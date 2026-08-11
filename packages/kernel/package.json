@@ -1,7 +1,6 @@
 {
   "name": "@panefold/kernel",
   "version": "0.1.0",
-  "description": "Panefold deterministic workspace transaction kernel",
   "type": "module",
   "sideEffects": false,
   "files": [

@@ -1,6 +1,6 @@
 # Experimental command support
 
-Version: `0.1.0-experimental`
+Version: `0.1.0` (experimental)
 
 This manifest follows the `WorkspaceCommand` union in
 `packages/model/src/commands.ts`. Every command below is implemented by the pure reference kernel,

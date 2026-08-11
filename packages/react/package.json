@@ -1,7 +1,6 @@
 {
   "name": "@panefold/react",
   "version": "0.1.0",
-  "description": "React adapter and accessible DOM projection for Panefold",
   "type": "module",
   "sideEffects": [
     "./src/styles.css"

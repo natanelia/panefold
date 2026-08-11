@@ -1,6 +1,6 @@
 # Support matrix
 
-Version: `0.1.0-experimental`
+Version: `0.1.0` (experimental)
 
 This table describes implemented and tested claims, not aspirations.
 

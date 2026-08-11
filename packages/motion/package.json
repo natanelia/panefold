@@ -1,7 +1,6 @@
 {
   "name": "@panefold/motion",
   "version": "0.1.0",
-  "description": "Motion planning and interpolation contracts for Panefold",
   "type": "module",
   "sideEffects": false,
   "files": [

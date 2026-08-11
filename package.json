@@ -3,15 +3,15 @@
   "version": "0.1.0",
   "private": true,
   "description": "Experimental deterministic, accessible workspace runtime for the web",
+  "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/natanelia/panefold.git"
+    "url": "git+https://github.com/natanelia/panefold.git"
   },
-  "homepage": "https://github.com/natanelia/panefold#readme",
   "bugs": {
     "url": "https://github.com/natanelia/panefold/issues"
   },
-  "license": "MIT",
+  "homepage": "https://github.com/natanelia/panefold#readme",
   "type": "module",
   "packageManager": "pnpm@11.16.0",
   "engines": {

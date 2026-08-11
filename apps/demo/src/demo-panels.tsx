@@ -305,7 +305,7 @@ function RouteExplorerPanel() {
     <PanelFrame
       toolbar={
         <label className="demo-search">
-          <span className="uw-visually-hidden">Filter routes</span>
+          <span className="pf-visually-hidden">Filter routes</span>
           <input type="search" placeholder="Filter routes…" />
         </label>
       }
@@ -653,7 +653,7 @@ function NotesPanel() {
       }
     >
       <label className="demo-notes-label">
-        <span className="uw-visually-hidden">Workspace review notes</span>
+        <span className="pf-visually-hidden">Workspace review notes</span>
         <textarea
           value={value}
           onChange={(event) => {

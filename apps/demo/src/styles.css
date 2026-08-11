@@ -83,20 +83,20 @@
     color-scheme: light;
   }
 
-  .demo-app[data-theme="light"] .uw-workspace {
-    --uw-bg: var(--demo-bg);
-    --uw-surface: var(--demo-surface);
-    --uw-surface-raised: var(--demo-surface-raised);
-    --uw-surface-soft: var(--demo-surface-soft);
-    --uw-border: var(--demo-border);
-    --uw-border-strong: var(--demo-border-strong);
-    --uw-text: var(--demo-text);
-    --uw-text-muted: var(--demo-muted);
-    --uw-accent: var(--demo-accent);
-    --uw-accent-soft: var(--demo-accent-soft);
-    --uw-valid: var(--demo-valid);
-    --uw-warning: var(--demo-warning);
-    --uw-danger: var(--demo-danger);
+  .demo-app[data-theme="light"] .pf-workspace {
+    --pf-bg: var(--demo-bg);
+    --pf-surface: var(--demo-surface);
+    --pf-surface-raised: var(--demo-surface-raised);
+    --pf-surface-soft: var(--demo-surface-soft);
+    --pf-border: var(--demo-border);
+    --pf-border-strong: var(--demo-border-strong);
+    --pf-text: var(--demo-text);
+    --pf-text-muted: var(--demo-muted);
+    --pf-accent: var(--demo-accent);
+    --pf-accent-soft: var(--demo-accent-soft);
+    --pf-valid: var(--demo-valid);
+    --pf-warning: var(--demo-warning);
+    --pf-danger: var(--demo-danger);
     color-scheme: light;
   }
 

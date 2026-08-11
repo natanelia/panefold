@@ -146,7 +146,7 @@ function MapWorkspaceApp({ runtime }: { readonly runtime: WorkspaceRuntime }) {
           <span className="demo-workspace-dot" aria-hidden="true" />
           <span>
             <strong>One-North route review</strong>
-            <small>RA-042 · Singapore</small>
+            <small>Atlas Operations · RA-042 · Singapore</small>
           </span>
         </div>
         <span className="demo-toolbar-spacer" />

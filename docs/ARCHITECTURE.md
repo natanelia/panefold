@@ -72,7 +72,7 @@ Docked layouts are surface-rooted n-ary trees using logical `inline` and `block`
 7. verifies that rounded children plus splitters equal the available pixels exactly.
 
 The pure solver accepts both committed and speculative inputs, so an adapter can use one geometry
-path for both. In `0.1.0-experimental` it is a tested headless package and is not yet wired into the
+path for both. In `0.1.0` (experimental) it is a tested headless package and is not yet wired into the
 compact React demo; that demo projects weights with CSS flex and therefore does not enforce panel
 constraints.
 

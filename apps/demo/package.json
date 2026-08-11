@@ -1,7 +1,6 @@
 {
   "name": "@panefold/demo",
   "version": "0.1.0",
-  "description": "Interactive Panefold workspace runtime demo",
   "private": true,
   "type": "module",
   "scripts": {

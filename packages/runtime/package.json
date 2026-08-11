@@ -1,7 +1,6 @@
 {
   "name": "@panefold/runtime",
   "version": "0.1.0",
-  "description": "Panefold workspace controller, policies, selectors, and subscriptions",
   "type": "module",
   "sideEffects": false,
   "files": [

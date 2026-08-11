@@ -1,10 +1,10 @@
 # Panefold
 
-An experimental, deterministic workspace runtime for building IDEs, map tools, operations
-consoles, and other panel-heavy web applications.
+Panefold is an experimental, deterministic workspace runtime for building IDEs, map tools,
+operations consoles, and other panel-heavy web applications.
 
 This repository is the first executable vertical slice of a larger normative system design. It is
-deliberately released as **`0.1.0-experimental`**: the pure state model, transactional kernel,
+deliberately released as **`0.1.0` (experimental)**: the pure state model, transactional kernel,
 constraint solver, runtime, and React projection are real; cross-window transfer, collaboration,
 plugin isolation, non-React adapters, and stable conformance certification remain future work.
 
@@ -56,6 +56,8 @@ still projects split weights with CSS and does not claim constraint-coupled rend
 | `@panefold/motion`          | Driver-neutral motion plans and Motion DOM adapter             |
 | `@panefold/react`           | React external-store adapter and accessible DOM renderer       |
 
+These packages are workspace-local in 0.1 and are not yet published to npm.
+
 The dependency graph is checked in CI. Model, kernel, and geometry cannot import DOM, React,
 Effect, XState, or Motion.
 
@@ -69,8 +71,8 @@ pnpm install
 pnpm dev
 ```
 
-Then open the URL printed by Vite. The demo is a map-operations workspace with route explorer,
-map, layers, notes, feature inspection, validation, problems, and event-timeline panels.
+Then open the URL printed by Vite. The included Atlas demo is a map-operations workspace with route
+explorer, map, layers, notes, feature inspection, validation, problems, and event-timeline panels.
 
 ## Verify the repository
 

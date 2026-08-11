@@ -1,7 +1,6 @@
 {
   "name": "@panefold/runtime-effect",
   "version": "0.1.0",
-  "description": "Effect adapters for Panefold operational services",
   "type": "module",
   "sideEffects": false,
   "files": [

@@ -1,7 +1,6 @@
 {
   "name": "@panefold/protocol-xstate",
   "version": "0.1.0",
-  "description": "XState interaction protocol adapters for Panefold",
   "type": "module",
   "sideEffects": false,
   "files": [

@@ -1,7 +1,7 @@
 # Conformance status
 
 The repository is an **experimental executable specification**. It does not claim stable conformance
-to the full workspace runtime system design that informed this implementation.
+to the full Panefold system design.
 
 ## Evidence present in 0.1
 

@@ -1,7 +1,6 @@
 {
   "name": "@panefold/geometry",
   "version": "0.1.0",
-  "description": "Panefold n-ary workspace constraint solver",
   "type": "module",
   "sideEffects": false,
   "files": [

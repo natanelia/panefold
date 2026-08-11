@@ -225,7 +225,7 @@ describe("WorkspaceSurface", () => {
     const explicitRuntime = new FixtureRuntime(initialProjection);
     const explicit = renderWorkspace(explicitRuntime, { motion: "reduced" });
     expect(
-      explicit.container.querySelector(".uw-workspace")?.getAttribute("data-effective-motion"),
+      explicit.container.querySelector(".pf-workspace")?.getAttribute("data-effective-motion"),
     ).toBe("reduced");
     explicit.unmount();
 
@@ -247,7 +247,7 @@ describe("WorkspaceSurface", () => {
     const system = renderWorkspace(systemRuntime);
     await waitFor(() => {
       expect(
-        system.container.querySelector(".uw-workspace")?.getAttribute("data-effective-motion"),
+        system.container.querySelector(".pf-workspace")?.getAttribute("data-effective-motion"),
       ).toBe("reduced");
     });
     Object.defineProperty(window, "matchMedia", {

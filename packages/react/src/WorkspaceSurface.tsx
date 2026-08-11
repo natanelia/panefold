@@ -69,7 +69,7 @@ class PanelBoundary extends Component<PanelBoundaryProps, PanelBoundaryState> {
   public override render() {
     if (this.state.error !== undefined) {
       return (
-        <section className="uw-panel-error" role="alert">
+        <section className="pf-panel-error" role="alert">
           <strong>{this.props.panel.title} could not be rendered</strong>
           <p>The workspace is still safe. Retry or close this panel.</p>
           <button
@@ -130,7 +130,7 @@ function SurfaceRenderer<TSnapshot, TCommand, TResult>({
   const projection = useMemo(() => projector(snapshot), [projector, snapshot]);
   const rootRef = useRef<HTMLDivElement>(null);
   const workspaceInstanceId = useId();
-  const domIdPrefix = `uw-${encodeDomId(workspaceInstanceId)}`;
+  const domIdPrefix = `pf-${encodeDomId(workspaceInstanceId)}`;
   const parkingRef = useRef<HTMLDivElement>(null);
   const slotsRef = useRef(new Map<string, HTMLDivElement>());
   const hostsRef = useRef(new Map<string, HostRecord>());
@@ -176,7 +176,7 @@ function SurfaceRenderer<TSnapshot, TCommand, TResult>({
     for (const panelId of livePanelIds) {
       if (hostsRef.current.has(panelId)) continue;
       const element = ownerDocument.createElement("div");
-      element.className = "uw-panel-host";
+      element.className = "pf-panel-host";
       element.dataset.workspacePanelHost = panelId;
       element.id = panelContentId(domIdPrefix, panelId);
       element.setAttribute("role", "tabpanel");
@@ -302,7 +302,7 @@ function SurfaceRenderer<TSnapshot, TCommand, TResult>({
   return (
     <div
       ref={rootRef}
-      className={["uw-workspace", className].filter(Boolean).join(" ")}
+      className={["pf-workspace", className].filter(Boolean).join(" ")}
       data-direction={direction}
       data-motion={motion}
       data-effective-motion={effectiveMotion}
@@ -310,7 +310,7 @@ function SurfaceRenderer<TSnapshot, TCommand, TResult>({
       aria-label={workspaceLabel}
       tabIndex={-1}
     >
-      <div className="uw-semantic-layer" data-workspace-layer="chrome">
+      <div className="pf-semantic-layer" data-workspace-layer="chrome">
         {node === undefined ? (
           <WorkspaceEmptyState />
         ) : (
@@ -336,12 +336,12 @@ function SurfaceRenderer<TSnapshot, TCommand, TResult>({
 
       <div
         ref={parkingRef}
-        className="uw-content-parking"
+        className="pf-content-parking"
         data-workspace-layer="stable-content"
         aria-hidden="true"
       />
 
-      <div className="uw-overlay-layer" data-workspace-layer="overlay">
+      <div className="pf-overlay-layer" data-workspace-layer="overlay">
         {movePanelId !== undefined ? (
           <KeyboardMoveOverlay
             panel={projection.panels[movePanelId]}
@@ -373,7 +373,7 @@ function SurfaceRenderer<TSnapshot, TCommand, TResult>({
 
       <div
         key={announcement.id}
-        className="uw-live-region"
+        className="pf-live-region"
         role="status"
         aria-live="polite"
         aria-atomic="true"
@@ -426,7 +426,7 @@ function SplitNode<TCommand, TResult>({
   const weights = previewWeights ?? split.weights;
 
   return (
-    <div className="uw-split" data-axis={split.axis} data-workspace-split={split.id}>
+    <div className="pf-split" data-axis={split.axis} data-workspace-split={split.id}>
       {split.childIds.map((childId, index) => {
         const child = props.projection.nodes[childId];
         if (child === undefined) return null;
@@ -455,8 +455,8 @@ function SplitNode<TCommand, TResult>({
               />
             ) : null}
             <div
-              className="uw-split-child"
-              style={{ "--uw-split-weight": weight } as CSSProperties}
+              className="pf-split-child"
+              style={{ "--pf-split-weight": weight } as CSSProperties}
             >
               <LayoutNode {...props} node={child} />
             </div>
@@ -577,7 +577,7 @@ function Splitter({
   return (
     <div
       ref={splitterRef}
-      className="uw-splitter"
+      className="pf-splitter"
       role="separator"
       tabIndex={0}
       aria-label="Resize adjacent workspace panes"
@@ -593,7 +593,7 @@ function Splitter({
       onLostPointerCapture={cancelPointer}
       onKeyDown={onKeyDown}
     >
-      <span className="uw-splitter-line" aria-hidden="true" />
+      <span className="pf-splitter-line" aria-hidden="true" />
     </div>
   );
 }
@@ -644,16 +644,16 @@ function PanelGroup<TCommand, TResult>({
 
   return (
     <section
-      className="uw-group"
+      className="pf-group"
       data-workspace-group={group.id}
       data-active={String(group.panelIds.includes(projection.activePanelId ?? ""))}
       aria-labelledby={groupLabelId}
     >
-      <h2 id={groupLabelId} className="uw-visually-hidden">
+      <h2 id={groupLabelId} className="pf-visually-hidden">
         {group.label ?? "Panel group"}
       </h2>
-      <div className="uw-tab-strip">
-        <div className="uw-tab-list" role="tablist" aria-label={group.label}>
+      <div className="pf-tab-strip">
+        <div className="pf-tab-list" role="tablist" aria-label={group.label}>
           {groupPanels.map((panel, index) => {
             const selected = group.selectedPanelId === panel.id;
             const definition = panels[panel.type];
@@ -661,7 +661,7 @@ function PanelGroup<TCommand, TResult>({
               <button
                 key={panel.id}
                 id={panelTabId(domIdPrefix, panel.id)}
-                className="uw-tab"
+                className="pf-tab"
                 type="button"
                 role="tab"
                 tabIndex={selected ? 0 : -1}
@@ -691,11 +691,11 @@ function PanelGroup<TCommand, TResult>({
                 }}
               >
                 {definition?.icon === undefined ? null : (
-                  <span className="uw-tab-icon" aria-hidden="true">
+                  <span className="pf-tab-icon" aria-hidden="true">
                     {definition.icon}
                   </span>
                 )}
-                <span className="uw-tab-title" dir="auto">
+                <span className="pf-tab-title" dir="auto">
                   {panel.title}
                 </span>
               </button>
@@ -708,12 +708,12 @@ function PanelGroup<TCommand, TResult>({
           createFloatPanelCommand === undefined) ? null : (
           <div
             id={panelControlsId(domIdPrefix, selectedPanel.id)}
-            className="uw-tab-controls"
+            className="pf-tab-controls"
             data-workspace-panel-controls={selectedPanel.id}
           >
             {selectedPanel.closable === false ? null : (
               <button
-                className="uw-tab-close"
+                className="pf-tab-close"
                 type="button"
                 aria-label={`Close ${selectedPanel.title}`}
                 title={`Close ${selectedPanel.title}`}
@@ -768,7 +768,7 @@ function PanelGroup<TCommand, TResult>({
         ref={(element) => {
           registerSlot(group.id, element);
         }}
-        className="uw-panel-slot"
+        className="pf-panel-slot"
         data-workspace-panel-slot={group.id}
       />
     </section>
@@ -809,12 +809,12 @@ function TabActions({
   };
 
   return (
-    <div className="uw-tab-actions">
+    <div className="pf-tab-actions">
       <button
         ref={triggerRef}
         id={triggerId}
         type="button"
-        className="uw-tab-more"
+        className="pf-tab-more"
         aria-label={`Actions for ${panel.title}`}
         aria-haspopup="menu"
         aria-expanded={open}
@@ -833,7 +833,7 @@ function TabActions({
       {open ? (
         <div
           ref={menuRef}
-          className="uw-menu"
+          className="pf-menu"
           role="menu"
           aria-label={`${panel.title} actions`}
           onKeyDown={(event) => {
@@ -923,7 +923,7 @@ function KeyboardMoveOverlay({ panel, groups, onMove, onCancel }: KeyboardMoveOv
   return (
     <div
       ref={overlayRef}
-      className="uw-keyboard-move"
+      className="pf-keyboard-move"
       role="dialog"
       aria-label={`Move ${panel?.title ?? "panel"}`}
       tabIndex={-1}
@@ -946,10 +946,10 @@ function KeyboardMoveOverlay({ panel, groups, onMove, onCancel }: KeyboardMoveOv
         }
       }}
     >
-      <p className="uw-keyboard-move-eyebrow">Choose destination</p>
+      <p className="pf-keyboard-move-eyebrow">Choose destination</p>
       <strong>{selectedGroup?.label ?? "No available group"}</strong>
       <p>Use arrow keys to preview, Enter to move, or Escape to cancel.</p>
-      <div className="uw-keyboard-move-dots" aria-hidden="true">
+      <div className="pf-keyboard-move-dots" aria-hidden="true">
         {groups.map((group, groupIndex) => (
           <span key={group.id} data-current={String(groupIndex === index)} />
         ))}
@@ -997,7 +997,7 @@ function PanelPortals({ projection, registry, hosts }: PanelPortalsProps) {
 
 function MissingPanel({ panel }: { readonly panel: WorkspacePanelView }) {
   return (
-    <section className="uw-panel-placeholder">
+    <section className="pf-panel-placeholder">
       <strong>{panel.title}</strong>
       <p>
         Renderer <code>{panel.type}</code> is unavailable. The panel descriptor and placement remain
@@ -1009,7 +1009,7 @@ function MissingPanel({ panel }: { readonly panel: WorkspacePanelView }) {
 
 function WorkspaceEmptyState() {
   return (
-    <section className="uw-empty-state">
+    <section className="pf-empty-state">
       <strong>No workspace layout</strong>
       <p>Open a panel or restore a workspace preset to begin.</p>
     </section>
