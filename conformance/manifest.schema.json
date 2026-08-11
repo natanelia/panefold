@@ -1,0 +1,21 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["engineVersion", "classification", "profiles", "unsupported", "telemetryDefault"],
+  "properties": {
+    "$schema": { "type": "string" },
+    "engineVersion": { "type": "string" },
+    "classification": { "const": "experimental" },
+    "generatedAt": { "type": "string", "format": "date" },
+    "profiles": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "status", "framework", "browser", "surfaces", "inputs", "workload"]
+      }
+    },
+    "unsupported": { "type": "array", "items": { "type": "string" }, "uniqueItems": true },
+    "telemetryDefault": { "const": "off" }
+  }
+}

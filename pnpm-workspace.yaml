@@ -1,0 +1,29 @@
+packages:
+  - packages/*
+  - apps/*
+
+allowBuilds:
+  esbuild: true
+
+catalog:
+  effect: 3.22.1
+  motion: 13.1.0
+  react: 19.2.8
+  react-dom: 19.2.8
+  xstate: 5.32.5
+
+minimumReleaseAgeExclude:
+  - "@typescript-eslint/eslint-plugin@8.67.0"
+  - "@typescript-eslint/parser@8.67.0"
+  - "@typescript-eslint/project-service@8.67.0"
+  - "@typescript-eslint/scope-manager@8.67.0"
+  - "@typescript-eslint/tsconfig-utils@8.67.0"
+  - "@typescript-eslint/type-utils@8.67.0"
+  - "@typescript-eslint/types@8.67.0"
+  - "@typescript-eslint/typescript-estree@8.67.0"
+  - "@typescript-eslint/utils@8.67.0"
+  - "@typescript-eslint/visitor-keys@8.67.0"
+  - dependency-cruiser@18.2.0
+  - framer-motion@13.1.0
+  - motion@13.1.0
+  - typescript-eslint@8.67.0

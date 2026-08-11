@@ -1,0 +1,138 @@
+{
+  "schemaVersion": 1,
+  "engineVersion": "0.1.0",
+  "classification": "experimental",
+  "source": "packages/model/src/commands.ts#WorkspaceCommand",
+  "commands": [
+    {
+      "type": "open-panel",
+      "status": "experimental-implemented",
+      "execution": "executeCommand",
+      "limitations": [
+        "Requires an existing destination group",
+        "Does not create the first group in an empty workspace"
+      ]
+    },
+    {
+      "type": "close-panels",
+      "status": "experimental-implemented",
+      "execution": "executeCommand",
+      "limitations": ["No asynchronous close guard", "No application checkpoint preparation"]
+    },
+    {
+      "type": "reopen-panel",
+      "status": "experimental-implemented",
+      "execution": "executeCommand",
+      "limitations": ["Requires at least one destination group"]
+    },
+    {
+      "type": "select-panel",
+      "status": "experimental-implemented",
+      "execution": "executeCommand",
+      "limitations": []
+    },
+    {
+      "type": "activate-panel",
+      "status": "experimental-implemented",
+      "execution": "executeCommand",
+      "limitations": ["DOM focus policy is executed outside the headless kernel"]
+    },
+    {
+      "type": "reorder-panels",
+      "status": "experimental-implemented",
+      "execution": "executeCommand",
+      "limitations": ["Within one group only", "Anchor must be outside the moving subset"]
+    },
+    {
+      "type": "move-panel",
+      "status": "experimental-implemented",
+      "execution": "executeCommand",
+      "limitations": ["Requires an existing destination group"]
+    },
+    {
+      "type": "split-group",
+      "status": "experimental-implemented",
+      "execution": "executeCommand",
+      "limitations": [
+        "Moves a proper subset of the target group only",
+        "Cannot split the entire group",
+        "Same-axis canonicalization may remove the supplied split node"
+      ]
+    },
+    {
+      "type": "merge-groups",
+      "status": "experimental-implemented",
+      "execution": "executeCommand",
+      "limitations": ["Does not merge a cross-surface root"]
+    },
+    {
+      "type": "resize-split",
+      "status": "experimental-implemented",
+      "execution": "executeCommand",
+      "limitations": ["Constraint resolution occurs in the geometry package"]
+    },
+    {
+      "type": "equalize-split",
+      "status": "experimental-implemented",
+      "execution": "executeCommand",
+      "limitations": ["Equalizes all children; subset equalization is absent"]
+    },
+    {
+      "type": "create-floating-surface",
+      "status": "experimental-implemented",
+      "execution": "executeCommand",
+      "limitations": ["In-page floating surfaces only", "The sole surface-root group cannot float"]
+    },
+    {
+      "type": "move-floating-surface",
+      "status": "experimental-implemented",
+      "execution": "executeCommand",
+      "limitations": ["Does not clamp to viewport or apply snapping"]
+    },
+    {
+      "type": "resize-floating-surface",
+      "status": "experimental-implemented",
+      "execution": "executeCommand",
+      "limitations": ["Does not apply panel constraints, viewport clamping, or snapping"]
+    },
+    {
+      "type": "maximize-surface",
+      "status": "experimental-implemented",
+      "execution": "executeCommand",
+      "limitations": ["Records semantic state but does not calculate visual viewport geometry"]
+    },
+    {
+      "type": "restore-surface",
+      "status": "experimental-implemented",
+      "execution": "executeCommand",
+      "limitations": ["Requires saved restore bounds from maximize"]
+    },
+    {
+      "type": "redock-surface",
+      "status": "experimental-implemented",
+      "execution": "executeCommand",
+      "limitations": ["Supports a single-group in-page floating root only"]
+    },
+    {
+      "type": "restore-workspace",
+      "status": "experimental-implemented",
+      "execution": "executeCommand",
+      "limitations": [
+        "Accepts an already-decoded typed snapshot",
+        "Boundary schema migration and untrusted-data limits are external"
+      ]
+    },
+    {
+      "type": "undo-workspace-operation",
+      "status": "experimental-implemented",
+      "execution": "dispatchKernelState",
+      "limitations": ["In-memory bounded workspace history only"]
+    },
+    {
+      "type": "redo-workspace-operation",
+      "status": "experimental-implemented",
+      "execution": "dispatchKernelState",
+      "limitations": ["In-memory bounded workspace history only"]
+    }
+  ]
+}

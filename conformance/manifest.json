@@ -1,0 +1,32 @@
+{
+  "$schema": "./manifest.schema.json",
+  "engineVersion": "0.1.0",
+  "classification": "experimental",
+  "generatedAt": "2026-08-11",
+  "profiles": [
+    {
+      "id": "compact-react-chromium-desktop",
+      "status": "experimental",
+      "framework": "React 19",
+      "browser": "current Chromium desktop",
+      "surfaces": ["main"],
+      "inputs": ["mouse", "keyboard", "programmatic"],
+      "workload": "compact"
+    }
+  ],
+  "unsupported": [
+    "durable-persistence",
+    "in-page-floating-renderer",
+    "browser-popout",
+    "document-picture-in-picture",
+    "multi-screen-placement",
+    "distributed-collaboration",
+    "dynamic-untrusted-plugins",
+    "vue-adapter",
+    "svelte-adapter",
+    "angular-adapter",
+    "web-components-adapter",
+    "stable-conformance-certification"
+  ],
+  "telemetryDefault": "off"
+}

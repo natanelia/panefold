@@ -1,0 +1,23 @@
+{
+  "name": "@panefold/runtime-effect",
+  "version": "0.1.0",
+  "description": "Effect adapters for Panefold operational services",
+  "type": "module",
+  "sideEffects": false,
+  "files": [
+    "dist"
+  ],
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "dependencies": {
+    "@panefold/runtime": "workspace:*",
+    "effect": "catalog:"
+  },
+  "scripts": {
+    "build": "tsup src/index.ts --format esm --dts --clean"
+  }
+}

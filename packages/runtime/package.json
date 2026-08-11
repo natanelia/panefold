@@ -1,0 +1,23 @@
+{
+  "name": "@panefold/runtime",
+  "version": "0.1.0",
+  "description": "Panefold workspace controller, policies, selectors, and subscriptions",
+  "type": "module",
+  "sideEffects": false,
+  "files": [
+    "dist"
+  ],
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "dependencies": {
+    "@panefold/kernel": "workspace:*",
+    "@panefold/model": "workspace:*"
+  },
+  "scripts": {
+    "build": "tsup src/index.ts --format esm --dts --clean"
+  }
+}

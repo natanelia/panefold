@@ -1,0 +1,22 @@
+{
+  "name": "@panefold/kernel",
+  "version": "0.1.0",
+  "description": "Panefold deterministic workspace transaction kernel",
+  "type": "module",
+  "sideEffects": false,
+  "files": [
+    "dist"
+  ],
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "dependencies": {
+    "@panefold/model": "workspace:*"
+  },
+  "scripts": {
+    "build": "tsup src/index.ts --format esm --dts --clean"
+  }
+}

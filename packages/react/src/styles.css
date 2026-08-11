@@ -1,0 +1,452 @@
+@layer workspace {
+  :where(.uw-workspace) {
+    --uw-bg: #0b1220;
+    --uw-surface: #111a2a;
+    --uw-surface-raised: #172235;
+    --uw-surface-soft: #202c40;
+    --uw-border: #2c3a50;
+    --uw-border-strong: #42536d;
+    --uw-text: #edf3fb;
+    --uw-text-muted: #9cacbf;
+    --uw-accent: #58a6ff;
+    --uw-accent-soft: #163b68;
+    --uw-valid: #4cd6b0;
+    --uw-warning: #f5b942;
+    --uw-danger: #ff6b7d;
+    --uw-focus: #8bc4ff;
+    --uw-target-size: 32px;
+    --uw-tab-size: 34px;
+    --uw-splitter-size: 5px;
+    --uw-motion-micro: 90ms;
+    --uw-motion-structural: 200ms;
+    color: var(--uw-text);
+    background: var(--uw-bg);
+    color-scheme: dark;
+    font-family:
+      Inter,
+      ui-sans-serif,
+      system-ui,
+      -apple-system,
+      BlinkMacSystemFont,
+      "Segoe UI",
+      sans-serif;
+  }
+
+  :where(.uw-workspace[data-effective-motion="off"]) {
+    --uw-motion-micro: 0ms;
+    --uw-motion-structural: 0ms;
+  }
+
+  :where(.uw-workspace[data-effective-motion="reduced"]) {
+    --uw-motion-micro: 0.01ms;
+    --uw-motion-structural: 0.01ms;
+  }
+
+  .uw-workspace {
+    position: relative;
+    min-inline-size: 0;
+    min-block-size: 0;
+    overflow: clip;
+    isolation: isolate;
+  }
+
+  .uw-semantic-layer,
+  .uw-split,
+  .uw-split-child,
+  .uw-group,
+  .uw-panel-slot,
+  .uw-panel-host {
+    min-inline-size: 0;
+    min-block-size: 0;
+  }
+
+  .uw-semantic-layer {
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+  }
+
+  .uw-split {
+    display: flex;
+    inline-size: 100%;
+    block-size: 100%;
+  }
+
+  .uw-split[data-axis="inline"] {
+    flex-direction: row;
+  }
+
+  .uw-split[data-axis="block"] {
+    flex-direction: column;
+  }
+
+  .uw-split-child {
+    position: relative;
+    flex: var(--uw-split-weight) 1 0;
+    overflow: clip;
+  }
+
+  .uw-splitter {
+    position: relative;
+    z-index: 4;
+    flex: 0 0 var(--uw-splitter-size);
+    background: var(--uw-bg);
+    touch-action: none;
+    outline: none;
+  }
+
+  .uw-split[data-axis="inline"] > .uw-splitter {
+    cursor: col-resize;
+  }
+
+  .uw-split[data-axis="block"] > .uw-splitter {
+    cursor: row-resize;
+  }
+
+  .uw-splitter::before {
+    content: "";
+    position: absolute;
+    inset: -6px;
+  }
+
+  .uw-splitter-line {
+    position: absolute;
+    inset: 0;
+    background: var(--uw-border);
+    transition: background-color var(--uw-motion-micro);
+  }
+
+  .uw-splitter:is(:hover, :focus-visible) .uw-splitter-line {
+    background: var(--uw-accent);
+  }
+
+  .uw-splitter:focus-visible::after {
+    content: "";
+    position: absolute;
+    inset: -3px;
+    border: 2px solid var(--uw-focus);
+    border-radius: 4px;
+  }
+
+  .uw-group {
+    display: grid;
+    grid-template-rows: var(--uw-tab-size) minmax(0, 1fr);
+    inline-size: 100%;
+    block-size: 100%;
+    background: var(--uw-surface);
+    border: 1px solid transparent;
+  }
+
+  .uw-group[data-active="true"] {
+    border-color: color-mix(in srgb, var(--uw-accent) 45%, transparent);
+  }
+
+  .uw-tab-strip {
+    display: flex;
+    min-inline-size: 0;
+    background: var(--uw-surface-raised);
+    border-block-end: 1px solid var(--uw-border);
+  }
+
+  .uw-tab-list {
+    display: flex;
+    flex: 1 1 auto;
+    min-inline-size: 0;
+    overflow-x: auto;
+    scrollbar-width: thin;
+  }
+
+  .uw-tab {
+    display: inline-flex;
+    flex: 0 1 180px;
+    align-items: center;
+    gap: 7px;
+    min-inline-size: 84px;
+    min-block-size: var(--uw-target-size);
+    padding-inline: 10px;
+    border: 0;
+    border-inline-end: 1px solid var(--uw-border);
+    border-block-end: 2px solid transparent;
+    color: var(--uw-text-muted);
+    background: transparent;
+    font: inherit;
+    font-size: 12px;
+    white-space: nowrap;
+    cursor: default;
+    transition:
+      color var(--uw-motion-micro),
+      background-color var(--uw-motion-micro),
+      border-color var(--uw-motion-micro);
+  }
+
+  .uw-tab[aria-selected="true"] {
+    color: var(--uw-text);
+    background: var(--uw-surface);
+    border-block-end-color: var(--uw-accent);
+  }
+
+  .uw-tab:focus-visible,
+  :where(
+    .uw-workspace button,
+    .uw-workspace input,
+    .uw-workspace select,
+    .uw-workspace textarea
+  ):focus-visible {
+    outline: 2px solid var(--uw-focus);
+    outline-offset: -3px;
+  }
+
+  .uw-tab-icon {
+    display: inline-flex;
+    inline-size: 14px;
+    block-size: 14px;
+    color: var(--uw-text-muted);
+  }
+
+  .uw-tab-title {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    unicode-bidi: isolate;
+  }
+
+  .uw-tab-close,
+  .uw-tab-more {
+    display: grid;
+    place-items: center;
+    inline-size: 24px;
+    block-size: 24px;
+    padding: 0;
+    border: 0;
+    border-radius: 4px;
+    color: var(--uw-text-muted);
+    background: transparent;
+    font: inherit;
+  }
+
+  .uw-tab-close {
+    font-size: 18px;
+  }
+
+  .uw-tab-more {
+    font-size: 10px;
+  }
+
+  .uw-tab-close:hover,
+  .uw-tab-more:hover {
+    color: var(--uw-text);
+    background: var(--uw-surface-soft);
+  }
+
+  .uw-tab-controls {
+    position: relative;
+    z-index: 6;
+    display: flex;
+    flex: 0 0 auto;
+    align-items: center;
+    gap: 2px;
+    padding-inline: 3px;
+    border-inline-start: 1px solid var(--uw-border);
+    background: var(--uw-surface-raised);
+  }
+
+  .uw-tab-actions {
+    position: relative;
+  }
+
+  .uw-menu {
+    position: absolute;
+    inset-block-start: 31px;
+    inset-inline-end: 2px;
+    z-index: 30;
+    display: grid;
+    min-inline-size: 190px;
+    padding: 6px;
+    border: 1px solid var(--uw-border-strong);
+    border-radius: 8px;
+    background: var(--uw-surface-raised);
+    box-shadow: 0 16px 44px rgb(0 0 0 / 35%);
+  }
+
+  .uw-menu button {
+    min-block-size: 32px;
+    padding-inline: 10px;
+    border: 0;
+    border-radius: 5px;
+    color: var(--uw-text);
+    background: transparent;
+    text-align: start;
+    font: inherit;
+    font-size: 12px;
+  }
+
+  .uw-menu button:hover {
+    background: var(--uw-accent-soft);
+  }
+
+  .uw-panel-slot,
+  .uw-panel-host {
+    position: relative;
+    inline-size: 100%;
+    block-size: 100%;
+    overflow: auto;
+  }
+
+  .uw-panel-host[hidden] {
+    display: none !important;
+  }
+
+  .uw-content-parking {
+    position: absolute;
+    inline-size: 0;
+    block-size: 0;
+    overflow: hidden;
+  }
+
+  .uw-overlay-layer {
+    position: absolute;
+    inset: 0;
+    z-index: 20;
+    pointer-events: none;
+  }
+
+  .uw-keyboard-move {
+    position: absolute;
+    inset: 50% auto auto 50%;
+    translate: -50% -50%;
+    inline-size: min(360px, calc(100% - 32px));
+    padding: 22px;
+    border: 2px solid var(--uw-valid);
+    border-radius: 12px;
+    color: var(--uw-text);
+    background: color-mix(in srgb, var(--uw-surface-raised) 96%, transparent);
+    box-shadow: 0 22px 70px rgb(0 0 0 / 50%);
+    pointer-events: auto;
+  }
+
+  .uw-keyboard-move-eyebrow {
+    margin: 0 0 8px;
+    color: var(--uw-valid);
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  .uw-keyboard-move p:last-of-type {
+    color: var(--uw-text-muted);
+    font-size: 13px;
+  }
+
+  .uw-keyboard-move-dots {
+    display: flex;
+    gap: 6px;
+  }
+
+  .uw-keyboard-move-dots span {
+    inline-size: 18px;
+    block-size: 4px;
+    border-radius: 2px;
+    background: var(--uw-border-strong);
+  }
+
+  .uw-keyboard-move-dots span[data-current="true"] {
+    background: var(--uw-valid);
+  }
+
+  .uw-panel-error,
+  .uw-panel-placeholder,
+  .uw-empty-state {
+    display: grid;
+    place-content: center;
+    block-size: 100%;
+    padding: 24px;
+    color: var(--uw-text-muted);
+    text-align: center;
+  }
+
+  .uw-panel-error strong,
+  .uw-panel-placeholder strong,
+  .uw-empty-state strong {
+    color: var(--uw-text);
+  }
+
+  .uw-panel-error button {
+    justify-self: center;
+    min-block-size: 34px;
+    padding-inline: 14px;
+    border: 1px solid var(--uw-border-strong);
+    border-radius: 6px;
+    color: var(--uw-text);
+    background: var(--uw-surface-soft);
+  }
+
+  .uw-live-region,
+  .uw-visually-hidden {
+    position: absolute !important;
+    inline-size: 1px !important;
+    block-size: 1px !important;
+    padding: 0 !important;
+    margin: -1px !important;
+    overflow: hidden !important;
+    clip: rect(0 0 0 0) !important;
+    white-space: nowrap !important;
+    border: 0 !important;
+  }
+
+  @media (pointer: coarse) {
+    :where(.uw-workspace) {
+      --uw-target-size: 44px;
+      --uw-tab-size: 46px;
+      --uw-splitter-size: 10px;
+    }
+
+    .uw-tab-close,
+    .uw-tab-more {
+      inline-size: 42px;
+      block-size: 42px;
+    }
+  }
+
+  :where(.uw-workspace[data-effective-motion="reduced"]) *,
+  :where(.uw-workspace[data-effective-motion="reduced"]) *::before,
+  :where(.uw-workspace[data-effective-motion="reduced"]) *::after {
+    scroll-behavior: auto !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+
+  :where(.uw-workspace[data-effective-motion="off"]) *,
+  :where(.uw-workspace[data-effective-motion="off"]) *::before,
+  :where(.uw-workspace[data-effective-motion="off"]) *::after {
+    scroll-behavior: auto !important;
+    animation: none !important;
+    transition-duration: 0s !important;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    :where(.uw-workspace[data-motion="productive"]) *,
+    :where(.uw-workspace[data-motion="productive"]) *::before,
+    :where(.uw-workspace[data-motion="productive"]) *::after {
+      scroll-behavior: auto !important;
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+    }
+  }
+
+  @media (forced-colors: active) {
+    .uw-group[data-active="true"],
+    .uw-keyboard-move {
+      border-color: Highlight;
+    }
+
+    .uw-tab[aria-selected="true"] {
+      border-block-end-color: Highlight;
+    }
+
+    .uw-splitter-line {
+      background: ButtonText;
+    }
+  }
+}

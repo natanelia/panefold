@@ -1,0 +1,23 @@
+{
+  "name": "@panefold/protocol-xstate",
+  "version": "0.1.0",
+  "description": "XState interaction protocol adapters for Panefold",
+  "type": "module",
+  "sideEffects": false,
+  "files": [
+    "dist"
+  ],
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "dependencies": {
+    "@panefold/model": "workspace:*",
+    "xstate": "catalog:"
+  },
+  "scripts": {
+    "build": "tsup src/index.ts --format esm --dts --clean"
+  }
+}
