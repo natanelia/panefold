@@ -4,6 +4,21 @@
     {
       "id": "model-integrity",
       "status": "unresolved",
+      "requirementIds": [
+        "LAY-001",
+        "LAY-007",
+        "MOD-001",
+        "MOD-002",
+        "MOD-005",
+        "TST-001",
+        "TST-002"
+      ],
+      "profileIds": [
+        "compact-react-chromium-desktop"
+      ],
+      "requiredEvidenceClasses": [
+        "code-verifiable"
+      ],
       "evidenceIds": [
         "bounded-exploration",
         "kernel-laws"
@@ -13,15 +28,49 @@
     {
       "id": "determinism",
       "status": "unresolved",
+      "requirementIds": [
+        "MOD-002",
+        "MOD-004",
+        "PER-008",
+        "PRF-003",
+        "TST-002",
+        "TXN-005"
+      ],
+      "profileIds": [
+        "compact-react-chromium-desktop"
+      ],
+      "requiredEvidenceClasses": [
+        "code-verifiable"
+      ],
       "evidenceIds": [
         "kernel-laws",
-        "patch-replay-oracle"
+        "patch-replay-oracle",
+        "independent-semantic-oracle",
+        "independent-semantic-oracle-result"
       ],
-      "note": "Automated determinism evidence exists, but the independent optimized-kernel long-run report is incomplete."
+      "note": "The independent semantic oracle agrees with the reference in a bounded generated run, but it is not yet the retained optimized production kernel and the ten-million-command report is absent."
     },
     {
       "id": "atomicity",
       "status": "unresolved",
+      "requirementIds": [
+        "PER-003",
+        "PER-004",
+        "SUR-003",
+        "TST-009",
+        "TXN-001",
+        "TXN-003",
+        "TXN-004",
+        "TXN-005",
+        "TXN-007"
+      ],
+      "profileIds": [
+        "compact-react-chromium-desktop"
+      ],
+      "requiredEvidenceClasses": [
+        "code-verifiable",
+        "environment-verifiable"
+      ],
       "evidenceIds": [
         "kernel-laws",
         "persistence-recovery",
@@ -32,6 +81,28 @@
     {
       "id": "accessibility",
       "status": "blocked",
+      "requirementIds": [
+        "A11Y-001",
+        "A11Y-002",
+        "A11Y-003",
+        "A11Y-004",
+        "A11Y-005",
+        "A11Y-006",
+        "A11Y-007",
+        "A11Y-008",
+        "FOC-003",
+        "FOC-004",
+        "REN-005",
+        "TST-007",
+        "TST-008"
+      ],
+      "profileIds": [
+        "compact-react-chromium-desktop"
+      ],
+      "requiredEvidenceClasses": [
+        "environment-verifiable",
+        "manual-external"
+      ],
       "evidenceIds": [
         "react-integration",
         "manual-accessibility-certification"
@@ -43,6 +114,26 @@
     {
       "id": "lifecycle",
       "status": "blocked",
+      "requirementIds": [
+        "LIF-001",
+        "LIF-002",
+        "LIF-003",
+        "LIF-005",
+        "LIF-006",
+        "LIF-007",
+        "MOT-003",
+        "PRF-005",
+        "REN-001",
+        "REN-004",
+        "REN-006"
+      ],
+      "profileIds": [
+        "compact-react-chromium-desktop",
+        "framework-adapter-contract-jsdom"
+      ],
+      "requiredEvidenceClasses": [
+        "environment-verifiable"
+      ],
       "evidenceIds": [
         "react-integration"
       ],
@@ -53,6 +144,27 @@
     {
       "id": "performance",
       "status": "blocked",
+      "requirementIds": [
+        "API-005",
+        "INT-001",
+        "INT-006",
+        "LAY-006",
+        "MOT-001",
+        "MOT-010",
+        "PRF-001",
+        "PRF-002",
+        "PRF-005",
+        "PRF-006",
+        "PRF-007",
+        "QLT-003",
+        "TST-006"
+      ],
+      "profileIds": [
+        "compact-react-chromium-desktop"
+      ],
+      "requiredEvidenceClasses": [
+        "manual-external"
+      ],
       "evidenceIds": [
         "performance-smoke",
         "physical-performance-certification"
@@ -64,9 +176,30 @@
     {
       "id": "recovery",
       "status": "blocked",
+      "requirementIds": [
+        "EXP-004",
+        "EXT-005",
+        "LIF-005",
+        "PER-002",
+        "PER-003",
+        "PER-004",
+        "PER-005",
+        "PER-007",
+        "SUR-003",
+        "SUR-005",
+        "SYS-004",
+        "TST-009"
+      ],
+      "profileIds": [
+        "compact-react-chromium-desktop"
+      ],
+      "requiredEvidenceClasses": [
+        "environment-verifiable"
+      ],
       "evidenceIds": [
         "persistence-recovery",
-        "surface-ownership"
+        "surface-ownership",
+        "testkit-contract"
       ],
       "blockedBy": [
         "real process, tab, window, IndexedDB quota/corruption, permission, and monitor failure runs"
@@ -75,6 +208,29 @@
     {
       "id": "security",
       "status": "blocked",
+      "requirementIds": [
+        "API-001",
+        "COL-003",
+        "EXT-002",
+        "OBS-003",
+        "SEC-001",
+        "SEC-002",
+        "SEC-003",
+        "SEC-004",
+        "SEC-005",
+        "SEC-006",
+        "SEC-007",
+        "SEC-008"
+      ],
+      "profileIds": [
+        "compact-react-chromium-desktop",
+        "framework-adapter-contract-jsdom"
+      ],
+      "requiredEvidenceClasses": [
+        "code-verifiable",
+        "environment-verifiable",
+        "manual-external"
+      ],
       "evidenceIds": [
         "security-source-check",
         "independent-security-review"
@@ -86,6 +242,21 @@
     {
       "id": "migration",
       "status": "unresolved",
+      "requirementIds": [
+        "DOM-004",
+        "GOV-002",
+        "PER-001",
+        "PER-002",
+        "PER-005",
+        "SCP-004"
+      ],
+      "profileIds": [
+        "compact-react-chromium-desktop"
+      ],
+      "requiredEvidenceClasses": [
+        "code-verifiable",
+        "environment-verifiable"
+      ],
       "evidenceIds": [
         "persistence-recovery"
       ],
@@ -94,9 +265,36 @@
     {
       "id": "public-evidence",
       "status": "unresolved",
+      "requirementIds": [
+        "ACC-001",
+        "ACC-002",
+        "ACC-003",
+        "EXT-006",
+        "GOV-001",
+        "GOV-003",
+        "QLT-001",
+        "QLT-002",
+        "QLT-003",
+        "QLT-004",
+        "QLT-005",
+        "SCP-001",
+        "SCP-002",
+        "TST-005",
+        "TST-006",
+        "TST-007"
+      ],
+      "profileIds": [
+        "compact-react-chromium-desktop",
+        "framework-adapter-contract-jsdom"
+      ],
+      "requiredEvidenceClasses": [
+        "code-verifiable",
+        "manual-external"
+      ],
       "evidenceIds": [
         "conformance-harness",
-        "performance-smoke"
+        "performance-smoke",
+        "testkit-contract"
       ],
       "note": "The register and harness are public, but raw traces and signed release approvals are incomplete."
     }

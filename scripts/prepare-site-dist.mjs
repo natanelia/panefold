@@ -1,4 +1,4 @@
-import { cp, copyFile, mkdir, readFile, stat, writeFile } from "node:fs/promises";
+import { copyFile, mkdir, readFile, readdir, stat, writeFile } from "node:fs/promises";
 import { resolve } from "node:path";
 
 const root = resolve(import.meta.dirname, "..");
@@ -49,6 +49,11 @@ const siteRoutes = [
     description: "Completed engineering and the external evidence still required.",
   },
   {
+    path: "docs/marketing",
+    title: "Marketing and launch — Panefold documentation",
+    description: "Product narrative, interaction media, measurement, and launch operations.",
+  },
+  {
     path: "docs/adr-authoritative-kernel",
     title: "Authoritative kernel — Panefold documentation",
     description: "Why all committed workspace state has one semantic owner.",
@@ -79,6 +84,36 @@ const siteRoutes = [
     description: "Prepared transfer, ownership epochs, and orphan recovery.",
   },
   {
+    path: "docs/adr-panel-plugin-boundaries",
+    title: "Panel and plugin boundaries — Panefold documentation",
+    description: "Versioned codecs, deterministic registration, and missing-provider recovery.",
+  },
+  {
+    path: "docs/adr-single-writer-coordination",
+    title: "Single-writer coordination — Panefold documentation",
+    description: "Authenticated intake, revision assignment, epochs, and presence separation.",
+  },
+  {
+    path: "docs/adr-fail-closed-runtime",
+    title: "Fail-closed runtime — Panefold documentation",
+    description: "Last-valid-state preservation and bounded redacted incident reproduction.",
+  },
+  {
+    path: "docs/adr-evidence-taxonomy",
+    title: "Executable evidence taxonomy — Panefold documentation",
+    description: "Proof classes, immutable artifacts, trace coverage, and hard-gate rules.",
+  },
+  {
+    path: "docs/adr-independent-oracle",
+    title: "Independent semantic oracle — Panefold documentation",
+    description: "Why semantic independence and production optimization remain separate claims.",
+  },
+  {
+    path: "docs/adr-protocol-motion-lifecycles",
+    title: "Protocol and motion lifecycles — Panefold documentation",
+    description: "Bounded actors, disposable leases, and progressive animation fallback.",
+  },
+  {
     path: "docs/system-design",
     title: "System design — Panefold documentation",
     description: "The complete normative design and 190-requirement register source.",
@@ -89,8 +124,7 @@ await stat(resolve(demoDist, "index.html")).catch(() => {
   throw new Error("Atlas demo must be built before the marketing site");
 });
 
-await mkdir(resolve(siteDist, "atlas"), { recursive: true });
-await cp(demoDist, resolve(siteDist, "atlas"), { recursive: true, force: true });
+await copyStableTree(demoDist, resolve(siteDist, "atlas"));
 const rootHtml = await readFile(resolve(siteDist, "index.html"), "utf8");
 for (const route of siteRoutes) {
   const routeDirectory = resolve(siteDist, route.path);
@@ -133,4 +167,18 @@ function escapeHtml(value) {
     .replaceAll('"', "&quot;")
     .replaceAll("<", "&lt;")
     .replaceAll(">", "&gt;");
+}
+
+async function copyStableTree(source, destination) {
+  await mkdir(destination, { recursive: true });
+  const entries = await readdir(source, { withFileTypes: true });
+  for (const entry of entries) {
+    // Vite uses hidden, short-lived files while publishing sourcemaps. They are not deployable
+    // assets and may disappear between readdir and copy on fast CI filesystems.
+    if (entry.name.startsWith(".")) continue;
+    const sourcePath = resolve(source, entry.name);
+    const destinationPath = resolve(destination, entry.name);
+    if (entry.isDirectory()) await copyStableTree(sourcePath, destinationPath);
+    else if (entry.isFile()) await copyFile(sourcePath, destinationPath);
+  }
 }

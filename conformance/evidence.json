@@ -5,22 +5,29 @@
       "id": "dependency-architecture",
       "kind": "automated-test",
       "status": "verified",
+      "verificationClass": "code-verifiable",
+      "artifactRole": "source",
       "uri": "repo://.dependency-cruiser.cjs",
       "sha256": "ebc47e6bfe26fd8b4277f6907b9200e0fcb80b841729c42926d633f79588934a",
       "producedAt": "2026-08-12T00:00:00Z",
       "requirementIds": [
         "ARC-001",
-        "ARC-005"
+        "ARC-005",
+        "PKG-001",
+        "PKG-002"
       ],
       "profileIds": [
-        "compact-react-chromium-desktop"
+        "compact-react-chromium-desktop",
+        "framework-adapter-contract-jsdom"
       ],
-      "note": "Repository-local automated evidence; it does not imply external certification."
+      "note": "Content-addressed repository source artifact; it does not claim an executed environment result, manual assessment, or external certification."
     },
     {
       "id": "model-immutability",
       "kind": "automated-test",
       "status": "verified",
+      "verificationClass": "code-verifiable",
+      "artifactRole": "source",
       "uri": "repo://packages/model/test/model.test.ts",
       "sha256": "8fa37646d33a7b3059b046f6057f3475003f3f0a4d5b4bfa0087f57a70f0f43c",
       "producedAt": "2026-08-12T00:00:00Z",
@@ -31,18 +38,24 @@
       "profileIds": [
         "compact-react-chromium-desktop"
       ],
-      "note": "Repository-local automated evidence; it does not imply external certification."
+      "note": "Content-addressed repository source artifact; it does not claim an executed environment result, manual assessment, or external certification."
     },
     {
       "id": "kernel-laws",
       "kind": "model-report",
       "status": "verified",
+      "verificationClass": "code-verifiable",
+      "artifactRole": "source",
       "uri": "repo://packages/kernel/test/properties.test.ts",
       "sha256": "c3c074f4870886eed45649cc1f0fdee5d6c9059c2172bdee2a16de9c93072e20",
       "producedAt": "2026-08-12T00:00:00Z",
       "requirementIds": [
         "LAY-001",
         "LAY-007",
+        "MOD-001",
+        "MOD-002",
+        "MOD-003",
+        "MOD-005",
         "TXN-001",
         "TXN-003",
         "TXN-004",
@@ -51,12 +64,14 @@
       "profileIds": [
         "compact-react-chromium-desktop"
       ],
-      "note": "Repository-local automated evidence; it does not imply external certification."
+      "note": "Content-addressed repository source artifact; it does not claim an executed environment result, manual assessment, or external certification."
     },
     {
       "id": "bounded-exploration",
       "kind": "model-report",
       "status": "verified",
+      "verificationClass": "code-verifiable",
+      "artifactRole": "source",
       "uri": "repo://packages/kernel/test/exploration.test.ts",
       "sha256": "b4819d6494b7123149866807ad812d041dfb9308b5e7fdaf1b05f773b6d3988c",
       "producedAt": "2026-08-12T00:00:00Z",
@@ -67,12 +82,14 @@
       "profileIds": [
         "compact-react-chromium-desktop"
       ],
-      "note": "Repository-local automated evidence; it does not imply external certification."
+      "note": "Content-addressed repository source artifact; it does not claim an executed environment result, manual assessment, or external certification."
     },
     {
       "id": "patch-replay-oracle",
       "kind": "automated-test",
       "status": "verified",
+      "verificationClass": "code-verifiable",
+      "artifactRole": "source",
       "uri": "repo://packages/kernel/test/patches.test.ts",
       "sha256": "3410652cf3f737bebca016668a154d41b1d8c822d5fdc43aac297018c9c566eb",
       "producedAt": "2026-08-12T00:00:00Z",
@@ -83,12 +100,14 @@
       "profileIds": [
         "compact-react-chromium-desktop"
       ],
-      "note": "Repository-local automated evidence; it does not imply external certification."
+      "note": "Content-addressed repository source artifact; it does not claim an executed environment result, manual assessment, or external certification."
     },
     {
       "id": "geometry-solver",
       "kind": "automated-test",
       "status": "verified",
+      "verificationClass": "code-verifiable",
+      "artifactRole": "source",
       "uri": "repo://packages/geometry/test/solve-layout.test.ts",
       "sha256": "4b40f4600d1e65642745d1cf56773dc6101c1e5a5565d72bdf468c3ac5b8ef03",
       "producedAt": "2026-08-12T00:00:00Z",
@@ -101,14 +120,16 @@
       "profileIds": [
         "compact-react-chromium-desktop"
       ],
-      "note": "Repository-local automated evidence; it does not imply external certification."
+      "note": "Content-addressed repository source artifact; it does not claim an executed environment result, manual assessment, or external certification."
     },
     {
       "id": "runtime-notification",
       "kind": "automated-test",
       "status": "verified",
+      "verificationClass": "code-verifiable",
+      "artifactRole": "source",
       "uri": "repo://packages/runtime/test/runtime.test.ts",
-      "sha256": "b1a5f47072a60eb1e893793e86f3291116a446694855a25065de41cddb308d8e",
+      "sha256": "069fe4aa225f291c88d742bad1e23ceea28c07e7a049b797305261635dd4c85e",
       "producedAt": "2026-08-12T00:00:00Z",
       "requirementIds": [
         "API-005",
@@ -117,12 +138,14 @@
       "profileIds": [
         "compact-react-chromium-desktop"
       ],
-      "note": "Repository-local automated evidence; it does not imply external certification."
+      "note": "Content-addressed repository source artifact; it does not claim an executed environment result, manual assessment, or external certification."
     },
     {
       "id": "persistence-recovery",
       "kind": "recovery-report",
       "status": "verified",
+      "verificationClass": "code-verifiable",
+      "artifactRole": "source",
       "uri": "repo://packages/runtime/test/persistence.test.ts",
       "sha256": "22743e307898cb66c422232ffe20f29eeac0fd247bdf71205ff6682abaae3915",
       "producedAt": "2026-08-12T00:00:00Z",
@@ -137,12 +160,14 @@
       "profileIds": [
         "compact-react-chromium-desktop"
       ],
-      "note": "Repository-local automated evidence; it does not imply external certification."
+      "note": "Content-addressed repository source artifact; it does not claim an executed environment result, manual assessment, or external certification."
     },
     {
       "id": "indexeddb-effect",
       "kind": "migration-report",
       "status": "verified",
+      "verificationClass": "code-verifiable",
+      "artifactRole": "source",
       "uri": "repo://packages/runtime-effect/test/persistence.test.ts",
       "sha256": "2cd6da5ef9c306a18a67d057e84bf440e93202919afe0b5ce673236aa3bcb538",
       "producedAt": "2026-08-12T00:00:00Z",
@@ -153,14 +178,16 @@
       "profileIds": [
         "compact-react-chromium-desktop"
       ],
-      "note": "Repository-local automated evidence; it does not imply external certification."
+      "note": "Content-addressed repository source artifact; it does not claim an executed environment result, manual assessment, or external certification."
     },
     {
       "id": "protocol-models",
       "kind": "model-report",
       "status": "verified",
+      "verificationClass": "code-verifiable",
+      "artifactRole": "source",
       "uri": "repo://packages/protocol-xstate/test/protocol-machines.test.ts",
-      "sha256": "c6250b1d49f0da1954fea8730db2cf066710f4d4f315dfff31a193fb8e65fcce",
+      "sha256": "b473558c7f1a64c17e58e0d1ebb1503f05734f4ba7e194d53b9b8b780c7d23ce",
       "producedAt": "2026-08-12T00:00:00Z",
       "requirementIds": [
         "ARC-002",
@@ -170,12 +197,33 @@
       "profileIds": [
         "compact-react-chromium-desktop"
       ],
-      "note": "Repository-local automated evidence; it does not imply external certification."
+      "note": "Content-addressed repository source artifact; it does not claim an executed environment result, manual assessment, or external certification."
+    },
+    {
+      "id": "protocol-actor-catalog",
+      "kind": "model-report",
+      "status": "verified",
+      "verificationClass": "code-verifiable",
+      "artifactRole": "source",
+      "uri": "repo://packages/protocol-xstate/test/catalog-machines.test.ts",
+      "sha256": "3d33e4ca3ea49b32e0a98e7749184d73ad5d93fd20b4ceff749c16156407142d",
+      "producedAt": "2026-08-12T00:00:00Z",
+      "requirementIds": [
+        "ARC-002",
+        "INT-003",
+        "TST-003"
+      ],
+      "profileIds": [
+        "compact-react-chromium-desktop"
+      ],
+      "note": "Content-addressed repository source artifact; it does not claim an executed environment result, manual assessment, or external certification."
     },
     {
       "id": "motion-primitives",
       "kind": "automated-test",
       "status": "verified",
+      "verificationClass": "code-verifiable",
+      "artifactRole": "source",
       "uri": "repo://packages/motion/test/motion.test.ts",
       "sha256": "02b6068c1abaa54b4433da29c0a7bb430254b24082385541e5617abfccc22ed8",
       "producedAt": "2026-08-12T00:00:00Z",
@@ -190,12 +238,38 @@
       "profileIds": [
         "compact-react-chromium-desktop"
       ],
-      "note": "Repository-local automated evidence; it does not imply external certification."
+      "note": "Content-addressed repository source artifact; it does not claim an executed environment result, manual assessment, or external certification."
+    },
+    {
+      "id": "motion-lifecycle",
+      "kind": "automated-test",
+      "status": "verified",
+      "verificationClass": "code-verifiable",
+      "artifactRole": "source",
+      "uri": "repo://packages/motion/test/motion-lifecycle.test.ts",
+      "sha256": "c2fd1527a2ebc5b96d9bb89d289e9fbeca223b4114412df7eed587b5ba9a5b40",
+      "producedAt": "2026-08-12T00:00:00Z",
+      "requirementIds": [
+        "MOT-003",
+        "MOT-004",
+        "MOT-005",
+        "MOT-007",
+        "MOT-009",
+        "MOT-010",
+        "SYS-003",
+        "TST-008"
+      ],
+      "profileIds": [
+        "compact-react-chromium-desktop"
+      ],
+      "note": "Content-addressed repository source artifact; it does not claim an executed environment result, manual assessment, or external certification."
     },
     {
       "id": "surface-ownership",
       "kind": "model-report",
       "status": "verified",
+      "verificationClass": "code-verifiable",
+      "artifactRole": "source",
       "uri": "repo://packages/surfaces/test/surfaces.test.ts",
       "sha256": "f2a88749d63a88505ead954b192dd10999e23b8d6d64ba776c1325ad63a2a0ee",
       "producedAt": "2026-08-12T00:00:00Z",
@@ -212,14 +286,16 @@
       "profileIds": [
         "compact-react-chromium-desktop"
       ],
-      "note": "Repository-local automated evidence; it does not imply external certification."
+      "note": "Content-addressed repository source artifact; it does not claim an executed environment result, manual assessment, or external certification."
     },
     {
       "id": "react-integration",
       "kind": "automated-test",
       "status": "verified",
+      "verificationClass": "code-verifiable",
+      "artifactRole": "source",
       "uri": "repo://packages/react/test/WorkspaceSurface.test.tsx",
-      "sha256": "2e012dd5ca09c524d60bd75a5f13bbfa0ca48354ae508f1780d1525c005feb9f",
+      "sha256": "e39052059da8727de81e4128f9faba37adeaa6ecd638733191033ab7042ef164",
       "producedAt": "2026-08-12T00:00:00Z",
       "requirementIds": [
         "A11Y-003",
@@ -237,12 +313,14 @@
       "profileIds": [
         "compact-react-chromium-desktop"
       ],
-      "note": "Repository-local automated evidence; it does not imply external certification."
+      "note": "Content-addressed repository source artifact; it does not claim an executed environment result, manual assessment, or external certification."
     },
     {
       "id": "native-adapter-contract",
       "kind": "compatibility-report",
       "status": "verified",
+      "verificationClass": "code-verifiable",
+      "artifactRole": "source",
       "uri": "repo://packages/adapter-contract/test/native-adapters.test.ts",
       "sha256": "52f513593cbdfbc472e9788fae3dce6928aca642ef156cc0e2018625b062d3b1",
       "producedAt": "2026-08-12T00:00:00Z",
@@ -254,12 +332,14 @@
       "profileIds": [
         "framework-adapter-contract-jsdom"
       ],
-      "note": "Repository-local automated evidence; it does not imply external certification."
+      "note": "Content-addressed repository source artifact; it does not claim an executed environment result, manual assessment, or external certification."
     },
     {
       "id": "web-component-ssr",
       "kind": "automated-test",
       "status": "verified",
+      "verificationClass": "code-verifiable",
+      "artifactRole": "source",
       "uri": "repo://packages/web-components/test/ssr-import.test.ts",
       "sha256": "ca44a0b9c0c7d85431b596ee78191a387e4a8d4b576f6ee89c14d6236e38be29",
       "producedAt": "2026-08-12T00:00:00Z",
@@ -269,14 +349,16 @@
       "profileIds": [
         "framework-adapter-contract-jsdom"
       ],
-      "note": "Repository-local automated evidence; it does not imply external certification."
+      "note": "Content-addressed repository source artifact; it does not claim an executed environment result, manual assessment, or external certification."
     },
     {
       "id": "ecosystem-primitives",
       "kind": "automated-test",
       "status": "verified",
+      "verificationClass": "code-verifiable",
+      "artifactRole": "source",
       "uri": "repo://packages/ecosystem/test/ecosystem.test.ts",
-      "sha256": "f4dd31e1fd11cfc66523e72d2625640bb14d7296a8e9c9e5e07b9cb0764c1a2c",
+      "sha256": "0843e1a9ceb0aa22f19e22184e9eabfb206327e06d02f22e09213448bba1be19",
       "producedAt": "2026-08-12T00:00:00Z",
       "requirementIds": [
         "EXT-001",
@@ -288,14 +370,44 @@
       "profileIds": [
         "compact-react-chromium-desktop"
       ],
-      "note": "Repository-local automated evidence; it does not imply external certification."
+      "note": "Content-addressed repository source artifact; it does not claim an executed environment result, manual assessment, or external certification."
+    },
+    {
+      "id": "testkit-contract",
+      "kind": "automated-test",
+      "status": "verified",
+      "verificationClass": "code-verifiable",
+      "artifactRole": "source",
+      "uri": "repo://packages/testkit/test/testkit.test.ts",
+      "sha256": "816eedd7adcd65d94f0c4580c3a6ba480ab3bac101ac591c888eedfbc6b49247",
+      "producedAt": "2026-08-12T00:00:00Z",
+      "requirementIds": [
+        "A11Y-002",
+        "COL-004",
+        "COL-005",
+        "EXP-001",
+        "INT-004",
+        "PRF-002",
+        "QLT-001",
+        "QLT-003",
+        "SUR-002",
+        "SUR-003",
+        "TST-004",
+        "TST-009"
+      ],
+      "profileIds": [
+        "compact-react-chromium-desktop"
+      ],
+      "note": "Content-addressed repository source artifact; it does not claim an executed environment result, manual assessment, or external certification."
     },
     {
       "id": "conformance-harness",
       "kind": "automated-test",
       "status": "verified",
+      "verificationClass": "code-verifiable",
+      "artifactRole": "source",
       "uri": "repo://packages/conformance/test/report.test.ts",
-      "sha256": "df923c2c0d45d6c42d392f7a29954dfcf33e03003572bb30a9b6b38284ad53d1",
+      "sha256": "3a45dc08b41b7b1d76f4fe488e1b630c72d29dee2cf859b0d4ccad72b2919b22",
       "producedAt": "2026-08-12T00:00:00Z",
       "requirementIds": [
         "ACC-001",
@@ -308,12 +420,14 @@
         "compact-react-chromium-desktop",
         "framework-adapter-contract-jsdom"
       ],
-      "note": "Repository-local automated evidence; it does not imply external certification."
+      "note": "Content-addressed repository source artifact; it does not claim an executed environment result, manual assessment, or external certification."
     },
     {
       "id": "security-source-check",
       "kind": "security-report",
       "status": "verified",
+      "verificationClass": "code-verifiable",
+      "artifactRole": "source",
       "uri": "repo://scripts/security-check.mjs",
       "sha256": "d3bfb79faca83779760d2288f63c77646e5de18f75b0386a155d5af18022d0b3",
       "producedAt": "2026-08-12T00:00:00Z",
@@ -324,12 +438,14 @@
       "profileIds": [
         "compact-react-chromium-desktop"
       ],
-      "note": "Repository-local automated evidence; it does not imply external certification."
+      "note": "Content-addressed repository source artifact; it does not claim an executed environment result, manual assessment, or external certification."
     },
     {
       "id": "performance-smoke",
       "kind": "performance-report",
       "status": "verified",
+      "verificationClass": "code-verifiable",
+      "artifactRole": "source",
       "uri": "repo://scripts/performance-smoke.mjs",
       "sha256": "887a2f66a8d6ab31b5169db428ac6c3a49d94ef28f1fd21a1b3a931e38138b02",
       "producedAt": "2026-08-12T00:00:00Z",
@@ -340,12 +456,520 @@
       "profileIds": [
         "compact-react-chromium-desktop"
       ],
-      "note": "Repository-local automated evidence; it does not imply external certification."
+      "note": "Content-addressed repository source artifact; it does not claim an executed environment result, manual assessment, or external certification."
+    },
+    {
+      "id": "package-boundaries",
+      "kind": "automated-test",
+      "status": "verified",
+      "verificationClass": "code-verifiable",
+      "artifactRole": "source",
+      "uri": "repo://pnpm-lock.yaml",
+      "sha256": "73361e72d7e8cf8e6108d74490053c2a713e93e51ebaf6db924303b9a5e74e8f",
+      "producedAt": "2026-08-12T00:00:00Z",
+      "requirementIds": [
+        "ARC-005",
+        "PKG-003",
+        "PKG-004",
+        "PKG-005",
+        "SEC-008"
+      ],
+      "profileIds": [
+        "compact-react-chromium-desktop",
+        "framework-adapter-contract-jsdom"
+      ],
+      "note": "Content-addressed repository source artifact; it does not claim an executed environment result, manual assessment, or external certification."
+    },
+    {
+      "id": "panel-registry",
+      "kind": "automated-test",
+      "status": "verified",
+      "verificationClass": "code-verifiable",
+      "artifactRole": "source",
+      "uri": "repo://packages/model/test/panel-registry.test.ts",
+      "sha256": "78c85eb3f55058870acf6cc5388eafc989878c1a28b75ad3606606da0e40d5a7",
+      "producedAt": "2026-08-12T00:00:00Z",
+      "requirementIds": [
+        "API-001",
+        "DOM-004",
+        "EXT-002",
+        "EXT-005",
+        "PER-005"
+      ],
+      "profileIds": [
+        "compact-react-chromium-desktop"
+      ],
+      "note": "Content-addressed repository source artifact; it does not claim an executed environment result, manual assessment, or external certification."
+    },
+    {
+      "id": "kernel-structural-sharing",
+      "kind": "automated-test",
+      "status": "verified",
+      "verificationClass": "code-verifiable",
+      "artifactRole": "source",
+      "uri": "repo://packages/kernel/test/kernel.test.ts",
+      "sha256": "e5da70199e7604ac82cf10f4914de2b18aa231a7ff8111c7256738be86567161",
+      "producedAt": "2026-08-12T00:00:00Z",
+      "requirementIds": [
+        "MOD-006",
+        "PER-006",
+        "SYS-001",
+        "TXN-002",
+        "TXN-008"
+      ],
+      "profileIds": [
+        "compact-react-chromium-desktop"
+      ],
+      "note": "Content-addressed repository source artifact; it does not claim an executed environment result, manual assessment, or external certification."
+    },
+    {
+      "id": "optimized-campaign-runner",
+      "kind": "model-report",
+      "status": "verified",
+      "verificationClass": "code-verifiable",
+      "artifactRole": "source",
+      "uri": "repo://packages/kernel-optimized/test/differential.test.ts",
+      "sha256": "5df1ac571356551d240449e5892c56c98574c7ca3d6e4c001bbd927963137d96",
+      "producedAt": "2026-08-12T00:00:00Z",
+      "requirementIds": [
+        "MOD-004",
+        "PRF-003",
+        "TST-001",
+        "TST-002"
+      ],
+      "profileIds": [
+        "compact-react-chromium-desktop"
+      ],
+      "note": "Content-addressed repository source artifact; it does not claim an executed environment result, manual assessment, or external certification."
+    },
+    {
+      "id": "independent-semantic-oracle",
+      "kind": "model-report",
+      "status": "verified",
+      "verificationClass": "code-verifiable",
+      "artifactRole": "source",
+      "uri": "repo://packages/kernel-optimized/test/independent-reducer.test.ts",
+      "sha256": "18716581e2581c80a4c0fc0e11ee39d14593f2df7a432367e8932bc75e83e35d",
+      "producedAt": "2026-08-12T00:00:00Z",
+      "requirementIds": [
+        "MOD-004",
+        "PRF-003",
+        "TST-002"
+      ],
+      "profileIds": [
+        "compact-react-chromium-desktop"
+      ],
+      "note": "Content-addressed repository source artifact; it does not claim an executed environment result, manual assessment, or external certification."
+    },
+    {
+      "id": "geometry-invalidation",
+      "kind": "automated-test",
+      "status": "verified",
+      "verificationClass": "code-verifiable",
+      "artifactRole": "source",
+      "uri": "repo://packages/geometry/test/invalidation.test.ts",
+      "sha256": "534dd2f6878e94fd1fa60d0785caa4e1a99ede8a5663e9714d0daa71e1356b44",
+      "producedAt": "2026-08-12T00:00:00Z",
+      "requirementIds": [
+        "LAY-006",
+        "PRF-006"
+      ],
+      "profileIds": [
+        "compact-react-chromium-desktop"
+      ],
+      "note": "Content-addressed repository source artifact; it does not claim an executed environment result, manual assessment, or external certification."
+    },
+    {
+      "id": "runtime-fail-closed",
+      "kind": "recovery-report",
+      "status": "verified",
+      "verificationClass": "code-verifiable",
+      "artifactRole": "source",
+      "uri": "repo://packages/runtime/test/runtime.test.ts",
+      "sha256": "069fe4aa225f291c88d742bad1e23ceea28c07e7a049b797305261635dd4c85e",
+      "producedAt": "2026-08-12T00:00:00Z",
+      "requirementIds": [
+        "OBS-004",
+        "SEC-006",
+        "SYS-004",
+        "TXN-002"
+      ],
+      "profileIds": [
+        "compact-react-chromium-desktop"
+      ],
+      "note": "Content-addressed repository source artifact; it does not claim an executed environment result, manual assessment, or external certification."
+    },
+    {
+      "id": "runtime-policy-contract",
+      "kind": "automated-test",
+      "status": "verified",
+      "verificationClass": "code-verifiable",
+      "artifactRole": "source",
+      "uri": "repo://packages/runtime/test/policy.test.ts",
+      "sha256": "c0abfacc8f1a0c1e5740a77c913a6b218ae13b29fd127d5fe37bba47205c3195",
+      "producedAt": "2026-08-12T00:00:00Z",
+      "requirementIds": [
+        "API-004",
+        "TXN-006",
+        "TXN-007"
+      ],
+      "profileIds": [
+        "compact-react-chromium-desktop"
+      ],
+      "note": "Content-addressed repository source artifact; it does not claim an executed environment result, manual assessment, or external certification."
+    },
+    {
+      "id": "browser-surface-adapter",
+      "kind": "automated-test",
+      "status": "verified",
+      "verificationClass": "code-verifiable",
+      "artifactRole": "source",
+      "uri": "repo://packages/surfaces/test/browser-adapter.test.ts",
+      "sha256": "3232c311be56c0cc26610e05a3f07a7e08dc68febe1702d0eea9b11e2625620c",
+      "producedAt": "2026-08-12T00:00:00Z",
+      "requirementIds": [
+        "LIF-002",
+        "LIF-004",
+        "LIF-005",
+        "REN-003",
+        "REN-004",
+        "SEC-005",
+        "SUR-002",
+        "SUR-003",
+        "SUR-004",
+        "SUR-007"
+      ],
+      "profileIds": [
+        "compact-react-chromium-desktop"
+      ],
+      "note": "Content-addressed repository source artifact; it does not claim an executed environment result, manual assessment, or external certification."
+    },
+    {
+      "id": "localized-react-contract",
+      "kind": "automated-test",
+      "status": "verified",
+      "verificationClass": "code-verifiable",
+      "artifactRole": "source",
+      "uri": "repo://packages/react/test/WorkspaceSurface.test.tsx",
+      "sha256": "e39052059da8727de81e4128f9faba37adeaa6ecd638733191033ab7042ef164",
+      "producedAt": "2026-08-12T00:00:00Z",
+      "requirementIds": [
+        "I18N-001",
+        "I18N-002",
+        "RSP-001",
+        "SYS-003",
+        "TST-008",
+        "TXN-008"
+      ],
+      "profileIds": [
+        "compact-react-chromium-desktop"
+      ],
+      "note": "Content-addressed repository source artifact; it does not claim an executed environment result, manual assessment, or external certification."
+    },
+    {
+      "id": "plugin-isolation",
+      "kind": "automated-test",
+      "status": "verified",
+      "verificationClass": "code-verifiable",
+      "artifactRole": "source",
+      "uri": "repo://packages/ecosystem/test/isolated-frame.test.ts",
+      "sha256": "de495a2d78d852b9d879f03b8a5623c27455323f62a74d8d8edfe7be9534c314",
+      "producedAt": "2026-08-12T00:00:00Z",
+      "requirementIds": [
+        "EXT-001",
+        "EXT-002",
+        "EXT-004",
+        "SEC-001",
+        "SEC-005"
+      ],
+      "profileIds": [
+        "compact-react-chromium-desktop"
+      ],
+      "note": "Content-addressed repository source artifact; it does not claim an executed environment result, manual assessment, or external certification."
+    },
+    {
+      "id": "authenticated-coordination",
+      "kind": "automated-test",
+      "status": "verified",
+      "verificationClass": "code-verifiable",
+      "artifactRole": "source",
+      "uri": "repo://packages/ecosystem/test/ecosystem.test.ts",
+      "sha256": "0843e1a9ceb0aa22f19e22184e9eabfb206327e06d02f22e09213448bba1be19",
+      "producedAt": "2026-08-12T00:00:00Z",
+      "requirementIds": [
+        "COL-003",
+        "COL-006",
+        "EXT-001",
+        "EXT-002",
+        "EXT-003",
+        "EXT-004",
+        "OBS-003",
+        "OBS-004",
+        "PRF-004",
+        "SEC-001",
+        "SEC-002",
+        "SEC-004"
+      ],
+      "profileIds": [
+        "compact-react-chromium-desktop"
+      ],
+      "note": "Content-addressed repository source artifact; it does not claim an executed environment result, manual assessment, or external certification."
+    },
+    {
+      "id": "evidence-taxonomy",
+      "kind": "architecture-decision",
+      "status": "verified",
+      "verificationClass": "code-verifiable",
+      "artifactRole": "source",
+      "uri": "repo://docs/adr/0010-executable-evidence-taxonomy.md",
+      "sha256": "40fe0c32070b4f532d78b56af7a3295c2bcc16a166d04bebb1f4d0fcd6cd4b61",
+      "producedAt": "2026-08-12T00:00:00Z",
+      "requirementIds": [
+        "GOV-001",
+        "GOV-002",
+        "GOV-004",
+        "QLT-001",
+        "QLT-002",
+        "QLT-004",
+        "SCP-001",
+        "SCP-002",
+        "SCP-003",
+        "SCP-004"
+      ],
+      "profileIds": [
+        "compact-react-chromium-desktop",
+        "framework-adapter-contract-jsdom"
+      ],
+      "note": "Content-addressed repository source artifact; it does not claim an executed environment result, manual assessment, or external certification."
+    },
+    {
+      "id": "architecture-contract",
+      "kind": "architecture-decision",
+      "status": "verified",
+      "verificationClass": "code-verifiable",
+      "artifactRole": "source",
+      "uri": "repo://docs/ARCHITECTURE.md",
+      "sha256": "2f78e56c5e68bc2b93fd1ef4926058e1c6a8a5320e664f617de0b716fc6cda77",
+      "producedAt": "2026-08-12T00:00:00Z",
+      "requirementIds": [
+        "API-002",
+        "API-008",
+        "ARC-004",
+        "DOM-002",
+        "DOM-003",
+        "GOV-004",
+        "SYS-001",
+        "SYS-002",
+        "SYS-005"
+      ],
+      "profileIds": [
+        "compact-react-chromium-desktop",
+        "framework-adapter-contract-jsdom"
+      ],
+      "note": "Content-addressed repository source artifact; it does not claim an executed environment result, manual assessment, or external certification."
+    },
+    {
+      "id": "independent-oracle-decision",
+      "kind": "architecture-decision",
+      "status": "verified",
+      "verificationClass": "code-verifiable",
+      "artifactRole": "source",
+      "uri": "repo://docs/adr/0011-independent-semantic-oracle.md",
+      "sha256": "5769cf116a24a7a78e05f8a0053805f90785a147b0cdcd96c6367d04f276d6b9",
+      "producedAt": "2026-08-12T00:00:00Z",
+      "requirementIds": [
+        "GOV-004",
+        "MOD-004",
+        "PRF-003",
+        "TST-002"
+      ],
+      "profileIds": [
+        "compact-react-chromium-desktop"
+      ],
+      "note": "Content-addressed repository source artifact; it does not claim an executed environment result, manual assessment, or external certification."
+    },
+    {
+      "id": "protocol-motion-decision",
+      "kind": "architecture-decision",
+      "status": "verified",
+      "verificationClass": "code-verifiable",
+      "artifactRole": "source",
+      "uri": "repo://docs/adr/0012-bounded-protocol-and-motion-lifecycles.md",
+      "sha256": "cf215bc1a4907adef9915346f0649bfa844597630850253cf632a0bacf1945b7",
+      "producedAt": "2026-08-12T00:00:00Z",
+      "requirementIds": [
+        "ARC-002",
+        "ARC-004",
+        "GOV-004",
+        "MOT-003",
+        "MOT-007",
+        "SYS-003"
+      ],
+      "profileIds": [
+        "compact-react-chromium-desktop"
+      ],
+      "note": "Content-addressed repository source artifact; it does not claim an executed environment result, manual assessment, or external certification."
+    },
+    {
+      "id": "third-party-certification-contract",
+      "kind": "automated-test",
+      "status": "verified",
+      "verificationClass": "code-verifiable",
+      "artifactRole": "source",
+      "uri": "repo://packages/conformance/test/certification.test.ts",
+      "sha256": "693024e361fa59f5c095fdb348df69771e6f477693cbbe5f0e2148ea26176908",
+      "producedAt": "2026-08-12T00:00:00Z",
+      "requirementIds": [
+        "GOV-006"
+      ],
+      "profileIds": [
+        "compact-react-chromium-desktop",
+        "framework-adapter-contract-jsdom"
+      ],
+      "note": "Content-addressed repository source artifact; it does not claim an executed environment result, manual assessment, or external certification."
+    },
+    {
+      "id": "model-campaign-50000-result",
+      "kind": "model-report",
+      "status": "verified",
+      "verificationClass": "code-verifiable",
+      "artifactRole": "result",
+      "uri": "repo://conformance/results/model-campaign-50000-2026-08-12.json",
+      "sha256": "bc01310655ce931adb323dbd3dad65e1e4599c148f2fa0f35c0e3ae88f9b69e9",
+      "producedAt": "2026-08-12T00:00:00Z",
+      "requirementIds": [
+        "MOD-004",
+        "PRF-003",
+        "TST-001",
+        "TST-002"
+      ],
+      "profileIds": [
+        "compact-react-chromium-desktop"
+      ],
+      "note": "Recorded execution result with an explicit experimental profile and limitations; it does not claim manual assessment or stable certification."
+    },
+    {
+      "id": "chromium-reference-result",
+      "kind": "compatibility-report",
+      "status": "verified",
+      "verificationClass": "environment-verifiable",
+      "artifactRole": "result",
+      "uri": "repo://conformance/results/chromium-reference-2026-08-12.json",
+      "sha256": "8f26eb55484ebfe11b20d7b32ef2f907cd1ab0e493316647c7298eda398b4e80",
+      "producedAt": "2026-08-12T00:00:00Z",
+      "requirementIds": [
+        "A11Y-003",
+        "A11Y-006",
+        "FOC-002",
+        "I18N-002",
+        "LIF-003",
+        "LIF-005",
+        "LIF-007",
+        "REN-001",
+        "REN-003",
+        "REN-004",
+        "REN-005",
+        "REN-006",
+        "RSP-001",
+        "RSP-002",
+        "SUR-002",
+        "SUR-003",
+        "THM-002"
+      ],
+      "profileIds": [
+        "compact-react-chromium-desktop"
+      ],
+      "note": "Recorded execution result with an explicit experimental profile and limitations; it does not claim manual assessment or stable certification."
+    },
+    {
+      "id": "interaction-performance-result",
+      "kind": "performance-report",
+      "status": "verified",
+      "verificationClass": "environment-verifiable",
+      "artifactRole": "result",
+      "uri": "repo://conformance/results/interaction-performance-2026-08-12.json",
+      "sha256": "f452dd24a61ef501fe77f33db3aed5ff4741904ba898936362cf127414ecb3ac",
+      "producedAt": "2026-08-12T00:00:00Z",
+      "requirementIds": [
+        "QLT-003",
+        "TST-006"
+      ],
+      "profileIds": [
+        "compact-react-chromium-desktop"
+      ],
+      "note": "Recorded execution result with an explicit experimental profile and limitations; it does not claim manual assessment or stable certification."
+    },
+    {
+      "id": "framework-contract-result",
+      "kind": "compatibility-report",
+      "status": "verified",
+      "verificationClass": "environment-verifiable",
+      "artifactRole": "result",
+      "uri": "repo://conformance/results/framework-contract-2026-08-12.json",
+      "sha256": "2ea2778ce6de7bae5b8c9df3ef795033435c834557d1e720eda7bff9edf9b8e0",
+      "producedAt": "2026-08-12T00:00:00Z",
+      "requirementIds": [
+        "FWK-001",
+        "FWK-003"
+      ],
+      "profileIds": [
+        "framework-adapter-contract-jsdom"
+      ],
+      "note": "Recorded execution result with an explicit experimental profile and limitations; it does not claim manual assessment or stable certification."
+    },
+    {
+      "id": "protocol-motion-result",
+      "kind": "model-report",
+      "status": "verified",
+      "verificationClass": "environment-verifiable",
+      "artifactRole": "result",
+      "uri": "repo://conformance/results/protocol-motion-2026-08-12.json",
+      "sha256": "be361ebc6636bd958701b153e424b1fb85925a88b3002d87acb1cf6ecfb3f264",
+      "producedAt": "2026-08-12T00:00:00Z",
+      "requirementIds": [
+        "ARC-002",
+        "INT-003",
+        "INT-006",
+        "MOT-003",
+        "MOT-004",
+        "MOT-005",
+        "MOT-007",
+        "MOT-009",
+        "MOT-010",
+        "SYS-003",
+        "TST-003",
+        "TST-008"
+      ],
+      "profileIds": [
+        "compact-react-chromium-desktop"
+      ],
+      "note": "Recorded execution result with an explicit experimental profile and limitations; it does not claim manual assessment or stable certification."
+    },
+    {
+      "id": "independent-semantic-oracle-result",
+      "kind": "model-report",
+      "status": "verified",
+      "verificationClass": "code-verifiable",
+      "artifactRole": "result",
+      "uri": "repo://conformance/results/independent-semantic-oracle-2026-08-12.json",
+      "sha256": "4d35e0eaa617ff852475f3253c1f2cf67cee3cbf56913338e5efb03b6077eb2f",
+      "producedAt": "2026-08-12T00:00:00Z",
+      "requirementIds": [
+        "MOD-004",
+        "PRF-003",
+        "TST-002"
+      ],
+      "profileIds": [
+        "compact-react-chromium-desktop"
+      ],
+      "note": "Recorded execution result with an explicit experimental profile and limitations; it does not claim manual assessment or stable certification."
     },
     {
       "id": "manual-accessibility-certification",
       "kind": "external-certification",
       "status": "blocked",
+      "verificationClass": "manual-external",
+      "artifactRole": "attestation",
       "requirementIds": [
         "A11Y-001",
         "A11Y-005",
@@ -364,6 +988,8 @@
       "id": "physical-performance-certification",
       "kind": "external-certification",
       "status": "blocked",
+      "verificationClass": "manual-external",
+      "artifactRole": "attestation",
       "requirementIds": [
         "QLT-003",
         "TST-006"
@@ -380,6 +1006,8 @@
       "id": "independent-security-review",
       "kind": "external-certification",
       "status": "blocked",
+      "verificationClass": "manual-external",
+      "artifactRole": "attestation",
       "requirementIds": [
         "SEC-002",
         "SEC-003",
@@ -398,6 +1026,8 @@
       "id": "third-party-pilots",
       "kind": "external-certification",
       "status": "blocked",
+      "verificationClass": "manual-external",
+      "artifactRole": "attestation",
       "requirementIds": [
         "EXT-006",
         "FWK-001"

@@ -12,6 +12,9 @@ import { solveLayout } from "@panefold/geometry";
 import {
   getEntity,
   nodeId,
+  panelId,
+  revision,
+  surfaceId,
   type CommittedTransaction,
   type WorkspaceCommand,
   type WorkspaceSnapshot,
@@ -30,8 +33,13 @@ import {
   type RuntimeDispatchReceipt,
   type WorkspaceRuntime,
 } from "@panefold/runtime";
+import {
+  BrowserExternalSurfaceAdapter,
+  type PrepareSurfaceRequest,
+  type PreparedSurfaceHandle,
+} from "@panefold/surfaces";
 
-import { demoPanelRegistry, Glyph } from "./demo-panels";
+import { demoPanelRegistry, Glyph, heavyContentDemoPanelRegistry } from "./demo-panels";
 import { createRedactedReproduction } from "./reproduction";
 import { demoCommands, initialWorkspaceSnapshot, projectWorkspace } from "./workspace-config";
 
@@ -75,21 +83,16 @@ function MapWorkspaceApp({ runtime }: { readonly runtime: WorkspaceRuntime }) {
   const [motion, setMotion] = useState<MotionProfile>("productive");
   const [inspectorOpen, setInspectorOpen] = useState(false);
   const [paletteOpen, setPaletteOpen] = useState(false);
-  const [compact, setCompact] = useState(false);
   const [compactGroupId, setCompactGroupId] = useState("primary");
+  const [surfaceStatus, setSurfaceStatus] = useState("External surface ready to try");
+  const panelRegistry = useMemo(
+    () =>
+      new URL(window.location.href).searchParams.get("fixture") === "heavy"
+        ? heavyContentDemoPanelRegistry
+        : demoPanelRegistry,
+    [],
+  );
   const workspaceFrameRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    const element = workspaceFrameRef.current;
-    if (element === null) return;
-    const observer = new ResizeObserver(([entry]) => {
-      if (entry !== undefined) setCompact(entry.contentRect.width < 720);
-    });
-    observer.observe(element);
-    return () => {
-      observer.disconnect();
-    };
-  }, []);
 
   useEffect(() => {
     const onKeyDown = (event: KeyboardEvent) => {
@@ -112,15 +115,8 @@ function MapWorkspaceApp({ runtime }: { readonly runtime: WorkspaceRuntime }) {
   }, []);
 
   const projector = useCallback(
-    (nextSnapshot: WorkspaceSnapshot): WorkspaceProjection => {
-      const projection = projectWorkspace(nextSnapshot);
-      if (!compact) return projection;
-      const groupNode = Object.values(projection.nodes).find(
-        (node) => node.kind === "group" && node.groupId === compactGroupId,
-      );
-      return groupNode === undefined ? projection : { ...projection, rootNodeId: groupNode.id };
-    },
-    [compact, compactGroupId],
+    (nextSnapshot: WorkspaceSnapshot): WorkspaceProjection => projectWorkspace(nextSnapshot),
+    [],
   );
   const layoutSolver = useCallback<WorkspaceLayoutSolver<WorkspaceSnapshot>>(
     (layoutSnapshot, request) =>
@@ -162,22 +158,14 @@ function MapWorkspaceApp({ runtime }: { readonly runtime: WorkspaceRuntime }) {
           </span>
         </div>
         <span className="demo-toolbar-spacer" />
-        {compact ? (
-          <label className="demo-compact-group">
-            <span>Region</span>
-            <select
-              value={compactGroupId}
-              onChange={(event) => {
-                setCompactGroupId(event.target.value);
-              }}
-            >
-              <option value="navigation">Navigation</option>
-              <option value="primary">Primary</option>
-              <option value="inspector">Inspector</option>
-              <option value="output">Output</option>
-            </select>
-          </label>
-        ) : null}
+        <ToolbarButton
+          label="Open external surface fixture"
+          onClick={() => {
+            void openExternalSurfaceFixture(setSurfaceStatus);
+          }}
+        >
+          ↗
+        </ToolbarButton>
         <ToolbarButton
           label="Undo layout change"
           disabled={!canUndo}
@@ -227,12 +215,15 @@ function MapWorkspaceApp({ runtime }: { readonly runtime: WorkspaceRuntime }) {
         <WorkspaceSurface
           projector={projector}
           commands={demoCommands}
-          panels={demoPanelRegistry}
+          panels={panelRegistry}
           layoutSolver={layoutSolver}
           direction={direction}
           motion={motion}
           workspaceLabel="Map operations workspace"
           className="demo-workspace"
+          responsive="auto"
+          compactGroupId={compactGroupId}
+          onCompactGroupChange={setCompactGroupId}
         />
         {inspectorOpen ? (
           <WorkspaceInspector
@@ -263,8 +254,9 @@ function MapWorkspaceApp({ runtime }: { readonly runtime: WorkspaceRuntime }) {
         </span>
         <span className="demo-toolbar-spacer" />
         <span>Active: {activePanel?.title ?? "None"}</span>
-        <span>{compact ? "Phone projection" : "Desktop projection"}</span>
+        <span>Responsive projection</span>
         <span>{motion} motion</span>
+        <span role="status">{surfaceStatus}</span>
         <span>Stable hosts · hidden work suspends</span>
         <span>Session memory only</span>
       </footer>
@@ -308,6 +300,121 @@ function ToolbarButton({
       {children}
     </button>
   );
+}
+
+async function openExternalSurfaceFixture(setStatus: (status: string) => void): Promise<void> {
+  const destinationSurfaceId = surfaceId("demo-external");
+  let handle: PreparedSurfaceHandle | undefined;
+  const adapter = new BrowserExternalSurfaceAdapter<{ readonly title: string }>({
+    environment: { sourceWindow: window },
+    mount: ({ checkpoint, document: ownerDocument, root, window: ownerWindow }) => {
+      const article = ownerDocument.createElement("article");
+      article.className = "demo-external-fixture";
+      Object.assign(article.style, {
+        background: "#08101d",
+        color: "#edf3fb",
+        display: "grid",
+        fontFamily: "Inter, ui-sans-serif, system-ui, sans-serif",
+        gap: "16px",
+        minHeight: "100vh",
+        padding: "32px",
+      });
+      const heading = ownerDocument.createElement("h1");
+      heading.textContent = checkpoint.title;
+      const explanation = ownerDocument.createElement("p");
+      explanation.textContent =
+        "Prepared under user activation, bootstrapped with explicit surface context, then acknowledged ready.";
+      const closeButton = ownerDocument.createElement("button");
+      closeButton.type = "button";
+      closeButton.textContent = "Close external fixture";
+      closeButton.addEventListener("click", () => {
+        if (handle !== undefined) void adapter.close(handle);
+      });
+      const unexpectedCloseButton = ownerDocument.createElement("button");
+      unexpectedCloseButton.type = "button";
+      unexpectedCloseButton.textContent = "Simulate unexpected surface loss";
+      unexpectedCloseButton.addEventListener("click", () => {
+        ownerWindow.setTimeout(() => ownerWindow.close(), 0);
+      });
+      for (const button of [closeButton, unexpectedCloseButton]) {
+        Object.assign(button.style, {
+          background: "#172235",
+          border: "1px solid #40526c",
+          borderRadius: "7px",
+          color: "#edf3fb",
+          justifySelf: "start",
+          minHeight: "44px",
+          paddingInline: "16px",
+        });
+      }
+      article.append(heading, explanation, closeButton, unexpectedCloseButton);
+      root.append(article);
+      return {
+        ready: Promise.resolve(),
+        dispose: () => {
+          article.remove();
+        },
+      };
+    },
+    onSurfaceLost: ({ reason }) => {
+      setStatus(`External surface recovered after ${reason}`);
+    },
+  });
+  const request = {
+    destinationSurfaceId,
+    kind: "browser-window",
+    bounds: { x: window.screenX + 80, y: window.screenY + 80, width: 520, height: 360 },
+    security: {
+      protocolVersion: 1,
+      workspaceId: "atlas-demo",
+      sessionNonce: "atlas-demo-session",
+      allowedOrigins: [window.location.origin],
+    },
+    presentation: {
+      locale: document.documentElement.lang || "en-SG",
+      direction: document.documentElement.dir === "rtl" ? "rtl" : "ltr",
+      writingMode: "horizontal-tb",
+      stylesheets: [],
+      themeTokens: {
+        "demo-accent": "#58a6ff",
+        "demo-background": "#08101d",
+      },
+    },
+    userActivation: navigator.userActivation?.isActive ?? true,
+  } as const satisfies PrepareSurfaceRequest;
+  const controller = new AbortController();
+
+  try {
+    setStatus("Preparing external surface…");
+    handle = await adapter.prepare(request, controller.signal);
+    await adapter.bootstrap(handle, request, controller.signal);
+    await adapter.mount(
+      handle,
+      {
+        panelId: panelId("map-canvas"),
+        checkpoint: { title: "Panefold external surface" },
+        ownership: {
+          token: "demo-ownership",
+          panelId: panelId("map-canvas"),
+          sourceSurfaceId: surfaceId("main"),
+          destinationSurfaceId,
+          coordinatorEpoch: 1,
+          sessionNonce: "atlas-demo-session",
+          baseRevision: revision(0),
+        },
+      },
+      controller.signal,
+    );
+    await adapter.waitUntilReady(handle, controller.signal);
+    setStatus("External surface ready");
+  } catch (error) {
+    if (handle !== undefined) await adapter.close(handle);
+    setStatus(
+      error instanceof Error
+        ? `External surface stayed safe: ${error.message}`
+        : "External surface stayed safe",
+    );
+  }
 }
 
 function SettingsMenu({

@@ -60,6 +60,19 @@ export interface CommandParityReport {
 
 export type EvidenceStatus = "verified" | "unresolved" | "blocked";
 
+/**
+ * The kind of work that can close a requirement trace.
+ *
+ * `future-scope` is deliberately a trace-only value: an excluded product capability cannot be
+ * turned into evidence merely by attaching a file to it.
+ */
+export type VerificationClass =
+  "code-verifiable" | "environment-verifiable" | "manual-external" | "future-scope";
+
+export type EvidenceVerificationClass = Exclude<VerificationClass, "future-scope">;
+
+export type EvidenceArtifactRole = "source" | "result" | "attestation";
+
 export type EvidenceKind =
   | "automated-test"
   | "model-report"
@@ -82,10 +95,58 @@ export interface EvidenceApproval {
   readonly sha256: string;
 }
 
+export type CertificationSubjectKind = "adapter" | "plugin";
+export type CertificationStatus = "candidate" | "certified";
+
+export interface CertificationSubject {
+  readonly kind: CertificationSubjectKind;
+  readonly id: string;
+  readonly packageName: string;
+}
+
+export interface CertificationVersions {
+  readonly subject: string;
+  readonly engine: string;
+  readonly protocol: number;
+  readonly framework?: string;
+  readonly browser?: string;
+}
+
+export interface CertificationProfile {
+  readonly id: string;
+  readonly surfaces: readonly string[];
+  readonly inputs: readonly string[];
+  readonly workload: string;
+}
+
+export interface CertificationEvidenceArtifact {
+  readonly id: string;
+  readonly kind: EvidenceKind;
+  readonly uri: string;
+  readonly sha256: string;
+  readonly producedAt: string;
+  readonly requirementIds: readonly string[];
+  readonly profileId: string;
+}
+
+export interface ThirdPartyCertificationManifest {
+  readonly $schema?: string;
+  readonly schemaVersion: 1;
+  readonly certificationId: string;
+  readonly status: CertificationStatus;
+  readonly subject: CertificationSubject;
+  readonly versions: CertificationVersions;
+  readonly profile: CertificationProfile;
+  readonly evidence: readonly CertificationEvidenceArtifact[];
+  readonly approval?: EvidenceApproval;
+}
+
 export interface EvidenceRecord {
   readonly id: string;
   readonly kind: EvidenceKind;
   readonly status: EvidenceStatus;
+  readonly verificationClass: EvidenceVerificationClass;
+  readonly artifactRole: EvidenceArtifactRole;
   readonly uri?: string;
   readonly sha256?: string;
   readonly producedAt?: string;
@@ -129,8 +190,16 @@ export interface RequirementTrace {
   readonly requirementId: string;
   readonly profileId: string;
   readonly status: TraceStatus;
+  readonly verificationClass: VerificationClass;
   readonly evidenceIds: readonly string[];
   readonly rationale?: string;
+}
+
+export interface VerificationClassTraceCounts {
+  readonly verified: number;
+  readonly unresolved: number;
+  readonly blocked: number;
+  readonly notApplicable: number;
 }
 
 export interface RequirementTraceabilityReport {
@@ -140,6 +209,7 @@ export interface RequirementTraceabilityReport {
   readonly unknownRequirementIds: readonly string[];
   readonly missingTraceKeys: readonly string[];
   readonly traces: readonly RequirementTrace[];
+  readonly byVerificationClass: Readonly<Record<VerificationClass, VerificationClassTraceCounts>>;
   readonly issues: readonly ConformanceIssue[];
 }
 
@@ -166,9 +236,18 @@ export type HardGateId =
 export interface HardGateRecord {
   readonly id: HardGateId;
   readonly status: EvidenceStatus;
+  readonly requirementIds: readonly string[];
+  readonly profileIds: readonly string[];
+  readonly requiredEvidenceClasses: readonly EvidenceVerificationClass[];
   readonly evidenceIds: readonly string[];
   readonly blockedBy?: readonly string[];
   readonly note?: string;
+}
+
+export interface HardGateAuditContext {
+  readonly expectedRequirementIds: readonly string[];
+  readonly profileIds: readonly string[];
+  readonly traces: readonly RequirementTrace[];
 }
 
 export interface HardGateAuditReport {

@@ -9,11 +9,28 @@
       ],
       "evidenceIds": [
         "model-immutability",
+        "panel-registry",
         "kernel-laws",
-        "bounded-exploration"
+        "bounded-exploration",
+        "model-campaign-50000-result"
       ],
       "limitations": [
-        "No stable conformance or ten-million-operation report"
+        "The 50,000-operation result is below the ten-million stable threshold"
+      ]
+    },
+    {
+      "id": "independent-semantic-oracle",
+      "classification": "experimental",
+      "profileIds": [
+        "compact-react-chromium-desktop"
+      ],
+      "evidenceIds": [
+        "independent-semantic-oracle",
+        "independent-semantic-oracle-result",
+        "independent-oracle-decision"
+      ],
+      "limitations": [
+        "The correctness-first candidate rebuilds Map/entity state per command; it is independent of the reference semantic reducer but is not a retained optimized production kernel"
       ]
     },
     {
@@ -40,7 +57,7 @@
         "react-integration"
       ],
       "limitations": [
-        "Cross-document lifecycle policies are not implemented by the DOM adapter"
+        "Production third-party heavy content and cross-document portal/mirror modes are not certified"
       ]
     },
     {
@@ -51,11 +68,15 @@
       ],
       "evidenceIds": [
         "protocol-models",
+        "protocol-actor-catalog",
         "motion-primitives",
+        "motion-lifecycle",
+        "protocol-motion-decision",
+        "protocol-motion-result",
         "react-integration"
       ],
       "limitations": [
-        "No physical frame traces or tab-drag certification"
+        "No physical 60/120 Hz traces or complete platform interaction certification"
       ]
     },
     {
@@ -83,7 +104,7 @@
         "protocol-models"
       ],
       "limitations": [
-        "Headless protocol primitive; no published browser-window product profile"
+        "Prepared ownership is implemented, but unrestricted browser/PiP/multi-screen product support is not published"
       ]
     },
     {
@@ -94,7 +115,8 @@
       ],
       "evidenceIds": [
         "native-adapter-contract",
-        "web-component-ssr"
+        "web-component-ssr",
+        "framework-contract-result"
       ],
       "limitations": [
         "Shared JSDOM contract only; no framework browser rendering certification"
@@ -110,7 +132,7 @@
         "ecosystem-primitives"
       ],
       "limitations": [
-        "Trusted in-process declarative contributions only"
+        "Same-realm plugins are trusted and require application provenance policy"
       ]
     },
     {
@@ -127,30 +149,90 @@
       ]
     },
     {
-      "id": "remote-command-intake",
+      "id": "authenticated-single-writer-coordination",
       "classification": "experimental",
       "profileIds": [
         "compact-react-chromium-desktop"
       ],
       "evidenceIds": [
-        "ecosystem-primitives",
+        "authenticated-coordination",
         "kernel-laws"
       ],
       "limitations": [
-        "No transport, authentication, durable coordinator, or conflict resolution"
+        "Transport, key provisioning, authorization, durable hosting, and domain conflict policy are application-owned"
       ]
     },
     {
-      "id": "mobile-projection",
+      "id": "react-responsive-projection",
       "classification": "experimental",
       "profileIds": [
         "compact-react-chromium-desktop"
       ],
       "evidenceIds": [
+        "localized-react-contract",
+        "chromium-reference-result"
+      ],
+      "limitations": [
+        "Browser touch emulation is not physical mobile or assistive-technology certification"
+      ]
+    },
+    {
+      "id": "browser-surface-adapter",
+      "classification": "experimental",
+      "profileIds": [
+        "compact-react-chromium-desktop"
+      ],
+      "evidenceIds": [
+        "browser-surface-adapter",
+        "chromium-reference-result",
+        "surface-ownership"
+      ],
+      "limitations": [
+        "Controlled same-origin popup fixture only; permissioned PiP, cross-origin, crash, and multi-screen evidence is absent"
+      ]
+    },
+    {
+      "id": "panel-plugin-extension-boundary",
+      "classification": "experimental",
+      "profileIds": [
+        "compact-react-chromium-desktop"
+      ],
+      "evidenceIds": [
+        "panel-registry",
+        "plugin-isolation",
         "ecosystem-primitives"
       ],
       "limitations": [
-        "Data-only projection; not a certified touch product"
+        "The isolated iframe host has no independent hostile-code or deployment certification"
+      ]
+    },
+    {
+      "id": "testkit-fixtures",
+      "classification": "experimental",
+      "profileIds": [
+        "compact-react-chromium-desktop"
+      ],
+      "evidenceIds": [
+        "testkit-contract",
+        "chromium-reference-result"
+      ],
+      "limitations": [
+        "Fixture definitions and one browser run do not certify third-party workloads"
+      ]
+    },
+    {
+      "id": "conformance-evidence-system",
+      "classification": "experimental",
+      "profileIds": [
+        "compact-react-chromium-desktop"
+      ],
+      "evidenceIds": [
+        "conformance-harness",
+        "evidence-taxonomy",
+        "third-party-certification-contract"
+      ],
+      "limitations": [
+        "The current release remains blocked/unresolved and has no signed approval"
       ]
     },
     {
@@ -159,7 +241,7 @@
       "profileIds": [],
       "evidenceIds": [],
       "limitations": [
-        "Prepared ownership primitives exist, but no real browser failure matrix is published"
+        "A controlled same-origin popup fixture exists, but no unrestricted cross-browser, cross-origin, or crash matrix is published"
       ]
     },
     {
@@ -177,16 +259,16 @@
       "profileIds": [],
       "evidenceIds": [],
       "limitations": [
-        "Remote intake is not distributed collaboration"
+        "Authenticated single-writer intake does not provide transport, durable hosting, recovery, or application conflict policy"
       ]
     },
     {
-      "id": "dynamic-untrusted-plugins",
+      "id": "arbitrary-untrusted-plugin-certification",
       "classification": "unsupported",
       "profileIds": [],
       "evidenceIds": [],
       "limitations": [
-        "Trusted in-process registration is not an isolation boundary"
+        "A sandboxed iframe host exists, but arbitrary hostile code and deployment policy have no independent certification"
       ]
     },
     {

@@ -21,6 +21,8 @@ import type {
   RequirementTraceabilityInput,
   RequirementTraceabilityReport,
   TraceStatus,
+  VerificationClass,
+  VerificationClassTraceCounts,
 } from "./types";
 
 const REQUIREMENT_KEYS = new Set([
@@ -30,7 +32,14 @@ const REQUIREMENT_KEYS = new Set([
   "statement",
   "acceptanceEvidence",
 ]);
-const TRACE_KEYS = new Set(["requirementId", "profileId", "status", "evidenceIds", "rationale"]);
+const TRACE_KEYS = new Set([
+  "requirementId",
+  "profileId",
+  "status",
+  "verificationClass",
+  "evidenceIds",
+  "rationale",
+]);
 const REQUIREMENT_LEVELS: ReadonlySet<RequirementLevel> = new Set([
   "MUST",
   "MUST NOT",
@@ -46,6 +55,12 @@ const TRACE_STATUSES: ReadonlySet<TraceStatus> = new Set([
   "unresolved",
   "blocked",
   "not-applicable",
+]);
+const VERIFICATION_CLASSES: ReadonlySet<VerificationClass> = new Set([
+  "code-verifiable",
+  "environment-verifiable",
+  "manual-external",
+  "future-scope",
 ]);
 
 function parseRequirement(
@@ -145,6 +160,7 @@ function parseTrace(
   const requirementId = input.requirementId;
   const profileId = input.profileId;
   const status = input.status;
+  const verificationClass = input.verificationClass;
   if (!isRequirementId(requirementId)) {
     issues.push(
       issue(
@@ -165,6 +181,19 @@ function parseTrace(
       issue("INVALID_TRACE_STATUS", "invalid", `${path}/status`, "Invalid trace status."),
     );
   }
+  if (
+    typeof verificationClass !== "string" ||
+    !VERIFICATION_CLASSES.has(verificationClass as VerificationClass)
+  ) {
+    issues.push(
+      issue(
+        "INVALID_TRACE_VERIFICATION_CLASS",
+        "invalid",
+        `${path}/verificationClass`,
+        "Trace verification class must be code-verifiable, environment-verifiable, manual-external, or future-scope.",
+      ),
+    );
+  }
   const evidenceIds = parseStringArray(input.evidenceIds, `${path}/evidenceIds`, issues, {
     identifier: true,
   });
@@ -179,6 +208,8 @@ function parseTrace(
     profileId.length === 0 ||
     typeof status !== "string" ||
     !TRACE_STATUSES.has(status as TraceStatus) ||
+    typeof verificationClass !== "string" ||
+    !VERIFICATION_CLASSES.has(verificationClass as VerificationClass) ||
     evidenceIds === undefined
   ) {
     return undefined;
@@ -187,6 +218,7 @@ function parseTrace(
     requirementId,
     profileId,
     status: status as TraceStatus,
+    verificationClass: verificationClass as VerificationClass,
     evidenceIds: [...evidenceIds].sort(compareCodeUnits),
     ...(typeof input.rationale === "string" ? { rationale: input.rationale } : {}),
   };
@@ -213,6 +245,49 @@ function auditTraceEvidence(
       ),
     );
   }
+  if (trace.verificationClass === "future-scope") {
+    if (trace.status !== "not-applicable") {
+      issues.push(
+        issue(
+          "FUTURE_SCOPE_TRACE_CLAIMS_IMPLEMENTATION",
+          "invalid",
+          path,
+          "Future product scope must be marked not-applicable for the current profile, never implemented, unresolved, or blocked.",
+        ),
+      );
+    }
+    if (trace.evidenceIds.length > 0) {
+      issues.push(
+        issue(
+          "FUTURE_SCOPE_TRACE_HAS_EVIDENCE",
+          "invalid",
+          `${path}/evidenceIds`,
+          "Future product scope cannot carry implementation evidence for the current profile.",
+        ),
+      );
+    }
+  } else if (trace.status === "not-applicable") {
+    issues.push(
+      issue(
+        "NON_FUTURE_TRACE_MARKED_NOT_APPLICABLE",
+        "invalid",
+        path,
+        "Only an explicit future-scope boundary can be not-applicable to a published profile.",
+      ),
+    );
+  }
+  if (trace.verificationClass === "code-verifiable" && trace.status === "blocked") {
+    issues.push(
+      issue(
+        "CODE_TRACE_MARKED_BLOCKED",
+        "invalid",
+        path,
+        "Missing repository implementation or tests are unresolved work, not an external blocker.",
+      ),
+    );
+  }
+
+  let hasMatchingVerifiedEvidence = false;
   trace.evidenceIds.forEach((evidenceId) => {
     const evidence = evidenceById.get(evidenceId);
     if (evidence === undefined) {
@@ -236,6 +311,13 @@ function auditTraceEvidence(
         ),
       );
     }
+    if (
+      trace.status === "verified" &&
+      evidence.status === "verified" &&
+      evidence.verificationClass === trace.verificationClass
+    ) {
+      hasMatchingVerifiedEvidence = true;
+    }
     if (!evidence.requirementIds.includes(trace.requirementId)) {
       issues.push(
         issue(
@@ -257,6 +339,20 @@ function auditTraceEvidence(
       );
     }
   });
+  if (
+    trace.status === "verified" &&
+    trace.verificationClass !== "future-scope" &&
+    !hasMatchingVerifiedEvidence
+  ) {
+    issues.push(
+      issue(
+        "VERIFIED_TRACE_LACKS_REQUIRED_EVIDENCE_CLASS",
+        "invalid",
+        `${path}/evidenceIds`,
+        `A verified ${trace.verificationClass} trace requires verified evidence of the same class.`,
+      ),
+    );
+  }
 
   if (trace.status === "blocked") {
     if (!isBoundedString(trace.rationale)) {
@@ -329,6 +425,32 @@ function auditTraceEvidence(
       );
     }
   }
+}
+
+function countTracesByVerificationClass(
+  traces: readonly RequirementTrace[],
+): Readonly<Record<VerificationClass, VerificationClassTraceCounts>> {
+  const counts: Record<VerificationClass, VerificationClassTraceCounts> = {
+    "code-verifiable": { verified: 0, unresolved: 0, blocked: 0, notApplicable: 0 },
+    "environment-verifiable": { verified: 0, unresolved: 0, blocked: 0, notApplicable: 0 },
+    "manual-external": { verified: 0, unresolved: 0, blocked: 0, notApplicable: 0 },
+    "future-scope": { verified: 0, unresolved: 0, blocked: 0, notApplicable: 0 },
+  };
+  traces.forEach((trace) => {
+    const current = counts[trace.verificationClass];
+    if (trace.status === "not-applicable") {
+      counts[trace.verificationClass] = {
+        ...current,
+        notApplicable: current.notApplicable + 1,
+      };
+    } else {
+      counts[trace.verificationClass] = {
+        ...current,
+        [trace.status]: current[trace.status] + 1,
+      };
+    }
+  });
+  return counts;
 }
 
 export function auditRequirementTraceability(
@@ -513,6 +635,7 @@ export function auditRequirementTraceability(
         traceKey(right.requirementId, right.profileId),
       ),
     ),
+    byVerificationClass: countTracesByVerificationClass(traces),
     issues: sortIssues(issues),
   };
 }

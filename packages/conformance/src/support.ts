@@ -227,6 +227,36 @@ export function auditSupportClaims(
         }
       });
     });
+    capability.profileIds.forEach((profileId) => {
+      const hasVerifiedEvidence = capability.evidenceIds.some((evidenceId) => {
+        const record = evidenceById.get(evidenceId);
+        return record?.status === "verified" && record.profileIds.includes(profileId);
+      });
+      if (!hasVerifiedEvidence) {
+        const hasBlockedEvidence = capability.evidenceIds.some(
+          (evidenceId) => evidenceById.get(evidenceId)?.status === "blocked",
+        );
+        issues.push(
+          issue(
+            "CAPABILITY_HAS_NO_VERIFIED_PROFILE_EVIDENCE",
+            hasBlockedEvidence ? "blocked" : "unresolved",
+            `${path}/evidenceIds`,
+            `Capability has no verified evidence for profile ${profileId}.`,
+          ),
+        );
+      }
+      const profile = manifest?.profiles.find((entry) => entry.id === profileId);
+      if (profile !== undefined && !profile.features?.includes(capability.id)) {
+        issues.push(
+          issue(
+            "CAPABILITY_NOT_DECLARED_BY_PROFILE",
+            "unresolved",
+            `${path}/profileIds`,
+            `Capability claims profile ${profileId}, but that profile does not publish the capability in its feature set.`,
+          ),
+        );
+      }
+    });
   });
 
   const manifestUnsupported = new Set(manifest?.unsupported ?? []);

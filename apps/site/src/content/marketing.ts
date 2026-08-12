@@ -17,7 +17,7 @@ export const proofPoints = [
   { value: "36", label: "implemented commands" },
   { value: "190", label: "traced requirements" },
   { value: "200+", label: "repository tests" },
-  { value: "18", label: "workspace packages" },
+  { value: "19", label: "workspace packages" },
 ] as const;
 
 export const featureCards = [
@@ -46,7 +46,7 @@ export const featureCards = [
     icon: Frame,
     tone: "violet",
     size: "standard",
-    detail: "Same-document · synthetic evidence",
+    detail: "17 fixtures · browser evidence",
   },
   {
     title: "Undo follows semantic work",

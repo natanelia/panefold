@@ -94,6 +94,8 @@ describe("deterministic report generation", () => {
           id: "external-certification",
           kind: "external-certification",
           status: "blocked",
+          verificationClass: "manual-external",
+          artifactRole: "attestation",
           requirementIds: ["TST-007"],
           profileIds: ["desktop"],
           blockedBy: ["independent assessment not performed"],

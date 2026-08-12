@@ -31,3 +31,11 @@ Surface loss recovers panels into an explicit safe surface under a newer coordin
   browser failure matrix and security review are published.
 - Dropped, duplicated, reordered, cancelled, and stale messages must remain part of the automated
   model and failure-injection suite.
+
+## Current implementation note
+
+An injected, SSR-safe adapter now exercises this ordering with headless failure injection and a real
+same-origin Chromium popup, including prepare/ready, intentional close, and unexpected-loss
+recovery. Document Picture-in-Picture remains capability-injected only; cross-origin deployment,
+real process failure, multi-screen placement, monitor removal, and an independent security review
+remain outside the published profile.

@@ -98,12 +98,12 @@ export const surfaceTransferMachine = setup({
     },
     "destination-mount": {
       on: {
-        DESTINATION_MOUNTED: { target: "destination-ready" },
+        DESTINATION_MOUNTED: { target: "ready" },
         FAILED: { target: "compensating", actions: "fail" },
         CANCEL: { target: "compensating", actions: "fail" },
       },
     },
-    "destination-ready": {
+    ready: {
       on: {
         DESTINATION_READY: { target: "source-release" },
         FAILED: { target: "compensating", actions: "fail" },

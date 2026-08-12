@@ -1,0 +1,45 @@
+{
+  "schemaVersion": 1,
+  "kind": "browser-profile-result",
+  "profile": "compact-react-chromium-desktop",
+  "producedAt": "2026-08-12T06:32:00Z",
+  "status": "passed",
+  "runner": "Playwright 1.62.1",
+  "project": "chromium",
+  "environment": {
+    "operatingSystem": "Linux 6.18.35 x86_64",
+    "node": "24.14.0",
+    "browserExecutableSha256": "434d2607c55941dcaa7fdd19b0800ee90488922fd9744a6642ef527ba8fabf63",
+    "viewport": "1280x720 plus 390x844 touch emulation"
+  },
+  "summary": {
+    "tests": 10,
+    "passed": 10,
+    "failed": 0,
+    "durationMs": 17200
+  },
+  "coverage": [
+    "accessible semantic command projection",
+    "automated WCAG A and AA scan",
+    "LTR and RTL solved keyboard resize",
+    "motion preference and stable-host identity",
+    "cooperative expensive-work suspension and resume",
+    "all 17 normative heavy-content fixture classes",
+    "forced-colors automation",
+    "same-origin popup prepare, ready, loss recovery, and intentional close",
+    "390x844 touch single-region projection with 44px target",
+    "raw splitter interaction frame capture and experimental guardrail"
+  ],
+  "sourceDigests": {
+    "e2e/demo.spec.ts": "5878dae154e324f74ec264276cab6fc3b60c8e54aaac371b406ec923ebc0601b",
+    "e2e/performance.spec.ts": "2bbc7b6cb40fd2ad97ba33824b5b8a0a3cf43a82ce638e432f13d29c8db164f3",
+    "e2e/performance-baseline.json": "128b4c7dc2c7fc03372224828417f675b279359ebbe9bab7408b172ad76b48a9",
+    "playwright.config.ts": "1488b4ef7257ef5a6dc5505148550cbb6ed89e9488b2c9e39e874f15469cc245"
+  },
+  "limitations": [
+    "This is one automated Chromium run in a container, not a stable browser matrix.",
+    "Touch is browser emulation rather than a physical phone or tablet.",
+    "The popup is a controlled same-origin fixture; Document Picture-in-Picture, multi-screen placement, process crash, and cross-origin deployment are not covered.",
+    "Automated axe, forced-colors, and keyboard checks do not replace manual assistive-technology assessment."
+  ]
+}

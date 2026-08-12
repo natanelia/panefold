@@ -8,18 +8,29 @@
       "id": "compact-react-chromium-desktop",
       "status": "experimental",
       "framework": "React 19.2.8",
-      "browser": "Chromium via Playwright 1.62.1 on desktop Linux CI",
-      "surfaces": ["main"],
-      "inputs": ["mouse", "keyboard", "programmatic"],
-      "workload": "Atlas compact map-operations fixture",
+      "browser": "Chromium via Playwright 1.62.1 on desktop Linux CI with a 390x844 emulated-touch subprofile",
+      "surfaces": ["main", "same-origin-popup-fixture"],
+      "inputs": ["keyboard", "mouse", "programmatic", "touch-emulated"],
+      "workload": "Atlas compact map operations, 17-kind lifecycle lab, popup-loss fixture, and splitter-frame capture",
       "accessibility": [
         "axe-core automation and semantic keyboard tests; no manual AT certification"
       ],
       "features": [
+        "authenticated-single-writer-coordination",
+        "browser-surface-adapter",
+        "conformance-evidence-system",
+        "durable-persistence",
         "geometry-dom-projection",
         "headless-model-kernel",
+        "independent-semantic-oracle",
         "interaction-motion",
-        "react-stable-host-adapter"
+        "observational-devtools",
+        "panel-plugin-extension-boundary",
+        "prepared-surface-protocol",
+        "react-responsive-projection",
+        "react-stable-host-adapter",
+        "testkit-fixtures",
+        "trusted-plugin-registry"
       ]
     },
     {
@@ -38,7 +49,7 @@
     "browser-popout-product-profile",
     "document-picture-in-picture-product-profile",
     "durable-distributed-collaboration",
-    "dynamic-untrusted-plugins",
+    "arbitrary-untrusted-plugin-certification",
     "heavy-content-certification",
     "mobile-touch-certification",
     "multi-screen-product-profile",
@@ -46,7 +57,7 @@
   ],
   "knownLimitations": [
     "All packages and profiles remain experimental and workspace-local; npm publication is not claimed.",
-    "Cross-document, persistence, adapter, plugin, devtools, remote-intake, and mobile APIs are technical primitives without product certification.",
+    "Persistence, popup/PiP, plugin isolation, devtools, coordination, and responsive APIs are technical primitives without product certification.",
     "Manual assistive-technology, physical 60/120 Hz, real browser crash, security review, and third-party pilot evidence is not present."
   ],
   "telemetryDefault": "off"

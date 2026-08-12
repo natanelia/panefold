@@ -6,6 +6,8 @@ export {
   useWorkspaceTransactions,
 } from "./runtime-context";
 export { WorkspaceSurface } from "./WorkspaceSurface";
+export { ENGLISH_WORKSPACE_MESSAGES } from "./messages";
+export type { WorkspaceMessageCatalog } from "./messages";
 export { solveWorkspaceProjectionLayout } from "./geometry";
 export type {
   ProjectionLayoutOptions,

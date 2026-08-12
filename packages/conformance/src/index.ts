@@ -1,4 +1,5 @@
 export * from "./commands";
+export * from "./certification";
 export * from "./evidence";
 export * from "./hard-gates";
 export * from "./manifest";

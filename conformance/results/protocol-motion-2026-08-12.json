@@ -1,0 +1,42 @@
+{
+  "schemaVersion": 1,
+  "kind": "protocol-motion-result",
+  "profile": "compact-react-chromium-desktop",
+  "producedAt": "2026-08-12T03:04:00Z",
+  "status": "passed",
+  "runner": "Vitest 4.1.10",
+  "environment": {
+    "operatingSystem": "Linux x86_64",
+    "node": "24.14.0",
+    "pnpm": "11.16.0"
+  },
+  "summary": {
+    "protocolMotionTestFiles": 6,
+    "protocolMotionTests": 49,
+    "protocolMotionPassed": 49,
+    "reactIntegrationTests": 18,
+    "reactIntegrationPassed": 18,
+    "failed": 0,
+    "durationMs": 3140
+  },
+  "coverage": [
+    "all 12 public protocol descriptors have an XState implementation with the catalog principal states",
+    "scope abort is exactly-once, stale actor identities are rejected, and injected-clock traces are bounded",
+    "drag and resize cancellation, capture loss, wrong-pointer handling, and revision conflicts leave no residual actor state",
+    "resize delivery switches between live, throttled, deferred, and adaptive policies",
+    "motion leases finish, cancel, skip, and dispose queued/running driver resources exactly once",
+    "replace and retarget interruption policies sample current visual properties before continuing",
+    "unsupported, skipped, failed, and disposed View Transitions commit semantic state once and fall back progressively",
+    "load planning drops decoration before spatial continuity and never degrades direct input tracking"
+  ],
+  "sourceDigests": {
+    "packages/protocol/src/catalog.ts": "8f9a79fa206045cf16903e6727892517796a16dee4e13998dd828c1d36b1121a",
+    "packages/protocol-xstate/test/catalog-machines.test.ts": "3d33e4ca3ea49b32e0a98e7749184d73ad5d93fd20b4ceff749c16156407142d",
+    "packages/motion/test/motion-lifecycle.test.ts": "c2fd1527a2ebc5b96d9bb89d289e9fbeca223b4114412df7eed587b5ba9a5b40"
+  },
+  "limitations": [
+    "The catalog/state checks do not constitute exhaustive generated transition, timeout, and recovery-path coverage.",
+    "JSDOM and deterministic driver tests do not measure the one-CSS-pixel re-grab target or real browser duplicate-name behavior.",
+    "The run contains no physical 60 Hz or 120 Hz latency, heap, resource, or assistive-technology evidence."
+  ]
+}

@@ -7,6 +7,7 @@ import {
 import {
   commandId,
   createKernelState,
+  isWorkspaceCommandType,
   type CommandEnvelope,
   type CommandId,
   type CommandOrigin,
@@ -14,6 +15,7 @@ import {
   type KernelResult,
   type KernelStateResult,
   type WorkspaceCommand,
+  type WorkspaceCommandType,
   type WorkspaceKernelState,
   type WorkspaceSnapshot,
 } from "@panefold/model";
@@ -37,8 +39,8 @@ export type RuntimeDispatchReceipt =
       readonly status: "rejected";
       readonly commandId: CommandId;
       readonly result: Extract<KernelStateResult, { readonly ok: false }>;
-      /** Present when rejection came from runtime queue admission. */
-      readonly runtimeCode?: RuntimeQueueRejectionCode;
+      /** Present when the runtime, rather than the kernel, rejected dispatch. */
+      readonly runtimeCode?: RuntimeRejectionCode;
     }
   | {
       readonly status: "queued";
@@ -63,11 +65,48 @@ export interface WorkspaceRuntimeOptions {
    * also contained because notification reporting cannot invalidate a commit.
    */
   readonly onSubscriberError?: (failure: SubscriberNotificationFailure) => void;
+  /** Receives one redacted fail-closed record when structural execution defects. */
+  readonly onStructuralFailure?: (failure: RuntimeStructuralFailure) => void;
+  /** Bounds transaction summaries retained in a structural reproduction. */
+  readonly structuralReproductionTransactionLimit?: number;
 }
 
 export type SubscriberChannel = "snapshot" | "transaction";
 
 export type RuntimeQueueRejectionCode = "QUEUE_CAPACITY_EXCEEDED" | "QUEUE_DRAIN_BUDGET_EXCEEDED";
+
+export type RuntimeRejectionCode = RuntimeQueueRejectionCode | "STRUCTURAL_MUTATION_FROZEN";
+
+export interface RedactedTransactionSummary {
+  readonly origin: CommandOrigin;
+  readonly commandType: WorkspaceCommandType;
+  readonly previousRevision: string;
+  readonly revision: string;
+  readonly patchKinds: readonly string[];
+}
+
+export interface RuntimeStructuralReproduction {
+  readonly schemaVersion: 1;
+  readonly detectedAtRevision: string;
+  readonly defectKind: "invariant-rejection" | "internal-exception";
+  readonly commandType: WorkspaceCommandType | "unknown";
+  readonly commandOrigin: CommandOrigin;
+  readonly causeName: string;
+  readonly workspaceCounts: {
+    readonly panels: number;
+    readonly groups: number;
+    readonly nodes: number;
+    readonly surfaces: number;
+    readonly recoverableClosedPanels: number;
+  };
+  readonly recentTransactions: readonly RedactedTransactionSummary[];
+}
+
+export interface RuntimeStructuralFailure {
+  readonly code: "STRUCTURAL_MUTATION_FROZEN";
+  readonly revision: WorkspaceSnapshot["revision"];
+  readonly reproduction: RuntimeStructuralReproduction;
+}
 
 export interface SubscriberNotificationFailure {
   readonly channel: SubscriberChannel;
@@ -111,6 +150,7 @@ export interface WorkspaceRuntime {
   canRedo(): boolean;
   getTransactions(): readonly CommittedTransaction[];
   getSubscriberErrors(): readonly SubscriberNotificationFailure[];
+  getStructuralFailure(): RuntimeStructuralFailure | undefined;
   dispose(): void;
 }
 
@@ -118,11 +158,16 @@ interface QueuedEnvelope {
   readonly envelope: CommandEnvelope;
 }
 
+type StructuralDefect =
+  | { readonly kind: "invariant-rejection" }
+  | { readonly kind: "internal-exception"; readonly cause: unknown };
+
 const DEFAULT_HISTORY_LIMIT = 200;
 const DEFAULT_TRANSACTION_LIMIT = 200;
 const DEFAULT_NOTIFICATION_ERROR_LIMIT = 100;
 const DEFAULT_QUEUE_LIMIT = 1_000;
 const DEFAULT_QUEUE_DRAIN_LIMIT = 1_000;
+const DEFAULT_STRUCTURAL_REPRODUCTION_TRANSACTION_LIMIT = 32;
 
 export function createWorkspaceRuntime(options: WorkspaceRuntimeOptions): WorkspaceRuntime {
   return new WorkspaceRuntimeImpl(options);
@@ -138,15 +183,18 @@ class WorkspaceRuntimeImpl implements WorkspaceRuntime {
   readonly #policies: readonly WorkspacePolicy[];
   readonly #createCommandId: () => CommandId;
   readonly #onSubscriberError: ((failure: SubscriberNotificationFailure) => void) | undefined;
+  readonly #onStructuralFailure: ((failure: RuntimeStructuralFailure) => void) | undefined;
   readonly #transactionLimit: number;
   readonly #notificationErrorLimit: number;
   readonly #queueLimit: number;
   readonly #queueDrainLimit: number;
   readonly #retainSubscriberErrorCause: boolean;
+  readonly #structuralReproductionTransactionLimit: number;
   #queueDrainRemaining: number | undefined;
   #draining = false;
   #notifying = false;
   #disposed = false;
+  #structuralFailure: RuntimeStructuralFailure | undefined;
 
   public constructor(options: WorkspaceRuntimeOptions) {
     const historyLimit = validatedLimit(
@@ -171,6 +219,11 @@ class WorkspaceRuntimeImpl implements WorkspaceRuntime {
       "queueDrainLimit",
     );
     this.#retainSubscriberErrorCause = options.retainSubscriberErrorCause ?? false;
+    this.#structuralReproductionTransactionLimit = validatedLimit(
+      options.structuralReproductionTransactionLimit,
+      DEFAULT_STRUCTURAL_REPRODUCTION_TRANSACTION_LIMIT,
+      "structuralReproductionTransactionLimit",
+    );
     const violations = validateWorkspace(options.initialSnapshot);
     if (violations.length > 0) {
       // Initial state is a trust boundary. Do not canonicalize it silently:
@@ -181,6 +234,7 @@ class WorkspaceRuntimeImpl implements WorkspaceRuntime {
     this.#policies = Object.freeze([...(options.policies ?? [])]);
     this.#createCommandId = options.createCommandId ?? defaultCreateCommandId;
     this.#onSubscriberError = options.onSubscriberError;
+    this.#onStructuralFailure = options.onStructuralFailure;
   }
 
   public getSnapshot = (): WorkspaceSnapshot => this.#state.snapshot;
@@ -237,11 +291,32 @@ class WorkspaceRuntimeImpl implements WorkspaceRuntime {
   public preview(command: WorkspaceCommand, options: DispatchOptions = {}): KernelResult {
     this.#assertLive();
     const envelope = this.#envelope(command, options);
-    const policy = evaluatePolicies(this.#state.snapshot, envelope, this.#policies);
-    if (!policy.ok) {
-      return { ok: false, error: policy.error };
+    if (this.#structuralFailure !== undefined) {
+      return { ok: false, error: this.#structuralFrozenError(envelope) };
     }
-    return executeCommand(this.#state.snapshot, { ...envelope, command: policy.command });
+    try {
+      const policy = evaluatePolicies(this.#state.snapshot, envelope, this.#policies);
+      if (!policy.ok) {
+        return { ok: false, error: policy.error };
+      }
+      const result = executeCommand(this.#state.snapshot, {
+        ...envelope,
+        command: policy.command,
+      });
+      if (!result.ok && result.error.code === "INVARIANT_VIOLATION") {
+        const receipt = this.#freezeStructuralMutation(envelope, {
+          kind: "invariant-rejection",
+        });
+        return { ok: false, error: receipt.result.error };
+      }
+      return result;
+    } catch (cause) {
+      const receipt = this.#freezeStructuralMutation(envelope, {
+        kind: "internal-exception",
+        cause,
+      });
+      return { ok: false, error: receipt.result.error };
+    }
   }
 
   public undo(): RuntimeDispatchReceipt {
@@ -259,11 +334,11 @@ class WorkspaceRuntimeImpl implements WorkspaceRuntime {
   }
 
   public canUndo(): boolean {
-    return this.#state.undoStack.length > 0;
+    return this.#structuralFailure === undefined && this.#state.undoStack.length > 0;
   }
 
   public canRedo(): boolean {
-    return this.#state.redoStack.length > 0;
+    return this.#structuralFailure === undefined && this.#state.redoStack.length > 0;
   }
 
   public getTransactions(): readonly CommittedTransaction[] {
@@ -272,6 +347,10 @@ class WorkspaceRuntimeImpl implements WorkspaceRuntime {
 
   public getSubscriberErrors(): readonly SubscriberNotificationFailure[] {
     return Object.freeze([...this.#subscriberErrors]);
+  }
+
+  public getStructuralFailure(): RuntimeStructuralFailure | undefined {
+    return this.#structuralFailure;
   }
 
   public dispose(): void {
@@ -298,30 +377,117 @@ class WorkspaceRuntimeImpl implements WorkspaceRuntime {
   }
 
   #apply(rawEnvelope: CommandEnvelope): RuntimeDispatchReceipt {
-    const policy = evaluatePolicies(this.#state.snapshot, rawEnvelope, this.#policies);
-    if (!policy.ok) {
-      const result: Extract<KernelStateResult, { readonly ok: false }> = {
-        ok: false,
-        state: this.#state,
-        error: policy.error,
-      };
-      return { status: "rejected", commandId: rawEnvelope.id, result };
-    }
+    if (this.#structuralFailure !== undefined) return this.#structuralFrozenReceipt(rawEnvelope);
+    try {
+      const policy = evaluatePolicies(this.#state.snapshot, rawEnvelope, this.#policies);
+      if (!policy.ok) {
+        const result: Extract<KernelStateResult, { readonly ok: false }> = {
+          ok: false,
+          state: this.#state,
+          error: policy.error,
+        };
+        return { status: "rejected", commandId: rawEnvelope.id, result };
+      }
 
-    const envelope: CommandEnvelope = { ...rawEnvelope, command: policy.command };
-    const result = dispatchKernelState(this.#state, envelope);
-    if (!result.ok) {
-      return { status: "rejected", commandId: envelope.id, result };
-    }
+      const envelope: CommandEnvelope = { ...rawEnvelope, command: policy.command };
+      const result = dispatchKernelState(this.#state, envelope);
+      if (!result.ok) {
+        if (result.error.code === "INVARIANT_VIOLATION") {
+          return this.#freezeStructuralMutation(envelope, {
+            kind: "invariant-rejection",
+          });
+        }
+        return { status: "rejected", commandId: envelope.id, result };
+      }
 
-    this.#state = result.state;
-    this.#transactions.push(result.transaction);
-    if (this.#transactions.length > this.#transactionLimit) {
-      this.#transactions.splice(0, this.#transactions.length - this.#transactionLimit);
-    }
+      this.#state = result.state;
+      this.#transactions.push(result.transaction);
+      if (this.#transactions.length > this.#transactionLimit) {
+        this.#transactions.splice(0, this.#transactions.length - this.#transactionLimit);
+      }
 
-    this.#notifySubscribers(result.transaction);
-    return { status: "committed", commandId: envelope.id, result };
+      this.#notifySubscribers(result.transaction);
+      return { status: "committed", commandId: envelope.id, result };
+    } catch (cause) {
+      return this.#freezeStructuralMutation(rawEnvelope, {
+        kind: "internal-exception",
+        cause,
+      });
+    }
+  }
+
+  #freezeStructuralMutation(
+    envelope: CommandEnvelope,
+    defect: StructuralDefect,
+  ): Extract<RuntimeDispatchReceipt, { readonly status: "rejected" }> {
+    if (this.#structuralFailure === undefined) {
+      const snapshot = this.#state.snapshot;
+      const reproduction: RuntimeStructuralReproduction = Object.freeze({
+        schemaVersion: 1,
+        detectedAtRevision: snapshot.revision.toString(),
+        defectKind: defect.kind,
+        commandType: safeCommandType(envelope.command),
+        commandOrigin: envelope.origin,
+        causeName:
+          defect.kind === "invariant-rejection"
+            ? "InvariantViolation"
+            : safeCauseName(defect.cause),
+        workspaceCounts: Object.freeze({
+          panels: snapshot.panels.ids.length,
+          groups: snapshot.groups.ids.length,
+          nodes: snapshot.nodes.ids.length,
+          surfaces: snapshot.surfaces.ids.length,
+          recoverableClosedPanels: snapshot.recoverableClosedPanels.length,
+        }),
+        recentTransactions: Object.freeze(
+          this.#transactions
+            .slice(-this.#structuralReproductionTransactionLimit)
+            .map(redactedTransactionSummary),
+        ),
+      });
+      this.#structuralFailure = Object.freeze({
+        code: "STRUCTURAL_MUTATION_FROZEN",
+        revision: snapshot.revision,
+        reproduction,
+      });
+      this.#queue.length = 0;
+      try {
+        this.#onStructuralFailure?.(this.#structuralFailure);
+      } catch {
+        // Failure reporting is observational and cannot weaken fail-closed state.
+      }
+    }
+    return this.#structuralFrozenReceipt(envelope);
+  }
+
+  #structuralFrozenReceipt(
+    envelope: CommandEnvelope,
+  ): Extract<RuntimeDispatchReceipt, { readonly status: "rejected" }> {
+    const result: Extract<KernelStateResult, { readonly ok: false }> = {
+      ok: false,
+      state: this.#state,
+      error: this.#structuralFrozenError(envelope),
+    };
+    return {
+      status: "rejected",
+      commandId: envelope.id,
+      result,
+      runtimeCode: "STRUCTURAL_MUTATION_FROZEN",
+    };
+  }
+
+  #structuralFrozenError(envelope: CommandEnvelope) {
+    return {
+      code: "INVARIANT_VIOLATION" as const,
+      message: "Structural mutation is frozen at the last valid workspace revision.",
+      remediation: Object.freeze([
+        "Export the redacted structural reproduction",
+        "Restore or recreate the runtime from a known-valid snapshot",
+      ]),
+      commandId: envelope.id,
+      revision: this.#state.snapshot.revision,
+      details: { runtimeCode: "STRUCTURAL_MUTATION_FROZEN" },
+    };
   }
 
   #enqueue(envelope: CommandEnvelope): RuntimeDispatchReceipt {
@@ -479,6 +645,45 @@ class WorkspaceRuntimeImpl implements WorkspaceRuntime {
 function summarizeSubscriberCause(cause: unknown): Readonly<{ name: string }> {
   return Object.freeze({
     name: cause instanceof Error && cause.name.length > 0 ? cause.name : "UnknownSubscriberError",
+  });
+}
+
+function safeCommandType(command: WorkspaceCommand): WorkspaceCommandType | "unknown" {
+  try {
+    const type = (command as { readonly type?: unknown }).type;
+    return isWorkspaceCommandType(type) ? type : "unknown";
+  } catch {
+    return "unknown";
+  }
+}
+
+function safeCauseName(cause: unknown): string {
+  try {
+    if (!(cause instanceof Error)) return "UnknownStructuralError";
+    const knownNames = new Set([
+      "AggregateError",
+      "DataCloneError",
+      "Error",
+      "EvalError",
+      "RangeError",
+      "ReferenceError",
+      "SyntaxError",
+      "TypeError",
+      "URIError",
+    ]);
+    return knownNames.has(cause.name) ? cause.name : "StructuralError";
+  } catch {
+    return "UnknownStructuralError";
+  }
+}
+
+function redactedTransactionSummary(transaction: CommittedTransaction): RedactedTransactionSummary {
+  return Object.freeze({
+    origin: transaction.origin,
+    commandType: transaction.command.type,
+    previousRevision: transaction.previousRevision.toString(),
+    revision: transaction.revision.toString(),
+    patchKinds: Object.freeze([...new Set(transaction.patches.map((patch) => patch.kind))].sort()),
   });
 }
 

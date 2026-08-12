@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { afterEach, describe, expect, it } from "vitest";
 import { act, cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
@@ -14,6 +14,7 @@ import {
 import {
   WorkspaceRuntimeProvider,
   WorkspaceSurface,
+  type WorkspaceMessageCatalog,
   type WorkspaceCommandAdapter,
   type WorkspaceCommandOrigin,
   type WorkspacePanelRegistry,
@@ -111,7 +112,76 @@ const panels: WorkspacePanelRegistry = {
   },
 };
 
+const INDONESIAN_MESSAGES: WorkspaceMessageCatalog = {
+  workspaceLabel: () => "Ruang kerja",
+  panelGroupFallback: () => "Grup panel",
+  groupFallback: () => "grup",
+  panelFallback: () => "panel",
+  panelRenderFailed: ({ title }) => `${title} gagal ditampilkan`,
+  panelRenderRecovery: () => "Ruang kerja tetap aman. Coba lagi atau tutup panel ini.",
+  retry: () => "Coba lagi",
+  resizedWorkspacePanes: () => "Mengubah ukuran panel ruang kerja",
+  selectedPanel: ({ title }) => `Memilih ${title}`,
+  activatedPanel: ({ title }) => `Mengaktifkan ${title}`,
+  closedPanel: ({ title }) => `Menutup ${title}`,
+  movedPanel: ({ title }) => `Memindahkan ${title}`,
+  movedPanelTo: ({ title, group }) => `Memindahkan ${title} ke ${group}`,
+  floatedPanel: ({ title }) => `Melayangkan ${title}`,
+  floatPanel: ({ title }) => `Layangkan ${title}`,
+  moveCancelled: () => "Pemindahan dibatalkan",
+  workspaceRegions: () => "Wilayah ruang kerja",
+  currentWorkspaceRegion: () => "Wilayah ruang kerja saat ini",
+  regionOption: ({ label, panelCount }) => `${label} · ${String(panelCount)} panel`,
+  resizeAdjacentPanes: () => "Ubah ukuran panel bersebelahan",
+  primaryPanePercent: ({ percent }) => `Panel utama ${String(percent)} persen`,
+  closePanel: ({ title }) => `Tutup ${title}`,
+  actionsForPanel: ({ title }) => `Tindakan untuk ${title}`,
+  panelActions: ({ title }) => `Tindakan ${title}`,
+  chooseDestination: () => "Pilih tujuan…",
+  moveToGroup: ({ group }) => `Pindahkan ke ${group}`,
+  movePanelDialog: ({ title }) => `Pindahkan ${title}`,
+  noAvailableGroup: () => "Tidak ada grup tersedia",
+  moveInstructions: () => "Gunakan tombol panah, Enter untuk memindahkan, atau Escape untuk batal.",
+  missingRenderer: ({ type }) =>
+    `Perender ${type} tidak tersedia. Deskriptor dan posisi panel tetap dapat dipulihkan.`,
+  noWorkspaceLayout: () => "Belum ada tata letak ruang kerja",
+  emptyWorkspaceInstructions: () => "Buka panel atau pulihkan preset untuk memulai.",
+  commandQueued: ({ label }) => `${label} masuk antrean`,
+  commandRejected: ({ label, reason }) =>
+    reason === undefined ? `${label} ditolak` : `${label} ditolak: ${reason}`,
+  resizeDidNotCommit: ({ status }) => `Perubahan ukuran tidak tersimpan (${status}).`,
+};
+
 describe("WorkspaceSurface", () => {
+  it("replaces labels, interpolations, and outcome announcements with a typed catalog", async () => {
+    const user = userEvent.setup();
+    const runtime = new FixtureRuntime(initialProjection, "close");
+    const announcements: string[] = [];
+    render(
+      <WorkspaceRuntimeProvider runtime={runtime}>
+        <div style={{ width: 1000, height: 700 }}>
+          <WorkspaceSurface
+            projector={(snapshot: FixtureSnapshot) => snapshot.projection}
+            commands={commands}
+            panels={panels}
+            layoutBounds={{ inlineStart: 0, blockStart: 0, inlineSize: 1000, blockSize: 700 }}
+            messageCatalog={INDONESIAN_MESSAGES}
+            onAnnouncement={(message) => announcements.push(message)}
+          />
+        </div>
+      </WorkspaceRuntimeProvider>,
+    );
+
+    expect(screen.getByLabelText("Ruang kerja")).toBeTruthy();
+    expect(screen.getByRole("separator", { name: "Ubah ukuran panel bersebelahan" })).toBeTruthy();
+    expect(screen.getByRole("button", { name: "Tindakan untuk Alpha" })).toBeTruthy();
+
+    await user.click(screen.getByRole("tab", { name: "Beta" }));
+    expect(announcements.at(-1)).toBe("Memilih Beta");
+    await user.click(screen.getByRole("button", { name: "Tutup Beta" }));
+    expect(announcements.at(-1)).toBe("Menutup Beta ditolak: Denied by fixture policy");
+  });
+
   it("projects accessible tabs, tabpanels, and keyboard tab behavior", async () => {
     const runtime = new FixtureRuntime(initialProjection);
     renderWorkspace(runtime);
@@ -375,6 +445,81 @@ describe("WorkspaceSurface", () => {
         system.container.querySelector(".pf-workspace")?.getAttribute("data-effective-motion"),
       ).toBe("reduced");
     });
+    Object.defineProperty(window, "matchMedia", {
+      configurable: true,
+      value: originalMatchMedia,
+    });
+  });
+
+  it("projects one selectable region on a compact coarse-pointer surface without mutating topology", async () => {
+    const user = userEvent.setup();
+    const originalMatchMedia = window.matchMedia;
+    Object.defineProperty(window, "matchMedia", {
+      configurable: true,
+      value: (query: string) => ({
+        matches: query === "(pointer: coarse)",
+        media: query,
+        onchange: null,
+        addEventListener: () => undefined,
+        removeEventListener: () => undefined,
+        addListener: () => undefined,
+        removeListener: () => undefined,
+        dispatchEvent: () => true,
+      }),
+    });
+    const runtime = new FixtureRuntime(initialProjection);
+    function CompactFixture() {
+      const [groupId, setGroupId] = useState("left");
+      return (
+        <WorkspaceRuntimeProvider runtime={runtime}>
+          <div style={{ width: 390, height: 700 }}>
+            <WorkspaceSurface
+              projector={(snapshot: FixtureSnapshot) => snapshot.projection}
+              commands={commands}
+              panels={panels}
+              layoutBounds={{ inlineStart: 0, blockStart: 0, inlineSize: 390, blockSize: 700 }}
+              workspaceLabel="Compact fixture workspace"
+              responsive="auto"
+              compactGroupId={groupId}
+              onCompactGroupChange={setGroupId}
+            />
+          </div>
+        </WorkspaceRuntimeProvider>
+      );
+    }
+    render(<CompactFixture />);
+
+    const workspace = screen.getByLabelText("Compact fixture workspace");
+    await waitFor(() => {
+      expect(workspace.dataset.responsiveProjection).toBe("single-region");
+    });
+    expect(
+      (
+        screen.getByRole("combobox", {
+          name: "Current workspace region",
+        }) as HTMLSelectElement
+      ).value,
+    ).toBe("left");
+    expect(screen.getByRole("tab", { name: "Alpha" })).toBeTruthy();
+    expect(screen.queryByRole("tab", { name: "Gamma" })).toBeNull();
+    const canonicalRoot = runtime.getSnapshot().projection.rootNodeId;
+
+    await user.selectOptions(
+      screen.getByRole("combobox", { name: "Current workspace region" }),
+      "right",
+    );
+    await waitFor(() => {
+      expect(screen.getByRole("tab", { name: "Gamma" })).toBeTruthy();
+    });
+    expect(runtime.getSnapshot().projection.rootNodeId).toBe(canonicalRoot);
+    expect(runtime.transactions).toHaveLength(0);
+    expect(
+      (
+        screen.getByRole("combobox", {
+          name: "Current workspace region",
+        }) as HTMLSelectElement
+      ).value,
+    ).toBe("right");
     Object.defineProperty(window, "matchMedia", {
       configurable: true,
       value: originalMatchMedia,

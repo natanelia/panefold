@@ -17,13 +17,17 @@ conformance, product certification, npm publication, or unrestricted browser-win
 ## What works today
 
 - Immutable schema-v2 workspace snapshots with normalized panels, groups, layout nodes, surfaces,
-  activation, focus memory, recoverable closes, and bounded remote receipts.
+  activation, focus memory, recoverable closes, bounded remote receipts, and typed versioned panel
+  parameter/checkpoint registries with recoverable missing-provider placeholders.
 - A zero-runtime-dependency model and pure reference kernel with all 36 semantic commands,
   canonicalization, invariants, typed rejection, patches, transaction receipts, batching, and
   bounded workspace undo/redo.
 - An experimental optimized projection with derived indexes, bounded history, patch replay,
-  seeded differential smoke runs, and a reproducible lookup microbenchmark. It is not yet an
-  independently reducing optimized kernel.
+  a chunkable all-command differential campaign, and a reproducible lookup microbenchmark. A
+  separate correctness-first reducer makes semantic decisions without calling the reference
+  reducer and is compared as a complete-result oracle. It rebuilds Map/entity state per command,
+  so it is not presented as the retained optimized production kernel; recorded runs also remain
+  below the stable ten-million threshold.
 - A logical-axis n-ary geometry solver with panel constraints, collapse state, exact integer
   conservation, overflow diagnostics, splitters, hit tests, and drop targets.
 - A React projection that uses the geometry allocator, driver-isolated resize protocols,
@@ -32,15 +36,20 @@ conformance, product certification, npm publication, or unrestricted browser-win
 - A bounded synchronous runtime plus versioned persistence codecs, atomic snapshot/journal
   contracts, deterministic schema migration, last-known-good recovery, and an IndexedDB/Effect
   adapter tested with injected storage. Real browser crash and quota certification is still absent.
-- Driver-neutral protocol contracts, XState machines for drag, resize, persistence, transfer, and
-  coordinator election, plus a prepared external-surface ownership coordinator. These are protocol
-  primitives, not a browser popout or Picture-in-Picture product profile.
+- Driver-neutral protocol contracts and a public twelve-actor XState catalog with scoped disposal,
+  deterministic traces, revision-conflict handling, and prepared external-surface ownership. The
+  injected same-origin browser adapter opens, bootstraps, observes, recovers, and closes a real
+  Chromium popup fixture; Picture-in-Picture and unrestricted popouts are still not a certified
+  product profile.
 - Native experimental Vue, Svelte, Angular, and Web Components bindings over a shared immutable
   adapter contract. Current cross-framework evidence is a JSDOM contract harness, not real-browser
   framework certification.
-- Experimental trusted-plugin, bounded devtools, remote-command-intake, and mobile-projection
-  primitives. They are not untrusted-plugin isolation, durable collaboration, or a certified mobile
-  experience.
+- Experimental trusted plugins with scoped cleanup, a sandboxed-iframe isolation host, bounded
+  devtools/reproductions, HMAC-authenticated single-writer remote coordination, and a reversible
+  React single-region touch projection. These are deployable primitives, not a durable
+  collaboration service, arbitrary-code security certification, or physical mobile certification.
+- A public testkit with the eight normative workload manifests, all 17 representative panel
+  fixtures, structural input-parity data, ownership exploration, lifecycle torture, and statistics.
 - A machine-checkable 190-requirement register, 36-command parity check, capability/evidence
   inventories, trace matrix, and explicit accounting for all ten hard release gates.
 
@@ -73,7 +82,7 @@ fallible work through explicit contracts. See [Architecture](docs/ARCHITECTURE.m
 
 ## Workspace packages
 
-The workspace contains the private root project, the demo application, and the following 18 library
+The workspace contains the private root project, the demo application, and the following 19 library
 packages. Every library below is version `0.1.0`, experimental, workspace-local, and unpublished to
 npm.
 
@@ -81,22 +90,23 @@ npm.
 | ---------------------------- | ------------------------------------------------------------------------------------- |
 | `@panefold/model`            | Schema-v2 records, branded IDs, 36-command inventory, results, factories, JSON guards |
 | `@panefold/kernel`           | Reference reduction, canonicalization, invariants, patches, hashes, history dispatch  |
-| `@panefold/kernel-optimized` | Experimental indexes, persistent buckets, patch projection, differential smoke tools  |
+| `@panefold/kernel-optimized` | Experimental indexes/projection, independent semantic oracle, differential campaigns  |
 | `@panefold/geometry`         | Constraint aggregation, n-ary allocation, resolved rectangles, hit/drop testing       |
 | `@panefold/runtime`          | Bounded dispatch, policies, selectors, persistence codecs, journals, durable runtime  |
 | `@panefold/runtime-effect`   | Optional Effect wrappers and injected IndexedDB journal adapter                       |
 | `@panefold/protocol`         | Driver-neutral protocol identities, scopes, clocks, and bounded traces                |
-| `@panefold/protocol-xstate`  | XState drivers for drag, resize, persistence, transfer, and election                  |
-| `@panefold/surfaces`         | Capability intersection, geometry clamping, prepared transfer, ownership, recovery    |
-| `@panefold/motion`           | Motion plans, channels, frame scheduling, FLIP, coordinator, Motion DOM driver        |
+| `@panefold/protocol-xstate`  | Twelve bounded XState protocol actors with scoped identity and deterministic traces   |
+| `@panefold/surfaces`         | Prepared ownership plus injected popup/PiP adapters, bootstrap, loss recovery         |
+| `@panefold/motion`           | Scoped motion leases, channels, FLIP/View Transition fallback, load-aware planning    |
 | `@panefold/adapter-contract` | Shared immutable source, selection, subscription, dispatch, and disposal contract     |
 | `@panefold/react`            | React external-store binding, accessible renderer, stable hosts, geometry bridge      |
 | `@panefold/vue`              | Vue shallow-ref binding and effect-scope disposal                                     |
 | `@panefold/svelte`           | Svelte readable store and component lifecycle helper                                  |
 | `@panefold/angular`          | Angular signal binding, provider, injection, and `DestroyRef` disposal                |
 | `@panefold/web-components`   | SSR-safe custom-element factory and source/dispatch bridge                            |
-| `@panefold/ecosystem`        | Trusted plugin registry, devtools, remote intake, and mobile data projection          |
-| `@panefold/conformance`      | Manifest, command, capability, evidence, requirement, gate, and report validation     |
+| `@panefold/ecosystem`        | Plugin isolation, authenticated coordination, devtools, reproduction, mobile data     |
+| `@panefold/testkit`          | Workload manifests, 17 panel fixtures, parity, ownership, lifecycle, and statistics   |
+| `@panefold/conformance`      | Claims, proof classes, gates, reports, and third-party certification validation       |
 
 `@panefold/demo` is the workspace application used for the Atlas reference fixture; it is not a
 published package or a support certification.
@@ -112,9 +122,10 @@ pnpm dev
 ```
 
 Open the URL printed by Vite. Atlas exercises a compact map-operations workspace with tabs,
-keyboard commands, splitters, stable content hosts, close/reopen, structural movement, and
-undo/redo. It is a demonstration and automated reference fixture, not evidence for every browser,
-input, framework, or workload.
+keyboard commands, splitters, stable content hosts, close/reopen, structural movement, undo/redo,
+a mobile single-region projection, an optional 17-kind lifecycle lab, and a same-origin popup
+fixture. It is an automated reference fixture, not evidence for every browser, input, framework,
+workload, or deployment.
 
 ## Verify the repository
 
@@ -163,13 +174,14 @@ partial snapshot.
 ## Project status
 
 All current packages and profiles are experimental. The repository does not claim stable WCAG 2.2
-AA conformance, performance certification, heavy-content certification, browser popout/Picture-in-
-Picture support, multi-screen support, durable distributed collaboration, dynamic untrusted-plugin
-isolation, mobile certification, or a completed security review. Those boundaries are intentional
-and machine-readable in `conformance/`.
+AA conformance, physical performance or heavy-content certification, unrestricted browser
+popout/Picture-in-Picture or multi-screen support, a hosted durable collaboration product,
+arbitrary-code isolation certification, physical mobile certification, or a completed independent
+security review. Those boundaries are intentional and machine-readable in `conformance/`.
 
 Engineering progress and missing exit evidence are separated in the [Roadmap](docs/ROADMAP.md).
-Architectural changes require an ADR.
+The public site and launch contract lives in [Marketing and launch](docs/MARKETING.md). Architectural
+changes require an ADR.
 
 ## Contributing
 

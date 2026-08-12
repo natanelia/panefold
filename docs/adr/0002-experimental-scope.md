@@ -20,3 +20,12 @@ capabilities are labeled unsupported rather than approximated through unsafe sho
 - Public types may evolve before 1.0.
 - Browser popouts, collaboration, dynamic plugins, other frameworks, and certification are deferred.
 - Any future stable release must supply the complete evidence bundle for its published profile.
+
+## Current implementation note
+
+The original vertical slice has since gained native framework bindings, versioned panel/plugin
+boundaries, authenticated single-writer coordination primitives, and a controlled same-origin
+popup fixture. Those additions do not revise this decision: they remain experimental and are
+classified narrowly in the support/conformance manifests. Unrestricted popout/PiP, durable
+collaboration, arbitrary hostile-plugin certification, third-party framework certification, and a
+stable release are still outside the published profile.

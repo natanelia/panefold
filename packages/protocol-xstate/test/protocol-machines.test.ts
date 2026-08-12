@@ -25,7 +25,9 @@ describe("resize protocol", () => {
 
     actor.send({ type: "POINTER_MOVE", pointerId: 4, position: { inline: 120, block: 0 } });
     actor.send({ type: "CONSTRAINT_RESULT", position: { inline: 116, block: 0 } });
+    actor.send({ type: "DELIVERY_POLICY_CHANGED", policy: "adaptive" });
     expect(actor.getSnapshot().value).toBe("resizing");
+    expect(actor.getSnapshot().context.deliveryPolicy).toBe("adaptive");
     actor.send({ type: "CAPTURE_LOST", pointerId: 4 });
     expect(actor.getSnapshot().value).toBe("cancelling");
     actor.send({ type: "RETURNED" });
@@ -46,6 +48,25 @@ describe("resize protocol", () => {
     actor.send({ type: "COMMIT" });
     actor.send({ type: "COMMIT_OK" });
     actor.send({ type: "SETTLED" });
+    expect(actor.getSnapshot().value).toBe("idle");
+    actor.stop();
+  });
+
+  it("fails safely when the base revision conflicts during commit", () => {
+    const actor = createResizeActor();
+    actor.start();
+    actor.send({
+      type: "KEYBOARD_START",
+      position: { inline: 50, block: 0 },
+      baseRevision: revision(0),
+    });
+    actor.send({ type: "COMMIT" });
+    actor.send({ type: "REVISION_CONFLICT" });
+    expect(actor.getSnapshot()).toMatchObject({
+      value: "cancelling",
+      context: { failure: "revision-conflict" },
+    });
+    actor.send({ type: "RETURNED" });
     expect(actor.getSnapshot().value).toBe("idle");
     actor.stop();
   });

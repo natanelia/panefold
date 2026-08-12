@@ -38,6 +38,8 @@ export function createMotionDomDriver(): MotionDriver {
           finished: Promise.resolve(),
           cancel() {},
           finish() {},
+          skip() {},
+          dispose() {},
         };
       }
 
@@ -50,6 +52,8 @@ export function createMotionDomDriver(): MotionDriver {
         finished: controls.finished.then(() => undefined),
         cancel: () => controls.cancel(),
         finish: () => controls.complete(),
+        skip: () => controls.complete(),
+        dispose: () => controls.cancel(),
       };
     },
   };

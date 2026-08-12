@@ -44,6 +44,7 @@ export type DragEvent =
   | { readonly type: "CAPTURE_LOST"; readonly pointerId: number }
   | { readonly type: "COMMIT_OK" }
   | { readonly type: "COMMIT_ERROR"; readonly message: string }
+  | { readonly type: "REVISION_CONFLICT" }
   | { readonly type: "SETTLED" }
   | {
       readonly type: "REGRAB";
@@ -106,9 +107,11 @@ export const dragMachine = setup({
     setCandidate: assign(({ event }) =>
       event.type === "SET_CANDIDATE" ? { candidate: event.candidate } : {},
     ),
-    rememberFailure: assign(({ event }) =>
-      event.type === "COMMIT_ERROR" ? { failure: event.message } : {},
-    ),
+    rememberFailure: assign(({ event }) => {
+      if (event.type === "COMMIT_ERROR") return { failure: event.message };
+      if (event.type === "REVISION_CONFLICT") return { failure: "revision-conflict" };
+      return {};
+    }),
     reset: assign({
       pointerId: undefined,
       baseRevision: undefined,
@@ -173,6 +176,7 @@ export const dragMachine = setup({
       on: {
         COMMIT_OK: { target: "settling" },
         COMMIT_ERROR: { target: "recovering", actions: "rememberFailure" },
+        REVISION_CONFLICT: { target: "recovering", actions: "rememberFailure" },
         CANCEL: { target: "recovering" },
       },
     },

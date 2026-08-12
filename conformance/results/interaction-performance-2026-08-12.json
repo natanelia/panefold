@@ -1,0 +1,57 @@
+{
+  "schemaVersion": 1,
+  "profile": "compact-react-chromium-desktop",
+  "producedAt": "2026-08-12T06:34:56.975Z",
+  "workload": "120-step primary splitter drag with 180 animation-frame samples",
+  "browser": "chromium",
+  "environment": {
+    "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.7922.34 Safari/537.36",
+    "hardwareConcurrency": 9,
+    "devicePixelRatio": 1,
+    "viewport": {
+      "width": 1280,
+      "height": 720
+    }
+  },
+  "sampleCount": 179,
+  "summary": {
+    "minimum": 16.6,
+    "maximum": 100,
+    "mean": 17.317,
+    "median": 16.7,
+    "p95": 16.71,
+    "p99": 33.322
+  },
+  "rawFrameDeltasMs": [
+    16.6, 16.7, 16.7, 16.7, 16.6, 16.7, 16.7, 16.6, 16.6, 16.7, 16.7, 16.6, 16.7, 16.7, 16.7, 16.7,
+    16.6, 16.7, 16.6, 16.7, 16.7, 16.6, 16.7, 16.7, 16.6, 16.6, 16.8, 16.6, 16.7, 16.6, 16.7, 16.7,
+    16.7, 16.6, 16.7, 16.6, 16.7, 16.7, 16.6, 16.7, 16.7, 16.7, 16.6, 16.7, 16.6, 16.7, 16.6, 16.7,
+    16.7, 16.7, 16.6, 16.7, 33.4, 16.6, 16.7, 16.6, 16.7, 16.7, 16.7, 16.6, 16.7, 16.6, 16.7, 16.7,
+    16.7, 16.6, 33.3, 100, 16.6, 16.8, 16.6, 16.7, 16.6, 16.7, 16.7, 16.6, 16.7, 16.7, 16.7, 16.6,
+    16.7, 16.6, 16.7, 16.6, 16.8, 16.6, 16.7, 16.7, 16.6, 16.7, 16.6, 16.7, 16.6, 16.8, 16.6, 16.7,
+    16.7, 16.6, 16.6, 16.7, 16.7, 16.7, 16.7, 16.6, 16.7, 16.7, 16.6, 16.7, 16.7, 16.6, 16.6, 16.8,
+    16.6, 16.7, 16.6, 16.7, 16.7, 16.6, 16.7, 16.7, 16.6, 16.7, 16.7, 16.7, 16.6, 16.6, 16.7, 16.6,
+    16.8, 16.7, 16.6, 16.6, 16.7, 16.7, 16.6, 16.7, 16.7, 16.6, 16.7, 16.7, 16.7, 16.6, 16.7, 16.7,
+    16.6, 16.6, 16.7, 16.7, 16.7, 16.6, 16.7, 16.6, 16.7, 16.7, 16.7, 16.6, 16.7, 16.7, 16.6, 16.7,
+    16.7, 16.6, 16.7, 16.6, 16.7, 16.7, 16.7, 16.6, 16.7, 16.7, 16.6, 16.7, 16.7, 16.6, 16.7, 16.6,
+    16.7, 16.7, 16.6
+  ],
+  "longTasks": [
+    {
+      "startTime": 1369.7000000029802,
+      "duration": 90
+    }
+  ],
+  "guardrail": {
+    "frameP95MaximumMs": 50,
+    "frameP99MaximumMs": 100,
+    "longTaskMaximumCount": 12,
+    "minimumSamples": 120,
+    "status": "passed"
+  },
+  "limitations": [
+    "This container result is an automated regression guard, not a physical 60 Hz or 120 Hz certification.",
+    "One run is not a statistically separated baseline history.",
+    "The captured long task remains visible rather than being discarded."
+  ]
+}

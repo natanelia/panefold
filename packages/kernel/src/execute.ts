@@ -12,6 +12,7 @@ import {
 import { canonicalizeWorkspace } from "./canonicalize";
 import { diffSnapshots } from "./diff";
 import { validateWorkspace } from "./invariants";
+import { applyPatches } from "./patches";
 import { reduceWorkspace } from "./reducer";
 
 function rejection(
@@ -116,8 +117,12 @@ export function executeCommand(
     );
   }
 
-  const next = withRevision(canonical.snapshot, nextRevision(snapshot.revision));
-  const patches = diffSnapshots(snapshot, next);
+  const canonicalNext = withRevision(canonical.snapshot, nextRevision(snapshot.revision));
+  const patches = diffSnapshots(snapshot, canonicalNext);
+  // Publish through the replay path after the canonical candidate has passed
+  // every invariant. This preserves untouched tables, records, and top-level
+  // values by reference for fine-grained selectors.
+  const next = applyPatches(snapshot, patches, canonicalNext.revision);
   const inverse: WorkspaceCommand | undefined =
     envelope.command.type === "apply-remote-transaction"
       ? undefined

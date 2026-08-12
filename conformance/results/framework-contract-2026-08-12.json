@@ -1,0 +1,36 @@
+{
+  "schemaVersion": 1,
+  "kind": "framework-contract-result",
+  "profile": "framework-adapter-contract-jsdom",
+  "producedAt": "2026-08-12T06:49:12Z",
+  "status": "passed",
+  "runner": "Vitest 4.1.10 with JSDOM 30.0.1",
+  "summary": {
+    "testFiles": 7,
+    "tests": 20,
+    "passed": 20,
+    "failed": 0,
+    "durationMs": 969
+  },
+  "coverage": [
+    "shared immutable snapshot, subscription, selection, dispatch, observer isolation, and disposal tasks",
+    "Vue shallow-ref and effect-scope disposal",
+    "Svelte readable-store lifecycle",
+    "Angular signal, injection, and DestroyRef lifecycle",
+    "Web Component connect, disconnect, dispatch, and SSR-safe import"
+  ],
+  "sourceDigests": {
+    "packages/adapter-contract/test/native-adapters.test.ts": "52f513593cbdfbc472e9788fae3dce6928aca642ef156cc0e2018625b062d3b1",
+    "packages/adapter-contract/test/adapters.test.ts": "09f1c5217a544effcd3e5fdb465738eac2434d47278199969b33d0986ca36edc",
+    "packages/vue/test/vue.test.ts": "428e1594fa925fdc3b3e2bfc338b388a5f140988424b63412f6b5b41dedc3fa6",
+    "packages/svelte/test/svelte.test.ts": "cee1b4d337df797a51ebd138b126dfe9cf0a12bb635ea58bc62fb12ad524c236",
+    "packages/angular/test/angular.test.ts": "68f9aa78202d7fc8466e40f32b594de9db2ce78bae3accf335bed30dec02e0a9",
+    "packages/web-components/test/web-components.test.ts": "74643350a136e747d6ca6485506ecbf46882064af56f1595de894b7c27a1a288",
+    "packages/web-components/test/ssr-import.test.ts": "ca44a0b9c0c7d85431b596ee78191a387e4a8d4b576f6ee89c14d6236e38be29"
+  },
+  "limitations": [
+    "JSDOM does not establish browser rendering, hydration, focus, accessibility, or performance compatibility.",
+    "The result is maintained by the Panefold project, not a third-party certification.",
+    "No framework support range becomes stable from this result."
+  ]
+}

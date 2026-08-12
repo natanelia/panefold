@@ -4,110 +4,130 @@
     {
       "requirementId": "A11Y-001",
       "profileId": "compact-react-chromium-desktop",
-      "status": "not-applicable",
+      "status": "blocked",
+      "verificationClass": "manual-external",
       "evidenceIds": [
         "manual-accessibility-certification"
       ],
-      "rationale": "The published profile is explicitly experimental; this stable-release requirement is not claimed."
+      "rationale": "This requirement needs manual, physical-system, independent-review, adoption, usability, or signed-approval evidence that repository automation cannot manufacture."
     },
     {
       "requirementId": "A11Y-002",
       "profileId": "compact-react-chromium-desktop",
-      "status": "unresolved",
-      "evidenceIds": [],
-      "rationale": "The complete acceptance evidence described by the system design has not yet been produced for this profile."
+      "status": "verified",
+      "verificationClass": "code-verifiable",
+      "evidenceIds": [
+        "testkit-contract"
+      ],
+      "rationale": "Covered by repository-local automated evidence for this experimental profile."
     },
     {
       "requirementId": "A11Y-003",
       "profileId": "compact-react-chromium-desktop",
       "status": "verified",
+      "verificationClass": "environment-verifiable",
       "evidenceIds": [
-        "react-integration"
+        "chromium-reference-result"
       ],
       "rationale": "Covered by repository-local automated evidence for this experimental profile."
     },
     {
       "requirementId": "A11Y-004",
       "profileId": "compact-react-chromium-desktop",
-      "status": "unresolved",
+      "status": "blocked",
+      "verificationClass": "manual-external",
       "evidenceIds": [],
-      "rationale": "The complete acceptance evidence described by the system design has not yet been produced for this profile."
+      "rationale": "This requirement needs manual, physical-system, independent-review, adoption, usability, or signed-approval evidence that repository automation cannot manufacture."
     },
     {
       "requirementId": "A11Y-005",
       "profileId": "compact-react-chromium-desktop",
       "status": "unresolved",
+      "verificationClass": "environment-verifiable",
       "evidenceIds": [
         "manual-accessibility-certification"
       ],
-      "rationale": "The complete acceptance evidence described by the system design has not yet been produced for this profile."
+      "rationale": "A reproducible automated environment result with profile, workload, and execution metadata has not been recorded."
     },
     {
       "requirementId": "A11Y-006",
       "profileId": "compact-react-chromium-desktop",
       "status": "verified",
+      "verificationClass": "environment-verifiable",
       "evidenceIds": [
-        "motion-primitives"
+        "chromium-reference-result"
       ],
       "rationale": "Covered by repository-local automated evidence for this experimental profile."
     },
     {
       "requirementId": "A11Y-007",
       "profileId": "compact-react-chromium-desktop",
-      "status": "unresolved",
+      "status": "blocked",
+      "verificationClass": "manual-external",
       "evidenceIds": [],
-      "rationale": "The complete acceptance evidence described by the system design has not yet been produced for this profile."
+      "rationale": "This requirement needs manual, physical-system, independent-review, adoption, usability, or signed-approval evidence that repository automation cannot manufacture."
     },
     {
       "requirementId": "A11Y-008",
       "profileId": "compact-react-chromium-desktop",
-      "status": "unresolved",
+      "status": "blocked",
+      "verificationClass": "manual-external",
       "evidenceIds": [
         "manual-accessibility-certification"
       ],
-      "rationale": "The complete acceptance evidence described by the system design has not yet been produced for this profile."
+      "rationale": "This requirement needs manual, physical-system, independent-review, adoption, usability, or signed-approval evidence that repository automation cannot manufacture."
     },
     {
       "requirementId": "ACC-001",
       "profileId": "compact-react-chromium-desktop",
-      "status": "not-applicable",
+      "status": "blocked",
+      "verificationClass": "manual-external",
       "evidenceIds": [
         "conformance-harness"
       ],
-      "rationale": "The published profile is explicitly experimental; this stable-release requirement is not claimed."
+      "rationale": "This requirement needs manual, physical-system, independent-review, adoption, usability, or signed-approval evidence that repository automation cannot manufacture."
     },
     {
       "requirementId": "ACC-002",
       "profileId": "compact-react-chromium-desktop",
-      "status": "unresolved",
+      "status": "blocked",
+      "verificationClass": "manual-external",
       "evidenceIds": [],
-      "rationale": "The complete acceptance evidence described by the system design has not yet been produced for this profile."
+      "rationale": "This requirement needs manual, physical-system, independent-review, adoption, usability, or signed-approval evidence that repository automation cannot manufacture."
     },
     {
       "requirementId": "ACC-003",
       "profileId": "compact-react-chromium-desktop",
-      "status": "unresolved",
+      "status": "blocked",
+      "verificationClass": "manual-external",
       "evidenceIds": [],
-      "rationale": "The complete acceptance evidence described by the system design has not yet been produced for this profile."
+      "rationale": "This requirement needs manual, physical-system, independent-review, adoption, usability, or signed-approval evidence that repository automation cannot manufacture."
     },
     {
       "requirementId": "API-001",
       "profileId": "compact-react-chromium-desktop",
-      "status": "unresolved",
-      "evidenceIds": [],
-      "rationale": "The complete acceptance evidence described by the system design has not yet been produced for this profile."
+      "status": "verified",
+      "verificationClass": "code-verifiable",
+      "evidenceIds": [
+        "panel-registry"
+      ],
+      "rationale": "Covered by repository-local automated evidence for this experimental profile."
     },
     {
       "requirementId": "API-002",
       "profileId": "compact-react-chromium-desktop",
-      "status": "unresolved",
-      "evidenceIds": [],
-      "rationale": "The complete acceptance evidence described by the system design has not yet been produced for this profile."
+      "status": "verified",
+      "verificationClass": "code-verifiable",
+      "evidenceIds": [
+        "architecture-contract"
+      ],
+      "rationale": "Covered by repository-local automated evidence for this experimental profile."
     },
     {
       "requirementId": "API-003",
       "profileId": "compact-react-chromium-desktop",
       "status": "verified",
+      "verificationClass": "code-verifiable",
       "evidenceIds": [
         "model-immutability"
       ],
@@ -116,44 +136,54 @@
     {
       "requirementId": "API-004",
       "profileId": "compact-react-chromium-desktop",
-      "status": "unresolved",
-      "evidenceIds": [],
-      "rationale": "The complete acceptance evidence described by the system design has not yet been produced for this profile."
-    },
-    {
-      "requirementId": "API-005",
-      "profileId": "compact-react-chromium-desktop",
       "status": "verified",
+      "verificationClass": "code-verifiable",
       "evidenceIds": [
-        "runtime-notification"
+        "runtime-policy-contract"
       ],
       "rationale": "Covered by repository-local automated evidence for this experimental profile."
     },
     {
-      "requirementId": "API-006",
+      "requirementId": "API-005",
       "profileId": "compact-react-chromium-desktop",
       "status": "unresolved",
+      "verificationClass": "environment-verifiable",
+      "evidenceIds": [
+        "runtime-notification"
+      ],
+      "rationale": "A reproducible automated environment result with profile, workload, and execution metadata has not been recorded."
+    },
+    {
+      "requirementId": "API-006",
+      "profileId": "compact-react-chromium-desktop",
+      "status": "blocked",
+      "verificationClass": "manual-external",
       "evidenceIds": [],
-      "rationale": "The complete acceptance evidence described by the system design has not yet been produced for this profile."
+      "rationale": "This requirement needs manual, physical-system, independent-review, adoption, usability, or signed-approval evidence that repository automation cannot manufacture."
     },
     {
       "requirementId": "API-007",
       "profileId": "compact-react-chromium-desktop",
-      "status": "unresolved",
+      "status": "blocked",
+      "verificationClass": "manual-external",
       "evidenceIds": [],
-      "rationale": "The complete acceptance evidence described by the system design has not yet been produced for this profile."
+      "rationale": "This requirement needs manual, physical-system, independent-review, adoption, usability, or signed-approval evidence that repository automation cannot manufacture."
     },
     {
       "requirementId": "API-008",
       "profileId": "compact-react-chromium-desktop",
-      "status": "unresolved",
-      "evidenceIds": [],
-      "rationale": "The complete acceptance evidence described by the system design has not yet been produced for this profile."
+      "status": "verified",
+      "verificationClass": "code-verifiable",
+      "evidenceIds": [
+        "architecture-contract"
+      ],
+      "rationale": "Covered by repository-local automated evidence for this experimental profile."
     },
     {
       "requirementId": "ARC-001",
       "profileId": "compact-react-chromium-desktop",
       "status": "verified",
+      "verificationClass": "code-verifiable",
       "evidenceIds": [
         "dependency-architecture"
       ],
@@ -163,8 +193,11 @@
       "requirementId": "ARC-002",
       "profileId": "compact-react-chromium-desktop",
       "status": "verified",
+      "verificationClass": "code-verifiable",
       "evidenceIds": [
-        "protocol-models"
+        "protocol-models",
+        "protocol-actor-catalog",
+        "protocol-motion-decision"
       ],
       "rationale": "Covered by repository-local automated evidence for this experimental profile."
     },
@@ -172,6 +205,7 @@
       "requirementId": "ARC-003",
       "profileId": "compact-react-chromium-desktop",
       "status": "verified",
+      "verificationClass": "code-verifiable",
       "evidenceIds": [
         "indexeddb-effect"
       ],
@@ -180,69 +214,88 @@
     {
       "requirementId": "ARC-004",
       "profileId": "compact-react-chromium-desktop",
-      "status": "unresolved",
+      "status": "verified",
+      "verificationClass": "code-verifiable",
       "evidenceIds": [
-        "motion-primitives"
+        "motion-primitives",
+        "architecture-contract",
+        "protocol-motion-decision"
       ],
-      "rationale": "The complete acceptance evidence described by the system design has not yet been produced for this profile."
+      "rationale": "Covered by repository-local automated evidence for this experimental profile."
     },
     {
       "requirementId": "ARC-005",
       "profileId": "compact-react-chromium-desktop",
-      "status": "unresolved",
+      "status": "verified",
+      "verificationClass": "code-verifiable",
       "evidenceIds": [
-        "dependency-architecture"
+        "dependency-architecture",
+        "package-boundaries"
       ],
-      "rationale": "The complete acceptance evidence described by the system design has not yet been produced for this profile."
+      "rationale": "Covered by repository-local automated evidence for this experimental profile."
     },
     {
       "requirementId": "COL-001",
       "profileId": "compact-react-chromium-desktop",
       "status": "unresolved",
+      "verificationClass": "code-verifiable",
       "evidenceIds": [],
-      "rationale": "The complete acceptance evidence described by the system design has not yet been produced for this profile."
+      "rationale": "The repository implementation or its requirement-specific static/model proof is incomplete for this profile."
     },
     {
       "requirementId": "COL-002",
       "profileId": "compact-react-chromium-desktop",
-      "status": "unresolved",
+      "status": "not-applicable",
+      "verificationClass": "future-scope",
       "evidenceIds": [],
-      "rationale": "The complete acceptance evidence described by the system design has not yet been produced for this profile."
+      "rationale": "The current profile does not publish the product capability governed by this requirement."
     },
     {
       "requirementId": "COL-003",
       "profileId": "compact-react-chromium-desktop",
-      "status": "unresolved",
-      "evidenceIds": [],
-      "rationale": "The complete acceptance evidence described by the system design has not yet been produced for this profile."
+      "status": "verified",
+      "verificationClass": "code-verifiable",
+      "evidenceIds": [
+        "authenticated-coordination"
+      ],
+      "rationale": "Covered by repository-local automated evidence for this experimental profile."
     },
     {
       "requirementId": "COL-004",
       "profileId": "compact-react-chromium-desktop",
-      "status": "unresolved",
+      "status": "verified",
+      "verificationClass": "code-verifiable",
       "evidenceIds": [
-        "surface-ownership"
+        "surface-ownership",
+        "testkit-contract"
       ],
-      "rationale": "The complete acceptance evidence described by the system design has not yet been produced for this profile."
+      "rationale": "Covered by repository-local automated evidence for this experimental profile."
     },
     {
       "requirementId": "COL-005",
       "profileId": "compact-react-chromium-desktop",
-      "status": "unresolved",
-      "evidenceIds": [],
-      "rationale": "The complete acceptance evidence described by the system design has not yet been produced for this profile."
+      "status": "verified",
+      "verificationClass": "code-verifiable",
+      "evidenceIds": [
+        "testkit-contract"
+      ],
+      "rationale": "Covered by repository-local automated evidence for this experimental profile."
     },
     {
       "requirementId": "COL-006",
       "profileId": "compact-react-chromium-desktop",
-      "status": "unresolved",
-      "evidenceIds": [],
-      "rationale": "The complete acceptance evidence described by the system design has not yet been produced for this profile."
+      "status": "verified",
+      "verificationClass": "code-verifiable",
+      "evidenceIds": [
+        "authenticated-coordination"
+      ],
+      "rationale": "Covered by repository-local automated evidence for this experimental profile."
     },
     {
       "requirementId": "DOM-001",
       "profileId": "compact-react-chromium-desktop",
       "status": "verified",
+      "verificationClass": "code-verifiable",
       "evidenceIds": [
         "model-immutability"
       ],
@@ -251,118 +304,153 @@
     {
       "requirementId": "DOM-002",
       "profileId": "compact-react-chromium-desktop",
-      "status": "unresolved",
-      "evidenceIds": [],
-      "rationale": "The complete acceptance evidence described by the system design has not yet been produced for this profile."
+      "status": "verified",
+      "verificationClass": "code-verifiable",
+      "evidenceIds": [
+        "architecture-contract"
+      ],
+      "rationale": "Covered by repository-local automated evidence for this experimental profile."
     },
     {
       "requirementId": "DOM-003",
       "profileId": "compact-react-chromium-desktop",
-      "status": "unresolved",
-      "evidenceIds": [],
-      "rationale": "The complete acceptance evidence described by the system design has not yet been produced for this profile."
+      "status": "verified",
+      "verificationClass": "code-verifiable",
+      "evidenceIds": [
+        "architecture-contract"
+      ],
+      "rationale": "Covered by repository-local automated evidence for this experimental profile."
     },
     {
       "requirementId": "DOM-004",
       "profileId": "compact-react-chromium-desktop",
-      "status": "unresolved",
-      "evidenceIds": [],
-      "rationale": "The complete acceptance evidence described by the system design has not yet been produced for this profile."
+      "status": "verified",
+      "verificationClass": "code-verifiable",
+      "evidenceIds": [
+        "panel-registry"
+      ],
+      "rationale": "Covered by repository-local automated evidence for this experimental profile."
     },
     {
       "requirementId": "DOM-005",
       "profileId": "compact-react-chromium-desktop",
       "status": "unresolved",
+      "verificationClass": "environment-verifiable",
       "evidenceIds": [],
-      "rationale": "The complete acceptance evidence described by the system design has not yet been produced for this profile."
+      "rationale": "A reproducible automated environment result with profile, workload, and execution metadata has not been recorded."
     },
     {
       "requirementId": "EXP-001",
       "profileId": "compact-react-chromium-desktop",
-      "status": "unresolved",
-      "evidenceIds": [],
-      "rationale": "The complete acceptance evidence described by the system design has not yet been produced for this profile."
+      "status": "blocked",
+      "verificationClass": "manual-external",
+      "evidenceIds": [
+        "testkit-contract"
+      ],
+      "rationale": "This requirement needs manual, physical-system, independent-review, adoption, usability, or signed-approval evidence that repository automation cannot manufacture."
     },
     {
       "requirementId": "EXP-002",
       "profileId": "compact-react-chromium-desktop",
       "status": "unresolved",
+      "verificationClass": "environment-verifiable",
       "evidenceIds": [],
-      "rationale": "The complete acceptance evidence described by the system design has not yet been produced for this profile."
+      "rationale": "A reproducible automated environment result with profile, workload, and execution metadata has not been recorded."
     },
     {
       "requirementId": "EXP-003",
       "profileId": "compact-react-chromium-desktop",
       "status": "unresolved",
+      "verificationClass": "environment-verifiable",
       "evidenceIds": [],
-      "rationale": "The complete acceptance evidence described by the system design has not yet been produced for this profile."
+      "rationale": "A reproducible automated environment result with profile, workload, and execution metadata has not been recorded."
     },
     {
       "requirementId": "EXP-004",
       "profileId": "compact-react-chromium-desktop",
       "status": "unresolved",
+      "verificationClass": "environment-verifiable",
       "evidenceIds": [],
-      "rationale": "The complete acceptance evidence described by the system design has not yet been produced for this profile."
+      "rationale": "A reproducible automated environment result with profile, workload, and execution metadata has not been recorded."
     },
     {
       "requirementId": "EXP-005",
       "profileId": "compact-react-chromium-desktop",
-      "status": "unresolved",
+      "status": "blocked",
+      "verificationClass": "manual-external",
       "evidenceIds": [],
-      "rationale": "The complete acceptance evidence described by the system design has not yet been produced for this profile."
+      "rationale": "This requirement needs manual, physical-system, independent-review, adoption, usability, or signed-approval evidence that repository automation cannot manufacture."
     },
     {
       "requirementId": "EXT-001",
       "profileId": "compact-react-chromium-desktop",
-      "status": "unresolved",
+      "status": "verified",
+      "verificationClass": "code-verifiable",
       "evidenceIds": [
-        "ecosystem-primitives"
+        "ecosystem-primitives",
+        "plugin-isolation",
+        "authenticated-coordination"
       ],
-      "rationale": "The complete acceptance evidence described by the system design has not yet been produced for this profile."
+      "rationale": "Covered by repository-local automated evidence for this experimental profile."
     },
     {
       "requirementId": "EXT-002",
       "profileId": "compact-react-chromium-desktop",
-      "status": "unresolved",
-      "evidenceIds": [],
-      "rationale": "The complete acceptance evidence described by the system design has not yet been produced for this profile."
+      "status": "verified",
+      "verificationClass": "code-verifiable",
+      "evidenceIds": [
+        "panel-registry",
+        "plugin-isolation",
+        "authenticated-coordination"
+      ],
+      "rationale": "Covered by repository-local automated evidence for this experimental profile."
     },
     {
       "requirementId": "EXT-003",
       "profileId": "compact-react-chromium-desktop",
-      "status": "unresolved",
+      "status": "verified",
+      "verificationClass": "code-verifiable",
       "evidenceIds": [
-        "ecosystem-primitives"
+        "ecosystem-primitives",
+        "authenticated-coordination"
       ],
-      "rationale": "The complete acceptance evidence described by the system design has not yet been produced for this profile."
+      "rationale": "Covered by repository-local automated evidence for this experimental profile."
     },
     {
       "requirementId": "EXT-004",
       "profileId": "compact-react-chromium-desktop",
-      "status": "unresolved",
+      "status": "verified",
+      "verificationClass": "code-verifiable",
       "evidenceIds": [
-        "ecosystem-primitives"
+        "ecosystem-primitives",
+        "plugin-isolation",
+        "authenticated-coordination"
       ],
-      "rationale": "The complete acceptance evidence described by the system design has not yet been produced for this profile."
+      "rationale": "Covered by repository-local automated evidence for this experimental profile."
     },
     {
       "requirementId": "EXT-005",
       "profileId": "compact-react-chromium-desktop",
-      "status": "unresolved",
-      "evidenceIds": [],
-      "rationale": "The complete acceptance evidence described by the system design has not yet been produced for this profile."
+      "status": "verified",
+      "verificationClass": "code-verifiable",
+      "evidenceIds": [
+        "panel-registry"
+      ],
+      "rationale": "Covered by repository-local automated evidence for this experimental profile."
     },
     {
       "requirementId": "EXT-006",
       "profileId": "compact-react-chromium-desktop",
-      "status": "unresolved",
+      "status": "blocked",
+      "verificationClass": "manual-external",
       "evidenceIds": [],
-      "rationale": "The complete acceptance evidence described by the system design has not yet been produced for this profile."
+      "rationale": "This requirement needs manual, physical-system, independent-review, adoption, usability, or signed-approval evidence that repository automation cannot manufacture."
     },
     {
       "requirementId": "FOC-001",
       "profileId": "compact-react-chromium-desktop",
       "status": "verified",
+      "verificationClass": "code-verifiable",
       "evidenceIds": [
         "react-integration"
       ],
@@ -371,204 +459,253 @@
     {
       "requirementId": "FOC-002",
       "profileId": "compact-react-chromium-desktop",
-      "status": "unresolved",
-      "evidenceIds": [],
-      "rationale": "The complete acceptance evidence described by the system design has not yet been produced for this profile."
+      "status": "verified",
+      "verificationClass": "environment-verifiable",
+      "evidenceIds": [
+        "chromium-reference-result"
+      ],
+      "rationale": "Covered by repository-local automated evidence for this experimental profile."
     },
     {
       "requirementId": "FOC-003",
       "profileId": "compact-react-chromium-desktop",
-      "status": "verified",
+      "status": "unresolved",
+      "verificationClass": "environment-verifiable",
       "evidenceIds": [
         "react-integration"
       ],
-      "rationale": "Covered by repository-local automated evidence for this experimental profile."
+      "rationale": "A reproducible automated environment result with profile, workload, and execution metadata has not been recorded."
     },
     {
       "requirementId": "FOC-004",
       "profileId": "compact-react-chromium-desktop",
-      "status": "verified",
+      "status": "unresolved",
+      "verificationClass": "environment-verifiable",
       "evidenceIds": [
         "react-integration"
       ],
-      "rationale": "Covered by repository-local automated evidence for this experimental profile."
+      "rationale": "A reproducible automated environment result with profile, workload, and execution metadata has not been recorded."
     },
     {
       "requirementId": "FOC-005",
       "profileId": "compact-react-chromium-desktop",
       "status": "unresolved",
+      "verificationClass": "environment-verifiable",
       "evidenceIds": [],
-      "rationale": "The complete acceptance evidence described by the system design has not yet been produced for this profile."
+      "rationale": "A reproducible automated environment result with profile, workload, and execution metadata has not been recorded."
     },
     {
       "requirementId": "FOC-006",
       "profileId": "compact-react-chromium-desktop",
       "status": "unresolved",
+      "verificationClass": "environment-verifiable",
       "evidenceIds": [],
-      "rationale": "The complete acceptance evidence described by the system design has not yet been produced for this profile."
+      "rationale": "A reproducible automated environment result with profile, workload, and execution metadata has not been recorded."
     },
     {
       "requirementId": "FWK-001",
       "profileId": "compact-react-chromium-desktop",
       "status": "unresolved",
+      "verificationClass": "environment-verifiable",
       "evidenceIds": [],
-      "rationale": "The complete acceptance evidence described by the system design has not yet been produced for this profile."
+      "rationale": "A reproducible automated environment result with profile, workload, and execution metadata has not been recorded."
     },
     {
       "requirementId": "FWK-002",
       "profileId": "compact-react-chromium-desktop",
       "status": "unresolved",
+      "verificationClass": "environment-verifiable",
       "evidenceIds": [],
-      "rationale": "The complete acceptance evidence described by the system design has not yet been produced for this profile."
+      "rationale": "A reproducible automated environment result with profile, workload, and execution metadata has not been recorded."
     },
     {
       "requirementId": "FWK-003",
       "profileId": "compact-react-chromium-desktop",
       "status": "unresolved",
+      "verificationClass": "environment-verifiable",
       "evidenceIds": [],
-      "rationale": "The complete acceptance evidence described by the system design has not yet been produced for this profile."
+      "rationale": "A reproducible automated environment result with profile, workload, and execution metadata has not been recorded."
     },
     {
       "requirementId": "FWK-004",
       "profileId": "compact-react-chromium-desktop",
       "status": "unresolved",
+      "verificationClass": "environment-verifiable",
       "evidenceIds": [],
-      "rationale": "The complete acceptance evidence described by the system design has not yet been produced for this profile."
+      "rationale": "A reproducible automated environment result with profile, workload, and execution metadata has not been recorded."
     },
     {
       "requirementId": "FWK-005",
       "profileId": "compact-react-chromium-desktop",
-      "status": "unresolved",
+      "status": "not-applicable",
+      "verificationClass": "future-scope",
       "evidenceIds": [],
-      "rationale": "The complete acceptance evidence described by the system design has not yet been produced for this profile."
+      "rationale": "The current profile does not publish the product capability governed by this requirement."
     },
     {
       "requirementId": "FWK-006",
       "profileId": "compact-react-chromium-desktop",
-      "status": "unresolved",
+      "status": "blocked",
+      "verificationClass": "manual-external",
       "evidenceIds": [],
-      "rationale": "The complete acceptance evidence described by the system design has not yet been produced for this profile."
+      "rationale": "This requirement needs manual, physical-system, independent-review, adoption, usability, or signed-approval evidence that repository automation cannot manufacture."
     },
     {
       "requirementId": "GOV-001",
       "profileId": "compact-react-chromium-desktop",
-      "status": "unresolved",
-      "evidenceIds": [],
-      "rationale": "The complete acceptance evidence described by the system design has not yet been produced for this profile."
+      "status": "verified",
+      "verificationClass": "code-verifiable",
+      "evidenceIds": [
+        "evidence-taxonomy"
+      ],
+      "rationale": "Covered by repository-local automated evidence for this experimental profile."
     },
     {
       "requirementId": "GOV-002",
       "profileId": "compact-react-chromium-desktop",
-      "status": "unresolved",
-      "evidenceIds": [],
-      "rationale": "The complete acceptance evidence described by the system design has not yet been produced for this profile."
+      "status": "verified",
+      "verificationClass": "code-verifiable",
+      "evidenceIds": [
+        "evidence-taxonomy"
+      ],
+      "rationale": "Covered by repository-local automated evidence for this experimental profile."
     },
     {
       "requirementId": "GOV-003",
       "profileId": "compact-react-chromium-desktop",
-      "status": "not-applicable",
+      "status": "blocked",
+      "verificationClass": "manual-external",
       "evidenceIds": [],
-      "rationale": "The published profile is explicitly experimental; this stable-release requirement is not claimed."
+      "rationale": "This requirement needs manual, physical-system, independent-review, adoption, usability, or signed-approval evidence that repository automation cannot manufacture."
     },
     {
       "requirementId": "GOV-004",
       "profileId": "compact-react-chromium-desktop",
-      "status": "unresolved",
-      "evidenceIds": [],
-      "rationale": "The complete acceptance evidence described by the system design has not yet been produced for this profile."
+      "status": "verified",
+      "verificationClass": "code-verifiable",
+      "evidenceIds": [
+        "evidence-taxonomy",
+        "architecture-contract",
+        "independent-oracle-decision",
+        "protocol-motion-decision"
+      ],
+      "rationale": "Covered by repository-local automated evidence for this experimental profile."
     },
     {
       "requirementId": "GOV-005",
       "profileId": "compact-react-chromium-desktop",
-      "status": "unresolved",
+      "status": "blocked",
+      "verificationClass": "manual-external",
       "evidenceIds": [],
-      "rationale": "The complete acceptance evidence described by the system design has not yet been produced for this profile."
+      "rationale": "This requirement needs manual, physical-system, independent-review, adoption, usability, or signed-approval evidence that repository automation cannot manufacture."
     },
     {
       "requirementId": "GOV-006",
       "profileId": "compact-react-chromium-desktop",
-      "status": "unresolved",
-      "evidenceIds": [],
-      "rationale": "The complete acceptance evidence described by the system design has not yet been produced for this profile."
+      "status": "verified",
+      "verificationClass": "code-verifiable",
+      "evidenceIds": [
+        "third-party-certification-contract"
+      ],
+      "rationale": "Covered by repository-local automated evidence for this experimental profile."
     },
     {
       "requirementId": "I18N-001",
       "profileId": "compact-react-chromium-desktop",
-      "status": "unresolved",
-      "evidenceIds": [],
-      "rationale": "The complete acceptance evidence described by the system design has not yet been produced for this profile."
+      "status": "verified",
+      "verificationClass": "code-verifiable",
+      "evidenceIds": [
+        "localized-react-contract"
+      ],
+      "rationale": "Covered by repository-local automated evidence for this experimental profile."
     },
     {
       "requirementId": "I18N-002",
       "profileId": "compact-react-chromium-desktop",
-      "status": "unresolved",
-      "evidenceIds": [],
-      "rationale": "The complete acceptance evidence described by the system design has not yet been produced for this profile."
+      "status": "verified",
+      "verificationClass": "environment-verifiable",
+      "evidenceIds": [
+        "chromium-reference-result"
+      ],
+      "rationale": "Covered by repository-local automated evidence for this experimental profile."
     },
     {
       "requirementId": "I18N-003",
       "profileId": "compact-react-chromium-desktop",
       "status": "unresolved",
+      "verificationClass": "code-verifiable",
       "evidenceIds": [],
-      "rationale": "The complete acceptance evidence described by the system design has not yet been produced for this profile."
+      "rationale": "The repository implementation or its requirement-specific static/model proof is incomplete for this profile."
     },
     {
       "requirementId": "INT-001",
       "profileId": "compact-react-chromium-desktop",
-      "status": "verified",
+      "status": "unresolved",
+      "verificationClass": "environment-verifiable",
       "evidenceIds": [
         "motion-primitives"
       ],
-      "rationale": "Covered by repository-local automated evidence for this experimental profile."
+      "rationale": "A reproducible automated environment result with profile, workload, and execution metadata has not been recorded."
     },
     {
       "requirementId": "INT-002",
       "profileId": "compact-react-chromium-desktop",
       "status": "unresolved",
+      "verificationClass": "code-verifiable",
       "evidenceIds": [],
-      "rationale": "The complete acceptance evidence described by the system design has not yet been produced for this profile."
+      "rationale": "The repository implementation or its requirement-specific static/model proof is incomplete for this profile."
     },
     {
       "requirementId": "INT-003",
       "profileId": "compact-react-chromium-desktop",
       "status": "verified",
+      "verificationClass": "environment-verifiable",
       "evidenceIds": [
-        "protocol-models"
+        "protocol-motion-result"
       ],
       "rationale": "Covered by repository-local automated evidence for this experimental profile."
     },
     {
       "requirementId": "INT-004",
       "profileId": "compact-react-chromium-desktop",
-      "status": "unresolved",
-      "evidenceIds": [],
-      "rationale": "The complete acceptance evidence described by the system design has not yet been produced for this profile."
+      "status": "verified",
+      "verificationClass": "code-verifiable",
+      "evidenceIds": [
+        "testkit-contract"
+      ],
+      "rationale": "Covered by repository-local automated evidence for this experimental profile."
     },
     {
       "requirementId": "INT-005",
       "profileId": "compact-react-chromium-desktop",
       "status": "unresolved",
+      "verificationClass": "environment-verifiable",
       "evidenceIds": [],
-      "rationale": "The complete acceptance evidence described by the system design has not yet been produced for this profile."
+      "rationale": "A reproducible automated environment result with profile, workload, and execution metadata has not been recorded."
     },
     {
       "requirementId": "INT-006",
       "profileId": "compact-react-chromium-desktop",
       "status": "unresolved",
-      "evidenceIds": [],
-      "rationale": "The complete acceptance evidence described by the system design has not yet been produced for this profile."
+      "verificationClass": "environment-verifiable",
+      "evidenceIds": [
+        "protocol-motion-result"
+      ],
+      "rationale": "A reproducible automated environment result with profile, workload, and execution metadata has not been recorded."
     },
     {
       "requirementId": "INT-007",
       "profileId": "compact-react-chromium-desktop",
       "status": "unresolved",
+      "verificationClass": "environment-verifiable",
       "evidenceIds": [],
-      "rationale": "The complete acceptance evidence described by the system design has not yet been produced for this profile."
+      "rationale": "A reproducible automated environment result with profile, workload, and execution metadata has not been recorded."
     },
     {
       "requirementId": "LAY-001",
       "profileId": "compact-react-chromium-desktop",
       "status": "verified",
+      "verificationClass": "code-verifiable",
       "evidenceIds": [
         "kernel-laws"
       ],
@@ -578,6 +715,7 @@
       "requirementId": "LAY-002",
       "profileId": "compact-react-chromium-desktop",
       "status": "verified",
+      "verificationClass": "code-verifiable",
       "evidenceIds": [
         "geometry-solver"
       ],
@@ -587,6 +725,7 @@
       "requirementId": "LAY-003",
       "profileId": "compact-react-chromium-desktop",
       "status": "verified",
+      "verificationClass": "code-verifiable",
       "evidenceIds": [
         "geometry-solver"
       ],
@@ -596,6 +735,7 @@
       "requirementId": "LAY-004",
       "profileId": "compact-react-chromium-desktop",
       "status": "verified",
+      "verificationClass": "code-verifiable",
       "evidenceIds": [
         "geometry-solver"
       ],
@@ -605,6 +745,7 @@
       "requirementId": "LAY-005",
       "profileId": "compact-react-chromium-desktop",
       "status": "verified",
+      "verificationClass": "code-verifiable",
       "evidenceIds": [
         "geometry-solver"
       ],
@@ -614,13 +755,17 @@
       "requirementId": "LAY-006",
       "profileId": "compact-react-chromium-desktop",
       "status": "unresolved",
-      "evidenceIds": [],
-      "rationale": "The complete acceptance evidence described by the system design has not yet been produced for this profile."
+      "verificationClass": "environment-verifiable",
+      "evidenceIds": [
+        "geometry-invalidation"
+      ],
+      "rationale": "A reproducible automated environment result with profile, workload, and execution metadata has not been recorded."
     },
     {
       "requirementId": "LAY-007",
       "profileId": "compact-react-chromium-desktop",
       "status": "verified",
+      "verificationClass": "code-verifiable",
       "evidenceIds": [
         "kernel-laws"
       ],
@@ -630,6 +775,7 @@
       "requirementId": "LIF-001",
       "profileId": "compact-react-chromium-desktop",
       "status": "verified",
+      "verificationClass": "code-verifiable",
       "evidenceIds": [
         "react-integration"
       ],
@@ -639,15 +785,19 @@
       "requirementId": "LIF-002",
       "profileId": "compact-react-chromium-desktop",
       "status": "unresolved",
-      "evidenceIds": [],
-      "rationale": "The complete acceptance evidence described by the system design has not yet been produced for this profile."
+      "verificationClass": "environment-verifiable",
+      "evidenceIds": [
+        "browser-surface-adapter"
+      ],
+      "rationale": "A reproducible automated environment result with profile, workload, and execution metadata has not been recorded."
     },
     {
       "requirementId": "LIF-003",
       "profileId": "compact-react-chromium-desktop",
       "status": "verified",
+      "verificationClass": "environment-verifiable",
       "evidenceIds": [
-        "react-integration"
+        "chromium-reference-result"
       ],
       "rationale": "Covered by repository-local automated evidence for this experimental profile."
     },
@@ -655,15 +805,19 @@
       "requirementId": "LIF-004",
       "profileId": "compact-react-chromium-desktop",
       "status": "unresolved",
-      "evidenceIds": [],
-      "rationale": "The complete acceptance evidence described by the system design has not yet been produced for this profile."
+      "verificationClass": "environment-verifiable",
+      "evidenceIds": [
+        "browser-surface-adapter"
+      ],
+      "rationale": "A reproducible automated environment result with profile, workload, and execution metadata has not been recorded."
     },
     {
       "requirementId": "LIF-005",
       "profileId": "compact-react-chromium-desktop",
       "status": "verified",
+      "verificationClass": "environment-verifiable",
       "evidenceIds": [
-        "surface-ownership"
+        "chromium-reference-result"
       ],
       "rationale": "Covered by repository-local automated evidence for this experimental profile."
     },
@@ -671,6 +825,7 @@
       "requirementId": "LIF-006",
       "profileId": "compact-react-chromium-desktop",
       "status": "verified",
+      "verificationClass": "code-verifiable",
       "evidenceIds": [
         "react-integration"
       ],
@@ -679,141 +834,190 @@
     {
       "requirementId": "LIF-007",
       "profileId": "compact-react-chromium-desktop",
-      "status": "unresolved",
-      "evidenceIds": [],
-      "rationale": "The complete acceptance evidence described by the system design has not yet been produced for this profile."
+      "status": "verified",
+      "verificationClass": "environment-verifiable",
+      "evidenceIds": [
+        "chromium-reference-result"
+      ],
+      "rationale": "Covered by repository-local automated evidence for this experimental profile."
     },
     {
       "requirementId": "MOD-001",
       "profileId": "compact-react-chromium-desktop",
-      "status": "unresolved",
-      "evidenceIds": [],
-      "rationale": "The complete acceptance evidence described by the system design has not yet been produced for this profile."
+      "status": "verified",
+      "verificationClass": "code-verifiable",
+      "evidenceIds": [
+        "kernel-laws"
+      ],
+      "rationale": "Covered by repository-local automated evidence for this experimental profile."
     },
     {
       "requirementId": "MOD-002",
       "profileId": "compact-react-chromium-desktop",
-      "status": "unresolved",
-      "evidenceIds": [],
-      "rationale": "The complete acceptance evidence described by the system design has not yet been produced for this profile."
+      "status": "verified",
+      "verificationClass": "code-verifiable",
+      "evidenceIds": [
+        "kernel-laws"
+      ],
+      "rationale": "Covered by repository-local automated evidence for this experimental profile."
     },
     {
       "requirementId": "MOD-003",
       "profileId": "compact-react-chromium-desktop",
-      "status": "unresolved",
-      "evidenceIds": [],
-      "rationale": "The complete acceptance evidence described by the system design has not yet been produced for this profile."
+      "status": "verified",
+      "verificationClass": "code-verifiable",
+      "evidenceIds": [
+        "kernel-laws"
+      ],
+      "rationale": "Covered by repository-local automated evidence for this experimental profile."
     },
     {
       "requirementId": "MOD-004",
       "profileId": "compact-react-chromium-desktop",
-      "status": "unresolved",
-      "evidenceIds": [],
-      "rationale": "The complete acceptance evidence described by the system design has not yet been produced for this profile."
+      "status": "verified",
+      "verificationClass": "code-verifiable",
+      "evidenceIds": [
+        "optimized-campaign-runner",
+        "independent-semantic-oracle",
+        "independent-oracle-decision",
+        "model-campaign-50000-result",
+        "independent-semantic-oracle-result"
+      ],
+      "rationale": "Covered by repository-local automated evidence for this experimental profile."
     },
     {
       "requirementId": "MOD-005",
       "profileId": "compact-react-chromium-desktop",
-      "status": "unresolved",
-      "evidenceIds": [],
-      "rationale": "The complete acceptance evidence described by the system design has not yet been produced for this profile."
+      "status": "verified",
+      "verificationClass": "code-verifiable",
+      "evidenceIds": [
+        "kernel-laws"
+      ],
+      "rationale": "Covered by repository-local automated evidence for this experimental profile."
     },
     {
       "requirementId": "MOD-006",
       "profileId": "compact-react-chromium-desktop",
-      "status": "unresolved",
-      "evidenceIds": [],
-      "rationale": "The complete acceptance evidence described by the system design has not yet been produced for this profile."
+      "status": "verified",
+      "verificationClass": "code-verifiable",
+      "evidenceIds": [
+        "kernel-structural-sharing"
+      ],
+      "rationale": "Covered by repository-local automated evidence for this experimental profile."
     },
     {
       "requirementId": "MOT-001",
       "profileId": "compact-react-chromium-desktop",
-      "status": "unresolved",
+      "status": "blocked",
+      "verificationClass": "manual-external",
       "evidenceIds": [],
-      "rationale": "The complete acceptance evidence described by the system design has not yet been produced for this profile."
+      "rationale": "This requirement needs manual, physical-system, independent-review, adoption, usability, or signed-approval evidence that repository automation cannot manufacture."
     },
     {
       "requirementId": "MOT-002",
       "profileId": "compact-react-chromium-desktop",
-      "status": "verified",
+      "status": "unresolved",
+      "verificationClass": "environment-verifiable",
       "evidenceIds": [
         "react-integration"
       ],
-      "rationale": "Covered by repository-local automated evidence for this experimental profile."
+      "rationale": "A reproducible automated environment result with profile, workload, and execution metadata has not been recorded."
     },
     {
       "requirementId": "MOT-003",
       "profileId": "compact-react-chromium-desktop",
       "status": "verified",
+      "verificationClass": "environment-verifiable",
       "evidenceIds": [
-        "motion-primitives"
+        "protocol-motion-result"
       ],
       "rationale": "Covered by repository-local automated evidence for this experimental profile."
     },
     {
       "requirementId": "MOT-004",
       "profileId": "compact-react-chromium-desktop",
-      "status": "verified",
+      "status": "unresolved",
+      "verificationClass": "environment-verifiable",
       "evidenceIds": [
-        "motion-primitives"
+        "motion-primitives",
+        "motion-lifecycle",
+        "protocol-motion-result"
       ],
-      "rationale": "Covered by repository-local automated evidence for this experimental profile."
+      "rationale": "A reproducible automated environment result with profile, workload, and execution metadata has not been recorded."
     },
     {
       "requirementId": "MOT-005",
       "profileId": "compact-react-chromium-desktop",
       "status": "unresolved",
-      "evidenceIds": [],
-      "rationale": "The complete acceptance evidence described by the system design has not yet been produced for this profile."
+      "verificationClass": "environment-verifiable",
+      "evidenceIds": [
+        "motion-lifecycle",
+        "protocol-motion-result"
+      ],
+      "rationale": "A reproducible automated environment result with profile, workload, and execution metadata has not been recorded."
     },
     {
       "requirementId": "MOT-006",
       "profileId": "compact-react-chromium-desktop",
       "status": "unresolved",
+      "verificationClass": "environment-verifiable",
       "evidenceIds": [],
-      "rationale": "The complete acceptance evidence described by the system design has not yet been produced for this profile."
+      "rationale": "A reproducible automated environment result with profile, workload, and execution metadata has not been recorded."
     },
     {
       "requirementId": "MOT-007",
       "profileId": "compact-react-chromium-desktop",
-      "status": "unresolved",
-      "evidenceIds": [],
-      "rationale": "The complete acceptance evidence described by the system design has not yet been produced for this profile."
+      "status": "verified",
+      "verificationClass": "environment-verifiable",
+      "evidenceIds": [
+        "protocol-motion-result"
+      ],
+      "rationale": "Covered by repository-local automated evidence for this experimental profile."
     },
     {
       "requirementId": "MOT-008",
       "profileId": "compact-react-chromium-desktop",
-      "status": "unresolved",
+      "status": "not-applicable",
+      "verificationClass": "future-scope",
       "evidenceIds": [],
-      "rationale": "The complete acceptance evidence described by the system design has not yet been produced for this profile."
+      "rationale": "The current profile does not publish the product capability governed by this requirement."
     },
     {
       "requirementId": "MOT-009",
       "profileId": "compact-react-chromium-desktop",
-      "status": "verified",
+      "status": "unresolved",
+      "verificationClass": "environment-verifiable",
       "evidenceIds": [
-        "motion-primitives"
+        "motion-primitives",
+        "motion-lifecycle",
+        "protocol-motion-result"
       ],
-      "rationale": "Covered by repository-local automated evidence for this experimental profile."
+      "rationale": "A reproducible automated environment result with profile, workload, and execution metadata has not been recorded."
     },
     {
       "requirementId": "MOT-010",
       "profileId": "compact-react-chromium-desktop",
       "status": "unresolved",
-      "evidenceIds": [],
-      "rationale": "The complete acceptance evidence described by the system design has not yet been produced for this profile."
+      "verificationClass": "environment-verifiable",
+      "evidenceIds": [
+        "motion-lifecycle",
+        "protocol-motion-result"
+      ],
+      "rationale": "A reproducible automated environment result with profile, workload, and execution metadata has not been recorded."
     },
     {
       "requirementId": "OBS-001",
       "profileId": "compact-react-chromium-desktop",
       "status": "unresolved",
+      "verificationClass": "environment-verifiable",
       "evidenceIds": [],
-      "rationale": "The complete acceptance evidence described by the system design has not yet been produced for this profile."
+      "rationale": "A reproducible automated environment result with profile, workload, and execution metadata has not been recorded."
     },
     {
       "requirementId": "OBS-002",
       "profileId": "compact-react-chromium-desktop",
       "status": "verified",
+      "verificationClass": "code-verifiable",
       "evidenceIds": [
         "runtime-notification",
         "ecosystem-primitives"
@@ -823,30 +1027,38 @@
     {
       "requirementId": "OBS-003",
       "profileId": "compact-react-chromium-desktop",
-      "status": "unresolved",
+      "status": "verified",
+      "verificationClass": "code-verifiable",
       "evidenceIds": [
-        "ecosystem-primitives"
+        "ecosystem-primitives",
+        "authenticated-coordination"
       ],
-      "rationale": "The complete acceptance evidence described by the system design has not yet been produced for this profile."
+      "rationale": "Covered by repository-local automated evidence for this experimental profile."
     },
     {
       "requirementId": "OBS-004",
       "profileId": "compact-react-chromium-desktop",
-      "status": "unresolved",
-      "evidenceIds": [],
-      "rationale": "The complete acceptance evidence described by the system design has not yet been produced for this profile."
+      "status": "verified",
+      "verificationClass": "code-verifiable",
+      "evidenceIds": [
+        "runtime-fail-closed",
+        "authenticated-coordination"
+      ],
+      "rationale": "Covered by repository-local automated evidence for this experimental profile."
     },
     {
       "requirementId": "OBS-005",
       "profileId": "compact-react-chromium-desktop",
       "status": "unresolved",
+      "verificationClass": "code-verifiable",
       "evidenceIds": [],
-      "rationale": "The complete acceptance evidence described by the system design has not yet been produced for this profile."
+      "rationale": "The repository implementation or its requirement-specific static/model proof is incomplete for this profile."
     },
     {
       "requirementId": "OBS-006",
       "profileId": "compact-react-chromium-desktop",
       "status": "verified",
+      "verificationClass": "code-verifiable",
       "evidenceIds": [
         "conformance-harness"
       ],
@@ -856,6 +1068,7 @@
       "requirementId": "PER-001",
       "profileId": "compact-react-chromium-desktop",
       "status": "verified",
+      "verificationClass": "code-verifiable",
       "evidenceIds": [
         "persistence-recovery"
       ],
@@ -865,6 +1078,7 @@
       "requirementId": "PER-002",
       "profileId": "compact-react-chromium-desktop",
       "status": "verified",
+      "verificationClass": "code-verifiable",
       "evidenceIds": [
         "persistence-recovery"
       ],
@@ -874,6 +1088,7 @@
       "requirementId": "PER-003",
       "profileId": "compact-react-chromium-desktop",
       "status": "verified",
+      "verificationClass": "code-verifiable",
       "evidenceIds": [
         "persistence-recovery",
         "indexeddb-effect"
@@ -884,6 +1099,7 @@
       "requirementId": "PER-004",
       "profileId": "compact-react-chromium-desktop",
       "status": "verified",
+      "verificationClass": "code-verifiable",
       "evidenceIds": [
         "persistence-recovery"
       ],
@@ -892,28 +1108,36 @@
     {
       "requirementId": "PER-005",
       "profileId": "compact-react-chromium-desktop",
-      "status": "unresolved",
-      "evidenceIds": [],
-      "rationale": "The complete acceptance evidence described by the system design has not yet been produced for this profile."
+      "status": "verified",
+      "verificationClass": "code-verifiable",
+      "evidenceIds": [
+        "panel-registry"
+      ],
+      "rationale": "Covered by repository-local automated evidence for this experimental profile."
     },
     {
       "requirementId": "PER-006",
       "profileId": "compact-react-chromium-desktop",
-      "status": "unresolved",
-      "evidenceIds": [],
-      "rationale": "The complete acceptance evidence described by the system design has not yet been produced for this profile."
+      "status": "verified",
+      "verificationClass": "code-verifiable",
+      "evidenceIds": [
+        "kernel-structural-sharing"
+      ],
+      "rationale": "Covered by repository-local automated evidence for this experimental profile."
     },
     {
       "requirementId": "PER-007",
       "profileId": "compact-react-chromium-desktop",
       "status": "unresolved",
+      "verificationClass": "environment-verifiable",
       "evidenceIds": [],
-      "rationale": "The complete acceptance evidence described by the system design has not yet been produced for this profile."
+      "rationale": "A reproducible automated environment result with profile, workload, and execution metadata has not been recorded."
     },
     {
       "requirementId": "PER-008",
       "profileId": "compact-react-chromium-desktop",
       "status": "verified",
+      "verificationClass": "code-verifiable",
       "evidenceIds": [
         "patch-replay-oracle",
         "persistence-recovery"
@@ -923,320 +1147,418 @@
     {
       "requirementId": "PKG-001",
       "profileId": "compact-react-chromium-desktop",
-      "status": "unresolved",
-      "evidenceIds": [],
-      "rationale": "The complete acceptance evidence described by the system design has not yet been produced for this profile."
+      "status": "verified",
+      "verificationClass": "code-verifiable",
+      "evidenceIds": [
+        "dependency-architecture"
+      ],
+      "rationale": "Covered by repository-local automated evidence for this experimental profile."
     },
     {
       "requirementId": "PKG-002",
       "profileId": "compact-react-chromium-desktop",
-      "status": "unresolved",
-      "evidenceIds": [],
-      "rationale": "The complete acceptance evidence described by the system design has not yet been produced for this profile."
+      "status": "verified",
+      "verificationClass": "code-verifiable",
+      "evidenceIds": [
+        "dependency-architecture"
+      ],
+      "rationale": "Covered by repository-local automated evidence for this experimental profile."
     },
     {
       "requirementId": "PKG-003",
       "profileId": "compact-react-chromium-desktop",
-      "status": "unresolved",
-      "evidenceIds": [],
-      "rationale": "The complete acceptance evidence described by the system design has not yet been produced for this profile."
+      "status": "verified",
+      "verificationClass": "code-verifiable",
+      "evidenceIds": [
+        "package-boundaries"
+      ],
+      "rationale": "Covered by repository-local automated evidence for this experimental profile."
     },
     {
       "requirementId": "PKG-004",
       "profileId": "compact-react-chromium-desktop",
-      "status": "unresolved",
-      "evidenceIds": [],
-      "rationale": "The complete acceptance evidence described by the system design has not yet been produced for this profile."
+      "status": "verified",
+      "verificationClass": "code-verifiable",
+      "evidenceIds": [
+        "package-boundaries"
+      ],
+      "rationale": "Covered by repository-local automated evidence for this experimental profile."
     },
     {
       "requirementId": "PKG-005",
       "profileId": "compact-react-chromium-desktop",
-      "status": "unresolved",
-      "evidenceIds": [],
-      "rationale": "The complete acceptance evidence described by the system design has not yet been produced for this profile."
+      "status": "verified",
+      "verificationClass": "code-verifiable",
+      "evidenceIds": [
+        "package-boundaries"
+      ],
+      "rationale": "Covered by repository-local automated evidence for this experimental profile."
     },
     {
       "requirementId": "PRF-001",
       "profileId": "compact-react-chromium-desktop",
       "status": "unresolved",
+      "verificationClass": "environment-verifiable",
       "evidenceIds": [],
-      "rationale": "The complete acceptance evidence described by the system design has not yet been produced for this profile."
+      "rationale": "A reproducible automated environment result with profile, workload, and execution metadata has not been recorded."
     },
     {
       "requirementId": "PRF-002",
       "profileId": "compact-react-chromium-desktop",
-      "status": "unresolved",
-      "evidenceIds": [],
-      "rationale": "The complete acceptance evidence described by the system design has not yet been produced for this profile."
+      "status": "verified",
+      "verificationClass": "code-verifiable",
+      "evidenceIds": [
+        "testkit-contract"
+      ],
+      "rationale": "Covered by repository-local automated evidence for this experimental profile."
     },
     {
       "requirementId": "PRF-003",
       "profileId": "compact-react-chromium-desktop",
-      "status": "unresolved",
-      "evidenceIds": [],
-      "rationale": "The complete acceptance evidence described by the system design has not yet been produced for this profile."
+      "status": "verified",
+      "verificationClass": "code-verifiable",
+      "evidenceIds": [
+        "optimized-campaign-runner",
+        "independent-semantic-oracle",
+        "independent-oracle-decision",
+        "model-campaign-50000-result",
+        "independent-semantic-oracle-result"
+      ],
+      "rationale": "Covered by repository-local automated evidence for this experimental profile."
     },
     {
       "requirementId": "PRF-004",
       "profileId": "compact-react-chromium-desktop",
       "status": "unresolved",
-      "evidenceIds": [],
-      "rationale": "The complete acceptance evidence described by the system design has not yet been produced for this profile."
+      "verificationClass": "environment-verifiable",
+      "evidenceIds": [
+        "authenticated-coordination"
+      ],
+      "rationale": "A reproducible automated environment result with profile, workload, and execution metadata has not been recorded."
     },
     {
       "requirementId": "PRF-005",
       "profileId": "compact-react-chromium-desktop",
       "status": "unresolved",
+      "verificationClass": "environment-verifiable",
       "evidenceIds": [],
-      "rationale": "The complete acceptance evidence described by the system design has not yet been produced for this profile."
+      "rationale": "A reproducible automated environment result with profile, workload, and execution metadata has not been recorded."
     },
     {
       "requirementId": "PRF-006",
       "profileId": "compact-react-chromium-desktop",
       "status": "unresolved",
-      "evidenceIds": [],
-      "rationale": "The complete acceptance evidence described by the system design has not yet been produced for this profile."
+      "verificationClass": "environment-verifiable",
+      "evidenceIds": [
+        "geometry-invalidation"
+      ],
+      "rationale": "A reproducible automated environment result with profile, workload, and execution metadata has not been recorded."
     },
     {
       "requirementId": "PRF-007",
       "profileId": "compact-react-chromium-desktop",
-      "status": "unresolved",
+      "status": "blocked",
+      "verificationClass": "manual-external",
       "evidenceIds": [],
-      "rationale": "The complete acceptance evidence described by the system design has not yet been produced for this profile."
+      "rationale": "This requirement needs manual, physical-system, independent-review, adoption, usability, or signed-approval evidence that repository automation cannot manufacture."
     },
     {
       "requirementId": "QLT-001",
       "profileId": "compact-react-chromium-desktop",
-      "status": "unresolved",
+      "status": "verified",
+      "verificationClass": "code-verifiable",
       "evidenceIds": [
-        "conformance-harness"
+        "testkit-contract",
+        "conformance-harness",
+        "evidence-taxonomy"
       ],
-      "rationale": "The complete acceptance evidence described by the system design has not yet been produced for this profile."
+      "rationale": "Covered by repository-local automated evidence for this experimental profile."
     },
     {
       "requirementId": "QLT-002",
       "profileId": "compact-react-chromium-desktop",
-      "status": "unresolved",
+      "status": "verified",
+      "verificationClass": "code-verifiable",
       "evidenceIds": [
-        "conformance-harness"
+        "conformance-harness",
+        "evidence-taxonomy"
       ],
-      "rationale": "The complete acceptance evidence described by the system design has not yet been produced for this profile."
+      "rationale": "Covered by repository-local automated evidence for this experimental profile."
     },
     {
       "requirementId": "QLT-003",
       "profileId": "compact-react-chromium-desktop",
       "status": "unresolved",
+      "verificationClass": "environment-verifiable",
       "evidenceIds": [
+        "testkit-contract",
         "performance-smoke",
+        "interaction-performance-result",
         "physical-performance-certification"
       ],
-      "rationale": "The complete acceptance evidence described by the system design has not yet been produced for this profile."
+      "rationale": "A reproducible automated environment result with profile, workload, and execution metadata has not been recorded."
     },
     {
       "requirementId": "QLT-004",
       "profileId": "compact-react-chromium-desktop",
-      "status": "not-applicable",
+      "status": "verified",
+      "verificationClass": "code-verifiable",
       "evidenceIds": [
-        "conformance-harness"
+        "conformance-harness",
+        "evidence-taxonomy"
       ],
-      "rationale": "The published profile is explicitly experimental; this stable-release requirement is not claimed."
+      "rationale": "Covered by repository-local automated evidence for this experimental profile."
     },
     {
       "requirementId": "QLT-005",
       "profileId": "compact-react-chromium-desktop",
-      "status": "unresolved",
+      "status": "blocked",
+      "verificationClass": "manual-external",
       "evidenceIds": [],
-      "rationale": "The complete acceptance evidence described by the system design has not yet been produced for this profile."
+      "rationale": "This requirement needs manual, physical-system, independent-review, adoption, usability, or signed-approval evidence that repository automation cannot manufacture."
     },
     {
       "requirementId": "REN-001",
       "profileId": "compact-react-chromium-desktop",
       "status": "verified",
+      "verificationClass": "environment-verifiable",
       "evidenceIds": [
-        "react-integration"
+        "chromium-reference-result"
       ],
       "rationale": "Covered by repository-local automated evidence for this experimental profile."
     },
     {
       "requirementId": "REN-002",
       "profileId": "compact-react-chromium-desktop",
-      "status": "verified",
+      "status": "unresolved",
+      "verificationClass": "environment-verifiable",
       "evidenceIds": [
         "react-integration"
       ],
-      "rationale": "Covered by repository-local automated evidence for this experimental profile."
+      "rationale": "A reproducible automated environment result with profile, workload, and execution metadata has not been recorded."
     },
     {
       "requirementId": "REN-003",
       "profileId": "compact-react-chromium-desktop",
-      "status": "unresolved",
-      "evidenceIds": [],
-      "rationale": "The complete acceptance evidence described by the system design has not yet been produced for this profile."
+      "status": "verified",
+      "verificationClass": "environment-verifiable",
+      "evidenceIds": [
+        "chromium-reference-result"
+      ],
+      "rationale": "Covered by repository-local automated evidence for this experimental profile."
     },
     {
       "requirementId": "REN-004",
       "profileId": "compact-react-chromium-desktop",
-      "status": "unresolved",
-      "evidenceIds": [],
-      "rationale": "The complete acceptance evidence described by the system design has not yet been produced for this profile."
+      "status": "verified",
+      "verificationClass": "environment-verifiable",
+      "evidenceIds": [
+        "chromium-reference-result"
+      ],
+      "rationale": "Covered by repository-local automated evidence for this experimental profile."
     },
     {
       "requirementId": "REN-005",
       "profileId": "compact-react-chromium-desktop",
       "status": "verified",
+      "verificationClass": "environment-verifiable",
       "evidenceIds": [
-        "react-integration"
+        "chromium-reference-result"
       ],
       "rationale": "Covered by repository-local automated evidence for this experimental profile."
     },
     {
       "requirementId": "REN-006",
       "profileId": "compact-react-chromium-desktop",
-      "status": "unresolved",
-      "evidenceIds": [],
-      "rationale": "The complete acceptance evidence described by the system design has not yet been produced for this profile."
+      "status": "verified",
+      "verificationClass": "environment-verifiable",
+      "evidenceIds": [
+        "chromium-reference-result"
+      ],
+      "rationale": "Covered by repository-local automated evidence for this experimental profile."
     },
     {
       "requirementId": "RSK-001",
       "profileId": "compact-react-chromium-desktop",
-      "status": "unresolved",
+      "status": "blocked",
+      "verificationClass": "manual-external",
       "evidenceIds": [],
-      "rationale": "The complete acceptance evidence described by the system design has not yet been produced for this profile."
+      "rationale": "This requirement needs manual, physical-system, independent-review, adoption, usability, or signed-approval evidence that repository automation cannot manufacture."
     },
     {
       "requirementId": "RSK-002",
       "profileId": "compact-react-chromium-desktop",
       "status": "unresolved",
+      "verificationClass": "code-verifiable",
       "evidenceIds": [],
-      "rationale": "The complete acceptance evidence described by the system design has not yet been produced for this profile."
+      "rationale": "The repository implementation or its requirement-specific static/model proof is incomplete for this profile."
     },
     {
       "requirementId": "RSK-003",
       "profileId": "compact-react-chromium-desktop",
-      "status": "unresolved",
+      "status": "blocked",
+      "verificationClass": "manual-external",
       "evidenceIds": [],
-      "rationale": "The complete acceptance evidence described by the system design has not yet been produced for this profile."
+      "rationale": "This requirement needs manual, physical-system, independent-review, adoption, usability, or signed-approval evidence that repository automation cannot manufacture."
     },
     {
       "requirementId": "RSK-004",
       "profileId": "compact-react-chromium-desktop",
-      "status": "unresolved",
+      "status": "blocked",
+      "verificationClass": "manual-external",
       "evidenceIds": [],
-      "rationale": "The complete acceptance evidence described by the system design has not yet been produced for this profile."
+      "rationale": "This requirement needs manual, physical-system, independent-review, adoption, usability, or signed-approval evidence that repository automation cannot manufacture."
     },
     {
       "requirementId": "RSP-001",
       "profileId": "compact-react-chromium-desktop",
-      "status": "unresolved",
-      "evidenceIds": [],
-      "rationale": "The complete acceptance evidence described by the system design has not yet been produced for this profile."
+      "status": "verified",
+      "verificationClass": "environment-verifiable",
+      "evidenceIds": [
+        "chromium-reference-result"
+      ],
+      "rationale": "Covered by repository-local automated evidence for this experimental profile."
     },
     {
       "requirementId": "RSP-002",
       "profileId": "compact-react-chromium-desktop",
-      "status": "unresolved",
-      "evidenceIds": [],
-      "rationale": "The complete acceptance evidence described by the system design has not yet been produced for this profile."
+      "status": "verified",
+      "verificationClass": "environment-verifiable",
+      "evidenceIds": [
+        "chromium-reference-result"
+      ],
+      "rationale": "Covered by repository-local automated evidence for this experimental profile."
     },
     {
       "requirementId": "SCP-001",
       "profileId": "compact-react-chromium-desktop",
-      "status": "unresolved",
-      "evidenceIds": [],
-      "rationale": "The complete acceptance evidence described by the system design has not yet been produced for this profile."
+      "status": "verified",
+      "verificationClass": "code-verifiable",
+      "evidenceIds": [
+        "evidence-taxonomy"
+      ],
+      "rationale": "Covered by repository-local automated evidence for this experimental profile."
     },
     {
       "requirementId": "SCP-002",
       "profileId": "compact-react-chromium-desktop",
-      "status": "unresolved",
-      "evidenceIds": [],
-      "rationale": "The complete acceptance evidence described by the system design has not yet been produced for this profile."
+      "status": "verified",
+      "verificationClass": "code-verifiable",
+      "evidenceIds": [
+        "evidence-taxonomy"
+      ],
+      "rationale": "Covered by repository-local automated evidence for this experimental profile."
     },
     {
       "requirementId": "SCP-003",
       "profileId": "compact-react-chromium-desktop",
-      "status": "unresolved",
-      "evidenceIds": [],
-      "rationale": "The complete acceptance evidence described by the system design has not yet been produced for this profile."
+      "status": "verified",
+      "verificationClass": "code-verifiable",
+      "evidenceIds": [
+        "evidence-taxonomy"
+      ],
+      "rationale": "Covered by repository-local automated evidence for this experimental profile."
     },
     {
       "requirementId": "SCP-004",
       "profileId": "compact-react-chromium-desktop",
-      "status": "unresolved",
-      "evidenceIds": [],
-      "rationale": "The complete acceptance evidence described by the system design has not yet been produced for this profile."
+      "status": "verified",
+      "verificationClass": "code-verifiable",
+      "evidenceIds": [
+        "evidence-taxonomy"
+      ],
+      "rationale": "Covered by repository-local automated evidence for this experimental profile."
     },
     {
       "requirementId": "SEC-001",
       "profileId": "compact-react-chromium-desktop",
-      "status": "unresolved",
+      "status": "verified",
+      "verificationClass": "code-verifiable",
       "evidenceIds": [
-        "persistence-recovery"
+        "persistence-recovery",
+        "plugin-isolation",
+        "authenticated-coordination"
       ],
-      "rationale": "The complete acceptance evidence described by the system design has not yet been produced for this profile."
+      "rationale": "Covered by repository-local automated evidence for this experimental profile."
     },
     {
       "requirementId": "SEC-002",
       "profileId": "compact-react-chromium-desktop",
-      "status": "unresolved",
+      "status": "verified",
+      "verificationClass": "code-verifiable",
       "evidenceIds": [
-        "independent-security-review"
+        "authenticated-coordination"
       ],
-      "rationale": "The complete acceptance evidence described by the system design has not yet been produced for this profile."
+      "rationale": "Covered by repository-local automated evidence for this experimental profile."
     },
     {
       "requirementId": "SEC-003",
       "profileId": "compact-react-chromium-desktop",
-      "status": "not-applicable",
+      "status": "unresolved",
+      "verificationClass": "environment-verifiable",
       "evidenceIds": [
         "security-source-check",
         "independent-security-review"
       ],
-      "rationale": "The published profile is explicitly experimental; this stable-release requirement is not claimed."
+      "rationale": "A reproducible automated environment result with profile, workload, and execution metadata has not been recorded."
     },
     {
       "requirementId": "SEC-004",
       "profileId": "compact-react-chromium-desktop",
-      "status": "unresolved",
-      "evidenceIds": [],
-      "rationale": "The complete acceptance evidence described by the system design has not yet been produced for this profile."
+      "status": "verified",
+      "verificationClass": "code-verifiable",
+      "evidenceIds": [
+        "authenticated-coordination"
+      ],
+      "rationale": "Covered by repository-local automated evidence for this experimental profile."
     },
     {
       "requirementId": "SEC-005",
       "profileId": "compact-react-chromium-desktop",
       "status": "unresolved",
-      "evidenceIds": [],
-      "rationale": "The complete acceptance evidence described by the system design has not yet been produced for this profile."
+      "verificationClass": "environment-verifiable",
+      "evidenceIds": [
+        "browser-surface-adapter",
+        "plugin-isolation"
+      ],
+      "rationale": "A reproducible automated environment result with profile, workload, and execution metadata has not been recorded."
     },
     {
       "requirementId": "SEC-006",
       "profileId": "compact-react-chromium-desktop",
-      "status": "unresolved",
-      "evidenceIds": [],
-      "rationale": "The complete acceptance evidence described by the system design has not yet been produced for this profile."
+      "status": "verified",
+      "verificationClass": "code-verifiable",
+      "evidenceIds": [
+        "runtime-fail-closed"
+      ],
+      "rationale": "Covered by repository-local automated evidence for this experimental profile."
     },
     {
       "requirementId": "SEC-007",
       "profileId": "compact-react-chromium-desktop",
-      "status": "not-applicable",
+      "status": "unresolved",
+      "verificationClass": "code-verifiable",
       "evidenceIds": [
         "independent-security-review"
       ],
-      "rationale": "The published profile is explicitly experimental; this stable-release requirement is not claimed."
+      "rationale": "The repository implementation or its requirement-specific static/model proof is incomplete for this profile."
     },
     {
       "requirementId": "SEC-008",
       "profileId": "compact-react-chromium-desktop",
-      "status": "unresolved",
+      "status": "verified",
+      "verificationClass": "code-verifiable",
       "evidenceIds": [
-        "security-source-check"
+        "security-source-check",
+        "package-boundaries"
       ],
-      "rationale": "The complete acceptance evidence described by the system design has not yet been produced for this profile."
+      "rationale": "Covered by repository-local automated evidence for this experimental profile."
     },
     {
       "requirementId": "SUR-001",
       "profileId": "compact-react-chromium-desktop",
       "status": "verified",
+      "verificationClass": "code-verifiable",
       "evidenceIds": [
         "surface-ownership"
       ],
@@ -1245,183 +1567,242 @@
     {
       "requirementId": "SUR-002",
       "profileId": "compact-react-chromium-desktop",
-      "status": "unresolved",
-      "evidenceIds": [],
-      "rationale": "The complete acceptance evidence described by the system design has not yet been produced for this profile."
+      "status": "verified",
+      "verificationClass": "environment-verifiable",
+      "evidenceIds": [
+        "chromium-reference-result"
+      ],
+      "rationale": "Covered by repository-local automated evidence for this experimental profile."
     },
     {
       "requirementId": "SUR-003",
       "profileId": "compact-react-chromium-desktop",
-      "status": "unresolved",
+      "status": "verified",
+      "verificationClass": "environment-verifiable",
       "evidenceIds": [
-        "surface-ownership"
+        "chromium-reference-result"
       ],
-      "rationale": "The complete acceptance evidence described by the system design has not yet been produced for this profile."
+      "rationale": "Covered by repository-local automated evidence for this experimental profile."
     },
     {
       "requirementId": "SUR-004",
       "profileId": "compact-react-chromium-desktop",
-      "status": "unresolved",
-      "evidenceIds": [],
-      "rationale": "The complete acceptance evidence described by the system design has not yet been produced for this profile."
+      "status": "verified",
+      "verificationClass": "code-verifiable",
+      "evidenceIds": [
+        "browser-surface-adapter"
+      ],
+      "rationale": "Covered by repository-local automated evidence for this experimental profile."
     },
     {
       "requirementId": "SUR-005",
       "profileId": "compact-react-chromium-desktop",
-      "status": "verified",
+      "status": "unresolved",
+      "verificationClass": "environment-verifiable",
       "evidenceIds": [
         "surface-ownership"
       ],
-      "rationale": "Covered by repository-local automated evidence for this experimental profile."
+      "rationale": "A reproducible automated environment result with profile, workload, and execution metadata has not been recorded."
     },
     {
       "requirementId": "SUR-006",
       "profileId": "compact-react-chromium-desktop",
       "status": "unresolved",
+      "verificationClass": "environment-verifiable",
       "evidenceIds": [],
-      "rationale": "The complete acceptance evidence described by the system design has not yet been produced for this profile."
+      "rationale": "A reproducible automated environment result with profile, workload, and execution metadata has not been recorded."
     },
     {
       "requirementId": "SUR-007",
       "profileId": "compact-react-chromium-desktop",
-      "status": "verified",
+      "status": "unresolved",
+      "verificationClass": "environment-verifiable",
       "evidenceIds": [
-        "surface-ownership"
+        "surface-ownership",
+        "browser-surface-adapter"
       ],
-      "rationale": "Covered by repository-local automated evidence for this experimental profile."
+      "rationale": "A reproducible automated environment result with profile, workload, and execution metadata has not been recorded."
     },
     {
       "requirementId": "SYS-001",
       "profileId": "compact-react-chromium-desktop",
-      "status": "unresolved",
-      "evidenceIds": [],
-      "rationale": "The complete acceptance evidence described by the system design has not yet been produced for this profile."
+      "status": "verified",
+      "verificationClass": "code-verifiable",
+      "evidenceIds": [
+        "kernel-structural-sharing",
+        "architecture-contract"
+      ],
+      "rationale": "Covered by repository-local automated evidence for this experimental profile."
     },
     {
       "requirementId": "SYS-002",
       "profileId": "compact-react-chromium-desktop",
-      "status": "unresolved",
-      "evidenceIds": [],
-      "rationale": "The complete acceptance evidence described by the system design has not yet been produced for this profile."
+      "status": "verified",
+      "verificationClass": "code-verifiable",
+      "evidenceIds": [
+        "architecture-contract"
+      ],
+      "rationale": "Covered by repository-local automated evidence for this experimental profile."
     },
     {
       "requirementId": "SYS-003",
       "profileId": "compact-react-chromium-desktop",
-      "status": "unresolved",
-      "evidenceIds": [],
-      "rationale": "The complete acceptance evidence described by the system design has not yet been produced for this profile."
+      "status": "verified",
+      "verificationClass": "code-verifiable",
+      "evidenceIds": [
+        "motion-lifecycle",
+        "localized-react-contract",
+        "protocol-motion-decision"
+      ],
+      "rationale": "Covered by repository-local automated evidence for this experimental profile."
     },
     {
       "requirementId": "SYS-004",
       "profileId": "compact-react-chromium-desktop",
-      "status": "unresolved",
-      "evidenceIds": [],
-      "rationale": "The complete acceptance evidence described by the system design has not yet been produced for this profile."
+      "status": "verified",
+      "verificationClass": "code-verifiable",
+      "evidenceIds": [
+        "runtime-fail-closed"
+      ],
+      "rationale": "Covered by repository-local automated evidence for this experimental profile."
     },
     {
       "requirementId": "SYS-005",
       "profileId": "compact-react-chromium-desktop",
-      "status": "unresolved",
-      "evidenceIds": [],
-      "rationale": "The complete acceptance evidence described by the system design has not yet been produced for this profile."
+      "status": "verified",
+      "verificationClass": "code-verifiable",
+      "evidenceIds": [
+        "architecture-contract"
+      ],
+      "rationale": "Covered by repository-local automated evidence for this experimental profile."
     },
     {
       "requirementId": "THM-001",
       "profileId": "compact-react-chromium-desktop",
       "status": "unresolved",
+      "verificationClass": "environment-verifiable",
       "evidenceIds": [],
-      "rationale": "The complete acceptance evidence described by the system design has not yet been produced for this profile."
+      "rationale": "A reproducible automated environment result with profile, workload, and execution metadata has not been recorded."
     },
     {
       "requirementId": "THM-002",
       "profileId": "compact-react-chromium-desktop",
-      "status": "unresolved",
-      "evidenceIds": [],
-      "rationale": "The complete acceptance evidence described by the system design has not yet been produced for this profile."
+      "status": "verified",
+      "verificationClass": "environment-verifiable",
+      "evidenceIds": [
+        "chromium-reference-result"
+      ],
+      "rationale": "Covered by repository-local automated evidence for this experimental profile."
     },
     {
       "requirementId": "TST-001",
       "profileId": "compact-react-chromium-desktop",
-      "status": "not-applicable",
+      "status": "unresolved",
+      "verificationClass": "code-verifiable",
       "evidenceIds": [
-        "bounded-exploration"
+        "bounded-exploration",
+        "optimized-campaign-runner",
+        "model-campaign-50000-result"
       ],
-      "rationale": "The published profile is explicitly experimental; this stable-release requirement is not claimed."
+      "rationale": "The repository implementation or its requirement-specific static/model proof is incomplete for this profile."
     },
     {
       "requirementId": "TST-002",
       "profileId": "compact-react-chromium-desktop",
-      "status": "unresolved",
+      "status": "verified",
+      "verificationClass": "code-verifiable",
       "evidenceIds": [
         "bounded-exploration",
-        "patch-replay-oracle"
+        "patch-replay-oracle",
+        "optimized-campaign-runner",
+        "independent-semantic-oracle",
+        "independent-oracle-decision",
+        "model-campaign-50000-result",
+        "independent-semantic-oracle-result"
       ],
-      "rationale": "The complete acceptance evidence described by the system design has not yet been produced for this profile."
+      "rationale": "Covered by repository-local automated evidence for this experimental profile."
     },
     {
       "requirementId": "TST-003",
       "profileId": "compact-react-chromium-desktop",
       "status": "unresolved",
+      "verificationClass": "code-verifiable",
       "evidenceIds": [
-        "protocol-models"
+        "protocol-models",
+        "protocol-actor-catalog",
+        "protocol-motion-result"
       ],
-      "rationale": "The complete acceptance evidence described by the system design has not yet been produced for this profile."
+      "rationale": "The repository implementation or its requirement-specific static/model proof is incomplete for this profile."
     },
     {
       "requirementId": "TST-004",
       "profileId": "compact-react-chromium-desktop",
-      "status": "unresolved",
+      "status": "verified",
+      "verificationClass": "code-verifiable",
       "evidenceIds": [
-        "surface-ownership"
+        "surface-ownership",
+        "testkit-contract"
       ],
-      "rationale": "The complete acceptance evidence described by the system design has not yet been produced for this profile."
+      "rationale": "Covered by repository-local automated evidence for this experimental profile."
     },
     {
       "requirementId": "TST-005",
       "profileId": "compact-react-chromium-desktop",
       "status": "unresolved",
+      "verificationClass": "environment-verifiable",
       "evidenceIds": [],
-      "rationale": "The complete acceptance evidence described by the system design has not yet been produced for this profile."
+      "rationale": "A reproducible automated environment result with profile, workload, and execution metadata has not been recorded."
     },
     {
       "requirementId": "TST-006",
       "profileId": "compact-react-chromium-desktop",
       "status": "unresolved",
+      "verificationClass": "environment-verifiable",
       "evidenceIds": [
         "performance-smoke",
+        "interaction-performance-result",
         "physical-performance-certification"
       ],
-      "rationale": "The complete acceptance evidence described by the system design has not yet been produced for this profile."
+      "rationale": "A reproducible automated environment result with profile, workload, and execution metadata has not been recorded."
     },
     {
       "requirementId": "TST-007",
       "profileId": "compact-react-chromium-desktop",
-      "status": "not-applicable",
+      "status": "blocked",
+      "verificationClass": "manual-external",
       "evidenceIds": [
         "manual-accessibility-certification"
       ],
-      "rationale": "The published profile is explicitly experimental; this stable-release requirement is not claimed."
+      "rationale": "This requirement needs manual, physical-system, independent-review, adoption, usability, or signed-approval evidence that repository automation cannot manufacture."
     },
     {
       "requirementId": "TST-008",
       "profileId": "compact-react-chromium-desktop",
       "status": "unresolved",
-      "evidenceIds": [],
-      "rationale": "The complete acceptance evidence described by the system design has not yet been produced for this profile."
+      "verificationClass": "environment-verifiable",
+      "evidenceIds": [
+        "motion-lifecycle",
+        "localized-react-contract",
+        "protocol-motion-result"
+      ],
+      "rationale": "A reproducible automated environment result with profile, workload, and execution metadata has not been recorded."
     },
     {
       "requirementId": "TST-009",
       "profileId": "compact-react-chromium-desktop",
-      "status": "unresolved",
+      "status": "verified",
+      "verificationClass": "code-verifiable",
       "evidenceIds": [
-        "surface-ownership"
+        "surface-ownership",
+        "testkit-contract"
       ],
-      "rationale": "The complete acceptance evidence described by the system design has not yet been produced for this profile."
+      "rationale": "Covered by repository-local automated evidence for this experimental profile."
     },
     {
       "requirementId": "TXN-001",
       "profileId": "compact-react-chromium-desktop",
       "status": "verified",
+      "verificationClass": "code-verifiable",
       "evidenceIds": [
         "kernel-laws"
       ],
@@ -1430,14 +1811,19 @@
     {
       "requirementId": "TXN-002",
       "profileId": "compact-react-chromium-desktop",
-      "status": "unresolved",
-      "evidenceIds": [],
-      "rationale": "The complete acceptance evidence described by the system design has not yet been produced for this profile."
+      "status": "verified",
+      "verificationClass": "code-verifiable",
+      "evidenceIds": [
+        "kernel-structural-sharing",
+        "runtime-fail-closed"
+      ],
+      "rationale": "Covered by repository-local automated evidence for this experimental profile."
     },
     {
       "requirementId": "TXN-003",
       "profileId": "compact-react-chromium-desktop",
       "status": "verified",
+      "verificationClass": "code-verifiable",
       "evidenceIds": [
         "kernel-laws"
       ],
@@ -1447,6 +1833,7 @@
       "requirementId": "TXN-004",
       "profileId": "compact-react-chromium-desktop",
       "status": "verified",
+      "verificationClass": "code-verifiable",
       "evidenceIds": [
         "kernel-laws"
       ],
@@ -1456,6 +1843,7 @@
       "requirementId": "TXN-005",
       "profileId": "compact-react-chromium-desktop",
       "status": "verified",
+      "verificationClass": "code-verifiable",
       "evidenceIds": [
         "kernel-laws"
       ],
@@ -1464,35 +1852,47 @@
     {
       "requirementId": "TXN-006",
       "profileId": "compact-react-chromium-desktop",
-      "status": "unresolved",
-      "evidenceIds": [],
-      "rationale": "The complete acceptance evidence described by the system design has not yet been produced for this profile."
+      "status": "verified",
+      "verificationClass": "code-verifiable",
+      "evidenceIds": [
+        "runtime-policy-contract"
+      ],
+      "rationale": "Covered by repository-local automated evidence for this experimental profile."
     },
     {
       "requirementId": "TXN-007",
       "profileId": "compact-react-chromium-desktop",
-      "status": "unresolved",
-      "evidenceIds": [],
-      "rationale": "The complete acceptance evidence described by the system design has not yet been produced for this profile."
+      "status": "verified",
+      "verificationClass": "code-verifiable",
+      "evidenceIds": [
+        "runtime-policy-contract"
+      ],
+      "rationale": "Covered by repository-local automated evidence for this experimental profile."
     },
     {
       "requirementId": "TXN-008",
       "profileId": "compact-react-chromium-desktop",
-      "status": "unresolved",
-      "evidenceIds": [],
-      "rationale": "The complete acceptance evidence described by the system design has not yet been produced for this profile."
+      "status": "verified",
+      "verificationClass": "code-verifiable",
+      "evidenceIds": [
+        "kernel-structural-sharing",
+        "localized-react-contract"
+      ],
+      "rationale": "Covered by repository-local automated evidence for this experimental profile."
     },
     {
       "requirementId": "A11Y-001",
       "profileId": "framework-adapter-contract-jsdom",
       "status": "not-applicable",
+      "verificationClass": "future-scope",
       "evidenceIds": [],
-      "rationale": "The published profile is explicitly experimental; this stable-release requirement is not claimed."
+      "rationale": "The framework store/lifecycle contract profile does not publish rendering, interaction, surface, or persistence support."
     },
     {
       "requirementId": "A11Y-002",
       "profileId": "framework-adapter-contract-jsdom",
       "status": "not-applicable",
+      "verificationClass": "future-scope",
       "evidenceIds": [],
       "rationale": "The framework store/lifecycle contract profile does not publish rendering, interaction, surface, or persistence support."
     },
@@ -1500,6 +1900,7 @@
       "requirementId": "A11Y-003",
       "profileId": "framework-adapter-contract-jsdom",
       "status": "not-applicable",
+      "verificationClass": "future-scope",
       "evidenceIds": [],
       "rationale": "The framework store/lifecycle contract profile does not publish rendering, interaction, surface, or persistence support."
     },
@@ -1507,6 +1908,7 @@
       "requirementId": "A11Y-004",
       "profileId": "framework-adapter-contract-jsdom",
       "status": "not-applicable",
+      "verificationClass": "future-scope",
       "evidenceIds": [],
       "rationale": "The framework store/lifecycle contract profile does not publish rendering, interaction, surface, or persistence support."
     },
@@ -1514,6 +1916,7 @@
       "requirementId": "A11Y-005",
       "profileId": "framework-adapter-contract-jsdom",
       "status": "not-applicable",
+      "verificationClass": "future-scope",
       "evidenceIds": [],
       "rationale": "The framework store/lifecycle contract profile does not publish rendering, interaction, surface, or persistence support."
     },
@@ -1521,6 +1924,7 @@
       "requirementId": "A11Y-006",
       "profileId": "framework-adapter-contract-jsdom",
       "status": "not-applicable",
+      "verificationClass": "future-scope",
       "evidenceIds": [],
       "rationale": "The framework store/lifecycle contract profile does not publish rendering, interaction, surface, or persistence support."
     },
@@ -1528,6 +1932,7 @@
       "requirementId": "A11Y-007",
       "profileId": "framework-adapter-contract-jsdom",
       "status": "not-applicable",
+      "verificationClass": "future-scope",
       "evidenceIds": [],
       "rationale": "The framework store/lifecycle contract profile does not publish rendering, interaction, surface, or persistence support."
     },
@@ -1535,127 +1940,156 @@
       "requirementId": "A11Y-008",
       "profileId": "framework-adapter-contract-jsdom",
       "status": "not-applicable",
+      "verificationClass": "future-scope",
       "evidenceIds": [],
       "rationale": "The framework store/lifecycle contract profile does not publish rendering, interaction, surface, or persistence support."
     },
     {
       "requirementId": "ACC-001",
       "profileId": "framework-adapter-contract-jsdom",
-      "status": "not-applicable",
+      "status": "blocked",
+      "verificationClass": "manual-external",
       "evidenceIds": [
         "conformance-harness"
       ],
-      "rationale": "The published profile is explicitly experimental; this stable-release requirement is not claimed."
+      "rationale": "This requirement needs manual, physical-system, independent-review, adoption, usability, or signed-approval evidence that repository automation cannot manufacture."
     },
     {
       "requirementId": "ACC-002",
       "profileId": "framework-adapter-contract-jsdom",
-      "status": "unresolved",
+      "status": "blocked",
+      "verificationClass": "manual-external",
       "evidenceIds": [],
-      "rationale": "The complete acceptance evidence described by the system design has not yet been produced for this profile."
+      "rationale": "This requirement needs manual, physical-system, independent-review, adoption, usability, or signed-approval evidence that repository automation cannot manufacture."
     },
     {
       "requirementId": "ACC-003",
       "profileId": "framework-adapter-contract-jsdom",
-      "status": "unresolved",
+      "status": "blocked",
+      "verificationClass": "manual-external",
       "evidenceIds": [],
-      "rationale": "The complete acceptance evidence described by the system design has not yet been produced for this profile."
+      "rationale": "This requirement needs manual, physical-system, independent-review, adoption, usability, or signed-approval evidence that repository automation cannot manufacture."
     },
     {
       "requirementId": "API-001",
       "profileId": "framework-adapter-contract-jsdom",
       "status": "unresolved",
+      "verificationClass": "code-verifiable",
       "evidenceIds": [],
-      "rationale": "The complete acceptance evidence described by the system design has not yet been produced for this profile."
+      "rationale": "The repository implementation or its requirement-specific static/model proof is incomplete for this profile."
     },
     {
       "requirementId": "API-002",
       "profileId": "framework-adapter-contract-jsdom",
       "status": "unresolved",
-      "evidenceIds": [],
-      "rationale": "The complete acceptance evidence described by the system design has not yet been produced for this profile."
+      "verificationClass": "code-verifiable",
+      "evidenceIds": [
+        "architecture-contract"
+      ],
+      "rationale": "The repository implementation or its requirement-specific static/model proof is incomplete for this profile."
     },
     {
       "requirementId": "API-003",
       "profileId": "framework-adapter-contract-jsdom",
       "status": "unresolved",
+      "verificationClass": "code-verifiable",
       "evidenceIds": [],
-      "rationale": "The complete acceptance evidence described by the system design has not yet been produced for this profile."
+      "rationale": "The repository implementation or its requirement-specific static/model proof is incomplete for this profile."
     },
     {
       "requirementId": "API-004",
       "profileId": "framework-adapter-contract-jsdom",
       "status": "unresolved",
+      "verificationClass": "code-verifiable",
       "evidenceIds": [],
-      "rationale": "The complete acceptance evidence described by the system design has not yet been produced for this profile."
+      "rationale": "The repository implementation or its requirement-specific static/model proof is incomplete for this profile."
     },
     {
       "requirementId": "API-005",
       "profileId": "framework-adapter-contract-jsdom",
       "status": "unresolved",
+      "verificationClass": "environment-verifiable",
       "evidenceIds": [],
-      "rationale": "The complete acceptance evidence described by the system design has not yet been produced for this profile."
+      "rationale": "A reproducible automated environment result with profile, workload, and execution metadata has not been recorded."
     },
     {
       "requirementId": "API-006",
       "profileId": "framework-adapter-contract-jsdom",
-      "status": "unresolved",
+      "status": "blocked",
+      "verificationClass": "manual-external",
       "evidenceIds": [],
-      "rationale": "The complete acceptance evidence described by the system design has not yet been produced for this profile."
+      "rationale": "This requirement needs manual, physical-system, independent-review, adoption, usability, or signed-approval evidence that repository automation cannot manufacture."
     },
     {
       "requirementId": "API-007",
       "profileId": "framework-adapter-contract-jsdom",
-      "status": "unresolved",
+      "status": "blocked",
+      "verificationClass": "manual-external",
       "evidenceIds": [],
-      "rationale": "The complete acceptance evidence described by the system design has not yet been produced for this profile."
+      "rationale": "This requirement needs manual, physical-system, independent-review, adoption, usability, or signed-approval evidence that repository automation cannot manufacture."
     },
     {
       "requirementId": "API-008",
       "profileId": "framework-adapter-contract-jsdom",
       "status": "unresolved",
-      "evidenceIds": [],
-      "rationale": "The complete acceptance evidence described by the system design has not yet been produced for this profile."
+      "verificationClass": "code-verifiable",
+      "evidenceIds": [
+        "architecture-contract"
+      ],
+      "rationale": "The repository implementation or its requirement-specific static/model proof is incomplete for this profile."
     },
     {
       "requirementId": "ARC-001",
       "profileId": "framework-adapter-contract-jsdom",
       "status": "unresolved",
-      "evidenceIds": [],
-      "rationale": "The complete acceptance evidence described by the system design has not yet been produced for this profile."
+      "verificationClass": "code-verifiable",
+      "evidenceIds": [
+        "dependency-architecture"
+      ],
+      "rationale": "The repository implementation or its requirement-specific static/model proof is incomplete for this profile."
     },
     {
       "requirementId": "ARC-002",
       "profileId": "framework-adapter-contract-jsdom",
       "status": "unresolved",
+      "verificationClass": "code-verifiable",
       "evidenceIds": [],
-      "rationale": "The complete acceptance evidence described by the system design has not yet been produced for this profile."
+      "rationale": "The repository implementation or its requirement-specific static/model proof is incomplete for this profile."
     },
     {
       "requirementId": "ARC-003",
       "profileId": "framework-adapter-contract-jsdom",
       "status": "unresolved",
+      "verificationClass": "code-verifiable",
       "evidenceIds": [],
-      "rationale": "The complete acceptance evidence described by the system design has not yet been produced for this profile."
+      "rationale": "The repository implementation or its requirement-specific static/model proof is incomplete for this profile."
     },
     {
       "requirementId": "ARC-004",
       "profileId": "framework-adapter-contract-jsdom",
       "status": "unresolved",
-      "evidenceIds": [],
-      "rationale": "The complete acceptance evidence described by the system design has not yet been produced for this profile."
+      "verificationClass": "code-verifiable",
+      "evidenceIds": [
+        "architecture-contract"
+      ],
+      "rationale": "The repository implementation or its requirement-specific static/model proof is incomplete for this profile."
     },
     {
       "requirementId": "ARC-005",
       "profileId": "framework-adapter-contract-jsdom",
       "status": "unresolved",
-      "evidenceIds": [],
-      "rationale": "The complete acceptance evidence described by the system design has not yet been produced for this profile."
+      "verificationClass": "code-verifiable",
+      "evidenceIds": [
+        "dependency-architecture",
+        "package-boundaries"
+      ],
+      "rationale": "The repository implementation or its requirement-specific static/model proof is incomplete for this profile."
     },
     {
       "requirementId": "COL-001",
       "profileId": "framework-adapter-contract-jsdom",
       "status": "not-applicable",
+      "verificationClass": "future-scope",
       "evidenceIds": [],
       "rationale": "The framework store/lifecycle contract profile does not publish rendering, interaction, surface, or persistence support."
     },
@@ -1663,6 +2097,7 @@
       "requirementId": "COL-002",
       "profileId": "framework-adapter-contract-jsdom",
       "status": "not-applicable",
+      "verificationClass": "future-scope",
       "evidenceIds": [],
       "rationale": "The framework store/lifecycle contract profile does not publish rendering, interaction, surface, or persistence support."
     },
@@ -1670,6 +2105,7 @@
       "requirementId": "COL-003",
       "profileId": "framework-adapter-contract-jsdom",
       "status": "not-applicable",
+      "verificationClass": "future-scope",
       "evidenceIds": [],
       "rationale": "The framework store/lifecycle contract profile does not publish rendering, interaction, surface, or persistence support."
     },
@@ -1677,6 +2113,7 @@
       "requirementId": "COL-004",
       "profileId": "framework-adapter-contract-jsdom",
       "status": "not-applicable",
+      "verificationClass": "future-scope",
       "evidenceIds": [],
       "rationale": "The framework store/lifecycle contract profile does not publish rendering, interaction, surface, or persistence support."
     },
@@ -1684,6 +2121,7 @@
       "requirementId": "COL-005",
       "profileId": "framework-adapter-contract-jsdom",
       "status": "not-applicable",
+      "verificationClass": "future-scope",
       "evidenceIds": [],
       "rationale": "The framework store/lifecycle contract profile does not publish rendering, interaction, surface, or persistence support."
     },
@@ -1691,6 +2129,7 @@
       "requirementId": "COL-006",
       "profileId": "framework-adapter-contract-jsdom",
       "status": "not-applicable",
+      "verificationClass": "future-scope",
       "evidenceIds": [],
       "rationale": "The framework store/lifecycle contract profile does not publish rendering, interaction, surface, or persistence support."
     },
@@ -1698,6 +2137,7 @@
       "requirementId": "DOM-001",
       "profileId": "framework-adapter-contract-jsdom",
       "status": "not-applicable",
+      "verificationClass": "future-scope",
       "evidenceIds": [],
       "rationale": "The framework store/lifecycle contract profile does not publish rendering, interaction, surface, or persistence support."
     },
@@ -1705,6 +2145,7 @@
       "requirementId": "DOM-002",
       "profileId": "framework-adapter-contract-jsdom",
       "status": "not-applicable",
+      "verificationClass": "future-scope",
       "evidenceIds": [],
       "rationale": "The framework store/lifecycle contract profile does not publish rendering, interaction, surface, or persistence support."
     },
@@ -1712,6 +2153,7 @@
       "requirementId": "DOM-003",
       "profileId": "framework-adapter-contract-jsdom",
       "status": "not-applicable",
+      "verificationClass": "future-scope",
       "evidenceIds": [],
       "rationale": "The framework store/lifecycle contract profile does not publish rendering, interaction, surface, or persistence support."
     },
@@ -1719,6 +2161,7 @@
       "requirementId": "DOM-004",
       "profileId": "framework-adapter-contract-jsdom",
       "status": "not-applicable",
+      "verificationClass": "future-scope",
       "evidenceIds": [],
       "rationale": "The framework store/lifecycle contract profile does not publish rendering, interaction, surface, or persistence support."
     },
@@ -1726,6 +2169,7 @@
       "requirementId": "DOM-005",
       "profileId": "framework-adapter-contract-jsdom",
       "status": "not-applicable",
+      "verificationClass": "future-scope",
       "evidenceIds": [],
       "rationale": "The framework store/lifecycle contract profile does not publish rendering, interaction, surface, or persistence support."
     },
@@ -1733,6 +2177,7 @@
       "requirementId": "EXP-001",
       "profileId": "framework-adapter-contract-jsdom",
       "status": "not-applicable",
+      "verificationClass": "future-scope",
       "evidenceIds": [],
       "rationale": "The framework store/lifecycle contract profile does not publish rendering, interaction, surface, or persistence support."
     },
@@ -1740,6 +2185,7 @@
       "requirementId": "EXP-002",
       "profileId": "framework-adapter-contract-jsdom",
       "status": "not-applicable",
+      "verificationClass": "future-scope",
       "evidenceIds": [],
       "rationale": "The framework store/lifecycle contract profile does not publish rendering, interaction, surface, or persistence support."
     },
@@ -1747,6 +2193,7 @@
       "requirementId": "EXP-003",
       "profileId": "framework-adapter-contract-jsdom",
       "status": "not-applicable",
+      "verificationClass": "future-scope",
       "evidenceIds": [],
       "rationale": "The framework store/lifecycle contract profile does not publish rendering, interaction, surface, or persistence support."
     },
@@ -1754,6 +2201,7 @@
       "requirementId": "EXP-004",
       "profileId": "framework-adapter-contract-jsdom",
       "status": "not-applicable",
+      "verificationClass": "future-scope",
       "evidenceIds": [],
       "rationale": "The framework store/lifecycle contract profile does not publish rendering, interaction, surface, or persistence support."
     },
@@ -1761,6 +2209,7 @@
       "requirementId": "EXP-005",
       "profileId": "framework-adapter-contract-jsdom",
       "status": "not-applicable",
+      "verificationClass": "future-scope",
       "evidenceIds": [],
       "rationale": "The framework store/lifecycle contract profile does not publish rendering, interaction, surface, or persistence support."
     },
@@ -1768,50 +2217,57 @@
       "requirementId": "EXT-001",
       "profileId": "framework-adapter-contract-jsdom",
       "status": "unresolved",
+      "verificationClass": "code-verifiable",
       "evidenceIds": [],
-      "rationale": "The complete acceptance evidence described by the system design has not yet been produced for this profile."
+      "rationale": "The repository implementation or its requirement-specific static/model proof is incomplete for this profile."
     },
     {
       "requirementId": "EXT-002",
       "profileId": "framework-adapter-contract-jsdom",
       "status": "unresolved",
+      "verificationClass": "code-verifiable",
       "evidenceIds": [],
-      "rationale": "The complete acceptance evidence described by the system design has not yet been produced for this profile."
+      "rationale": "The repository implementation or its requirement-specific static/model proof is incomplete for this profile."
     },
     {
       "requirementId": "EXT-003",
       "profileId": "framework-adapter-contract-jsdom",
       "status": "unresolved",
+      "verificationClass": "code-verifiable",
       "evidenceIds": [],
-      "rationale": "The complete acceptance evidence described by the system design has not yet been produced for this profile."
+      "rationale": "The repository implementation or its requirement-specific static/model proof is incomplete for this profile."
     },
     {
       "requirementId": "EXT-004",
       "profileId": "framework-adapter-contract-jsdom",
       "status": "unresolved",
+      "verificationClass": "code-verifiable",
       "evidenceIds": [],
-      "rationale": "The complete acceptance evidence described by the system design has not yet been produced for this profile."
+      "rationale": "The repository implementation or its requirement-specific static/model proof is incomplete for this profile."
     },
     {
       "requirementId": "EXT-005",
       "profileId": "framework-adapter-contract-jsdom",
       "status": "unresolved",
+      "verificationClass": "code-verifiable",
       "evidenceIds": [],
-      "rationale": "The complete acceptance evidence described by the system design has not yet been produced for this profile."
+      "rationale": "The repository implementation or its requirement-specific static/model proof is incomplete for this profile."
     },
     {
       "requirementId": "EXT-006",
       "profileId": "framework-adapter-contract-jsdom",
-      "status": "unresolved",
+      "status": "blocked",
+      "verificationClass": "manual-external",
       "evidenceIds": [
         "third-party-pilots"
       ],
-      "rationale": "The complete acceptance evidence described by the system design has not yet been produced for this profile."
+      "rationale": "This requirement needs manual, physical-system, independent-review, adoption, usability, or signed-approval evidence that repository automation cannot manufacture."
     },
     {
       "requirementId": "FOC-001",
       "profileId": "framework-adapter-contract-jsdom",
       "status": "not-applicable",
+      "verificationClass": "future-scope",
       "evidenceIds": [],
       "rationale": "The framework store/lifecycle contract profile does not publish rendering, interaction, surface, or persistence support."
     },
@@ -1819,6 +2275,7 @@
       "requirementId": "FOC-002",
       "profileId": "framework-adapter-contract-jsdom",
       "status": "not-applicable",
+      "verificationClass": "future-scope",
       "evidenceIds": [],
       "rationale": "The framework store/lifecycle contract profile does not publish rendering, interaction, surface, or persistence support."
     },
@@ -1826,6 +2283,7 @@
       "requirementId": "FOC-003",
       "profileId": "framework-adapter-contract-jsdom",
       "status": "not-applicable",
+      "verificationClass": "future-scope",
       "evidenceIds": [],
       "rationale": "The framework store/lifecycle contract profile does not publish rendering, interaction, surface, or persistence support."
     },
@@ -1833,6 +2291,7 @@
       "requirementId": "FOC-004",
       "profileId": "framework-adapter-contract-jsdom",
       "status": "not-applicable",
+      "verificationClass": "future-scope",
       "evidenceIds": [],
       "rationale": "The framework store/lifecycle contract profile does not publish rendering, interaction, surface, or persistence support."
     },
@@ -1840,6 +2299,7 @@
       "requirementId": "FOC-005",
       "profileId": "framework-adapter-contract-jsdom",
       "status": "not-applicable",
+      "verificationClass": "future-scope",
       "evidenceIds": [],
       "rationale": "The framework store/lifecycle contract profile does not publish rendering, interaction, surface, or persistence support."
     },
@@ -1847,6 +2307,7 @@
       "requirementId": "FOC-006",
       "profileId": "framework-adapter-contract-jsdom",
       "status": "not-applicable",
+      "verificationClass": "future-scope",
       "evidenceIds": [],
       "rationale": "The framework store/lifecycle contract profile does not publish rendering, interaction, surface, or persistence support."
     },
@@ -1854,8 +2315,9 @@
       "requirementId": "FWK-001",
       "profileId": "framework-adapter-contract-jsdom",
       "status": "verified",
+      "verificationClass": "environment-verifiable",
       "evidenceIds": [
-        "native-adapter-contract"
+        "framework-contract-result"
       ],
       "rationale": "Covered by repository-local automated evidence for this experimental profile."
     },
@@ -1863,15 +2325,17 @@
       "requirementId": "FWK-002",
       "profileId": "framework-adapter-contract-jsdom",
       "status": "unresolved",
+      "verificationClass": "environment-verifiable",
       "evidenceIds": [],
-      "rationale": "The complete acceptance evidence described by the system design has not yet been produced for this profile."
+      "rationale": "A reproducible automated environment result with profile, workload, and execution metadata has not been recorded."
     },
     {
       "requirementId": "FWK-003",
       "profileId": "framework-adapter-contract-jsdom",
       "status": "verified",
+      "verificationClass": "environment-verifiable",
       "evidenceIds": [
-        "native-adapter-contract"
+        "framework-contract-result"
       ],
       "rationale": "Covered by repository-local automated evidence for this experimental profile."
     },
@@ -1879,73 +2343,92 @@
       "requirementId": "FWK-004",
       "profileId": "framework-adapter-contract-jsdom",
       "status": "unresolved",
+      "verificationClass": "environment-verifiable",
       "evidenceIds": [
         "web-component-ssr"
       ],
-      "rationale": "The complete acceptance evidence described by the system design has not yet been produced for this profile."
+      "rationale": "A reproducible automated environment result with profile, workload, and execution metadata has not been recorded."
     },
     {
       "requirementId": "FWK-005",
       "profileId": "framework-adapter-contract-jsdom",
       "status": "unresolved",
+      "verificationClass": "code-verifiable",
       "evidenceIds": [],
-      "rationale": "The complete acceptance evidence described by the system design has not yet been produced for this profile."
+      "rationale": "The repository implementation or its requirement-specific static/model proof is incomplete for this profile."
     },
     {
       "requirementId": "FWK-006",
       "profileId": "framework-adapter-contract-jsdom",
-      "status": "verified",
+      "status": "blocked",
+      "verificationClass": "manual-external",
       "evidenceIds": [
         "native-adapter-contract"
       ],
-      "rationale": "Covered by repository-local automated evidence for this experimental profile."
+      "rationale": "This requirement needs manual, physical-system, independent-review, adoption, usability, or signed-approval evidence that repository automation cannot manufacture."
     },
     {
       "requirementId": "GOV-001",
       "profileId": "framework-adapter-contract-jsdom",
       "status": "unresolved",
-      "evidenceIds": [],
-      "rationale": "The complete acceptance evidence described by the system design has not yet been produced for this profile."
+      "verificationClass": "code-verifiable",
+      "evidenceIds": [
+        "evidence-taxonomy"
+      ],
+      "rationale": "The repository implementation or its requirement-specific static/model proof is incomplete for this profile."
     },
     {
       "requirementId": "GOV-002",
       "profileId": "framework-adapter-contract-jsdom",
       "status": "unresolved",
-      "evidenceIds": [],
-      "rationale": "The complete acceptance evidence described by the system design has not yet been produced for this profile."
+      "verificationClass": "code-verifiable",
+      "evidenceIds": [
+        "evidence-taxonomy"
+      ],
+      "rationale": "The repository implementation or its requirement-specific static/model proof is incomplete for this profile."
     },
     {
       "requirementId": "GOV-003",
       "profileId": "framework-adapter-contract-jsdom",
-      "status": "not-applicable",
+      "status": "blocked",
+      "verificationClass": "manual-external",
       "evidenceIds": [],
-      "rationale": "The published profile is explicitly experimental; this stable-release requirement is not claimed."
+      "rationale": "This requirement needs manual, physical-system, independent-review, adoption, usability, or signed-approval evidence that repository automation cannot manufacture."
     },
     {
       "requirementId": "GOV-004",
       "profileId": "framework-adapter-contract-jsdom",
       "status": "unresolved",
-      "evidenceIds": [],
-      "rationale": "The complete acceptance evidence described by the system design has not yet been produced for this profile."
+      "verificationClass": "code-verifiable",
+      "evidenceIds": [
+        "evidence-taxonomy",
+        "architecture-contract"
+      ],
+      "rationale": "The repository implementation or its requirement-specific static/model proof is incomplete for this profile."
     },
     {
       "requirementId": "GOV-005",
       "profileId": "framework-adapter-contract-jsdom",
-      "status": "unresolved",
+      "status": "blocked",
+      "verificationClass": "manual-external",
       "evidenceIds": [],
-      "rationale": "The complete acceptance evidence described by the system design has not yet been produced for this profile."
+      "rationale": "This requirement needs manual, physical-system, independent-review, adoption, usability, or signed-approval evidence that repository automation cannot manufacture."
     },
     {
       "requirementId": "GOV-006",
       "profileId": "framework-adapter-contract-jsdom",
       "status": "unresolved",
-      "evidenceIds": [],
-      "rationale": "The complete acceptance evidence described by the system design has not yet been produced for this profile."
+      "verificationClass": "code-verifiable",
+      "evidenceIds": [
+        "third-party-certification-contract"
+      ],
+      "rationale": "The repository implementation or its requirement-specific static/model proof is incomplete for this profile."
     },
     {
       "requirementId": "I18N-001",
       "profileId": "framework-adapter-contract-jsdom",
       "status": "not-applicable",
+      "verificationClass": "future-scope",
       "evidenceIds": [],
       "rationale": "The framework store/lifecycle contract profile does not publish rendering, interaction, surface, or persistence support."
     },
@@ -1953,6 +2436,7 @@
       "requirementId": "I18N-002",
       "profileId": "framework-adapter-contract-jsdom",
       "status": "not-applicable",
+      "verificationClass": "future-scope",
       "evidenceIds": [],
       "rationale": "The framework store/lifecycle contract profile does not publish rendering, interaction, surface, or persistence support."
     },
@@ -1960,6 +2444,7 @@
       "requirementId": "I18N-003",
       "profileId": "framework-adapter-contract-jsdom",
       "status": "not-applicable",
+      "verificationClass": "future-scope",
       "evidenceIds": [],
       "rationale": "The framework store/lifecycle contract profile does not publish rendering, interaction, surface, or persistence support."
     },
@@ -1967,6 +2452,7 @@
       "requirementId": "INT-001",
       "profileId": "framework-adapter-contract-jsdom",
       "status": "not-applicable",
+      "verificationClass": "future-scope",
       "evidenceIds": [],
       "rationale": "The framework store/lifecycle contract profile does not publish rendering, interaction, surface, or persistence support."
     },
@@ -1974,6 +2460,7 @@
       "requirementId": "INT-002",
       "profileId": "framework-adapter-contract-jsdom",
       "status": "not-applicable",
+      "verificationClass": "future-scope",
       "evidenceIds": [],
       "rationale": "The framework store/lifecycle contract profile does not publish rendering, interaction, surface, or persistence support."
     },
@@ -1981,6 +2468,7 @@
       "requirementId": "INT-003",
       "profileId": "framework-adapter-contract-jsdom",
       "status": "not-applicable",
+      "verificationClass": "future-scope",
       "evidenceIds": [],
       "rationale": "The framework store/lifecycle contract profile does not publish rendering, interaction, surface, or persistence support."
     },
@@ -1988,6 +2476,7 @@
       "requirementId": "INT-004",
       "profileId": "framework-adapter-contract-jsdom",
       "status": "not-applicable",
+      "verificationClass": "future-scope",
       "evidenceIds": [],
       "rationale": "The framework store/lifecycle contract profile does not publish rendering, interaction, surface, or persistence support."
     },
@@ -1995,6 +2484,7 @@
       "requirementId": "INT-005",
       "profileId": "framework-adapter-contract-jsdom",
       "status": "not-applicable",
+      "verificationClass": "future-scope",
       "evidenceIds": [],
       "rationale": "The framework store/lifecycle contract profile does not publish rendering, interaction, surface, or persistence support."
     },
@@ -2002,6 +2492,7 @@
       "requirementId": "INT-006",
       "profileId": "framework-adapter-contract-jsdom",
       "status": "not-applicable",
+      "verificationClass": "future-scope",
       "evidenceIds": [],
       "rationale": "The framework store/lifecycle contract profile does not publish rendering, interaction, surface, or persistence support."
     },
@@ -2009,6 +2500,7 @@
       "requirementId": "INT-007",
       "profileId": "framework-adapter-contract-jsdom",
       "status": "not-applicable",
+      "verificationClass": "future-scope",
       "evidenceIds": [],
       "rationale": "The framework store/lifecycle contract profile does not publish rendering, interaction, surface, or persistence support."
     },
@@ -2016,6 +2508,7 @@
       "requirementId": "LAY-001",
       "profileId": "framework-adapter-contract-jsdom",
       "status": "not-applicable",
+      "verificationClass": "future-scope",
       "evidenceIds": [],
       "rationale": "The framework store/lifecycle contract profile does not publish rendering, interaction, surface, or persistence support."
     },
@@ -2023,6 +2516,7 @@
       "requirementId": "LAY-002",
       "profileId": "framework-adapter-contract-jsdom",
       "status": "not-applicable",
+      "verificationClass": "future-scope",
       "evidenceIds": [],
       "rationale": "The framework store/lifecycle contract profile does not publish rendering, interaction, surface, or persistence support."
     },
@@ -2030,6 +2524,7 @@
       "requirementId": "LAY-003",
       "profileId": "framework-adapter-contract-jsdom",
       "status": "not-applicable",
+      "verificationClass": "future-scope",
       "evidenceIds": [],
       "rationale": "The framework store/lifecycle contract profile does not publish rendering, interaction, surface, or persistence support."
     },
@@ -2037,6 +2532,7 @@
       "requirementId": "LAY-004",
       "profileId": "framework-adapter-contract-jsdom",
       "status": "not-applicable",
+      "verificationClass": "future-scope",
       "evidenceIds": [],
       "rationale": "The framework store/lifecycle contract profile does not publish rendering, interaction, surface, or persistence support."
     },
@@ -2044,6 +2540,7 @@
       "requirementId": "LAY-005",
       "profileId": "framework-adapter-contract-jsdom",
       "status": "not-applicable",
+      "verificationClass": "future-scope",
       "evidenceIds": [],
       "rationale": "The framework store/lifecycle contract profile does not publish rendering, interaction, surface, or persistence support."
     },
@@ -2051,6 +2548,7 @@
       "requirementId": "LAY-006",
       "profileId": "framework-adapter-contract-jsdom",
       "status": "not-applicable",
+      "verificationClass": "future-scope",
       "evidenceIds": [],
       "rationale": "The framework store/lifecycle contract profile does not publish rendering, interaction, surface, or persistence support."
     },
@@ -2058,6 +2556,7 @@
       "requirementId": "LAY-007",
       "profileId": "framework-adapter-contract-jsdom",
       "status": "not-applicable",
+      "verificationClass": "future-scope",
       "evidenceIds": [],
       "rationale": "The framework store/lifecycle contract profile does not publish rendering, interaction, surface, or persistence support."
     },
@@ -2065,6 +2564,7 @@
       "requirementId": "LIF-001",
       "profileId": "framework-adapter-contract-jsdom",
       "status": "not-applicable",
+      "verificationClass": "future-scope",
       "evidenceIds": [],
       "rationale": "The framework store/lifecycle contract profile does not publish rendering, interaction, surface, or persistence support."
     },
@@ -2072,6 +2572,7 @@
       "requirementId": "LIF-002",
       "profileId": "framework-adapter-contract-jsdom",
       "status": "not-applicable",
+      "verificationClass": "future-scope",
       "evidenceIds": [],
       "rationale": "The framework store/lifecycle contract profile does not publish rendering, interaction, surface, or persistence support."
     },
@@ -2079,6 +2580,7 @@
       "requirementId": "LIF-003",
       "profileId": "framework-adapter-contract-jsdom",
       "status": "not-applicable",
+      "verificationClass": "future-scope",
       "evidenceIds": [],
       "rationale": "The framework store/lifecycle contract profile does not publish rendering, interaction, surface, or persistence support."
     },
@@ -2086,6 +2588,7 @@
       "requirementId": "LIF-004",
       "profileId": "framework-adapter-contract-jsdom",
       "status": "not-applicable",
+      "verificationClass": "future-scope",
       "evidenceIds": [],
       "rationale": "The framework store/lifecycle contract profile does not publish rendering, interaction, surface, or persistence support."
     },
@@ -2093,6 +2596,7 @@
       "requirementId": "LIF-005",
       "profileId": "framework-adapter-contract-jsdom",
       "status": "not-applicable",
+      "verificationClass": "future-scope",
       "evidenceIds": [],
       "rationale": "The framework store/lifecycle contract profile does not publish rendering, interaction, surface, or persistence support."
     },
@@ -2100,6 +2604,7 @@
       "requirementId": "LIF-006",
       "profileId": "framework-adapter-contract-jsdom",
       "status": "not-applicable",
+      "verificationClass": "future-scope",
       "evidenceIds": [],
       "rationale": "The framework store/lifecycle contract profile does not publish rendering, interaction, surface, or persistence support."
     },
@@ -2107,6 +2612,7 @@
       "requirementId": "LIF-007",
       "profileId": "framework-adapter-contract-jsdom",
       "status": "not-applicable",
+      "verificationClass": "future-scope",
       "evidenceIds": [],
       "rationale": "The framework store/lifecycle contract profile does not publish rendering, interaction, surface, or persistence support."
     },
@@ -2114,6 +2620,7 @@
       "requirementId": "MOD-001",
       "profileId": "framework-adapter-contract-jsdom",
       "status": "not-applicable",
+      "verificationClass": "future-scope",
       "evidenceIds": [],
       "rationale": "The framework store/lifecycle contract profile does not publish rendering, interaction, surface, or persistence support."
     },
@@ -2121,6 +2628,7 @@
       "requirementId": "MOD-002",
       "profileId": "framework-adapter-contract-jsdom",
       "status": "not-applicable",
+      "verificationClass": "future-scope",
       "evidenceIds": [],
       "rationale": "The framework store/lifecycle contract profile does not publish rendering, interaction, surface, or persistence support."
     },
@@ -2128,6 +2636,7 @@
       "requirementId": "MOD-003",
       "profileId": "framework-adapter-contract-jsdom",
       "status": "not-applicable",
+      "verificationClass": "future-scope",
       "evidenceIds": [],
       "rationale": "The framework store/lifecycle contract profile does not publish rendering, interaction, surface, or persistence support."
     },
@@ -2135,6 +2644,7 @@
       "requirementId": "MOD-004",
       "profileId": "framework-adapter-contract-jsdom",
       "status": "not-applicable",
+      "verificationClass": "future-scope",
       "evidenceIds": [],
       "rationale": "The framework store/lifecycle contract profile does not publish rendering, interaction, surface, or persistence support."
     },
@@ -2142,6 +2652,7 @@
       "requirementId": "MOD-005",
       "profileId": "framework-adapter-contract-jsdom",
       "status": "not-applicable",
+      "verificationClass": "future-scope",
       "evidenceIds": [],
       "rationale": "The framework store/lifecycle contract profile does not publish rendering, interaction, surface, or persistence support."
     },
@@ -2149,6 +2660,7 @@
       "requirementId": "MOD-006",
       "profileId": "framework-adapter-contract-jsdom",
       "status": "not-applicable",
+      "verificationClass": "future-scope",
       "evidenceIds": [],
       "rationale": "The framework store/lifecycle contract profile does not publish rendering, interaction, surface, or persistence support."
     },
@@ -2156,6 +2668,7 @@
       "requirementId": "MOT-001",
       "profileId": "framework-adapter-contract-jsdom",
       "status": "not-applicable",
+      "verificationClass": "future-scope",
       "evidenceIds": [],
       "rationale": "The framework store/lifecycle contract profile does not publish rendering, interaction, surface, or persistence support."
     },
@@ -2163,6 +2676,7 @@
       "requirementId": "MOT-002",
       "profileId": "framework-adapter-contract-jsdom",
       "status": "not-applicable",
+      "verificationClass": "future-scope",
       "evidenceIds": [],
       "rationale": "The framework store/lifecycle contract profile does not publish rendering, interaction, surface, or persistence support."
     },
@@ -2170,6 +2684,7 @@
       "requirementId": "MOT-003",
       "profileId": "framework-adapter-contract-jsdom",
       "status": "not-applicable",
+      "verificationClass": "future-scope",
       "evidenceIds": [],
       "rationale": "The framework store/lifecycle contract profile does not publish rendering, interaction, surface, or persistence support."
     },
@@ -2177,6 +2692,7 @@
       "requirementId": "MOT-004",
       "profileId": "framework-adapter-contract-jsdom",
       "status": "not-applicable",
+      "verificationClass": "future-scope",
       "evidenceIds": [],
       "rationale": "The framework store/lifecycle contract profile does not publish rendering, interaction, surface, or persistence support."
     },
@@ -2184,6 +2700,7 @@
       "requirementId": "MOT-005",
       "profileId": "framework-adapter-contract-jsdom",
       "status": "not-applicable",
+      "verificationClass": "future-scope",
       "evidenceIds": [],
       "rationale": "The framework store/lifecycle contract profile does not publish rendering, interaction, surface, or persistence support."
     },
@@ -2191,6 +2708,7 @@
       "requirementId": "MOT-006",
       "profileId": "framework-adapter-contract-jsdom",
       "status": "not-applicable",
+      "verificationClass": "future-scope",
       "evidenceIds": [],
       "rationale": "The framework store/lifecycle contract profile does not publish rendering, interaction, surface, or persistence support."
     },
@@ -2198,6 +2716,7 @@
       "requirementId": "MOT-007",
       "profileId": "framework-adapter-contract-jsdom",
       "status": "not-applicable",
+      "verificationClass": "future-scope",
       "evidenceIds": [],
       "rationale": "The framework store/lifecycle contract profile does not publish rendering, interaction, surface, or persistence support."
     },
@@ -2205,6 +2724,7 @@
       "requirementId": "MOT-008",
       "profileId": "framework-adapter-contract-jsdom",
       "status": "not-applicable",
+      "verificationClass": "future-scope",
       "evidenceIds": [],
       "rationale": "The framework store/lifecycle contract profile does not publish rendering, interaction, surface, or persistence support."
     },
@@ -2212,6 +2732,7 @@
       "requirementId": "MOT-009",
       "profileId": "framework-adapter-contract-jsdom",
       "status": "not-applicable",
+      "verificationClass": "future-scope",
       "evidenceIds": [],
       "rationale": "The framework store/lifecycle contract profile does not publish rendering, interaction, surface, or persistence support."
     },
@@ -2219,6 +2740,7 @@
       "requirementId": "MOT-010",
       "profileId": "framework-adapter-contract-jsdom",
       "status": "not-applicable",
+      "verificationClass": "future-scope",
       "evidenceIds": [],
       "rationale": "The framework store/lifecycle contract profile does not publish rendering, interaction, surface, or persistence support."
     },
@@ -2226,50 +2748,57 @@
       "requirementId": "OBS-001",
       "profileId": "framework-adapter-contract-jsdom",
       "status": "unresolved",
+      "verificationClass": "environment-verifiable",
       "evidenceIds": [],
-      "rationale": "The complete acceptance evidence described by the system design has not yet been produced for this profile."
+      "rationale": "A reproducible automated environment result with profile, workload, and execution metadata has not been recorded."
     },
     {
       "requirementId": "OBS-002",
       "profileId": "framework-adapter-contract-jsdom",
       "status": "unresolved",
+      "verificationClass": "code-verifiable",
       "evidenceIds": [],
-      "rationale": "The complete acceptance evidence described by the system design has not yet been produced for this profile."
+      "rationale": "The repository implementation or its requirement-specific static/model proof is incomplete for this profile."
     },
     {
       "requirementId": "OBS-003",
       "profileId": "framework-adapter-contract-jsdom",
       "status": "unresolved",
+      "verificationClass": "code-verifiable",
       "evidenceIds": [],
-      "rationale": "The complete acceptance evidence described by the system design has not yet been produced for this profile."
+      "rationale": "The repository implementation or its requirement-specific static/model proof is incomplete for this profile."
     },
     {
       "requirementId": "OBS-004",
       "profileId": "framework-adapter-contract-jsdom",
       "status": "unresolved",
+      "verificationClass": "code-verifiable",
       "evidenceIds": [],
-      "rationale": "The complete acceptance evidence described by the system design has not yet been produced for this profile."
+      "rationale": "The repository implementation or its requirement-specific static/model proof is incomplete for this profile."
     },
     {
       "requirementId": "OBS-005",
       "profileId": "framework-adapter-contract-jsdom",
       "status": "unresolved",
+      "verificationClass": "code-verifiable",
       "evidenceIds": [],
-      "rationale": "The complete acceptance evidence described by the system design has not yet been produced for this profile."
+      "rationale": "The repository implementation or its requirement-specific static/model proof is incomplete for this profile."
     },
     {
       "requirementId": "OBS-006",
       "profileId": "framework-adapter-contract-jsdom",
       "status": "unresolved",
+      "verificationClass": "code-verifiable",
       "evidenceIds": [
         "conformance-harness"
       ],
-      "rationale": "The complete acceptance evidence described by the system design has not yet been produced for this profile."
+      "rationale": "The repository implementation or its requirement-specific static/model proof is incomplete for this profile."
     },
     {
       "requirementId": "PER-001",
       "profileId": "framework-adapter-contract-jsdom",
       "status": "not-applicable",
+      "verificationClass": "future-scope",
       "evidenceIds": [],
       "rationale": "The framework store/lifecycle contract profile does not publish rendering, interaction, surface, or persistence support."
     },
@@ -2277,6 +2806,7 @@
       "requirementId": "PER-002",
       "profileId": "framework-adapter-contract-jsdom",
       "status": "not-applicable",
+      "verificationClass": "future-scope",
       "evidenceIds": [],
       "rationale": "The framework store/lifecycle contract profile does not publish rendering, interaction, surface, or persistence support."
     },
@@ -2284,6 +2814,7 @@
       "requirementId": "PER-003",
       "profileId": "framework-adapter-contract-jsdom",
       "status": "not-applicable",
+      "verificationClass": "future-scope",
       "evidenceIds": [],
       "rationale": "The framework store/lifecycle contract profile does not publish rendering, interaction, surface, or persistence support."
     },
@@ -2291,6 +2822,7 @@
       "requirementId": "PER-004",
       "profileId": "framework-adapter-contract-jsdom",
       "status": "not-applicable",
+      "verificationClass": "future-scope",
       "evidenceIds": [],
       "rationale": "The framework store/lifecycle contract profile does not publish rendering, interaction, surface, or persistence support."
     },
@@ -2298,6 +2830,7 @@
       "requirementId": "PER-005",
       "profileId": "framework-adapter-contract-jsdom",
       "status": "not-applicable",
+      "verificationClass": "future-scope",
       "evidenceIds": [],
       "rationale": "The framework store/lifecycle contract profile does not publish rendering, interaction, surface, or persistence support."
     },
@@ -2305,6 +2838,7 @@
       "requirementId": "PER-006",
       "profileId": "framework-adapter-contract-jsdom",
       "status": "not-applicable",
+      "verificationClass": "future-scope",
       "evidenceIds": [],
       "rationale": "The framework store/lifecycle contract profile does not publish rendering, interaction, surface, or persistence support."
     },
@@ -2312,6 +2846,7 @@
       "requirementId": "PER-007",
       "profileId": "framework-adapter-contract-jsdom",
       "status": "not-applicable",
+      "verificationClass": "future-scope",
       "evidenceIds": [],
       "rationale": "The framework store/lifecycle contract profile does not publish rendering, interaction, surface, or persistence support."
     },
@@ -2319,6 +2854,7 @@
       "requirementId": "PER-008",
       "profileId": "framework-adapter-contract-jsdom",
       "status": "not-applicable",
+      "verificationClass": "future-scope",
       "evidenceIds": [],
       "rationale": "The framework store/lifecycle contract profile does not publish rendering, interaction, surface, or persistence support."
     },
@@ -2326,6 +2862,7 @@
       "requirementId": "PKG-001",
       "profileId": "framework-adapter-contract-jsdom",
       "status": "not-applicable",
+      "verificationClass": "future-scope",
       "evidenceIds": [],
       "rationale": "The framework store/lifecycle contract profile does not publish rendering, interaction, surface, or persistence support."
     },
@@ -2333,6 +2870,7 @@
       "requirementId": "PKG-002",
       "profileId": "framework-adapter-contract-jsdom",
       "status": "not-applicable",
+      "verificationClass": "future-scope",
       "evidenceIds": [],
       "rationale": "The framework store/lifecycle contract profile does not publish rendering, interaction, surface, or persistence support."
     },
@@ -2340,6 +2878,7 @@
       "requirementId": "PKG-003",
       "profileId": "framework-adapter-contract-jsdom",
       "status": "not-applicable",
+      "verificationClass": "future-scope",
       "evidenceIds": [],
       "rationale": "The framework store/lifecycle contract profile does not publish rendering, interaction, surface, or persistence support."
     },
@@ -2347,6 +2886,7 @@
       "requirementId": "PKG-004",
       "profileId": "framework-adapter-contract-jsdom",
       "status": "not-applicable",
+      "verificationClass": "future-scope",
       "evidenceIds": [],
       "rationale": "The framework store/lifecycle contract profile does not publish rendering, interaction, surface, or persistence support."
     },
@@ -2354,6 +2894,7 @@
       "requirementId": "PKG-005",
       "profileId": "framework-adapter-contract-jsdom",
       "status": "not-applicable",
+      "verificationClass": "future-scope",
       "evidenceIds": [],
       "rationale": "The framework store/lifecycle contract profile does not publish rendering, interaction, surface, or persistence support."
     },
@@ -2361,6 +2902,7 @@
       "requirementId": "PRF-001",
       "profileId": "framework-adapter-contract-jsdom",
       "status": "not-applicable",
+      "verificationClass": "future-scope",
       "evidenceIds": [],
       "rationale": "The framework store/lifecycle contract profile does not publish rendering, interaction, surface, or persistence support."
     },
@@ -2368,6 +2910,7 @@
       "requirementId": "PRF-002",
       "profileId": "framework-adapter-contract-jsdom",
       "status": "not-applicable",
+      "verificationClass": "future-scope",
       "evidenceIds": [],
       "rationale": "The framework store/lifecycle contract profile does not publish rendering, interaction, surface, or persistence support."
     },
@@ -2375,6 +2918,7 @@
       "requirementId": "PRF-003",
       "profileId": "framework-adapter-contract-jsdom",
       "status": "not-applicable",
+      "verificationClass": "future-scope",
       "evidenceIds": [],
       "rationale": "The framework store/lifecycle contract profile does not publish rendering, interaction, surface, or persistence support."
     },
@@ -2382,6 +2926,7 @@
       "requirementId": "PRF-004",
       "profileId": "framework-adapter-contract-jsdom",
       "status": "not-applicable",
+      "verificationClass": "future-scope",
       "evidenceIds": [],
       "rationale": "The framework store/lifecycle contract profile does not publish rendering, interaction, surface, or persistence support."
     },
@@ -2389,6 +2934,7 @@
       "requirementId": "PRF-005",
       "profileId": "framework-adapter-contract-jsdom",
       "status": "not-applicable",
+      "verificationClass": "future-scope",
       "evidenceIds": [],
       "rationale": "The framework store/lifecycle contract profile does not publish rendering, interaction, surface, or persistence support."
     },
@@ -2396,6 +2942,7 @@
       "requirementId": "PRF-006",
       "profileId": "framework-adapter-contract-jsdom",
       "status": "not-applicable",
+      "verificationClass": "future-scope",
       "evidenceIds": [],
       "rationale": "The framework store/lifecycle contract profile does not publish rendering, interaction, surface, or persistence support."
     },
@@ -2403,6 +2950,7 @@
       "requirementId": "PRF-007",
       "profileId": "framework-adapter-contract-jsdom",
       "status": "not-applicable",
+      "verificationClass": "future-scope",
       "evidenceIds": [],
       "rationale": "The framework store/lifecycle contract profile does not publish rendering, interaction, surface, or persistence support."
     },
@@ -2410,47 +2958,56 @@
       "requirementId": "QLT-001",
       "profileId": "framework-adapter-contract-jsdom",
       "status": "unresolved",
+      "verificationClass": "code-verifiable",
       "evidenceIds": [
-        "conformance-harness"
+        "conformance-harness",
+        "evidence-taxonomy"
       ],
-      "rationale": "The complete acceptance evidence described by the system design has not yet been produced for this profile."
+      "rationale": "The repository implementation or its requirement-specific static/model proof is incomplete for this profile."
     },
     {
       "requirementId": "QLT-002",
       "profileId": "framework-adapter-contract-jsdom",
       "status": "unresolved",
+      "verificationClass": "code-verifiable",
       "evidenceIds": [
-        "conformance-harness"
+        "conformance-harness",
+        "evidence-taxonomy"
       ],
-      "rationale": "The complete acceptance evidence described by the system design has not yet been produced for this profile."
+      "rationale": "The repository implementation or its requirement-specific static/model proof is incomplete for this profile."
     },
     {
       "requirementId": "QLT-003",
       "profileId": "framework-adapter-contract-jsdom",
       "status": "unresolved",
+      "verificationClass": "environment-verifiable",
       "evidenceIds": [],
-      "rationale": "The complete acceptance evidence described by the system design has not yet been produced for this profile."
+      "rationale": "A reproducible automated environment result with profile, workload, and execution metadata has not been recorded."
     },
     {
       "requirementId": "QLT-004",
       "profileId": "framework-adapter-contract-jsdom",
-      "status": "not-applicable",
+      "status": "unresolved",
+      "verificationClass": "code-verifiable",
       "evidenceIds": [
-        "conformance-harness"
+        "conformance-harness",
+        "evidence-taxonomy"
       ],
-      "rationale": "The published profile is explicitly experimental; this stable-release requirement is not claimed."
+      "rationale": "The repository implementation or its requirement-specific static/model proof is incomplete for this profile."
     },
     {
       "requirementId": "QLT-005",
       "profileId": "framework-adapter-contract-jsdom",
-      "status": "unresolved",
+      "status": "blocked",
+      "verificationClass": "manual-external",
       "evidenceIds": [],
-      "rationale": "The complete acceptance evidence described by the system design has not yet been produced for this profile."
+      "rationale": "This requirement needs manual, physical-system, independent-review, adoption, usability, or signed-approval evidence that repository automation cannot manufacture."
     },
     {
       "requirementId": "REN-001",
       "profileId": "framework-adapter-contract-jsdom",
       "status": "not-applicable",
+      "verificationClass": "future-scope",
       "evidenceIds": [],
       "rationale": "The framework store/lifecycle contract profile does not publish rendering, interaction, surface, or persistence support."
     },
@@ -2458,6 +3015,7 @@
       "requirementId": "REN-002",
       "profileId": "framework-adapter-contract-jsdom",
       "status": "not-applicable",
+      "verificationClass": "future-scope",
       "evidenceIds": [],
       "rationale": "The framework store/lifecycle contract profile does not publish rendering, interaction, surface, or persistence support."
     },
@@ -2465,6 +3023,7 @@
       "requirementId": "REN-003",
       "profileId": "framework-adapter-contract-jsdom",
       "status": "not-applicable",
+      "verificationClass": "future-scope",
       "evidenceIds": [],
       "rationale": "The framework store/lifecycle contract profile does not publish rendering, interaction, surface, or persistence support."
     },
@@ -2472,6 +3031,7 @@
       "requirementId": "REN-004",
       "profileId": "framework-adapter-contract-jsdom",
       "status": "not-applicable",
+      "verificationClass": "future-scope",
       "evidenceIds": [],
       "rationale": "The framework store/lifecycle contract profile does not publish rendering, interaction, surface, or persistence support."
     },
@@ -2479,6 +3039,7 @@
       "requirementId": "REN-005",
       "profileId": "framework-adapter-contract-jsdom",
       "status": "not-applicable",
+      "verificationClass": "future-scope",
       "evidenceIds": [],
       "rationale": "The framework store/lifecycle contract profile does not publish rendering, interaction, surface, or persistence support."
     },
@@ -2486,6 +3047,7 @@
       "requirementId": "REN-006",
       "profileId": "framework-adapter-contract-jsdom",
       "status": "not-applicable",
+      "verificationClass": "future-scope",
       "evidenceIds": [],
       "rationale": "The framework store/lifecycle contract profile does not publish rendering, interaction, surface, or persistence support."
     },
@@ -2493,6 +3055,7 @@
       "requirementId": "RSK-001",
       "profileId": "framework-adapter-contract-jsdom",
       "status": "not-applicable",
+      "verificationClass": "future-scope",
       "evidenceIds": [],
       "rationale": "The framework store/lifecycle contract profile does not publish rendering, interaction, surface, or persistence support."
     },
@@ -2500,6 +3063,7 @@
       "requirementId": "RSK-002",
       "profileId": "framework-adapter-contract-jsdom",
       "status": "not-applicable",
+      "verificationClass": "future-scope",
       "evidenceIds": [],
       "rationale": "The framework store/lifecycle contract profile does not publish rendering, interaction, surface, or persistence support."
     },
@@ -2507,6 +3071,7 @@
       "requirementId": "RSK-003",
       "profileId": "framework-adapter-contract-jsdom",
       "status": "not-applicable",
+      "verificationClass": "future-scope",
       "evidenceIds": [],
       "rationale": "The framework store/lifecycle contract profile does not publish rendering, interaction, surface, or persistence support."
     },
@@ -2514,6 +3079,7 @@
       "requirementId": "RSK-004",
       "profileId": "framework-adapter-contract-jsdom",
       "status": "not-applicable",
+      "verificationClass": "future-scope",
       "evidenceIds": [],
       "rationale": "The framework store/lifecycle contract profile does not publish rendering, interaction, surface, or persistence support."
     },
@@ -2521,6 +3087,7 @@
       "requirementId": "RSP-001",
       "profileId": "framework-adapter-contract-jsdom",
       "status": "not-applicable",
+      "verificationClass": "future-scope",
       "evidenceIds": [],
       "rationale": "The framework store/lifecycle contract profile does not publish rendering, interaction, surface, or persistence support."
     },
@@ -2528,6 +3095,7 @@
       "requirementId": "RSP-002",
       "profileId": "framework-adapter-contract-jsdom",
       "status": "not-applicable",
+      "verificationClass": "future-scope",
       "evidenceIds": [],
       "rationale": "The framework store/lifecycle contract profile does not publish rendering, interaction, surface, or persistence support."
     },
@@ -2535,96 +3103,119 @@
       "requirementId": "SCP-001",
       "profileId": "framework-adapter-contract-jsdom",
       "status": "unresolved",
-      "evidenceIds": [],
-      "rationale": "The complete acceptance evidence described by the system design has not yet been produced for this profile."
+      "verificationClass": "code-verifiable",
+      "evidenceIds": [
+        "evidence-taxonomy"
+      ],
+      "rationale": "The repository implementation or its requirement-specific static/model proof is incomplete for this profile."
     },
     {
       "requirementId": "SCP-002",
       "profileId": "framework-adapter-contract-jsdom",
       "status": "unresolved",
-      "evidenceIds": [],
-      "rationale": "The complete acceptance evidence described by the system design has not yet been produced for this profile."
+      "verificationClass": "code-verifiable",
+      "evidenceIds": [
+        "evidence-taxonomy"
+      ],
+      "rationale": "The repository implementation or its requirement-specific static/model proof is incomplete for this profile."
     },
     {
       "requirementId": "SCP-003",
       "profileId": "framework-adapter-contract-jsdom",
       "status": "unresolved",
-      "evidenceIds": [],
-      "rationale": "The complete acceptance evidence described by the system design has not yet been produced for this profile."
+      "verificationClass": "code-verifiable",
+      "evidenceIds": [
+        "evidence-taxonomy"
+      ],
+      "rationale": "The repository implementation or its requirement-specific static/model proof is incomplete for this profile."
     },
     {
       "requirementId": "SCP-004",
       "profileId": "framework-adapter-contract-jsdom",
       "status": "unresolved",
-      "evidenceIds": [],
-      "rationale": "The complete acceptance evidence described by the system design has not yet been produced for this profile."
+      "verificationClass": "code-verifiable",
+      "evidenceIds": [
+        "evidence-taxonomy"
+      ],
+      "rationale": "The repository implementation or its requirement-specific static/model proof is incomplete for this profile."
     },
     {
       "requirementId": "SEC-001",
       "profileId": "framework-adapter-contract-jsdom",
       "status": "unresolved",
+      "verificationClass": "code-verifiable",
       "evidenceIds": [],
-      "rationale": "The complete acceptance evidence described by the system design has not yet been produced for this profile."
+      "rationale": "The repository implementation or its requirement-specific static/model proof is incomplete for this profile."
     },
     {
       "requirementId": "SEC-002",
       "profileId": "framework-adapter-contract-jsdom",
       "status": "unresolved",
+      "verificationClass": "code-verifiable",
       "evidenceIds": [
         "independent-security-review"
       ],
-      "rationale": "The complete acceptance evidence described by the system design has not yet been produced for this profile."
+      "rationale": "The repository implementation or its requirement-specific static/model proof is incomplete for this profile."
     },
     {
       "requirementId": "SEC-003",
       "profileId": "framework-adapter-contract-jsdom",
-      "status": "not-applicable",
+      "status": "unresolved",
+      "verificationClass": "environment-verifiable",
       "evidenceIds": [
         "independent-security-review"
       ],
-      "rationale": "The published profile is explicitly experimental; this stable-release requirement is not claimed."
+      "rationale": "A reproducible automated environment result with profile, workload, and execution metadata has not been recorded."
     },
     {
       "requirementId": "SEC-004",
       "profileId": "framework-adapter-contract-jsdom",
       "status": "unresolved",
+      "verificationClass": "code-verifiable",
       "evidenceIds": [],
-      "rationale": "The complete acceptance evidence described by the system design has not yet been produced for this profile."
+      "rationale": "The repository implementation or its requirement-specific static/model proof is incomplete for this profile."
     },
     {
       "requirementId": "SEC-005",
       "profileId": "framework-adapter-contract-jsdom",
       "status": "unresolved",
+      "verificationClass": "environment-verifiable",
       "evidenceIds": [],
-      "rationale": "The complete acceptance evidence described by the system design has not yet been produced for this profile."
+      "rationale": "A reproducible automated environment result with profile, workload, and execution metadata has not been recorded."
     },
     {
       "requirementId": "SEC-006",
       "profileId": "framework-adapter-contract-jsdom",
       "status": "unresolved",
+      "verificationClass": "code-verifiable",
       "evidenceIds": [],
-      "rationale": "The complete acceptance evidence described by the system design has not yet been produced for this profile."
+      "rationale": "The repository implementation or its requirement-specific static/model proof is incomplete for this profile."
     },
     {
       "requirementId": "SEC-007",
       "profileId": "framework-adapter-contract-jsdom",
-      "status": "not-applicable",
+      "status": "unresolved",
+      "verificationClass": "code-verifiable",
       "evidenceIds": [
         "independent-security-review"
       ],
-      "rationale": "The published profile is explicitly experimental; this stable-release requirement is not claimed."
+      "rationale": "The repository implementation or its requirement-specific static/model proof is incomplete for this profile."
     },
     {
       "requirementId": "SEC-008",
       "profileId": "framework-adapter-contract-jsdom",
       "status": "unresolved",
-      "evidenceIds": [],
-      "rationale": "The complete acceptance evidence described by the system design has not yet been produced for this profile."
+      "verificationClass": "code-verifiable",
+      "evidenceIds": [
+        "package-boundaries"
+      ],
+      "rationale": "The repository implementation or its requirement-specific static/model proof is incomplete for this profile."
     },
     {
       "requirementId": "SUR-001",
       "profileId": "framework-adapter-contract-jsdom",
       "status": "not-applicable",
+      "verificationClass": "future-scope",
       "evidenceIds": [],
       "rationale": "The framework store/lifecycle contract profile does not publish rendering, interaction, surface, or persistence support."
     },
@@ -2632,6 +3223,7 @@
       "requirementId": "SUR-002",
       "profileId": "framework-adapter-contract-jsdom",
       "status": "not-applicable",
+      "verificationClass": "future-scope",
       "evidenceIds": [],
       "rationale": "The framework store/lifecycle contract profile does not publish rendering, interaction, surface, or persistence support."
     },
@@ -2639,6 +3231,7 @@
       "requirementId": "SUR-003",
       "profileId": "framework-adapter-contract-jsdom",
       "status": "not-applicable",
+      "verificationClass": "future-scope",
       "evidenceIds": [],
       "rationale": "The framework store/lifecycle contract profile does not publish rendering, interaction, surface, or persistence support."
     },
@@ -2646,6 +3239,7 @@
       "requirementId": "SUR-004",
       "profileId": "framework-adapter-contract-jsdom",
       "status": "not-applicable",
+      "verificationClass": "future-scope",
       "evidenceIds": [],
       "rationale": "The framework store/lifecycle contract profile does not publish rendering, interaction, surface, or persistence support."
     },
@@ -2653,6 +3247,7 @@
       "requirementId": "SUR-005",
       "profileId": "framework-adapter-contract-jsdom",
       "status": "not-applicable",
+      "verificationClass": "future-scope",
       "evidenceIds": [],
       "rationale": "The framework store/lifecycle contract profile does not publish rendering, interaction, surface, or persistence support."
     },
@@ -2660,6 +3255,7 @@
       "requirementId": "SUR-006",
       "profileId": "framework-adapter-contract-jsdom",
       "status": "not-applicable",
+      "verificationClass": "future-scope",
       "evidenceIds": [],
       "rationale": "The framework store/lifecycle contract profile does not publish rendering, interaction, surface, or persistence support."
     },
@@ -2667,6 +3263,7 @@
       "requirementId": "SUR-007",
       "profileId": "framework-adapter-contract-jsdom",
       "status": "not-applicable",
+      "verificationClass": "future-scope",
       "evidenceIds": [],
       "rationale": "The framework store/lifecycle contract profile does not publish rendering, interaction, surface, or persistence support."
     },
@@ -2674,6 +3271,7 @@
       "requirementId": "SYS-001",
       "profileId": "framework-adapter-contract-jsdom",
       "status": "not-applicable",
+      "verificationClass": "future-scope",
       "evidenceIds": [],
       "rationale": "The framework store/lifecycle contract profile does not publish rendering, interaction, surface, or persistence support."
     },
@@ -2681,6 +3279,7 @@
       "requirementId": "SYS-002",
       "profileId": "framework-adapter-contract-jsdom",
       "status": "not-applicable",
+      "verificationClass": "future-scope",
       "evidenceIds": [],
       "rationale": "The framework store/lifecycle contract profile does not publish rendering, interaction, surface, or persistence support."
     },
@@ -2688,6 +3287,7 @@
       "requirementId": "SYS-003",
       "profileId": "framework-adapter-contract-jsdom",
       "status": "not-applicable",
+      "verificationClass": "future-scope",
       "evidenceIds": [],
       "rationale": "The framework store/lifecycle contract profile does not publish rendering, interaction, surface, or persistence support."
     },
@@ -2695,6 +3295,7 @@
       "requirementId": "SYS-004",
       "profileId": "framework-adapter-contract-jsdom",
       "status": "not-applicable",
+      "verificationClass": "future-scope",
       "evidenceIds": [],
       "rationale": "The framework store/lifecycle contract profile does not publish rendering, interaction, surface, or persistence support."
     },
@@ -2702,6 +3303,7 @@
       "requirementId": "SYS-005",
       "profileId": "framework-adapter-contract-jsdom",
       "status": "not-applicable",
+      "verificationClass": "future-scope",
       "evidenceIds": [],
       "rationale": "The framework store/lifecycle contract profile does not publish rendering, interaction, surface, or persistence support."
     },
@@ -2709,6 +3311,7 @@
       "requirementId": "THM-001",
       "profileId": "framework-adapter-contract-jsdom",
       "status": "not-applicable",
+      "verificationClass": "future-scope",
       "evidenceIds": [],
       "rationale": "The framework store/lifecycle contract profile does not publish rendering, interaction, surface, or persistence support."
     },
@@ -2716,76 +3319,87 @@
       "requirementId": "THM-002",
       "profileId": "framework-adapter-contract-jsdom",
       "status": "not-applicable",
+      "verificationClass": "future-scope",
       "evidenceIds": [],
       "rationale": "The framework store/lifecycle contract profile does not publish rendering, interaction, surface, or persistence support."
     },
     {
       "requirementId": "TST-001",
       "profileId": "framework-adapter-contract-jsdom",
-      "status": "not-applicable",
+      "status": "unresolved",
+      "verificationClass": "code-verifiable",
       "evidenceIds": [],
-      "rationale": "The published profile is explicitly experimental; this stable-release requirement is not claimed."
+      "rationale": "The repository implementation or its requirement-specific static/model proof is incomplete for this profile."
     },
     {
       "requirementId": "TST-002",
       "profileId": "framework-adapter-contract-jsdom",
       "status": "unresolved",
+      "verificationClass": "code-verifiable",
       "evidenceIds": [],
-      "rationale": "The complete acceptance evidence described by the system design has not yet been produced for this profile."
+      "rationale": "The repository implementation or its requirement-specific static/model proof is incomplete for this profile."
     },
     {
       "requirementId": "TST-003",
       "profileId": "framework-adapter-contract-jsdom",
       "status": "unresolved",
+      "verificationClass": "code-verifiable",
       "evidenceIds": [],
-      "rationale": "The complete acceptance evidence described by the system design has not yet been produced for this profile."
+      "rationale": "The repository implementation or its requirement-specific static/model proof is incomplete for this profile."
     },
     {
       "requirementId": "TST-004",
       "profileId": "framework-adapter-contract-jsdom",
       "status": "unresolved",
+      "verificationClass": "code-verifiable",
       "evidenceIds": [],
-      "rationale": "The complete acceptance evidence described by the system design has not yet been produced for this profile."
+      "rationale": "The repository implementation or its requirement-specific static/model proof is incomplete for this profile."
     },
     {
       "requirementId": "TST-005",
       "profileId": "framework-adapter-contract-jsdom",
       "status": "unresolved",
+      "verificationClass": "environment-verifiable",
       "evidenceIds": [],
-      "rationale": "The complete acceptance evidence described by the system design has not yet been produced for this profile."
+      "rationale": "A reproducible automated environment result with profile, workload, and execution metadata has not been recorded."
     },
     {
       "requirementId": "TST-006",
       "profileId": "framework-adapter-contract-jsdom",
       "status": "unresolved",
+      "verificationClass": "environment-verifiable",
       "evidenceIds": [],
-      "rationale": "The complete acceptance evidence described by the system design has not yet been produced for this profile."
+      "rationale": "A reproducible automated environment result with profile, workload, and execution metadata has not been recorded."
     },
     {
       "requirementId": "TST-007",
       "profileId": "framework-adapter-contract-jsdom",
-      "status": "not-applicable",
+      "status": "blocked",
+      "verificationClass": "manual-external",
       "evidenceIds": [],
-      "rationale": "The published profile is explicitly experimental; this stable-release requirement is not claimed."
+      "rationale": "This requirement needs manual, physical-system, independent-review, adoption, usability, or signed-approval evidence that repository automation cannot manufacture."
     },
     {
       "requirementId": "TST-008",
       "profileId": "framework-adapter-contract-jsdom",
       "status": "unresolved",
+      "verificationClass": "environment-verifiable",
       "evidenceIds": [],
-      "rationale": "The complete acceptance evidence described by the system design has not yet been produced for this profile."
+      "rationale": "A reproducible automated environment result with profile, workload, and execution metadata has not been recorded."
     },
     {
       "requirementId": "TST-009",
       "profileId": "framework-adapter-contract-jsdom",
       "status": "unresolved",
+      "verificationClass": "code-verifiable",
       "evidenceIds": [],
-      "rationale": "The complete acceptance evidence described by the system design has not yet been produced for this profile."
+      "rationale": "The repository implementation or its requirement-specific static/model proof is incomplete for this profile."
     },
     {
       "requirementId": "TXN-001",
       "profileId": "framework-adapter-contract-jsdom",
       "status": "not-applicable",
+      "verificationClass": "future-scope",
       "evidenceIds": [],
       "rationale": "The framework store/lifecycle contract profile does not publish rendering, interaction, surface, or persistence support."
     },
@@ -2793,6 +3407,7 @@
       "requirementId": "TXN-002",
       "profileId": "framework-adapter-contract-jsdom",
       "status": "not-applicable",
+      "verificationClass": "future-scope",
       "evidenceIds": [],
       "rationale": "The framework store/lifecycle contract profile does not publish rendering, interaction, surface, or persistence support."
     },
@@ -2800,6 +3415,7 @@
       "requirementId": "TXN-003",
       "profileId": "framework-adapter-contract-jsdom",
       "status": "not-applicable",
+      "verificationClass": "future-scope",
       "evidenceIds": [],
       "rationale": "The framework store/lifecycle contract profile does not publish rendering, interaction, surface, or persistence support."
     },
@@ -2807,6 +3423,7 @@
       "requirementId": "TXN-004",
       "profileId": "framework-adapter-contract-jsdom",
       "status": "not-applicable",
+      "verificationClass": "future-scope",
       "evidenceIds": [],
       "rationale": "The framework store/lifecycle contract profile does not publish rendering, interaction, surface, or persistence support."
     },
@@ -2814,6 +3431,7 @@
       "requirementId": "TXN-005",
       "profileId": "framework-adapter-contract-jsdom",
       "status": "not-applicable",
+      "verificationClass": "future-scope",
       "evidenceIds": [],
       "rationale": "The framework store/lifecycle contract profile does not publish rendering, interaction, surface, or persistence support."
     },
@@ -2821,6 +3439,7 @@
       "requirementId": "TXN-006",
       "profileId": "framework-adapter-contract-jsdom",
       "status": "not-applicable",
+      "verificationClass": "future-scope",
       "evidenceIds": [],
       "rationale": "The framework store/lifecycle contract profile does not publish rendering, interaction, surface, or persistence support."
     },
@@ -2828,6 +3447,7 @@
       "requirementId": "TXN-007",
       "profileId": "framework-adapter-contract-jsdom",
       "status": "not-applicable",
+      "verificationClass": "future-scope",
       "evidenceIds": [],
       "rationale": "The framework store/lifecycle contract profile does not publish rendering, interaction, surface, or persistence support."
     },
@@ -2835,6 +3455,7 @@
       "requirementId": "TXN-008",
       "profileId": "framework-adapter-contract-jsdom",
       "status": "not-applicable",
+      "verificationClass": "future-scope",
       "evidenceIds": [],
       "rationale": "The framework store/lifecycle contract profile does not publish rendering, interaction, surface, or persistence support."
     }

@@ -1,0 +1,9 @@
+{
+  "schemaVersion": 1,
+  "profile": "compact-react-chromium-desktop",
+  "workload": "120-step primary splitter drag with 180 animation-frame samples",
+  "frameP95MaximumMs": 50,
+  "frameP99MaximumMs": 100,
+  "longTaskMaximumCount": 12,
+  "minimumSamples": 120
+}

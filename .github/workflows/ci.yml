@@ -27,6 +27,18 @@ jobs:
           cache: pnpm
       - run: pnpm install --frozen-lockfile
       - run: pnpm check
+      - name: Preserve Node performance evidence
+        run: |
+          mkdir -p artifacts
+          pnpm performance:smoke > "artifacts/performance-smoke-node-${{ matrix.node-version }}.json"
+      - name: Upload verification evidence
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: verification-evidence-node-${{ matrix.node-version }}
+          path: artifacts
+          if-no-files-found: warn
+          retention-days: 30
 
   browser:
     runs-on: ubuntu-latest
@@ -44,3 +56,13 @@ jobs:
       - run: pnpm exec playwright install --with-deps chromium
       - run: pnpm test:e2e
       - run: pnpm test:site:e2e
+      - name: Upload browser evidence and retained traces
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: browser-evidence
+          path: |
+            test-results
+            playwright-report
+          if-no-files-found: warn
+          retention-days: 30

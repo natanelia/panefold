@@ -1,7 +1,12 @@
 import { revision } from "@panefold/model";
 import { describe, expect, it } from "vitest";
 
-import { BoundedProtocolTrace, createProtocolScope } from "../src";
+import {
+  BoundedProtocolTrace,
+  createProtocolScope,
+  PROTOCOL_ACTOR_CATALOG,
+  protocolActorDescriptor,
+} from "../src";
 
 describe("driver-neutral protocol contracts", () => {
   it("bounds diagnostic history without changing protocol ordering", () => {
@@ -39,5 +44,30 @@ describe("driver-neutral protocol contracts", () => {
     expect(scope.signal.reason).toBe("surface-disposed");
     scope.close("duplicate");
     expect(scope.signal.reason).toBe("surface-disposed");
+  });
+
+  it("publishes the complete experimental bounded-actor inventory", () => {
+    expect(Object.keys(PROTOCOL_ACTOR_CATALOG)).toEqual([
+      "drag",
+      "splitter-resize",
+      "floating-manipulation",
+      "keyboard-move",
+      "close",
+      "suspend-resume",
+      "surface-transfer",
+      "surface-recovery",
+      "persistence-worker",
+      "plugin-load",
+      "view-transition",
+      "coordinator-election",
+    ]);
+    expect(new Set(Object.values(PROTOCOL_ACTOR_CATALOG).map(({ actorId }) => actorId)).size).toBe(
+      12,
+    );
+    expect(protocolActorDescriptor("view-transition")).toMatchObject({
+      stability: "experimental",
+      principalStates: expect.arrayContaining(["skipped", "completed"]),
+      adversarialEvents: expect.arrayContaining(["duplicate-name", "budget-rejection"]),
+    });
   });
 });

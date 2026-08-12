@@ -48,7 +48,8 @@ checkpointing, ownership tokens, and an adapter with corresponding evidence.
 - `detach` and `remount` remain explicit opt-ins when preservation is inappropriate.
 - Stable hosts add DOM and lifecycle complexity, so focus, accessibility, clipping, stacking, and
   cleanup require dedicated tests.
-- Synthetic lifecycle fixtures establish contract behavior but do not certify real editors, maps,
-  grids, media, iframes, or microfrontends.
+- The controlled 17-kind browser fixture establishes contract behavior for representative forms,
+  editor/canvas/WebGL/grid/media/iframe/Web Component/microfrontend content, but it does not certify
+  third-party products, heap/resource stability, or physical-device behavior.
 - Browser-window, Picture-in-Picture, and cross-origin lifecycle behavior remains experimental
   protocol work rather than a supported product capability.
