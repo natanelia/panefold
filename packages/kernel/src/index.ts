@@ -4,4 +4,5 @@ export * from "./execute";
 export * from "./hash";
 export * from "./invariants";
 export * from "./patches";
+export * from "./plan-panel-drop";
 export * from "./reducer";

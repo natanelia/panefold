@@ -401,11 +401,8 @@ export function solveLayout(
               : {
                   preferred: Math.min(constraints.max, Math.max(constraints.min, aspectPreferred)),
                 }),
-            grow: constraints.grow * weight,
-            // A larger canonical weight requests more of the axis. Treat it as
-            // growth priority and inverse shrink pressure so increasing a
-            // child's weight is monotonic even when preferred sizes overflow.
-            shrink: constraints.shrink / weight,
+            grow: constraints.grow,
+            shrink: constraints.shrink,
           },
         };
       }),

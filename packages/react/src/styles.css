@@ -16,6 +16,7 @@
     --pf-focus: #8bc4ff;
     --pf-target-size: 32px;
     --pf-tab-size: 34px;
+    --pf-tab-inline-size: 148px;
     --pf-splitter-size: 6px;
     --pf-motion-micro: 90ms;
     --pf-motion-structural: 200ms;
@@ -161,8 +162,8 @@
   }
 
   .pf-group {
-    display: grid;
-    grid-template-rows: var(--pf-tab-size) minmax(0, 1fr);
+    display: flex;
+    flex-direction: column;
     inline-size: 100%;
     block-size: 100%;
     background: var(--pf-surface);
@@ -175,6 +176,7 @@
 
   .pf-tab-strip {
     display: flex;
+    flex: 0 0 var(--pf-tab-size);
     min-inline-size: 0;
     background: var(--pf-surface-raised);
     border-block-end: 1px solid var(--pf-border);
@@ -205,10 +207,15 @@
     font-size: 12px;
     white-space: nowrap;
     cursor: default;
+    user-select: none;
     transition:
       color var(--pf-motion-micro),
       background-color var(--pf-motion-micro),
       border-color var(--pf-motion-micro);
+  }
+
+  .pf-workspace[data-panel-drop-enabled="true"] .pf-tab {
+    touch-action: none;
   }
 
   .pf-tab[aria-selected="true"] {
@@ -244,6 +251,7 @@
   .pf-tab-close,
   .pf-tab-more {
     display: grid;
+    flex: 0 0 auto;
     place-items: center;
     inline-size: 24px;
     block-size: 24px;
@@ -323,6 +331,98 @@
     overflow: auto;
   }
 
+  .pf-panel-slot {
+    flex: 1 1 auto;
+  }
+
+  .pf-group[data-tab-placement="block-end"] {
+    flex-direction: column-reverse;
+  }
+
+  .pf-group[data-tab-placement="block-end"] .pf-tab-strip {
+    border-block-start: 1px solid var(--pf-border);
+    border-block-end: 0;
+  }
+
+  .pf-group[data-tab-placement="block-end"] .pf-tab {
+    border-block-start: 2px solid transparent;
+    border-block-end: 0;
+  }
+
+  .pf-group[data-tab-placement="block-end"] .pf-tab[aria-selected="true"] {
+    border-block-start-color: var(--pf-accent);
+  }
+
+  .pf-group[data-tab-placement="inline-start"],
+  .pf-group[data-tab-placement="inline-end"] {
+    flex-direction: row;
+  }
+
+  .pf-group[data-tab-placement="inline-end"] {
+    flex-direction: row-reverse;
+  }
+
+  .pf-group[data-tab-orientation="vertical"] .pf-tab-strip {
+    flex: 0 0 var(--pf-tab-inline-size);
+    flex-direction: column;
+    min-block-size: 0;
+    border-block-end: 0;
+  }
+
+  .pf-group[data-tab-placement="inline-start"] .pf-tab-strip {
+    border-inline-end: 1px solid var(--pf-border);
+  }
+
+  .pf-group[data-tab-placement="inline-end"] .pf-tab-strip {
+    border-inline-start: 1px solid var(--pf-border);
+  }
+
+  .pf-group[data-tab-orientation="vertical"] .pf-tab-list {
+    flex-direction: column;
+    min-block-size: 0;
+    overflow-x: hidden;
+    overflow-y: auto;
+  }
+
+  .pf-group[data-tab-orientation="vertical"] .pf-tab {
+    flex: 0 0 var(--pf-tab-size);
+    inline-size: 100%;
+    min-inline-size: 0;
+    border-block-end: 1px solid var(--pf-border);
+    border-inline-end: 2px solid transparent;
+  }
+
+  .pf-group[data-tab-placement="inline-end"] .pf-tab {
+    border-inline-start: 2px solid transparent;
+    border-inline-end: 0;
+  }
+
+  .pf-group[data-tab-placement="inline-start"] .pf-tab[aria-selected="true"] {
+    border-inline-end-color: var(--pf-accent);
+  }
+
+  .pf-group[data-tab-placement="inline-end"] .pf-tab[aria-selected="true"] {
+    border-inline-start-color: var(--pf-accent);
+  }
+
+  .pf-group[data-tab-orientation="vertical"] .pf-tab-controls {
+    min-block-size: var(--pf-tab-size);
+    justify-content: flex-end;
+    border-block-start: 1px solid var(--pf-border);
+    border-inline-start: 0;
+  }
+
+  .pf-group[data-tab-content="icon-only"] {
+    --pf-tab-inline-size: 64px;
+  }
+
+  .pf-group[data-tab-content="icon-only"][data-tab-orientation="horizontal"] .pf-tab {
+    flex-basis: 44px;
+    min-inline-size: 44px;
+    justify-content: center;
+    padding-inline: 8px;
+  }
+
   .pf-panel-host[hidden] {
     display: none !important;
   }
@@ -339,6 +439,74 @@
     inset: 0;
     z-index: 20;
     pointer-events: none;
+  }
+
+  .pf-panel-drag {
+    position: absolute;
+    inset: 0;
+    overflow: visible;
+  }
+
+  .pf-panel-drop-preview {
+    position: absolute;
+    left: var(--pf-drop-x);
+    top: var(--pf-drop-y);
+    width: var(--pf-drop-width);
+    height: var(--pf-drop-height);
+    border: 2px solid var(--pf-valid);
+    border-radius: 8px;
+    background: color-mix(in srgb, var(--pf-valid) 18%, transparent);
+    box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--pf-valid) 38%, transparent);
+    transition:
+      left var(--pf-motion-micro),
+      top var(--pf-motion-micro),
+      width var(--pf-motion-micro),
+      height var(--pf-motion-micro);
+  }
+
+  .pf-group[data-tab-placement="inline-start"] .pf-menu {
+    inset-block-start: auto;
+    inset-block-end: 0;
+    inset-inline-start: 31px;
+    inset-inline-end: auto;
+  }
+
+  .pf-group[data-tab-placement="inline-end"] .pf-menu {
+    inset-block-start: auto;
+    inset-block-end: 0;
+    inset-inline-start: auto;
+    inset-inline-end: 31px;
+  }
+
+  .pf-panel-drag-ghost {
+    position: absolute;
+    inset: 0 auto auto 0;
+    display: grid;
+    gap: 2px;
+    max-inline-size: 260px;
+    padding: 8px 11px;
+    border: 1px solid var(--pf-border-strong);
+    border-radius: 7px;
+    color: var(--pf-text);
+    background: color-mix(in srgb, var(--pf-surface-raised) 96%, transparent);
+    box-shadow: 0 12px 38px rgb(0 0 0 / 42%);
+    translate: calc(var(--pf-drag-x) + 12px) calc(var(--pf-drag-y) + 12px);
+  }
+
+  .pf-panel-drag-ghost strong {
+    overflow: hidden;
+    font-size: 12px;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .pf-panel-drag-ghost span {
+    color: var(--pf-valid);
+    font-size: 10px;
+  }
+
+  .pf-panel-drag-ghost[data-available="false"] span {
+    color: var(--pf-warning);
   }
 
   .pf-keyboard-move {
@@ -434,8 +602,13 @@
 
     .pf-tab-close,
     .pf-tab-more {
-      inline-size: 42px;
-      block-size: 42px;
+      inline-size: var(--pf-target-size);
+      block-size: var(--pf-target-size);
+    }
+
+    .pf-group[data-tab-content="icon-only"][data-tab-orientation="vertical"] {
+      /* Two adjacent controls retain full 44px touch targets without flex shrink. */
+      --pf-tab-inline-size: 100px;
     }
   }
 
@@ -469,12 +642,14 @@
 
   @media (forced-colors: active) {
     .pf-group[data-active="true"],
-    .pf-keyboard-move {
+    .pf-keyboard-move,
+    .pf-panel-drop-preview {
       border-color: Highlight;
     }
 
     .pf-tab[aria-selected="true"] {
       border-block-end-color: Highlight;
+      outline: 1px solid Highlight;
     }
 
     .pf-splitter-line {

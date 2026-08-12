@@ -6,9 +6,26 @@ import type {
   WorkspaceSnapshot,
 } from "@panefold/model";
 
-import { createWorkspaceEnvelope, type CreateWorkspaceEnvelopeOptions } from "./persistence-codec";
-import type { PersistenceDurability, WorkspaceJournalEntry, WorkspaceJournalPort } from "./journal";
-import type { DispatchOptions, RuntimeDispatchReceipt, WorkspaceRuntime } from "./runtime";
+import {
+  createWorkspaceEnvelope,
+  type CreateWorkspaceEnvelopeOptions,
+  type DecodeWorkspaceEnvelopeOptions,
+} from "./persistence-codec";
+import {
+  recoverWorkspaceBundle,
+  type PersistenceDurability,
+  type StoredWorkspaceBundle,
+  type WorkspaceJournalEntry,
+  type WorkspaceJournalPort,
+  type WorkspaceRecoveryDiagnostic,
+} from "./journal";
+import {
+  createWorkspaceRuntime,
+  type DispatchOptions,
+  type RuntimeDispatchReceipt,
+  type WorkspaceRuntime,
+  type WorkspaceRuntimeOptions,
+} from "./runtime";
 
 export type PersistenceRuntimeErrorCode =
   "PERSISTENCE_QUEUE_OVERFLOW" | "PERSISTENCE_WRITE_FAILED" | "PERSISTENCE_DEGRADED";
@@ -26,6 +43,18 @@ export class PersistenceRuntimeError extends Error {
   }
 }
 
+export class DurableWorkspaceOpenError extends Error {
+  public override readonly name = "DurableWorkspaceOpenError";
+  public readonly code = "JOURNAL_RECOVERY_INCOMPLETE";
+
+  public constructor(
+    message: string,
+    public readonly diagnostics: readonly WorkspaceRecoveryDiagnostic[],
+  ) {
+    super(message);
+  }
+}
+
 export interface DurableWorkspaceRuntimeOptions {
   readonly runtime: WorkspaceRuntime;
   readonly journal: WorkspaceJournalPort;
@@ -35,6 +64,8 @@ export interface DurableWorkspaceRuntimeOptions {
   readonly compactionInterval?: number;
   readonly envelope?: CreateWorkspaceEnvelopeOptions;
   readonly onPersistenceError?: (error: PersistenceRuntimeError) => void;
+  /** Observes an isolated status-listener failure without affecting persistence. */
+  readonly onStatusSubscriberError?: (cause: unknown) => void;
 }
 
 export interface DurableWorkspaceStatus {
@@ -53,12 +84,58 @@ export interface DurableWorkspaceRuntime {
   flush(): Promise<void>;
   retry(): Promise<void>;
   getStatus(): DurableWorkspaceStatus;
+  subscribeStatus(listener: (status: DurableWorkspaceStatus) => void): () => void;
   dispose(): Promise<void>;
 }
+
+export interface OpenDurableWorkspaceOptions extends Omit<
+  DurableWorkspaceRuntimeOptions,
+  "runtime"
+> {
+  /** Used only when the journal has no prior workspace. */
+  readonly initialSnapshot: WorkspaceSnapshot;
+  readonly runtimeOptions?: Omit<WorkspaceRuntimeOptions, "initialSnapshot">;
+  readonly recovery: DecodeWorkspaceEnvelopeOptions;
+}
+
+export type DurableWorkspaceRestoration =
+  | {
+      readonly status: "initialized";
+      readonly source: "initial";
+      readonly revision: string;
+      readonly appliedTransactions: 0;
+      readonly diagnostics: readonly WorkspaceRecoveryDiagnostic[];
+    }
+  | {
+      readonly status: "restored";
+      readonly source: "latest" | "last-known-good";
+      readonly revision: string;
+      readonly appliedTransactions: number;
+      readonly diagnostics: readonly WorkspaceRecoveryDiagnostic[];
+    };
+
+export type OpenDurableWorkspaceResult =
+  | {
+      readonly ok: true;
+      readonly runtime: WorkspaceRuntime;
+      readonly durable: DurableWorkspaceRuntime;
+      readonly restoration: DurableWorkspaceRestoration;
+    }
+  | {
+      readonly ok: false;
+      readonly error: Error;
+      readonly diagnostics: readonly WorkspaceRecoveryDiagnostic[];
+    };
 
 interface PendingTransaction {
   readonly transaction: CommittedTransaction;
   readonly snapshot: WorkspaceSnapshot;
+}
+
+interface PreloadedWorkspace {
+  readonly bundle: StoredWorkspaceBundle | undefined;
+  /** The revision produced by verified decoding and journal replay. */
+  readonly recoveredRevision?: string;
 }
 
 const DEFAULT_QUEUE_LIMIT = 1_000;
@@ -72,6 +149,94 @@ export async function createDurableWorkspaceRuntime(
   return controller;
 }
 
+/**
+ * Opens a durable workspace at its recovered revision. The persisted bundle is
+ * decoded and replayed before the synchronous runtime is constructed, so
+ * consumers can never observe an initial layout and later have it replaced by
+ * an older or newer persisted layout.
+ *
+ * A corrupt or unsupported bundle is returned as a typed, non-destructive
+ * failure. Callers must explicitly clear, export, or migrate that bundle rather
+ * than silently overwriting it with the fallback snapshot.
+ */
+export async function openDurableWorkspace(
+  options: OpenDurableWorkspaceOptions,
+): Promise<OpenDurableWorkspaceResult> {
+  const existing = await options.journal.read(options.key);
+  let initialSnapshot = options.initialSnapshot;
+  let restoration: DurableWorkspaceRestoration = Object.freeze({
+    status: "initialized",
+    source: "initial",
+    revision: initialSnapshot.revision.toString(),
+    appliedTransactions: 0,
+    diagnostics: Object.freeze([]),
+  });
+
+  if (existing !== undefined) {
+    const recovered = await recoverWorkspaceBundle(existing, options.recovery);
+    if (!recovered.ok) {
+      return Object.freeze({
+        ok: false,
+        error: recovered.error,
+        diagnostics: recovered.diagnostics,
+      });
+    }
+    const interruptedReplay = recovered.diagnostics.find(
+      (diagnostic) => diagnostic.transactionId !== undefined,
+    );
+    if (interruptedReplay !== undefined) {
+      return Object.freeze({
+        ok: false,
+        error: new DurableWorkspaceOpenError(
+          "Workspace journal replay did not reach a verified tail.",
+          recovered.diagnostics,
+        ),
+        diagnostics: recovered.diagnostics,
+      });
+    }
+    initialSnapshot = recovered.snapshot;
+    restoration = Object.freeze({
+      status: "restored",
+      source: recovered.source,
+      revision: recovered.snapshot.revision.toString(),
+      appliedTransactions: recovered.appliedTransactions,
+      diagnostics: recovered.diagnostics,
+    });
+  }
+
+  const runtime = createWorkspaceRuntime({
+    ...(options.runtimeOptions ?? {}),
+    initialSnapshot,
+  });
+  const controller = new DurableWorkspaceRuntimeImpl({
+    runtime,
+    journal: options.journal,
+    key: options.key,
+    ...(options.durability === undefined ? {} : { durability: options.durability }),
+    ...(options.queueLimit === undefined ? {} : { queueLimit: options.queueLimit }),
+    ...(options.compactionInterval === undefined
+      ? {}
+      : { compactionInterval: options.compactionInterval }),
+    ...(options.envelope === undefined ? {} : { envelope: options.envelope }),
+    ...(options.onPersistenceError === undefined
+      ? {}
+      : { onPersistenceError: options.onPersistenceError }),
+    ...(options.onStatusSubscriberError === undefined
+      ? {}
+      : { onStatusSubscriberError: options.onStatusSubscriberError }),
+  });
+  try {
+    await controller.initialize({
+      bundle: existing,
+      recoveredRevision: initialSnapshot.revision.toString(),
+    });
+  } catch (cause) {
+    runtime.dispose();
+    throw cause;
+  }
+  return Object.freeze({ ok: true, runtime, durable: controller, restoration });
+}
+
 class DurableWorkspaceRuntimeImpl implements DurableWorkspaceRuntime {
   public readonly runtime: WorkspaceRuntime;
   readonly #journal: WorkspaceJournalPort;
@@ -81,8 +246,11 @@ class DurableWorkspaceRuntimeImpl implements DurableWorkspaceRuntime {
   readonly #compactionInterval: number;
   readonly #envelopeOptions: CreateWorkspaceEnvelopeOptions;
   readonly #onPersistenceError: ((error: PersistenceRuntimeError) => void) | undefined;
+  readonly #onStatusSubscriberError: ((cause: unknown) => void) | undefined;
   readonly #queue: PendingTransaction[] = [];
+  readonly #statusListeners = new Set<(status: DurableWorkspaceStatus) => void>();
   #sequence = 0;
+  #activeWrites = 0;
   #processing: Promise<void> | undefined;
   #unsubscribe: (() => void) | undefined;
   #lastPersistedRevision: string | undefined;
@@ -104,12 +272,17 @@ class DurableWorkspaceRuntimeImpl implements DurableWorkspaceRuntime {
     );
     this.#envelopeOptions = options.envelope ?? {};
     this.#onPersistenceError = options.onPersistenceError;
+    this.#onStatusSubscriberError = options.onStatusSubscriberError;
   }
 
-  public async initialize(): Promise<void> {
-    const existing = await this.#journal.read(this.#key);
+  public async initialize(preloaded?: PreloadedWorkspace): Promise<void> {
+    const existing =
+      preloaded === undefined ? await this.#journal.read(this.#key) : preloaded.bundle;
     this.#sequence = (existing?.journal.at(-1)?.sequence ?? -1) + 1;
-    if (existing?.latestSnapshot === undefined) {
+    if (
+      existing === undefined ||
+      (existing.latestSnapshot === undefined && preloaded?.recoveredRevision === undefined)
+    ) {
       const snapshot = this.runtime.getSnapshot();
       const envelope = await createWorkspaceEnvelope(snapshot, this.#envelopeOptions);
       await this.#journal.commit(this.#key, {
@@ -119,7 +292,11 @@ class DurableWorkspaceRuntimeImpl implements DurableWorkspaceRuntime {
       });
       this.#lastPersistedRevision = snapshot.revision.toString();
     } else {
-      this.#lastPersistedRevision = existing.latestSnapshot.snapshotRevision;
+      this.#lastPersistedRevision =
+        preloaded?.recoveredRevision ??
+        existing.journal.at(-1)?.revision ??
+        existing.latestSnapshot?.snapshotRevision ??
+        existing.lastKnownGoodSnapshot?.snapshotRevision;
     }
     this.#unsubscribe = this.runtime.subscribeTransactions((transaction) => {
       this.#enqueue(transaction, this.runtime.getSnapshot());
@@ -161,6 +338,8 @@ class DurableWorkspaceRuntimeImpl implements DurableWorkspaceRuntime {
     this.#assertLive();
     const snapshot = this.#degradedSnapshot;
     if (snapshot === undefined) return;
+    this.#activeWrites += 1;
+    this.#notifyStatus();
     try {
       const envelope = await createWorkspaceEnvelope(snapshot, this.#envelopeOptions);
       await this.#journal.commit(this.#key, {
@@ -171,6 +350,7 @@ class DurableWorkspaceRuntimeImpl implements DurableWorkspaceRuntime {
       this.#lastPersistedRevision = snapshot.revision.toString();
       this.#degradedSnapshot = undefined;
       this.#error = undefined;
+      this.#notifyStatus();
     } catch (cause) {
       const error = new PersistenceRuntimeError(
         "PERSISTENCE_WRITE_FAILED",
@@ -180,6 +360,9 @@ class DurableWorkspaceRuntimeImpl implements DurableWorkspaceRuntime {
       );
       this.#report(error);
       throw error;
+    } finally {
+      this.#activeWrites -= 1;
+      this.#notifyStatus();
     }
     await this.#startProcessing();
   }
@@ -187,13 +370,22 @@ class DurableWorkspaceRuntimeImpl implements DurableWorkspaceRuntime {
   public getStatus(): DurableWorkspaceStatus {
     return Object.freeze({
       durability: this.#durability,
-      pendingWrites: this.#queue.length,
+      pendingWrites: this.#queue.length + this.#activeWrites,
       ...(this.#lastPersistedRevision === undefined
         ? {}
         : { lastPersistedRevision: this.#lastPersistedRevision }),
       degraded: this.#error !== undefined,
       ...(this.#error === undefined ? {} : { error: this.#error }),
     });
+  }
+
+  public subscribeStatus(listener: (status: DurableWorkspaceStatus) => void): () => void {
+    this.#assertLive();
+    this.#statusListeners.add(listener);
+    this.#deliverStatus(listener, this.getStatus());
+    return () => {
+      this.#statusListeners.delete(listener);
+    };
   }
 
   public async dispose(): Promise<void> {
@@ -204,6 +396,7 @@ class DurableWorkspaceRuntimeImpl implements DurableWorkspaceRuntime {
       await this.#startProcessing();
     } finally {
       this.#disposed = true;
+      this.#statusListeners.clear();
     }
   }
 
@@ -222,6 +415,7 @@ class DurableWorkspaceRuntimeImpl implements DurableWorkspaceRuntime {
       return;
     }
     this.#queue.push(Object.freeze({ transaction, snapshot }));
+    this.#notifyStatus();
     if (this.#durability !== "strict") void this.#startProcessing();
   }
 
@@ -237,6 +431,8 @@ class DurableWorkspaceRuntimeImpl implements DurableWorkspaceRuntime {
     while (this.#queue.length > 0 && this.#error === undefined) {
       const pending = this.#queue.shift();
       if (pending === undefined) break;
+      this.#activeWrites += 1;
+      this.#notifyStatus();
       try {
         await this.#persist(pending);
       } catch (cause) {
@@ -250,6 +446,9 @@ class DurableWorkspaceRuntimeImpl implements DurableWorkspaceRuntime {
             cause,
           ),
         );
+      } finally {
+        this.#activeWrites -= 1;
+        this.#notifyStatus();
       }
     }
   }
@@ -296,6 +495,30 @@ class DurableWorkspaceRuntimeImpl implements DurableWorkspaceRuntime {
       this.#onPersistenceError?.(error);
     } catch {
       // Diagnostics are observational and cannot alter persistence state.
+    }
+    this.#notifyStatus();
+  }
+
+  #notifyStatus(): void {
+    if (this.#statusListeners.size === 0) return;
+    const status = this.getStatus();
+    for (const listener of [...this.#statusListeners]) {
+      this.#deliverStatus(listener, status);
+    }
+  }
+
+  #deliverStatus(
+    listener: (status: DurableWorkspaceStatus) => void,
+    status: DurableWorkspaceStatus,
+  ): void {
+    try {
+      listener(status);
+    } catch (cause) {
+      try {
+        this.#onStatusSubscriberError?.(cause);
+      } catch {
+        // Status diagnostics are observational and cannot affect writes.
+      }
     }
   }
 

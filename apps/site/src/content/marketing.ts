@@ -58,6 +58,24 @@ export const featureCards = [
     detail: "Bounded history · snapshot-based inverses",
   },
   {
+    title: "Direct docking, without a second layout model",
+    description:
+      "Tabs resolve center and logical-edge targets from solved geometry. Preview stays ephemeral; release plans one revision-bound semantic transaction.",
+    icon: PanelsTopLeft,
+    tone: "violet",
+    size: "wide",
+    detail: "Center dock · 4-way split · one history entry",
+  },
+  {
+    title: "Recovery is visible",
+    description:
+      "The Atlas fixture opens from a checksummed IndexedDB journal before first render and reports the exact restored or persisted revision.",
+    icon: RefreshCw,
+    tone: "amber",
+    size: "standard",
+    detail: "Fail-closed decode · explicit saved revision",
+  },
+  {
     title: "Accessible at the projection edge",
     description:
       "Tabs, splitters, menus, keyboard movement, focus recovery, announcements, and reduced motion are designed into the adapter.",

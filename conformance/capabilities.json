@@ -41,7 +41,10 @@
       ],
       "evidenceIds": [
         "geometry-solver",
-        "react-integration"
+        "panel-drop-zones",
+        "panel-drop-planner",
+        "react-integration",
+        "chromium-reference-result"
       ],
       "limitations": [
         "Reference React profile only"
@@ -87,7 +90,9 @@
       ],
       "evidenceIds": [
         "persistence-recovery",
-        "indexeddb-effect"
+        "indexeddb-effect",
+        "direct-placement-durability-decision",
+        "chromium-reference-result"
       ],
       "limitations": [
         "Failure injection is automated; real crash, quota, and corruption certification is pending"

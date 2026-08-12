@@ -9,6 +9,7 @@ import {
   createKernelState,
   isWorkspaceCommandType,
   type CommandEnvelope,
+  type CommandHistoryMode,
   type CommandId,
   type CommandOrigin,
   type CommittedTransaction,
@@ -27,6 +28,11 @@ export interface DispatchOptions {
   readonly origin?: CommandOrigin;
   readonly label?: string;
   readonly baseRevision?: WorkspaceSnapshot["revision"];
+  /**
+   * Use `barrier` only when a structural platform transition cannot be
+   * recreated by semantic redo. Successful barriers clear undo/redo history.
+   */
+  readonly history?: CommandHistoryMode;
 }
 
 export type RuntimeDispatchReceipt =
@@ -372,6 +378,7 @@ class WorkspaceRuntimeImpl implements WorkspaceRuntime {
       origin: options.origin ?? "application",
       label: options.label ?? labelForCommand(command),
       ...(baseRevision === undefined ? {} : { baseRevision }),
+      ...(options.history === undefined ? {} : { history: options.history }),
       command,
     };
   }

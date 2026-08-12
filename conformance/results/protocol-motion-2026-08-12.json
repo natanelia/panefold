@@ -2,9 +2,10 @@
   "schemaVersion": 1,
   "kind": "protocol-motion-result",
   "profile": "compact-react-chromium-desktop",
-  "producedAt": "2026-08-12T03:04:00Z",
+  "producedAt": "2026-08-12T13:39:55Z",
   "status": "passed",
   "runner": "Vitest 4.1.10",
+  "command": "vitest run packages/protocol/test packages/protocol-xstate/test packages/motion/test packages/react/test",
   "environment": {
     "operatingSystem": "Linux x86_64",
     "node": "24.14.0",
@@ -14,10 +15,10 @@
     "protocolMotionTestFiles": 6,
     "protocolMotionTests": 49,
     "protocolMotionPassed": 49,
-    "reactIntegrationTests": 18,
-    "reactIntegrationPassed": 18,
+    "reactIntegrationTests": 41,
+    "reactIntegrationPassed": 41,
     "failed": 0,
-    "durationMs": 3140
+    "durationMs": 3750
   },
   "coverage": [
     "all 12 public protocol descriptors have an XState implementation with the catalog principal states",
@@ -31,8 +32,14 @@
   ],
   "sourceDigests": {
     "packages/protocol/src/catalog.ts": "8f9a79fa206045cf16903e6727892517796a16dee4e13998dd828c1d36b1121a",
+    "packages/protocol/test/protocol.test.ts": "dd118363496c22c9df3110c3a3ab05e7b1bee643fe0c613c75503c2f2262fd4f",
     "packages/protocol-xstate/test/catalog-machines.test.ts": "3d33e4ca3ea49b32e0a98e7749184d73ad5d93fd20b4ceff749c16156407142d",
-    "packages/motion/test/motion-lifecycle.test.ts": "c2fd1527a2ebc5b96d9bb89d289e9fbeca223b4114412df7eed587b5ba9a5b40"
+    "packages/protocol-xstate/test/drag-machine.test.ts": "8f7fb758af84a1970141cc7b82d593551ea94164b9153e9d9a6a50ff61a691e5",
+    "packages/protocol-xstate/test/protocol-machines.test.ts": "b473558c7f1a64c17e58e0d1ebb1503f05734f4ba7e194d53b9b8b780c7d23ce",
+    "packages/motion/test/motion-lifecycle.test.ts": "c2fd1527a2ebc5b96d9bb89d289e9fbeca223b4114412df7eed587b5ba9a5b40",
+    "packages/motion/test/motion.test.ts": "02b6068c1abaa54b4433da29c0a7bb430254b24082385541e5617abfccc22ed8",
+    "packages/react/test/WorkspaceSurface.test.tsx": "9063504b1e7e7e1780eca5e9f3f48afc1348e14150aafa440db3f959de56fb5d",
+    "packages/react/test/panel-drop.test.ts": "fffd4ee07c0e4216f10b1d809372a039850181b33f4c88cd2458b614d6108780"
   },
   "limitations": [
     "The catalog/state checks do not constitute exhaustive generated transition, timeout, and recovery-path coverage.",

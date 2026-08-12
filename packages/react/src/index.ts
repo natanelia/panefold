@@ -5,8 +5,9 @@ export {
   useWorkspaceSnapshot,
   useWorkspaceTransactions,
 } from "./runtime-context";
-export { WorkspaceSurface } from "./WorkspaceSurface";
+export { WorkspaceSurface, type WorkspaceSurfaceProps } from "./WorkspaceSurface";
 export { ENGLISH_WORKSPACE_MESSAGES } from "./messages";
+export { DEFAULT_WORKSPACE_TAB_PRESENTATION } from "./tab-presentation";
 export type { WorkspaceMessageCatalog } from "./messages";
 export { solveWorkspaceProjectionLayout } from "./geometry";
 export type {
@@ -25,8 +26,16 @@ export type {
   WorkspaceDispatchStatus,
   WorkspaceGroupNodeView,
   WorkspaceGroupView,
+  WorkspaceExternalPanelHandler,
+  WorkspaceExternalPanelOutcome,
+  WorkspaceExternalPanelPosition,
+  WorkspaceExternalPanelRequest,
+  WorkspaceLogicalEdge,
   WorkspaceNodeView,
   WorkspacePanelDefinition,
+  WorkspacePanelDropPlan,
+  WorkspacePanelDropPlanContext,
+  WorkspacePanelDropRequest,
   WorkspacePanelLifecycle,
   WorkspacePanelLifecycleChange,
   WorkspacePanelLifecyclePolicy,
@@ -37,6 +46,10 @@ export type {
   WorkspaceProjection,
   WorkspaceProjector,
   WorkspaceRuntimeLike,
+  WorkspaceTabContent,
+  WorkspaceTabPlacement,
+  WorkspaceTabPresentation,
+  WorkspaceTabPresentationResolver,
   WorkspaceResultInterpreter,
   WorkspaceSplitView,
 } from "./types";

@@ -1,4 +1,5 @@
 import {
+  MAIN_SURFACE_CAPABILITIES,
   panelId,
   revision,
   surfaceId,
@@ -13,6 +14,7 @@ import {
   SurfaceTransferCoordinator,
   clampSurfaceRect,
   chooseSurfaceFallback,
+  detectBrowserSurfaceCapabilities,
   intersectSurfaceCapabilities,
   type ExternalSurfaceAdapter,
   type PreparedSurfaceHandle,
@@ -94,7 +96,7 @@ class FakeAdapter implements ExternalSurfaceAdapter {
   }
 }
 
-function fixture(failAt?: SurfaceTransferStage) {
+function fixture(failAt?: SurfaceTransferStage, failCompensation = false) {
   const adapter = new FakeAdapter(failAt);
   const ownership = new SurfaceOwnershipRegistry();
   const events: string[] = [];
@@ -106,7 +108,7 @@ function fixture(failAt?: SurfaceTransferStage) {
     createToken: () => "transfer:1",
     hooks: {
       currentRevision: () => revision(7),
-      commitOwnership: async () => {
+      commitOwnership: () => {
         events.push("commit");
         return true;
       },
@@ -116,6 +118,7 @@ function fixture(failAt?: SurfaceTransferStage) {
       },
       compensateOwnership: async () => {
         events.push("compensate");
+        if (failCompensation) throw new Error("failed:compensation");
       },
     },
   });
@@ -127,7 +130,11 @@ function transferRequest(failCheckpoint = false) {
     panelId: mapPanelId,
     sourceSurfaceId,
     destination,
-    sourceCapabilities: externalCapabilities,
+    sourcePolicy: {
+      allowBrowserWindow: true,
+      allowDocumentPictureInPicture: true,
+    },
+    destinationCapabilities: externalCapabilities,
     panelCapabilities: { popout: true, pictureInPicture: true },
     baseRevision: revision(7),
     coordinatorEpoch: 3,
@@ -169,6 +176,67 @@ describe("surface capabilities and geometry", () => {
 });
 
 describe("prepared external surface transfer", () => {
+  it("separates main-surface egress policy from detected popup capabilities", async () => {
+    const { coordinator, adapter } = fixture();
+    const detectedPopup = detectBrowserSurfaceCapabilities({
+      sourceWindow: {} as Window,
+    })["browser-window"];
+
+    expect(MAIN_SURFACE_CAPABILITIES).toMatchObject({ popout: false, crossDocument: false });
+    await expect(
+      coordinator.transfer({
+        ...transferRequest(),
+        destinationCapabilities: detectedPopup,
+      }),
+    ).resolves.toMatchObject({ ok: true });
+    expect(adapter.events[0]).toBe("prepare");
+  });
+
+  it("fails closed for the deprecated ambiguous source-capabilities input", async () => {
+    const { coordinator, adapter } = fixture();
+    const current = transferRequest();
+    const legacy = {
+      panelId: current.panelId,
+      sourceSurfaceId: current.sourceSurfaceId,
+      destination: current.destination,
+      sourceCapabilities: externalCapabilities,
+      panelCapabilities: current.panelCapabilities,
+      baseRevision: current.baseRevision,
+      coordinatorEpoch: current.coordinatorEpoch,
+      checkpoint: current.checkpoint,
+      restorationToken: current.restorationToken,
+    } as const;
+
+    await expect(coordinator.transfer(legacy)).resolves.toMatchObject({
+      ok: false,
+      error: { code: "CAPABILITY_DENIED", stage: "capability" },
+    });
+    expect(adapter.events).toEqual([]);
+  });
+
+  it("rejects a denied source policy or incapable destination before opening a window", async () => {
+    const deniedSource = fixture();
+    await expect(
+      deniedSource.coordinator.transfer({
+        ...transferRequest(),
+        sourcePolicy: {
+          allowBrowserWindow: false,
+          allowDocumentPictureInPicture: true,
+        },
+      }),
+    ).resolves.toMatchObject({ ok: false, error: { code: "CAPABILITY_DENIED" } });
+    expect(deniedSource.adapter.events).toEqual([]);
+
+    const deniedDestination = fixture();
+    await expect(
+      deniedDestination.coordinator.transfer({
+        ...transferRequest(),
+        destinationCapabilities: { ...externalCapabilities, crossDocument: false },
+      }),
+    ).resolves.toMatchObject({ ok: false, error: { code: "CAPABILITY_DENIED" } });
+    expect(deniedDestination.adapter.events).toEqual([]);
+  });
+
   it("commits ownership only after prepare, bootstrap, and checkpoint", async () => {
     const { coordinator, ownership, adapter, events } = fixture();
     const result = await coordinator.transfer(transferRequest());
@@ -235,6 +303,182 @@ describe("prepared external surface transfer", () => {
       surfaceId: destinationSurfaceId,
       state: "owned",
     });
+  });
+
+  it("retains the prepared destination when semantic compensation fails", async () => {
+    const { coordinator, ownership, adapter, events } = fixture("destination-mount", true);
+
+    await expect(coordinator.transfer(transferRequest())).resolves.toMatchObject({
+      ok: false,
+      safeSurfaceId: destinationSurfaceId,
+      error: { code: "COMPENSATION_FAILED", stage: "compensation" },
+    });
+    expect(events).toEqual(["commit", "compensate"]);
+    expect(adapter.events).toEqual(["prepare", "bootstrap", "destination-mount"]);
+    expect(ownership.ownerOf(mapPanelId)).toMatchObject({
+      surfaceId: destinationSurfaceId,
+      state: "destination-pending-ready",
+    });
+  });
+
+  it.each([
+    ["prepare", "prepare", sourceSurfaceId, false],
+    ["bootstrap", "bootstrap", sourceSurfaceId, true],
+    ["checkpoint", "checkpoint", sourceSurfaceId, true],
+    ["mount", "destination-mount", sourceSurfaceId, true],
+    ["ready", "destination-ready", sourceSurfaceId, true],
+    ["release", "source-release", destinationSurfaceId, false],
+    ["compensation", "compensation", destinationSurfaceId, false],
+    ["close", "destination-mount", sourceSurfaceId, true],
+  ] as const)(
+    "bounds an uncooperative %s promise and preserves truthful ownership",
+    async (hangingStage, expectedStage, expectedOwner, shouldClose) => {
+      let triggerTimeout: (() => void) | undefined;
+      const hang = (): Promise<never> => {
+        if (triggerTimeout === undefined) throw new Error("transfer timer was not installed");
+        triggerTimeout();
+        return new Promise<never>(() => undefined);
+      };
+      const adapterEvents: string[] = [];
+      const adapter: ExternalSurfaceAdapter = {
+        prepare: () => {
+          adapterEvents.push("prepare");
+          if (hangingStage === "prepare") return hang();
+          return Promise.resolve({
+            resource: {},
+            destinationSurfaceId,
+            kind: "browser-window",
+            token: "prepared:timeout",
+            protocolVersion: 1,
+          });
+        },
+        bootstrap: () => {
+          adapterEvents.push("bootstrap");
+          return hangingStage === "bootstrap" ? hang() : Promise.resolve();
+        },
+        mount: () => {
+          adapterEvents.push("destination-mount");
+          if (hangingStage === "compensation" || hangingStage === "close") {
+            return Promise.reject(new Error("fixture mount failure"));
+          }
+          return hangingStage === "mount" ? hang() : Promise.resolve();
+        },
+        waitUntilReady: () => {
+          adapterEvents.push("destination-ready");
+          return hangingStage === "ready" ? hang() : Promise.resolve();
+        },
+        close: () => {
+          adapterEvents.push("close");
+          return hangingStage === "close" ? hang() : Promise.resolve();
+        },
+      };
+      const ownership = new SurfaceOwnershipRegistry();
+      const hookEvents: string[] = [];
+      const coordinator = new SurfaceTransferCoordinator({
+        adapter,
+        ownership,
+        sessionNonce: "session:test",
+        timeoutMs: 1_000,
+        createToken: () => `transfer:${hangingStage}`,
+        setTimer: (callback) => {
+          triggerTimeout = callback;
+          return 1;
+        },
+        clearTimer: () => undefined,
+        hooks: {
+          currentRevision: () => revision(7),
+          commitOwnership: () => {
+            hookEvents.push("commit");
+            return true;
+          },
+          releaseSource: () => {
+            hookEvents.push("release");
+            return hangingStage === "release" ? hang() : Promise.resolve();
+          },
+          compensateOwnership: () => {
+            hookEvents.push("compensate");
+            return hangingStage === "compensation" ? hang() : Promise.resolve();
+          },
+        },
+      });
+      const request = {
+        ...transferRequest(),
+        checkpoint: () =>
+          hangingStage === "checkpoint" ? hang() : Promise.resolve<JsonValue>({ camera: [] }),
+      };
+
+      await expect(coordinator.transfer(request)).resolves.toMatchObject({
+        ok: false,
+        safeSurfaceId: expectedOwner,
+        error: {
+          code: hangingStage === "compensation" ? "COMPENSATION_FAILED" : "TRANSFER_TIMEOUT",
+          stage: expectedStage,
+        },
+      });
+      expect(ownership.ownerOf(mapPanelId)).toMatchObject({
+        surfaceId: expectedOwner,
+        state: hangingStage === "compensation" ? "destination-pending-ready" : "owned",
+      });
+      expect(adapterEvents.includes("close")).toBe(shouldClose);
+      expect(hookEvents.includes("compensate")).toBe(
+        hangingStage === "mount" ||
+          hangingStage === "ready" ||
+          hangingStage === "compensation" ||
+          hangingStage === "close",
+      );
+    },
+  );
+
+  it("applies a late successful compensation exactly once after reporting indeterminate ownership", async () => {
+    let triggerTimeout: (() => void) | undefined;
+    let resolveCompensation: () => void = () => undefined;
+    const compensation = new Promise<void>((resolve) => {
+      resolveCompensation = resolve;
+    });
+    const adapter = new FakeAdapter("destination-mount");
+    const ownership = new SurfaceOwnershipRegistry();
+    const coordinator = new SurfaceTransferCoordinator({
+      adapter,
+      ownership,
+      sessionNonce: "session:test",
+      timeoutMs: 1_000,
+      createToken: () => "transfer:late-compensation",
+      setTimer: (callback) => {
+        triggerTimeout = callback;
+        return 1;
+      },
+      clearTimer: () => undefined,
+      hooks: {
+        currentRevision: () => revision(7),
+        commitOwnership: () => true,
+        releaseSource: async () => undefined,
+        compensateOwnership: () => {
+          if (triggerTimeout === undefined) throw new Error("compensation timer was not installed");
+          triggerTimeout();
+          return compensation;
+        },
+      },
+    });
+
+    await expect(coordinator.transfer(transferRequest())).resolves.toMatchObject({
+      ok: false,
+      safeSurfaceId: destinationSurfaceId,
+      error: { code: "COMPENSATION_FAILED", stage: "compensation" },
+    });
+    expect(ownership.ownerOf(mapPanelId)).toMatchObject({
+      surfaceId: destinationSurfaceId,
+      state: "destination-pending-ready",
+    });
+    expect(adapter.events.filter((event) => event === "close")).toHaveLength(0);
+
+    resolveCompensation();
+    await Promise.resolve();
+    await Promise.resolve();
+    expect(ownership.ownerOf(mapPanelId)).toMatchObject({
+      surfaceId: sourceSurfaceId,
+      state: "owned",
+    });
+    expect(adapter.events.filter((event) => event === "close")).toHaveLength(1);
   });
 
   it("rejects stale coordinator epochs without replacing an existing owner", () => {

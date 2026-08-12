@@ -60,7 +60,7 @@ function normalizeItem(
 
   const preferred = Math.min(max, Math.max(min, finiteNonNegative(input.preferred, min)));
   const weight = finiteNonNegative(item.weight, 1) || 1;
-  const grow = finiteNonNegative(input.grow, weight);
+  const grow = finiteNonNegative(input.grow, 1);
   const shrink = finiteNonNegative(input.shrink, 1);
   const collapsePriority = Number.isFinite(input.collapsePriority)
     ? (input.collapsePriority ?? 0)
@@ -85,47 +85,75 @@ function sum(items: readonly NormalizedItem[], select: (item: NormalizedItem) =>
   return items.reduce((total, item) => total + select(item), 0);
 }
 
-function distribute(
-  values: number[],
+function boundedFactor(value: number): number {
+  if (Number.isFinite(value)) return Math.max(0, value);
+  return value > 0 ? Number.MAX_VALUE : 0;
+}
+
+/**
+ * Finds the proportional allocation whose factor-scaled sizes fit the supplied
+ * bounds. Items that hit a bound are frozen and the remainder is solved again.
+ */
+function allocateProportionally(
   items: readonly NormalizedItem[],
   target: number,
-  direction: "grow" | "shrink",
-): number {
-  for (let pass = 0; pass <= items.length; pass += 1) {
-    const current = values.reduce((total, value) => total + value, 0);
-    const remaining = target - current;
-    if (Math.abs(remaining) <= EPSILON) return 0;
+  lowerFor: (item: NormalizedItem) => number,
+  upperFor: (item: NormalizedItem) => number,
+  factorFor: (item: NormalizedItem) => number,
+): number[] {
+  const values = Array.from({ length: items.length }, () => 0);
+  const pending = new Set(items.map((_, index) => index));
+  let remaining = target;
 
-    const candidates = items
-      .map((item, index) => ({ item, index }))
-      .filter(({ item, index }) =>
-        direction === "grow"
-          ? (values[index] ?? 0) < item.max - EPSILON
-          : (values[index] ?? 0) > item.min + EPSILON,
-      );
-
-    if (candidates.length === 0) return remaining;
-
-    const weightedCandidates = candidates.map(({ item, index }) => ({
-      item,
-      index,
-      factor: direction === "grow" ? item.grow : item.shrink * Math.max(values[index] ?? 0, 1),
-    }));
-    const factorTotal = weightedCandidates.reduce(
-      (total, candidate) => total + candidate.factor,
+  for (let pass = 0; pass <= items.length && pending.size > 0; pass += 1) {
+    const candidates = [...pending].map((index) => {
+      const item = items[index];
+      if (item === undefined) throw new RangeError("Missing proportional allocation item.");
+      return { item, index, factor: boundedFactor(factorFor(item)) };
+    });
+    const largestFactor = candidates.reduce(
+      (largest, candidate) => Math.max(largest, candidate.factor),
       0,
     );
+    const factors = candidates.map((candidate) =>
+      largestFactor > EPSILON ? candidate.factor / largestFactor : 1,
+    );
+    const factorTotal = factors.reduce((total, factor) => total + factor, 0);
+    let frozeItem = false;
 
-    for (const { item, index, factor } of weightedCandidates) {
-      const equalShare = 1 / candidates.length;
-      const share = factorTotal > EPSILON ? factor / factorTotal : equalShare;
-      const proposed = (values[index] ?? 0) + remaining * share;
-      values[index] =
-        direction === "grow" ? Math.min(item.max, proposed) : Math.max(item.min, proposed);
+    candidates.forEach(({ item, index }, candidateIndex) => {
+      const factor = factors[candidateIndex] ?? 0;
+      const proposed = remaining * (factor / factorTotal);
+      const lower = lowerFor(item);
+      const upper = upperFor(item);
+      if (proposed < lower - EPSILON) {
+        values[index] = lower;
+        remaining -= lower;
+        pending.delete(index);
+        frozeItem = true;
+      } else if (proposed > upper + EPSILON) {
+        values[index] = upper;
+        remaining -= upper;
+        pending.delete(index);
+        frozeItem = true;
+      }
+    });
+
+    if (!frozeItem) {
+      candidates.forEach(({ index }, candidateIndex) => {
+        const factor = factors[candidateIndex] ?? 0;
+        values[index] = remaining * (factor / factorTotal);
+      });
+      remaining = 0;
+      pending.clear();
     }
   }
 
-  return target - values.reduce((total, value) => total + value, 0);
+  if (Math.abs(remaining) > EPSILON && items.length > 0) {
+    const lastIndex = items.length - 1;
+    values[lastIndex] = (values[lastIndex] ?? 0) + remaining;
+  }
+  return values;
 }
 
 function largestRemainderEqual(total: number, count: number): number[] {
@@ -321,19 +349,26 @@ export function allocateAxis(
     const basisTotal = basis.reduce((total, value) => total + value, 0) || active.length;
     values = basis.map((value) => (contentSize * (value || 1)) / basisTotal);
   } else {
-    values = active.map((item) => item.preferred);
-    const preferredTotal = values.reduce((total, value) => total + value, 0);
-    if (preferredTotal < contentSize - EPSILON) {
-      const remainder = distribute(values, active, contentSize, "grow");
-      if (remainder > EPSILON) {
-        const weightTotal = sum(active, (item) => item.grow) || active.length;
-        values = active.map(
-          (item, index) => (values[index] ?? 0) + (remainder * item.grow) / weightTotal,
-        );
-      }
-    } else if (preferredTotal > contentSize + EPSILON) {
-      distribute(values, active, contentSize, "shrink");
-    }
+    const roundedPreferredTotal = sum(active, (item) => Math.ceil(item.preferred - EPSILON));
+    const preferencesFit = roundedPreferredTotal <= contentSize;
+    const lowerFor = preferencesFit
+      ? (item: NormalizedItem) => item.preferred
+      : (item: NormalizedItem) => item.min;
+    const factorFor = preferencesFit
+      ? (item: NormalizedItem) => item.weight * item.grow
+      : (item: NormalizedItem) => item.weight / Math.max(item.shrink, EPSILON);
+
+    // Canonical weights describe the requested proportions, while preferred
+    // sizes are soft floors when they jointly fit. Bounded proportional
+    // water-filling makes pointer resize direct: a 60/40 request resolves to
+    // 60/40 unless a declared constraint actually prevents it.
+    values = allocateProportionally(
+      active,
+      contentSize,
+      lowerFor,
+      maxViolated ? () => Number.POSITIVE_INFINITY : (item) => item.max,
+      factorFor,
+    );
   }
 
   // Eliminate accumulated floating-point error deterministically before rounding.

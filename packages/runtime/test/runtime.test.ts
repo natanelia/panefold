@@ -485,6 +485,35 @@ describe("workspace runtime", () => {
     expect(runtime.getSnapshot().groups.byId[testGroupId]?.selectedPanelId).toBe(secondPanelId);
   });
 
+  it("clears reversible history at an explicit non-replayable platform barrier", () => {
+    const runtime = createWorkspaceRuntime({
+      initialSnapshot: fixture(),
+      createCommandId: deterministicIds(),
+    });
+    runtime.dispatch(
+      { type: "select-panel", panelId: secondPanelId },
+      { label: "Select second panel" },
+    );
+    expect(runtime.canUndo()).toBe(true);
+
+    const barrier = runtime.dispatch(
+      {
+        type: "activate-panel",
+        panelId: secondPanelId,
+        focus: "keep-focus",
+      },
+      {
+        origin: "platform",
+        label: "Acquire a non-replayable platform owner",
+        history: "barrier",
+      },
+    );
+    expect(barrier.status).toBe("committed");
+    expect(runtime.canUndo()).toBe(false);
+    expect(runtime.canRedo()).toBe(false);
+    expect(runtime.undo().status).toBe("rejected");
+  });
+
   it("freezes at the last valid snapshot and emits a bounded redacted reproduction", () => {
     const structuralFailureListener = vi.fn(() => {
       throw new Error("Failure reporting must remain observational");

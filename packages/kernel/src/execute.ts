@@ -255,8 +255,10 @@ export function dispatchKernelState(
   const result = executeCommand(state.snapshot, envelope);
   if (!result.ok) return stateFailure(state, result);
   const inverse = result.inverse;
-  const nextUndo =
-    inverse === undefined || state.historyLimit === 0
+  const historyBarrier = envelope.history === "barrier";
+  const nextUndo = historyBarrier
+    ? []
+    : inverse === undefined || state.historyLimit === 0
       ? state.undoStack
       : [...state.undoStack, { envelope, inverse } satisfies WorkspaceHistoryEntry].slice(
           -state.historyLimit,

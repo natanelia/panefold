@@ -114,6 +114,12 @@ const siteRoutes = [
     description: "Bounded actors, disposable leases, and progressive animation fallback.",
   },
   {
+    path: "docs/adr-direct-placement-durable-demo",
+    title: "Direct placement and durable Atlas — Panefold documentation",
+    description:
+      "Revision-bound docking, controlled live popouts, tab presentation, and restore-before-render persistence.",
+  },
+  {
     path: "docs/system-design",
     title: "System design — Panefold documentation",
     description: "The complete normative design and 190-requirement register source.",

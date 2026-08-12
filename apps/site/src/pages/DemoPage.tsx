@@ -17,8 +17,8 @@ export function DemoPage({ navigate }: { readonly navigate: (path: string) => vo
         </SiteLink>
         <span className="h-4 w-px bg-white/10" />
         <div className="flex min-w-0 items-start gap-2 text-[11px] leading-5 text-slate-400">
-          <Info className="size-3.5 text-cyan-300" /> Atlas is an interactive reference fixture.
-          State lives in this session only.
+          <Info className="size-3.5 text-cyan-300" /> Atlas is an interactive reference fixture. Its
+          canonical layout is saved in IndexedDB in this browser.
         </div>
         <a
           href={siteAsset("atlas/")}

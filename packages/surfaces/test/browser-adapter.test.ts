@@ -5,6 +5,8 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 
 import {
   BrowserExternalSurfaceAdapter,
+  SurfaceOwnershipRegistry,
+  SurfaceTransferCoordinator,
   SurfaceTransferError,
   detectBrowserSurfaceCapabilities,
   type PrepareSurfaceRequest,
@@ -78,6 +80,7 @@ describe("browser external-surface adapter", () => {
     expect(destinationDocument.documentElement.lang).toBe("en-SG");
     expect(destinationDocument.documentElement.dir).toBe("rtl");
     expect(destinationDocument.documentElement.style.writingMode).toBe("vertical-rl");
+    expect(destinationDocument.title).toBe("Panefold workspace surface");
     expect(
       destinationDocument
         .querySelector('meta[name="panefold-workspace-id"]')
@@ -204,6 +207,233 @@ describe("browser external-surface adapter", () => {
     expect(disposeCount).toBe(1);
   });
 
+  it("closes synchronously without waiting for a never-settling disposer", async () => {
+    const destinationWindow = createDestinationWindow();
+    let closed = false;
+    let disposeCount = 0;
+    Object.defineProperty(destinationWindow, "closed", {
+      configurable: true,
+      get: () => closed,
+    });
+    destinationWindow.close = () => {
+      closed = true;
+    };
+    const adapter = new BrowserExternalSurfaceAdapter({
+      environment: { sourceWindow: window, openWindow: () => destinationWindow },
+      mount: () => ({
+        dispose: async () => {
+          disposeCount += 1;
+          await new Promise<void>(() => undefined);
+        },
+      }),
+    });
+    const signal = new AbortController().signal;
+    const context = prepareRequest("browser-window");
+    const handle = await adapter.prepare(context, signal);
+    await adapter.bootstrap(handle, context, signal);
+    await adapter.mount(handle, mountRequest({}), signal);
+
+    const closing = adapter.close(handle);
+    expect(closed).toBe(true);
+    expect(disposeCount).toBe(1);
+    await expect(
+      Promise.race([
+        closing.then(() => "resolved" as const),
+        new Promise<"pending">((resolve) => setTimeout(() => resolve("pending"), 25)),
+      ]),
+    ).resolves.toBe("resolved");
+    await expect(adapter.close(handle)).resolves.toBeUndefined();
+    expect(disposeCount).toBe(1);
+  });
+
+  it("times out a never-settling mount, compensates ownership, and closes the popup", async () => {
+    const destinationWindow = createDestinationWindow();
+    let closed = false;
+    let triggerTimeout: (() => void) | undefined;
+    Object.defineProperty(destinationWindow, "closed", {
+      configurable: true,
+      get: () => closed,
+    });
+    destinationWindow.close = () => {
+      closed = true;
+    };
+    const adapter = new BrowserExternalSurfaceAdapter({
+      environment: {
+        sourceWindow: window,
+        openWindow: () => destinationWindow,
+        setTimer: () => 1,
+        clearTimer: () => undefined,
+      },
+      mount: () => {
+        if (triggerTimeout === undefined) throw new Error("transfer timer was not installed");
+        triggerTimeout();
+        return new Promise<never>(() => undefined);
+      },
+    });
+    const ownership = new SurfaceOwnershipRegistry();
+    const compensateOwnership = vi.fn(async () => undefined);
+    const coordinator = new SurfaceTransferCoordinator({
+      adapter,
+      ownership,
+      sessionNonce: "session:test",
+      timeoutMs: 1_000,
+      createToken: () => "transfer:mount-timeout",
+      setTimer: (callback) => {
+        triggerTimeout = callback;
+        return 1;
+      },
+      clearTimer: () => undefined,
+      hooks: {
+        currentRevision: () => revision(7),
+        commitOwnership: () => true,
+        releaseSource: async () => undefined,
+        compensateOwnership,
+      },
+    });
+    const context = prepareRequest("browser-window");
+
+    await expect(
+      coordinator.transfer({
+        panelId: mapPanelId,
+        sourceSurfaceId,
+        destination: context,
+        sourcePolicy: {
+          allowBrowserWindow: true,
+          allowDocumentPictureInPicture: false,
+        },
+        destinationCapabilities: detectBrowserSurfaceCapabilities({ sourceWindow: window })[
+          "browser-window"
+        ],
+        panelCapabilities: { popout: true, pictureInPicture: false },
+        baseRevision: revision(7),
+        coordinatorEpoch: 1,
+        checkpoint: async () => ({}),
+      }),
+    ).resolves.toMatchObject({
+      ok: false,
+      safeSurfaceId: sourceSurfaceId,
+      error: { code: "TRANSFER_TIMEOUT", stage: "destination-mount" },
+      completedStages: expect.arrayContaining(["ownership-commit", "compensation"]),
+    });
+    expect(compensateOwnership).toHaveBeenCalledOnce();
+    expect(ownership.ownerOf(mapPanelId)).toMatchObject({
+      surfaceId: sourceSurfaceId,
+      state: "owned",
+    });
+    expect(closed).toBe(true);
+  });
+
+  it("disposes a mount lease that resolves after abort and destination close exactly once", async () => {
+    const destinationWindow = createDestinationWindow();
+    let resolveMount: (lease: { readonly dispose: () => void }) => void = () => undefined;
+    const mounting = new Promise<{ readonly dispose: () => void }>((resolve) => {
+      resolveMount = resolve;
+    });
+    let disposeCount = 0;
+    const adapter = new BrowserExternalSurfaceAdapter({
+      environment: {
+        sourceWindow: window,
+        openWindow: () => destinationWindow,
+        setTimer: () => 1,
+        clearTimer: () => undefined,
+      },
+      mount: () => mounting,
+    });
+    const controller = new AbortController();
+    const context = prepareRequest("browser-window");
+    const handle = await adapter.prepare(context, controller.signal);
+    await adapter.bootstrap(handle, context, controller.signal);
+
+    const mountResult = adapter.mount(handle, mountRequest({}), controller.signal);
+    controller.abort("fixture abort");
+    await expect(mountResult).rejects.toBe("fixture abort");
+    await adapter.close(handle);
+
+    resolveMount({
+      dispose: () => {
+        disposeCount += 1;
+      },
+    });
+    await Promise.resolve();
+    await Promise.resolve();
+    expect(disposeCount).toBe(1);
+    await adapter.close(handle);
+    expect(disposeCount).toBe(1);
+  });
+
+  it("ignores bfcache pagehide and synchronously closes on real source unload", async () => {
+    const destinationWindow = createDestinationWindow();
+    let closed = false;
+    let disposeCount = 0;
+    Object.defineProperty(destinationWindow, "closed", {
+      configurable: true,
+      get: () => closed,
+    });
+    destinationWindow.close = () => {
+      closed = true;
+    };
+    const onSurfaceLost = vi.fn();
+    const adapter = new BrowserExternalSurfaceAdapter({
+      environment: { sourceWindow: window, openWindow: () => destinationWindow },
+      mount: () => ({
+        dispose: async () => {
+          disposeCount += 1;
+          await new Promise<void>(() => undefined);
+        },
+      }),
+      onSurfaceLost,
+    });
+    const signal = new AbortController().signal;
+    const context = prepareRequest("browser-window");
+    const handle = await adapter.prepare(context, signal);
+    await adapter.bootstrap(handle, context, signal);
+    await adapter.mount(handle, mountRequest({}), signal);
+    await adapter.waitUntilReady(handle, signal);
+
+    window.dispatchEvent(new PageTransitionEvent("pagehide", { persisted: true }));
+    await Promise.resolve();
+    expect(closed).toBe(false);
+
+    window.dispatchEvent(new PageTransitionEvent("pagehide", { persisted: false }));
+    // Destination ownership is revoked within the browser event even though
+    // application cleanup never settles.
+    expect(closed).toBe(true);
+    expect(disposeCount).toBe(1);
+    expect(onSurfaceLost).not.toHaveBeenCalled();
+  });
+
+  it("contains a rejecting disposer during real source unload", async () => {
+    const destinationWindow = createDestinationWindow();
+    let closed = false;
+    Object.defineProperty(destinationWindow, "closed", {
+      configurable: true,
+      get: () => closed,
+    });
+    destinationWindow.close = () => {
+      closed = true;
+    };
+    const adapter = new BrowserExternalSurfaceAdapter({
+      environment: { sourceWindow: window, openWindow: () => destinationWindow },
+      mount: () => ({
+        dispose: async () => {
+          throw new Error("fixture disposal failure");
+        },
+      }),
+    });
+    const signal = new AbortController().signal;
+    const context = prepareRequest("browser-window");
+    const handle = await adapter.prepare(context, signal);
+    await adapter.bootstrap(handle, context, signal);
+    await adapter.mount(handle, mountRequest({}), signal);
+
+    expect(() =>
+      window.dispatchEvent(new PageTransitionEvent("pagehide", { persisted: false })),
+    ).not.toThrow();
+    expect(closed).toBe(true);
+    await Promise.resolve();
+    await Promise.resolve();
+  });
+
   it("uses Document Picture-in-Picture only when explicitly supplied", async () => {
     const destinationWindow = createDestinationWindow();
     const requestWindow = vi.fn(async () => destinationWindow);
@@ -227,6 +457,38 @@ describe("browser external-surface adapter", () => {
       freePositioning: false,
     });
     await adapter.close(handle);
+  });
+
+  it("closes a Document Picture-in-Picture window that resolves after preparation abort", async () => {
+    const destinationWindow = createDestinationWindow();
+    let closed = false;
+    let resolveWindow: (value: Window) => void = () => undefined;
+    Object.defineProperty(destinationWindow, "closed", {
+      configurable: true,
+      get: () => closed,
+    });
+    destinationWindow.close = () => {
+      closed = true;
+    };
+    const requestWindow = new Promise<Window>((resolve) => {
+      resolveWindow = resolve;
+    });
+    const adapter = new BrowserExternalSurfaceAdapter({
+      environment: {
+        sourceWindow: window,
+        documentPictureInPicture: { requestWindow: () => requestWindow },
+      },
+      mount: () => undefined,
+    });
+    const controller = new AbortController();
+
+    const preparation = adapter.prepare(prepareRequest("document-pip"), controller.signal);
+    controller.abort("fixture abort");
+    await expect(preparation).rejects.toBe("fixture abort");
+    resolveWindow(destinationWindow);
+    await Promise.resolve();
+    await Promise.resolve();
+    expect(closed).toBe(true);
   });
 
   it("fails safely for blocked, unactivated, unavailable, and untrusted destinations", async () => {

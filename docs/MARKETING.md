@@ -25,7 +25,7 @@ behavior must remain coherent as complexity grows.
 
 - `/` — product narrative, animated workspace hero, feature proof, craftsmanship, interaction film,
   embedded live fixture, framework story, and calls to action.
-- `/demo` — full-height Atlas fixture with an explicit session-memory notice.
+- `/demo` — full-height Atlas fixture with explicit IndexedDB save/restore status and boundaries.
 - `/docs` — searchable documentation index.
 - `/docs/:slug` — repository Markdown rendered with navigation, headings, tables, and copyable code.
 

@@ -266,10 +266,10 @@ export function HomePage({ navigate }: { readonly navigate: (path: string) => vo
               <h2 className="section-title mt-4 max-w-2xl">Don’t take the screenshots on faith.</h2>
               <ol className="mt-6 grid gap-2 text-xs text-slate-400 sm:grid-cols-2">
                 {[
-                  "Resize a splitter — release commits once.",
-                  "Move a panel — stable identity follows it.",
-                  "Close and undo — history restores structure.",
-                  "Try keyboard controls and reduced motion.",
+                  "Drag a tab to a group center to dock it.",
+                  "Drop on any edge to create a new container.",
+                  "Drag beyond the workspace to open a live popup.",
+                  "Reload — the canonical layout returns from IndexedDB.",
                 ].map((step, index) => (
                   <li key={step} className="flex items-center gap-2">
                     <span className="font-mono text-[9px] text-cyan-300/70">
@@ -297,7 +297,7 @@ export function HomePage({ navigate }: { readonly navigate: (path: string) => vo
                 <i className="size-2 rounded-full bg-white/10" />
               </div>
               <span className="mx-auto font-mono text-[9px] text-slate-400">
-                interactive · session memory only
+                interactive · layout saved in this browser
               </span>
             </div>
             <iframe

@@ -69,6 +69,8 @@ const markdownRouteMap: Readonly<Record<string, string>> = {
   "adr/0011-independent-semantic-oracle.md": "/docs/adr-independent-oracle",
   "docs/adr/0012-bounded-protocol-and-motion-lifecycles.md": "/docs/adr-protocol-motion-lifecycles",
   "adr/0012-bounded-protocol-and-motion-lifecycles.md": "/docs/adr-protocol-motion-lifecycles",
+  "docs/adr/0013-direct-placement-durable-demo.md": "/docs/adr-direct-placement-durable-demo",
+  "adr/0013-direct-placement-durable-demo.md": "/docs/adr-direct-placement-durable-demo",
 };
 
 export function DocsPage({ slug, navigate }: DocsPageProps) {

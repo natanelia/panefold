@@ -16,12 +16,25 @@ import {
   type WorkspaceCommand,
   type WorkspaceSnapshot,
 } from "@panefold/model";
-import type { WorkspaceCommandAdapter, WorkspaceProjection } from "@panefold/react";
+import { solveLayout } from "@panefold/geometry";
+import {
+  canonicalizeWorkspace,
+  planPanelDropCommand,
+  reduceWorkspace,
+  validateWorkspace,
+} from "@panefold/kernel";
+import type {
+  WorkspaceCommandAdapter,
+  WorkspacePanelDropRequest,
+  WorkspacePanelDropPlan,
+  WorkspacePanelDropPlanContext,
+  WorkspaceProjection,
+} from "@panefold/react";
 
 const capabilities: PanelCapabilities = {
   closable: true,
   floatable: true,
-  popout: false,
+  popout: true,
   pictureInPicture: false,
   singleton: true,
 };
@@ -29,7 +42,7 @@ const capabilities: PanelCapabilities = {
 const lifecycle: PanelLifecyclePolicy = {
   hidden: "suspend",
   sameDocumentMove: "preserve-host",
-  crossDocumentMove: "unsupported",
+  crossDocumentMove: "portal-coupled",
 };
 
 function panel(
@@ -211,10 +224,13 @@ export function projectWorkspace(snapshot: WorkspaceSnapshot): WorkspaceProjecti
     };
   }
 
+  const reachableNodeIds = collectReachableNodeIds(snapshot, mainSurface.rootNodeId);
+  const reachableGroupIds = new Set<string>();
   const projectedNodes: Record<string, WorkspaceProjection["nodes"][string]> = {};
-  for (const id of snapshot.nodes.ids) {
+  for (const id of reachableNodeIds) {
     const node = getEntity(snapshot.nodes, id);
     if (node === undefined) continue;
+    if (node.kind === "group") reachableGroupIds.add(String(node.groupId));
     projectedNodes[String(id)] =
       node.kind === "split"
         ? {
@@ -233,6 +249,7 @@ export function projectWorkspace(snapshot: WorkspaceSnapshot): WorkspaceProjecti
 
   const projectedGroups: Record<string, WorkspaceProjection["groups"][string]> = {};
   for (const id of snapshot.groups.ids) {
+    if (!reachableGroupIds.has(String(id))) continue;
     const group = getEntity(snapshot.groups, id);
     if (group === undefined) continue;
     projectedGroups[String(id)] = {
@@ -275,39 +292,138 @@ export function projectWorkspace(snapshot: WorkspaceSnapshot): WorkspaceProjecti
 
 let closedSequence = 0;
 
-export const demoCommands: WorkspaceCommandAdapter<WorkspaceCommand> = {
-  selectPanel: (id) => ({
-    type: "select-panel",
-    panelId: panelId(id),
-    activate: true,
-  }),
-  activatePanel: (id) => ({
-    type: "activate-panel",
-    panelId: panelId(id),
-    focus: "keep-focus",
-  }),
-  closePanel: (id) => {
-    closedSequence += 1;
-    return {
-      type: "close-panels",
-      targets: [
-        {
-          panelId: panelId(id),
-          closedPanelId: closedPanelId(`closed-${id}-${closedSequence}`),
-        },
-      ],
-    };
-  },
-  resizeSplit: (id, weights) => ({
-    type: "resize-split",
-    splitNodeId: nodeId(id),
-    weights,
-  }),
-  movePanel: (id, targetGroupId) => ({
-    type: "move-panel",
-    panelId: panelId(id),
-    target: { groupId: groupId(targetGroupId) },
-    select: true,
-    activate: true,
-  }),
-};
+export function createDemoCommands(
+  getSnapshot: () => WorkspaceSnapshot,
+): WorkspaceCommandAdapter<WorkspaceCommand> {
+  return {
+    selectPanel: (id) => ({
+      type: "select-panel",
+      panelId: panelId(id),
+      activate: true,
+    }),
+    activatePanel: (id) => ({
+      type: "activate-panel",
+      panelId: panelId(id),
+      focus: "keep-focus",
+    }),
+    closePanel: (id) => {
+      closedSequence += 1;
+      return {
+        type: "close-panels",
+        targets: [
+          {
+            panelId: panelId(id),
+            closedPanelId: closedPanelId(`closed-${id}-${closedSequence}`),
+          },
+        ],
+      };
+    },
+    resizeSplit: (id, weights) => ({
+      type: "resize-split",
+      splitNodeId: nodeId(id),
+      weights,
+    }),
+    movePanel: (id, targetGroupId) => ({
+      type: "move-panel",
+      panelId: panelId(id),
+      target: { groupId: groupId(targetGroupId) },
+      select: true,
+      activate: true,
+    }),
+    planPanelDrop: (request, context) => planDemoPanelDrop(getSnapshot(), request, context),
+  };
+}
+
+function planDemoPanelDrop(
+  snapshot: WorkspaceSnapshot,
+  request: WorkspacePanelDropRequest,
+  context: WorkspacePanelDropPlanContext,
+): WorkspacePanelDropPlan<WorkspaceCommand> | undefined {
+  if (request.revision !== snapshot.revision.toString()) return undefined;
+  const ids = allocateDropIds(snapshot, request.panel.id);
+  const plan = planPanelDropCommand(
+    snapshot,
+    {
+      panelId: panelId(request.panel.id),
+      target:
+        request.target.kind === "center"
+          ? { kind: "center", groupId: groupId(request.targetGroup.id) }
+          : {
+              kind: "edge",
+              groupId: groupId(request.targetGroup.id),
+              edge: request.target.edge,
+              ratio: request.target.ratio,
+            },
+    },
+    {
+      newGroupId: ids.group,
+      newGroupNodeId: ids.groupNode,
+      splitNodeId: ids.splitNode,
+    },
+  );
+  if (!plan.ok) return undefined;
+
+  // Preview the exact semantic command retained for pointerup. Reducing and
+  // canonicalizing against the same immutable revision mirrors kernel
+  // execution without dispatching or mutating the live runtime.
+  const reduced = reduceWorkspace(snapshot, plan.command);
+  if (!reduced.ok) return undefined;
+  const next = canonicalizeWorkspace(reduced.snapshot).snapshot;
+  if (validateWorkspace(next).length > 0) return undefined;
+  const mainSurface = next.surfaces.ids
+    .map((id) => getEntity(next.surfaces, id))
+    .find((surface) => surface?.kind === "main");
+  const resultingGroups = next.groups.ids
+    .map((id) => getEntity(next.groups, id))
+    .filter((group) => group?.panelIds.includes(panelId(request.panel.id)));
+  if (mainSurface === undefined || resultingGroups.length !== 1) return undefined;
+  const resultingGroup = resultingGroups[0];
+  if (resultingGroup === undefined) return undefined;
+  const layout = solveLayout(next, mainSurface.rootNodeId, context.bounds, {
+    splitterSize: context.splitterSize,
+  });
+  const previewRect = layout.groupRects[String(resultingGroup.id)];
+  if (previewRect === undefined) return undefined;
+  return Object.freeze({ command: plan.command, previewRect: Object.freeze({ ...previewRect }) });
+}
+
+/**
+ * Derives placement IDs from the authoritative snapshot instead of module
+ * lifetime. The demo can therefore reload a persisted split and immediately
+ * split the same panel again without reusing the IDs produced before reload.
+ */
+function allocateDropIds(snapshot: WorkspaceSnapshot, panelIdValue: string) {
+  for (let candidate = 1; candidate < Number.MAX_SAFE_INTEGER; candidate += 1) {
+    const suffix = `${panelIdValue}:${String(candidate)}`;
+    const group = groupId(`drag-group:${suffix}`);
+    const groupNode = nodeId(`drag-node:${suffix}`);
+    const splitNode = nodeId(`drag-split:${suffix}`);
+    if (
+      getEntity(snapshot.groups, group) === undefined &&
+      getEntity(snapshot.nodes, groupNode) === undefined &&
+      getEntity(snapshot.nodes, splitNode) === undefined
+    ) {
+      return Object.freeze({ group, groupNode, splitNode });
+    }
+  }
+  throw new Error(`No placement identity remains available for panel ${panelIdValue}`);
+}
+
+function collectReachableNodeIds(
+  snapshot: WorkspaceSnapshot,
+  rootNodeId: LayoutNode["id"],
+): readonly LayoutNode["id"][] {
+  const result: LayoutNode["id"][] = [];
+  const pending = [rootNodeId];
+  const seen = new Set<string>();
+  while (pending.length > 0) {
+    const current = pending.pop();
+    if (current === undefined || seen.has(String(current))) continue;
+    seen.add(String(current));
+    const node = getEntity(snapshot.nodes, current);
+    if (node === undefined) continue;
+    result.push(node.id);
+    if (node.kind === "split") pending.push(...node.children);
+  }
+  return result;
+}

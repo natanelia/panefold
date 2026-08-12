@@ -533,12 +533,11 @@ function edgeAxis(edge: Extract<WorkspaceCommand, { type: "split-group" }>["edge
 function createIndependentSplit(
   id: LayoutNode["id"],
   edge: Extract<WorkspaceCommand, { type: "split-group" }>["edge"],
-  ratioValue: number,
+  ratio: number,
   firstNodeId: LayoutNode["id"],
   secondNodeId: LayoutNode["id"],
   insertedFirst: boolean,
 ): LayoutNode {
-  const ratio = Math.round(ratioValue * OPTIMIZED_WEIGHT_TOTAL);
   return {
     kind: "split",
     id,
@@ -551,7 +550,7 @@ function createIndependentSplit(
   };
 }
 
-function requireRatio(value: number, intent: string): void {
+function requireRatio(value: number, intent: string): number {
   if (!Number.isFinite(value) || value <= 0 || value >= 1) {
     rejectIndependent(
       "INVALID_COMMAND",
@@ -559,6 +558,15 @@ function requireRatio(value: number, intent: string): void {
       "Choose a ratio such as 0.5",
     );
   }
+  const weight = Math.round(value * OPTIMIZED_WEIGHT_TOTAL);
+  if (weight <= 0 || weight >= OPTIMIZED_WEIGHT_TOTAL) {
+    rejectIndependent(
+      "INVALID_COMMAND",
+      `${intent} ratio must produce two positive canonical weights`,
+      "Choose a ratio from 0.000001 through 0.999999",
+    );
+  }
+  return weight;
 }
 
 function reduceIndependentMoveGroup(
@@ -579,7 +587,7 @@ function reduceIndependentMoveGroup(
       "Supply a new split ID",
     );
   }
-  requireRatio(command.ratio, "Move-group");
+  const ratio = requireRatio(command.ratio, "Move-group");
   const sourceGroup = requireIndependent(
     draft.groups.get(command.groupId),
     "Group",
@@ -607,6 +615,26 @@ function reduceIndependentMoveGroup(
     "Target group node",
     targetGroup.id,
   );
+  const sourceSurface = requireIndependent(
+    findIndependentNodeSurface(draft, sourceNode.id),
+    "Source group surface",
+    sourceNode.id,
+  );
+  const targetSurface = requireIndependent(
+    findIndependentNodeSurface(draft, targetNode.id),
+    "Target group surface",
+    targetNode.id,
+  );
+  if (
+    sourceSurface.id !== targetSurface.id &&
+    (sourceSurface.capabilities.crossDocument || targetSurface.capabilities.crossDocument)
+  ) {
+    rejectIndependent(
+      "CAPABILITY_DENIED",
+      "A group cannot move across cross-document ownership without preparation",
+      "Use a prepared transfer, redock, or recovery command",
+    );
+  }
   const sourceLocation = requireIndependent(
     locateIndependentNode(draft, sourceNode.id),
     "Group location",
@@ -615,25 +643,25 @@ function reduceIndependentMoveGroup(
   if (sourceLocation.parentNodeId !== undefined) {
     detachIndependentNode(draft, sourceNode.id);
   } else if (sourceLocation.surfaceId !== undefined) {
-    const sourceSurface = requireIndependent(
+    const sourceRootSurface = requireIndependent(
       draft.surfaces.get(sourceLocation.surfaceId),
       "Source surface",
       sourceLocation.surfaceId,
     );
-    if (sourceSurface.kind !== "floating") {
+    if (sourceRootSurface.kind !== "floating") {
       rejectIndependent(
         "CAPABILITY_DENIED",
         "Only an in-page floating root can move without an ownership recovery protocol",
         "Use redock or recover-orphaned-surface for external ownership",
       );
     }
-    draft.surfaces.delete(sourceSurface.id);
-    draft.floatingOrder = draft.floatingOrder.filter((id) => id !== sourceSurface.id);
+    draft.surfaces.delete(sourceRootSurface.id);
+    draft.floatingOrder = draft.floatingOrder.filter((id) => id !== sourceRootSurface.id);
   }
   const split = createIndependentSplit(
     command.splitNodeId,
     command.edge,
-    command.ratio,
+    ratio,
     sourceNode.id,
     targetNode.id,
     command.edge.endsWith("start"),
@@ -734,7 +762,8 @@ function reduceIndependentSplitGroup(
   if (
     draft.groups.has(command.newGroupId) ||
     draft.nodes.has(command.newGroupNodeId) ||
-    draft.nodes.has(command.splitNodeId)
+    draft.nodes.has(command.splitNodeId) ||
+    command.newGroupNodeId === command.splitNodeId
   ) {
     rejectIndependent(
       "DUPLICATE_ENTITY",
@@ -742,13 +771,7 @@ function reduceIndependentSplitGroup(
       "Supply new stable IDs",
     );
   }
-  if (!Number.isFinite(command.ratio) || command.ratio <= 0 || command.ratio >= 1) {
-    rejectIndependent(
-      "INVALID_COMMAND",
-      "Split ratio must be greater than 0 and less than 1",
-      "Choose a ratio such as 0.5",
-    );
-  }
+  const ratio = requireRatio(command.ratio, "Split");
   if (
     command.panelIds.length === 0 ||
     !hasUniqueValues(command.panelIds) ||
@@ -781,7 +804,7 @@ function reduceIndependentSplitGroup(
   const split = createIndependentSplit(
     command.splitNodeId,
     command.edge,
-    command.ratio,
+    ratio,
     command.newGroupNodeId,
     targetNode.id,
     command.edge.endsWith("start"),
@@ -1179,13 +1202,7 @@ function reduceIndependentRecoverSurface(
       "Supply a new split ID",
     );
   }
-  if (!Number.isFinite(command.ratio) || command.ratio <= 0 || command.ratio >= 1) {
-    rejectIndependent(
-      "INVALID_COMMAND",
-      "Recovery ratio must be between 0 and 1",
-      "Choose a ratio such as 0.5",
-    );
-  }
+  const ratio = requireRatio(command.ratio, "Recovery");
   const targetGroup = requireIndependent(
     draft.groups.get(command.targetGroupId),
     "Recovery target group",
@@ -1208,10 +1225,17 @@ function reduceIndependentRecoverSurface(
       "Choose a group on another surface",
     );
   }
+  if (targetSurface.capabilities.crossDocument) {
+    rejectIndependent(
+      "CAPABILITY_DENIED",
+      "An orphaned surface cannot recover into a cross-document target",
+      "Choose a target on an in-page surface",
+    );
+  }
   const split = createIndependentSplit(
     command.splitNodeId,
     command.edge,
-    command.ratio,
+    ratio,
     surface.rootNodeId,
     targetNode.id,
     command.edge.endsWith("start"),
@@ -1271,6 +1295,23 @@ function reduceIndependentRedock(
       "INVALID_COMMAND",
       "Floating surface cannot redock into itself",
       "Choose a docked target group",
+    );
+  }
+  const targetNode = requireIndependent(
+    findIndependentGroupNode(draft, target.id),
+    "Redock target node",
+    target.id,
+  );
+  const targetSurface = requireIndependent(
+    findIndependentNodeSurface(draft, targetNode.id),
+    "Redock target surface",
+    targetNode.id,
+  );
+  if (targetSurface.capabilities.crossDocument) {
+    rejectIndependent(
+      "CAPABILITY_DENIED",
+      "A surface cannot redock into a cross-document target",
+      "Choose a target on an in-page surface",
     );
   }
   const panelIds = insertIndependentPanels(

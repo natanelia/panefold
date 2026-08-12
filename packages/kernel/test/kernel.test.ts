@@ -284,6 +284,37 @@ describe("reference kernel", () => {
     expect(redo.state.undoStack).toHaveLength(1);
   });
 
+  it("uses a history barrier for non-replayable platform ownership changes", () => {
+    const initial = fixtureSnapshot();
+    const first = dispatchKernelState(
+      createKernelState(initial, 3),
+      envelope({ type: "select-panel", panelId: ids.panels[1] }, initial),
+    );
+    expect(first.ok).toBe(true);
+    if (!first.ok) return;
+    expect(first.state.undoStack).toHaveLength(1);
+
+    const barrierEnvelope: CommandEnvelope = {
+      ...envelope(
+        { type: "activate-panel", panelId: ids.panels[1], focus: "keep-focus" },
+        first.state.snapshot,
+      ),
+      history: "barrier",
+    };
+    const barrier = dispatchKernelState(first.state, barrierEnvelope);
+    expect(barrier.ok).toBe(true);
+    if (!barrier.ok) return;
+    expect(barrier.state.undoStack).toEqual([]);
+    expect(barrier.state.redoStack).toEqual([]);
+
+    const undo = dispatchKernelState(
+      barrier.state,
+      envelope({ type: "undo-workspace-operation" }, barrier.state.snapshot),
+    );
+    expect(undo.ok).toBe(false);
+    if (!undo.ok) expect(undo.error.code).toBe("HISTORY_EMPTY");
+  });
+
   it("activates the same-group successor when closing and restores the panel in one undo", () => {
     const initial = fixtureSnapshot();
     let state = createKernelState(initial, 3);

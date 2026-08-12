@@ -107,6 +107,9 @@ importers:
       '@panefold/runtime':
         specifier: workspace:*
         version: link:../../packages/runtime
+      '@panefold/runtime-effect':
+        specifier: workspace:*
+        version: link:../../packages/runtime-effect
       '@panefold/surfaces':
         specifier: workspace:*
         version: link:../../packages/surfaces

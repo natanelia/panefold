@@ -323,6 +323,30 @@ describe("solveLayout", () => {
     expect(increased.nodeRects.n2?.inlineSize).toBeLessThan(baseline.nodeRects.n2?.inlineSize ?? 0);
   });
 
+  it("tracks a requested 100 pixel splitter move even when preferred sizes fit", () => {
+    const panels = [panel("p1", { preferredInline: 320 }), panel("p2", { preferredInline: 320 })];
+    const groups = [group("g1", ["p1"]), group("g2", ["p2"])];
+    const leaves = [groupNode("n1", "g1"), groupNode("n2", "g2")];
+    const root: LayoutNode = {
+      kind: "split",
+      id: nodeId("root"),
+      axis: "inline",
+      children: leaves.map((leaf) => leaf.id),
+      weights: [500_000, 500_000],
+      collapsedChildIds: [],
+    };
+    const snapshot = createWorkspaceSnapshot({ panels, groups, nodes: [...leaves, root] });
+    const bounds = { inlineStart: 0, blockStart: 0, inlineSize: 1_006, blockSize: 100 };
+    const baseline = solveLayout(snapshot, root.id, bounds);
+    const moved = solveLayout(snapshot, root.id, bounds, {
+      splitOverrides: { root: { weights: [600_000, 400_000] } },
+    });
+
+    expect(baseline.nodeRects.n1?.inlineSize).toBe(500);
+    expect(moved.nodeRects.n1?.inlineSize).toBe(600);
+    expect(moved.nodeRects.n2?.inlineSize).toBe(400);
+  });
+
   it("ignores malformed speculative overrides with an explicit diagnostic", () => {
     const panels = [panel("p1"), panel("p2")];
     const groups = [group("g1", ["p1"]), group("g2", ["p2"])];

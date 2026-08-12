@@ -52,8 +52,14 @@ export function createDropTargets(
   edgeRatio = 0.25,
 ): readonly DropTarget[] {
   const ratio = Number.isFinite(edgeRatio) ? Math.min(0.45, Math.max(0, edgeRatio)) : 0.25;
-  const inlineDepth = Math.round(rect.inlineSize * ratio);
-  const blockDepth = Math.round(rect.blockSize * ratio);
+  const inlineDepth = Math.min(
+    Math.floor(Math.max(0, rect.inlineSize) / 2),
+    Math.round(Math.max(0, rect.inlineSize) * ratio),
+  );
+  const blockDepth = Math.min(
+    Math.floor(Math.max(0, rect.blockSize) / 2),
+    Math.round(Math.max(0, rect.blockSize) * ratio),
+  );
   const center: LogicalRect = {
     inlineStart: rect.inlineStart + inlineDepth,
     blockStart: rect.blockStart + blockDepth,
@@ -67,9 +73,22 @@ export function createDropTargets(
       kind: "split",
       nodeId,
       edge: "inline-start",
-      rect: edgeRect(rect, "inline-start", inlineDepth),
+      rect: {
+        ...edgeRect(rect, "inline-start", inlineDepth),
+        blockStart: center.blockStart,
+        blockSize: center.blockSize,
+      },
     },
-    { kind: "split", nodeId, edge: "inline-end", rect: edgeRect(rect, "inline-end", inlineDepth) },
+    {
+      kind: "split",
+      nodeId,
+      edge: "inline-end",
+      rect: {
+        ...edgeRect(rect, "inline-end", inlineDepth),
+        blockStart: center.blockStart,
+        blockSize: center.blockSize,
+      },
+    },
     { kind: "split", nodeId, edge: "block-start", rect: edgeRect(rect, "block-start", blockDepth) },
     { kind: "split", nodeId, edge: "block-end", rect: edgeRect(rect, "block-end", blockDepth) },
   ];

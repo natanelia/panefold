@@ -18,7 +18,9 @@ epoch.
 
 A driver-neutral ownership registry permits exactly one state per panel: source-owned,
 transferring, destination-pending-ready, or destination-owned. Failure before readiness rolls back
-and compensates a committed ownership change. Once the destination is ready it remains
+and compensates a committed ownership change under a fresh, bounded safety budget. The source is
+reported as authoritative only after compensation is confirmed; otherwise the destination remains
+pending and its resource is retained for recovery. Once the destination is ready it remains
 authoritative even if source cleanup fails; cleanup is retried without rolling ownership back.
 Surface loss recovers panels into an explicit safe surface under a newer coordinator epoch.
 

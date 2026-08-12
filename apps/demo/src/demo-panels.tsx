@@ -677,7 +677,7 @@ function NotesPanel({ lifecycle }: WorkspacePanelRenderProps) {
       }
       status={
         <>
-          <span>Saved locally</span>
+          <span>Panel-local draft · stable host</span>
           <span className="demo-lifecycle-badge" data-state={lifecycle}>
             {lifecycle === "suspended" ? "Editor suspended" : `Editor ${lifecycle}`}
           </span>

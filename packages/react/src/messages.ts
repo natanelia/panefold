@@ -1,5 +1,7 @@
 import type { WorkspaceDispatchStatus } from "./types";
 
+export type WorkspacePhysicalEdge = "left" | "right" | "above" | "below";
+
 /** Every user-visible string emitted by the reference React projection. */
 export interface WorkspaceMessageCatalog {
   workspaceLabel(): string;
@@ -37,6 +39,24 @@ export interface WorkspaceMessageCatalog {
   commandQueued(values: { readonly label: string }): string;
   commandRejected(values: { readonly label: string; readonly reason?: string }): string;
   resizeDidNotCommit(values: { readonly status: WorkspaceDispatchStatus }): string;
+  /** Optional direct-manipulation strings; omitted methods use the English fallback. */
+  splitPanel?(values: {
+    readonly title: string;
+    readonly edge: WorkspacePhysicalEdge;
+    readonly group: string;
+  }): string;
+  splitEdge?(values: { readonly edge: WorkspacePhysicalEdge }): string;
+  openPanelInNewWindow?(values: { readonly title: string }): string;
+  openInNewWindow?(): string;
+  openedPanelInNewWindow?(values: { readonly title: string }): string;
+  couldNotOpenPanelInNewWindow?(values: { readonly title: string }): string;
+  newWindowUnavailable?(): string;
+  panelNotReadyForNewWindow?(): string;
+  panelMoveCancelledNoDestination?(): string;
+  panelMoveRejected?(): string;
+  workspaceChangedBeforePanelMove?(): string;
+  directPanelPlacementUnsupported?(): string;
+  panelPlacementUnavailable?(): string;
 }
 
 export const ENGLISH_WORKSPACE_MESSAGES = Object.freeze<WorkspaceMessageCatalog>({
@@ -78,4 +98,76 @@ export const ENGLISH_WORKSPACE_MESSAGES = Object.freeze<WorkspaceMessageCatalog>
   commandRejected: ({ label, reason }) =>
     reason === undefined ? `${label} was rejected` : `${label} was rejected. ${reason}`,
   resizeDidNotCommit: ({ status }) => `Resize did not commit (${status}).`,
+  splitPanel: ({ title, edge, group }) => `Split ${title} ${edge} of ${group}`,
+  splitEdge: ({ edge }) => `Split ${edge}`,
+  openPanelInNewWindow: ({ title }) => `Open ${title} in a new window`,
+  openInNewWindow: () => "Open in new window",
+  openedPanelInNewWindow: ({ title }) => `Opened ${title} in a new window`,
+  couldNotOpenPanelInNewWindow: ({ title }) => `Could not open ${title} in a new window`,
+  newWindowUnavailable: () => "New window is unavailable for this workspace.",
+  panelNotReadyForNewWindow: () => "The panel is not ready to move to a new window.",
+  panelMoveCancelledNoDestination: () => "Panel move cancelled. No destination was selected.",
+  panelMoveRejected: () => "Panel move was rejected.",
+  workspaceChangedBeforePanelMove: () => "The workspace changed before the panel could be moved.",
+  directPanelPlacementUnsupported: () => "This workspace does not support direct panel placement.",
+  panelPlacementUnavailable: () => "The panel placement is no longer available.",
 });
+
+export interface ResolvedWorkspaceInteractionMessages {
+  readonly movedPanelTo: (values: { readonly title: string; readonly group: string }) => string;
+  readonly moveCancelled: () => string;
+  readonly splitPanel: (values: {
+    readonly title: string;
+    readonly edge: WorkspacePhysicalEdge;
+    readonly group: string;
+  }) => string;
+  readonly splitEdge: (values: { readonly edge: WorkspacePhysicalEdge }) => string;
+  readonly openPanelInNewWindow: (values: { readonly title: string }) => string;
+  readonly openInNewWindow: () => string;
+  readonly openedPanelInNewWindow: (values: { readonly title: string }) => string;
+  readonly couldNotOpenPanelInNewWindow: (values: { readonly title: string }) => string;
+  readonly newWindowUnavailable: () => string;
+  readonly panelNotReadyForNewWindow: () => string;
+  readonly panelMoveCancelledNoDestination: () => string;
+  readonly panelMoveRejected: () => string;
+  readonly workspaceChangedBeforePanelMove: () => string;
+  readonly directPanelPlacementUnsupported: () => string;
+  readonly panelPlacementUnavailable: () => string;
+}
+
+export function resolveWorkspaceInteractionMessages(
+  catalog: WorkspaceMessageCatalog,
+): ResolvedWorkspaceInteractionMessages {
+  return {
+    movedPanelTo: catalog.movedPanelTo,
+    moveCancelled: catalog.moveCancelled,
+    splitPanel:
+      catalog.splitPanel ?? (({ title, edge, group }) => `Split ${title} ${edge} of ${group}`),
+    splitEdge: catalog.splitEdge ?? (({ edge }) => `Split ${edge}`),
+    openPanelInNewWindow:
+      catalog.openPanelInNewWindow ?? (({ title }) => `Open ${title} in a new window`),
+    openInNewWindow: catalog.openInNewWindow ?? (() => "Open in new window"),
+    openedPanelInNewWindow:
+      catalog.openedPanelInNewWindow ?? (({ title }) => `Opened ${title} in a new window`),
+    couldNotOpenPanelInNewWindow:
+      catalog.couldNotOpenPanelInNewWindow ??
+      (({ title }) => `Could not open ${title} in a new window`),
+    newWindowUnavailable:
+      catalog.newWindowUnavailable ?? (() => "New window is unavailable for this workspace."),
+    panelNotReadyForNewWindow:
+      catalog.panelNotReadyForNewWindow ??
+      (() => "The panel is not ready to move to a new window."),
+    panelMoveCancelledNoDestination:
+      catalog.panelMoveCancelledNoDestination ??
+      (() => "Panel move cancelled. No destination was selected."),
+    panelMoveRejected: catalog.panelMoveRejected ?? (() => "Panel move was rejected."),
+    workspaceChangedBeforePanelMove:
+      catalog.workspaceChangedBeforePanelMove ??
+      (() => "The workspace changed before the panel could be moved."),
+    directPanelPlacementUnsupported:
+      catalog.directPanelPlacementUnsupported ??
+      (() => "This workspace does not support direct panel placement."),
+    panelPlacementUnavailable:
+      catalog.panelPlacementUnavailable ?? (() => "The panel placement is no longer available."),
+  };
+}
