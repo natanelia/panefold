@@ -36,6 +36,7 @@ export interface WorkspaceMessageCatalog {
   missingRenderer(values: { readonly type: string }): string;
   noWorkspaceLayout(): string;
   emptyWorkspaceInstructions(): string;
+  emptyPanelGroupInstructions(values: { readonly group: string }): string;
   commandQueued(values: { readonly label: string }): string;
   commandRejected(values: { readonly label: string; readonly reason?: string }): string;
   resizeDidNotCommit(values: { readonly status: WorkspaceDispatchStatus }): string;
@@ -94,6 +95,8 @@ export const ENGLISH_WORKSPACE_MESSAGES = Object.freeze<WorkspaceMessageCatalog>
     `Renderer ${type} is unavailable. The panel descriptor and placement remain recoverable.`,
   noWorkspaceLayout: () => "No workspace layout",
   emptyWorkspaceInstructions: () => "Open a panel or restore a workspace preset to begin.",
+  emptyPanelGroupInstructions: ({ group }) =>
+    `${group} is empty. Drag a panel here or choose this group as a move destination.`,
   commandQueued: ({ label }) => `${label} queued`,
   commandRejected: ({ label, reason }) =>
     reason === undefined ? `${label} was rejected` : `${label} was rejected. ${reason}`,

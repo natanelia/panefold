@@ -13,6 +13,7 @@
       content="Panefold is an experimental deterministic workspace runtime for building serious panel-heavy web applications."
     />
     <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="Panefold" />
     <meta property="og:title" content="Panefold — Workspace state you can reason about" />
     <meta
       property="og:description"
@@ -26,11 +27,18 @@
       property="og:image:alt"
       content="Panefold workspace runtime shown as a three-pane Atlas map workspace"
     />
+    <meta property="og:image:type" content="image/png" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
     <meta property="og:url" content="https://natanelia.github.io/panefold/" />
     <meta name="twitter:card" content="summary_large_image" />
     <meta
       name="twitter:image"
       content="https://natanelia.github.io/panefold/media/social-card.png"
+    />
+    <meta
+      name="twitter:image:alt"
+      content="Panefold workspace runtime shown as a three-pane Atlas map workspace"
     />
     <meta name="twitter:title" content="Panefold — Workspace state you can reason about" />
     <meta
@@ -41,6 +49,18 @@
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
     <link rel="manifest" href="/site.webmanifest" />
     <title>Panefold — Workspace state you can reason about</title>
+    <script id="panefold-structured-data" type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "SoftwareSourceCode",
+        "name": "Panefold",
+        "description": "Experimental deterministic workspace runtime for panel-heavy web applications.",
+        "codeRepository": "https://github.com/natanelia/panefold",
+        "license": "https://opensource.org/licenses/MIT",
+        "programmingLanguage": "TypeScript",
+        "runtimePlatform": "Web browser"
+      }
+    </script>
   </head>
   <body>
     <div id="root"></div>

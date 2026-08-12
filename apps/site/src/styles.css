@@ -74,6 +74,26 @@
 }
 
 @layer components {
+  .site-skip-link {
+    position: fixed;
+    inset-block-start: 0.75rem;
+    inset-inline-start: 0.75rem;
+    z-index: 100;
+    padding: 0.65rem 0.85rem;
+    border: 1px solid rgb(103 232 249 / 55%);
+    border-radius: 0.55rem;
+    color: #ecfeff;
+    background: #0b111a;
+    font-size: 0.8rem;
+    font-weight: 650;
+    transform: translateY(calc(-100% - 1rem));
+    transition: transform 120ms ease;
+  }
+
+  .site-skip-link:focus {
+    transform: translateY(0);
+  }
+
   .page-shell {
     width: min(100% - 2rem, 1200px);
     margin-inline: auto;

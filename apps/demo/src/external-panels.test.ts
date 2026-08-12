@@ -1,9 +1,20 @@
 import { surfaceId } from "@panefold/model";
 import { describe, expect, it } from "vitest";
 
-import { destinationRetainedOutcome, shouldRetainExternalLease } from "./external-panels";
+import {
+  destinationRetainedOutcome,
+  returnedPanelOutcome,
+  shouldRetainExternalLease,
+} from "./external-panels";
 
 describe("external panel transfer recovery disposition", () => {
+  it("names a returned panel in both visual status and assistive feedback", () => {
+    expect(returnedPanelOutcome("Notes", "requested return")).toEqual({
+      announcement: "Notes returned to the main window.",
+      statusMessage: "Notes returned to the main workspace after requested return.",
+    });
+  });
+
   it("retains the lease when a failed transfer still reports the destination as safe", () => {
     const destination = surfaceId("surface:external");
 

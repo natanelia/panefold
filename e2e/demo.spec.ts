@@ -286,6 +286,31 @@ test("creates new containers on all four logical sides through the shared drop p
   }
 });
 
+test("redocks into a persistent group after its last tab moves away", async ({ page }) => {
+  await page.emulateMedia({ reducedMotion: "reduce" });
+  await page.goto("/");
+  await page.getByRole("tab", { name: "Notes" }).click();
+  await splitNotesFromMenu(page, "Split right");
+  await expect(page.locator("[data-workspace-group]")).toHaveCount(5);
+
+  await page.getByRole("button", { name: "Actions for Map Canvas" }).click();
+  await page.getByRole("menuitem", { name: "Move to Inspector" }).click();
+  const emptyPrimary = page.locator('[data-workspace-group="primary"]');
+  await expect(emptyPrimary).toHaveAttribute("data-empty", "true");
+  await expect(page.locator('[data-workspace-empty-group="primary"]')).toBeVisible();
+  await expect(emptyPrimary).toContainText(/Primary workspace is empty/i);
+  const emptyBox = await requiredBox(emptyPrimary);
+  expect(emptyBox.width).toBeGreaterThanOrEqual(96);
+  expect(emptyBox.height).toBeGreaterThanOrEqual(96);
+
+  await dragTabToGroup(page, "notes", "primary", "center");
+  await expect(
+    page.locator('[data-workspace-group="primary"] [data-workspace-panel-tab="notes"]'),
+  ).toBeVisible();
+  await expect(page.locator('[data-workspace-empty-group="primary"]')).toHaveCount(0);
+  await expect(page.locator("[data-workspace-group]")).toHaveCount(4);
+});
+
 test("allocates a fresh split identity from persisted topology after reload", async ({ page }) => {
   await page.emulateMedia({ reducedMotion: "reduce" });
   await page.goto("/");
@@ -648,14 +673,19 @@ test("drags a live panel beyond the workspace into a popup and redocks it", asyn
   await expect(page.locator("[data-workspace-group]")).toHaveCount(4);
   await expect(page.locator('[data-workspace-panel-host="notes"]')).toHaveCount(1);
   await expect(page.locator(".demo-health")).toHaveAttribute("data-valid", "true");
+  await expect(page.locator(".demo-surface-status")).toContainText(
+    "returned to the main workspace",
+  );
+  await expect(page.locator(".pf-live-region")).toHaveText("Notes returned to the main window.");
+  await expect(returnedNotesTab).toBeFocused();
+  await expect
+    .poll(() => page.evaluate(() => document.activeElement === document.body))
+    .toBe(false);
   if ((await returnedNotesTab.getAttribute("aria-selected")) !== "true") {
     await returnedNotesTab.click();
   }
   await expect(notesHost).toHaveAttribute("id", hostId ?? "");
   await expect(editor).toHaveValue("Edited inside the external browser window.");
-  await expect(page.locator(".demo-surface-status")).toContainText(
-    "returned to the main workspace",
-  );
 });
 
 test("a blocked popup leaves the panel and semantic revision in the source workspace", async ({
@@ -691,10 +721,13 @@ test("unexpected popup loss recovers the authoritative panel into the main works
     "true",
   );
   await popup.close();
-  await expect(page.locator('[data-workspace-panel-tab="notes"]')).toBeVisible();
+  const returnedNotesTab = page.locator('[data-workspace-panel-tab="notes"]');
+  await expect(returnedNotesTab).toBeVisible();
   await expect(page.locator(".demo-surface-status")).toContainText(
     "returned to the main workspace",
   );
+  await expect(page.locator(".pf-live-region")).toHaveText("Notes returned to the main window.");
+  await expect(returnedNotesTab).toBeFocused();
 });
 
 test("reload closes an external window, restores its panel, and permits a fresh popout", async ({

@@ -161,6 +161,8 @@ const INDONESIAN_MESSAGES: WorkspaceMessageCatalog = {
     `Perender ${type} tidak tersedia. Deskriptor dan posisi panel tetap dapat dipulihkan.`,
   noWorkspaceLayout: () => "Belum ada tata letak ruang kerja",
   emptyWorkspaceInstructions: () => "Buka panel atau pulihkan preset untuk memulai.",
+  emptyPanelGroupInstructions: ({ group }) =>
+    `${group} kosong. Seret panel ke sini atau pilih grup ini sebagai tujuan pemindahan.`,
   commandQueued: ({ label }) => `${label} masuk antrean`,
   commandRejected: ({ label, reason }) =>
     reason === undefined ? `${label} ditolak` : `${label} ditolak: ${reason}`,
@@ -969,6 +971,116 @@ describe("WorkspaceSurface", () => {
     expect(view.container.querySelector("[data-workspace-panel-drag]")).toBeNull();
   });
 
+  it("does not invalidate a selected inactive tab drag when pointerdown moves focus", async () => {
+    const runtime = new FixtureRuntime(initialProjection);
+    const view = renderWorkspace(runtime, { commands: directManipulationCommands });
+    const gamma = await screen.findByRole("tab", { name: "Gamma" });
+    installPointerCapture(gamma);
+
+    fireEvent.pointerDown(gamma, {
+      button: 0,
+      pointerId: 43,
+      pointerType: "mouse",
+      clientX: 750,
+      clientY: 20,
+    });
+    fireEvent.focus(gamma);
+    expect(screen.getByLabelText("Fixture workspace").dataset.panelDragState).toBe("armed");
+    expect(runtime.getSnapshot().projection.revision).toBe("0");
+    expect(runtime.transactions).toHaveLength(0);
+
+    fireEvent.pointerMove(gamma, {
+      pointerId: 43,
+      pointerType: "mouse",
+      clientX: 250,
+      clientY: 350,
+    });
+    expect(
+      requiredElement(view.container.querySelector("[data-workspace-panel-drag]")).dataset
+        .workspaceDropTarget,
+    ).toBe("center:left-node");
+    fireEvent.pointerUp(gamma, {
+      pointerId: 43,
+      pointerType: "mouse",
+      clientX: 250,
+      clientY: 350,
+    });
+
+    expect(runtime.transactions.map((transaction) => transaction.type)).toEqual(["drop"]);
+    expect(runtime.getSnapshot().projection.groups.left?.panelIds).toContain("gamma");
+  });
+
+  it("keeps a retained empty group visible, accessible, and available to pointer and keyboard moves", async () => {
+    const root = initialProjection.nodes.root;
+    const right = initialProjection.groups.right;
+    if (root?.kind !== "split" || right === undefined)
+      throw new Error("Missing empty-group fixture");
+    const projection: WorkspaceProjection = {
+      ...initialProjection,
+      nodes: {
+        ...initialProjection.nodes,
+        root: { ...root, weights: [1000, 1] },
+      },
+      groups: {
+        ...initialProjection.groups,
+        right: { ...right, panelIds: [], selectedPanelId: "" },
+      },
+    };
+    const runtime = new FixtureRuntime(projection);
+    const view = renderWorkspace(runtime, { commands: directManipulationCommands });
+    const emptyGroup = requiredElement(
+      view.container.querySelector('[data-workspace-group="right"]'),
+    );
+    const placeholder = await screen.findByRole("note");
+
+    expect(emptyGroup.dataset.empty).toBe("true");
+    expect(emptyGroup.getAttribute("aria-describedby")).toBe(placeholder.id);
+    expect(placeholder.textContent).toMatch(/Right is empty.*move destination/i);
+    expect(emptyGroup.style.getPropertyValue("--pf-empty-group-inline-size")).toBe("96px");
+
+    const user = userEvent.setup();
+    await user.click(screen.getByRole("button", { name: "Actions for Alpha" }));
+    expect(screen.getByRole("menuitem", { name: "Move to Right" })).toBeTruthy();
+    await user.keyboard("{Escape}");
+
+    const alpha = screen.getByRole("tab", { name: "Alpha" });
+    installPointerCapture(alpha);
+    fireEvent.pointerDown(alpha, {
+      button: 0,
+      pointerId: 45,
+      pointerType: "mouse",
+      clientX: 100,
+      clientY: 20,
+    });
+    // The solved right group is a one-pixel sliver. Its view-only acquisition
+    // target expands inward to 96px, so this point can still redock Alpha.
+    fireEvent.pointerMove(alpha, {
+      pointerId: 45,
+      pointerType: "mouse",
+      clientX: 950,
+      clientY: 350,
+    });
+    const overlay = requiredElement(view.container.querySelector("[data-workspace-panel-drag]"));
+    expect(overlay.dataset.workspaceDropKind).toBe("center");
+    expect(overlay.dataset.workspaceDropTarget).toBe("center:right-node");
+    fireEvent.pointerUp(alpha, {
+      pointerId: 45,
+      pointerType: "mouse",
+      clientX: 950,
+      clientY: 350,
+    });
+
+    await waitFor(() => {
+      expect(
+        view.container.querySelector(
+          '[data-workspace-group="right"] [data-workspace-panel-tab="alpha"]',
+        ),
+      ).toBeTruthy();
+      expect(view.container.querySelector('[data-workspace-empty-group="right"]')).toBeNull();
+    });
+    expect(runtime.transactions.at(-1)?.type).toBe("drop");
+  });
+
   it("keeps drag actor pointer ownership and cancels without dispatch", async () => {
     const runtime = new FixtureRuntime(initialProjection);
     const view = renderWorkspace(runtime, { commands: directManipulationCommands });
@@ -1237,6 +1349,16 @@ describe("WorkspaceSurface", () => {
       expect(received?.host.parentElement?.dataset.workspacePanelSlot).toBe("left");
       expect(received?.host.getAttribute("aria-labelledby")).toBe(alpha.id);
       expect(received?.host.getAttribute("aria-label")).toBeNull();
+    });
+
+    act(() => {
+      received?.notifyReturnedToOwner("Alpha returned to the main window.");
+    });
+    await waitFor(() => {
+      expect(document.activeElement).toBe(alpha);
+      expect(view.container.querySelector(".pf-live-region")?.textContent).toBe(
+        "Alpha returned to the main window.",
+      );
     });
   });
 

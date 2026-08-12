@@ -1,6 +1,7 @@
 {
   "name": "@panefold/react",
   "version": "0.1.0",
+  "private": true,
   "type": "module",
   "sideEffects": [
     "./src/styles.css"

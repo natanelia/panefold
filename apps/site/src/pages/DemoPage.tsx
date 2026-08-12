@@ -5,7 +5,7 @@ import { siteAsset } from "../lib/router";
 
 export function DemoPage({ navigate }: { readonly navigate: (path: string) => void }) {
   return (
-    <main className="flex h-dvh min-h-0 flex-col pt-[68px]">
+    <main id="main-content" tabIndex={-1} className="flex h-dvh min-h-0 flex-col pt-[68px]">
       <div className="flex min-h-[54px] shrink-0 flex-wrap items-center gap-x-3 gap-y-2 border-b border-white/[0.08] bg-[#080c12] px-4 py-2 md:px-6">
         <SiteLink
           to="/"

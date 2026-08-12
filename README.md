@@ -1,18 +1,37 @@
 # Panefold
 
-Panefold is an experimental, deterministic workspace runtime for building IDEs, map tools,
-operations consoles, and other panel-heavy web applications.
+[![CI](https://github.com/natanelia/panefold/actions/workflows/ci.yml/badge.svg)](https://github.com/natanelia/panefold/actions/workflows/ci.yml)
+[![Status: Experimental](https://img.shields.io/badge/status-experimental-F59E0B)](docs/SUPPORT.md)
+
+**A deterministic workspace runtime for web applications that need to feel like crafted desktop
+tools.** Panefold provides the semantic model, geometry, interactions, persistence, and framework
+adapters behind IDEs, map tools, operations consoles, and other panel-heavy products.
 
 [Website](https://natanelia.github.io/panefold/) ·
 [Live demo](https://natanelia.github.io/panefold/demo/) ·
 [Documentation](https://natanelia.github.io/panefold/docs/) ·
 [Source](https://github.com/natanelia/panefold)
 
-This repository is an executable implementation companion to the
-[Panefold system design](docs/spec/SYSTEM_DESIGN.md). Version `0.1.0` remains experimental: the
-semantic model, 36-command reference kernel, geometry, runtime, adapters, and operational
-primitives are implemented and tested in the repository, but the project does **not** claim stable
-conformance, product certification, npm publication, or unrestricted browser-window behavior.
+[![Open the interactive Atlas demo](apps/site/public/media/panefold-interactions-poster.jpg)](https://natanelia.github.io/panefold/demo/)
+
+**[Watch the interaction film](https://natanelia.github.io/panefold/media/panefold-interactions.webm)**
+· [Try the live workspace](https://natanelia.github.io/panefold/demo/)
+
+| Deterministic by design                                                                | Interaction craft                                                                   | Failure-aware foundations                                                                             |
+| -------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------- |
+| One immutable command model makes layout, focus, history, and persistence explainable. | Exact drop previews, stable panel hosts, accessible tabs, and responsive splitters. | Bounded protocols, typed rejection, atomic persistence, and explicit recovery paths—not hidden state. |
+
+> **Use Panefold today**
+>
+> - **Explore:** open the [live Atlas demo](https://natanelia.github.io/panefold/demo/).
+> - **Evaluate:** clone this repository and follow [Run the demo](#run-the-demo).
+> - **Install:** npm packages are **not published**. Version `0.1.0` is available from source and
+>   as private workspace packages only.
+
+Panefold `0.1.0` is an **experimental source release** and executable companion to the
+[system design](docs/spec/SYSTEM_DESIGN.md). Its 36-command reference kernel, geometry, runtime,
+adapters, and operational primitives are implemented and tested here. It does **not** claim stable
+conformance, product certification, npm availability, or unrestricted browser-window behavior.
 
 ## What works today
 

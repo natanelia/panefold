@@ -2,10 +2,10 @@
   "schemaVersion": 1,
   "kind": "protocol-motion-result",
   "profile": "compact-react-chromium-desktop",
-  "producedAt": "2026-08-12T13:39:55Z",
+  "producedAt": "2026-08-12T14:50:40Z",
   "status": "passed",
   "runner": "Vitest 4.1.10",
-  "command": "vitest run packages/protocol/test packages/protocol-xstate/test packages/motion/test packages/react/test",
+  "command": "vitest run packages/protocol/test/protocol.test.ts packages/protocol-xstate/test/catalog-machines.test.ts packages/protocol-xstate/test/drag-machine.test.ts packages/protocol-xstate/test/protocol-machines.test.ts packages/motion/test/motion-lifecycle.test.ts packages/motion/test/motion.test.ts packages/react/test/WorkspaceSurface.test.tsx packages/react/test/panel-drop.test.ts",
   "environment": {
     "operatingSystem": "Linux x86_64",
     "node": "24.14.0",
@@ -15,10 +15,10 @@
     "protocolMotionTestFiles": 6,
     "protocolMotionTests": 49,
     "protocolMotionPassed": 49,
-    "reactIntegrationTests": 41,
-    "reactIntegrationPassed": 41,
+    "reactIntegrationTests": 43,
+    "reactIntegrationPassed": 43,
     "failed": 0,
-    "durationMs": 3750
+    "durationMs": 4320
   },
   "coverage": [
     "all 12 public protocol descriptors have an XState implementation with the catalog principal states",
@@ -38,7 +38,11 @@
     "packages/protocol-xstate/test/protocol-machines.test.ts": "b473558c7f1a64c17e58e0d1ebb1503f05734f4ba7e194d53b9b8b780c7d23ce",
     "packages/motion/test/motion-lifecycle.test.ts": "c2fd1527a2ebc5b96d9bb89d289e9fbeca223b4114412df7eed587b5ba9a5b40",
     "packages/motion/test/motion.test.ts": "02b6068c1abaa54b4433da29c0a7bb430254b24082385541e5617abfccc22ed8",
-    "packages/react/test/WorkspaceSurface.test.tsx": "9063504b1e7e7e1780eca5e9f3f48afc1348e14150aafa440db3f959de56fb5d",
+    "packages/react/src/WorkspaceSurface.tsx": "193954099cce7fa25902acac84266699e246cf8e7c7938b22f89216ed744fa4c",
+    "packages/react/src/messages.ts": "c3577ea017fcebfa86409864b578e181b49208f196c99bd632df8181376bfb81",
+    "packages/react/src/panel-drop.ts": "cb9b838f642373c1c35f0de5f18a22fbf47fe863a73ee95ea07c03c9f5f92fc7",
+    "packages/react/src/types.ts": "ec2ecf19e49f2825ed2bec7869f87be8caf9bc15520933798c9d22ec152fb7be",
+    "packages/react/test/WorkspaceSurface.test.tsx": "55d1ea9924acd99e87dfb355e1f1a94d92b684fbbef3ddeb51b9fc0214025c21",
     "packages/react/test/panel-drop.test.ts": "fffd4ee07c0e4216f10b1d809372a039850181b33f4c88cd2458b614d6108780"
   },
   "limitations": [

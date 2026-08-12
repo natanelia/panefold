@@ -15,7 +15,7 @@ stable compatibility or conformance claim.
 
 The latest checked-in browser result is
 [`chromium-reference-2026-08-12.json`](../conformance/results/chromium-reference-2026-08-12.json).
-It records 23/23 passing browser tasks and the exact limitations. Results do not silently widen
+It records 24/24 passing browser tasks and the exact limitations. Results do not silently widen
 profile scope.
 The same result directory retains the framework contract, protocol/motion, independent semantic
 oracle, interaction-frame, and 50,000-attempt projection reports; each records its own environment,

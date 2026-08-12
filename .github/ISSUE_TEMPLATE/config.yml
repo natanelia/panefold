@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Documentation and support matrix
+    url: https://natanelia.github.io/panefold/docs/
+    about: Check current behavior, constraints, and experimental support boundaries first.
+  - name: Confidential contact request
+    url: https://github.com/natanelia/panefold/issues/new?template=private_contact.yml
+    about: Request a private maintainer channel without disclosing sensitive details publicly.

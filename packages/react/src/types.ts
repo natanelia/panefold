@@ -156,6 +156,13 @@ export interface WorkspaceExternalPanelRequest {
   readonly host: HTMLElement;
   /** Safe source-document parking supplied explicitly for prepare/rollback workflows. */
   readonly parkingElement: HTMLElement;
+  /**
+   * Notifies the owner surface after the application has semantically redocked
+   * the panel and returned its stable host to the owner document. The surface
+   * restores useful panel focus and publishes the application-localized
+   * message through its live region.
+   */
+  readonly notifyReturnedToOwner: (message: string) => void;
   readonly origin: Extract<WorkspaceCommandOrigin, "pointer" | "keyboard" | "menu">;
   readonly position: WorkspaceExternalPanelPosition;
   readonly pointer?: {

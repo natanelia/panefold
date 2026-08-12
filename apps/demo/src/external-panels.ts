@@ -42,9 +42,11 @@ interface ExternalPanelLease {
   readonly panelId: PanelId;
   readonly sourceGroupId: GroupId;
   readonly sourceSurfaceId: SurfaceId;
+  readonly title: string;
   readonly ownerEpoch: number;
   readonly host: HTMLElement;
   readonly parkingElement: HTMLElement;
+  readonly notifyReturnedToOwner: (message: string) => void;
   handle?: PreparedSurfaceHandle;
   recovering: boolean;
 }
@@ -123,9 +125,11 @@ export class DemoExternalPanelController {
       panelId: panel.id,
       sourceGroupId: sourceGroup.id,
       sourceSurfaceId: sourceSurface.id,
+      title: request.panel.title,
       ownerEpoch,
       host: request.host,
       parkingElement: request.parkingElement,
+      notifyReturnedToOwner: request.notifyReturnedToOwner,
       recovering: false,
     };
     this.#leases.set(destinationSurfaceId, lease);
@@ -295,13 +299,19 @@ export class DemoExternalPanelController {
         lease.sourceSurfaceId,
         lease.ownerEpoch,
       );
+      // The application owns this stable host explicitly. Return it before
+      // closing the browser resource so focus restoration never races an
+      // advisory adapter disposer.
+      lease.parkingElement.append(lease.host);
       if (closeDestination && lease.handle !== undefined) {
         await lease.adapter.close(lease.handle);
       }
       this.#leases.delete(lease.destinationSurfaceId);
-      this.#options.onStatus(
-        `${String(lease.panelId)} returned to the main workspace after ${reason}.`,
-      );
+      const outcome = returnedPanelOutcome(lease.title, reason);
+      this.#options.onStatus(outcome.statusMessage);
+      if (reason !== "application close") {
+        lease.notifyReturnedToOwner(outcome.announcement);
+      }
     } finally {
       lease.recovering = false;
     }
@@ -359,6 +369,17 @@ export function destinationRetainedOutcome(
   return Object.freeze({
     status: "committed",
     message: `${title} remains assigned to its external window because ${reason}. Use Return to main window to retry recovery.`,
+  });
+}
+
+/** Demo copy kept separate so status and assistive feedback name the panel consistently. */
+export function returnedPanelOutcome(
+  title: string,
+  reason: string,
+): { readonly announcement: string; readonly statusMessage: string } {
+  return Object.freeze({
+    announcement: `${title} returned to the main window.`,
+    statusMessage: `${title} returned to the main workspace after ${reason}.`,
   });
 }
 

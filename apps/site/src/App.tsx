@@ -29,6 +29,7 @@ export default function App() {
   if (cleanPath === "/demo") {
     return (
       <>
+        <SkipLink />
         <Header path={cleanPath} navigate={navigate} />
         <Suspense fallback={<RouteLoading />}>
           <DemoPage navigate={navigate} />
@@ -41,6 +42,7 @@ export default function App() {
     const slug = cleanPath.startsWith("/docs/") ? cleanPath.slice("/docs/".length) : undefined;
     return (
       <>
+        <SkipLink />
         <Header path={cleanPath} navigate={navigate} />
         <Suspense fallback={<RouteLoading />}>
           <DocsPage slug={slug} navigate={navigate} />
@@ -51,6 +53,7 @@ export default function App() {
 
   return (
     <>
+      <SkipLink />
       <Header path={cleanPath} navigate={navigate} />
       <HomePage navigate={navigate} />
       <Footer navigate={navigate} />
@@ -58,9 +61,21 @@ export default function App() {
   );
 }
 
+function SkipLink() {
+  return (
+    <a className="site-skip-link" href="#main-content">
+      Skip to main content
+    </a>
+  );
+}
+
 function RouteLoading() {
   return (
-    <main className="grid min-h-screen place-items-center bg-[#080c12] pt-[68px]">
+    <main
+      id="main-content"
+      tabIndex={-1}
+      className="grid min-h-screen place-items-center bg-[#080c12] pt-[68px]"
+    >
       <span className="font-mono text-[10px] uppercase tracking-[0.16em] text-slate-400">
         Loading Panefold…
       </span>
