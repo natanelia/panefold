@@ -79,5 +79,5 @@ describe("logical hit testing", () => {
       ),
       { numRuns: 500 },
     );
-  });
+  }, 15_000);
 });

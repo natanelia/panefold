@@ -129,7 +129,7 @@
       "verificationClass": "code-verifiable",
       "artifactRole": "source",
       "uri": "repo://packages/geometry/test/hit-test.test.ts",
-      "sha256": "a49f43870abc1d5bdd228885d9369ab84438eb22e17d5a71b1ddbe805a1d7109",
+      "sha256": "52be8096490317d16219b6a794b5710c9580606dc0bb753c0787a48fc0bd2acd",
       "producedAt": "2026-08-12T00:00:00Z",
       "requirementIds": [
         "EXP-002",
