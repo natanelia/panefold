@@ -390,9 +390,25 @@ describe("workspace runtime", () => {
     expect(runtime.getTransactions()).toHaveLength(2);
     expect(reported).toHaveBeenCalledTimes(2);
     expect(runtime.getSubscriberErrors()).toMatchObject([
-      { channel: "snapshot", listenerIndex: 0, revision: 1n },
-      { channel: "transaction", listenerIndex: 0, revision: 1n },
+      { channel: "snapshot", listenerIndex: 0, revision: 1n, cause: { name: "Error" } },
+      { channel: "transaction", listenerIndex: 0, revision: 1n, cause: { name: "Error" } },
     ]);
+  });
+
+  it("retains raw subscriber causes only through an explicit diagnostic opt-in", () => {
+    const cause = new Error("contains private application context");
+    const runtime = createWorkspaceRuntime({
+      initialSnapshot: fixture(),
+      createCommandId: deterministicIds(),
+      retainSubscriberErrorCause: true,
+    });
+    runtime.subscribe(() => {
+      throw cause;
+    });
+
+    runtime.dispatch({ type: "select-panel", panelId: secondPanelId });
+
+    expect(runtime.getSubscriberErrors()[0]?.cause).toBe(cause);
   });
 
   it("bounds retained subscriber failures without suppressing reporting", () => {

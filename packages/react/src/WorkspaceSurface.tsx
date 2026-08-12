@@ -3,6 +3,7 @@ import {
   Fragment,
   useCallback,
   useEffect,
+  useEffectEvent,
   useId,
   useLayoutEffect,
   useMemo,
@@ -15,7 +16,23 @@ import {
   type ReactNode,
 } from "react";
 import { createPortal } from "react-dom";
+import type {
+  LogicalRect,
+  ResolvedLayout,
+  ResolvedSplitter,
+  SplitLayoutOverride,
+} from "@panefold/geometry";
+import { revision } from "@panefold/model";
+import {
+  createFlipPlan,
+  createMotionDomDriver,
+  MotionCoordinator,
+  SurfaceFrameScheduler,
+  type MotionDriver,
+} from "@panefold/motion";
+import { createResizeActor, type ResizeEvent } from "@panefold/protocol-xstate";
 
+import { solveWorkspaceProjectionLayout, type WorkspaceLayoutSolver } from "./geometry";
 import { useWorkspaceRuntime, useWorkspaceSnapshot } from "./runtime-context";
 import type {
   WorkspaceAnnouncement,
@@ -27,6 +44,9 @@ import type {
   WorkspaceGroupView,
   WorkspaceNodeView,
   WorkspacePanelRegistry,
+  WorkspacePanelLifecycle,
+  WorkspacePanelLifecyclePolicy,
+  WorkspacePanelLifecycleReason,
   WorkspacePanelView,
   WorkspaceProjection,
   WorkspaceProjector,
@@ -45,6 +65,14 @@ export interface WorkspaceSurfaceProps<TSnapshot, TCommand, TResult> {
   readonly motion?: MotionProfile;
   readonly className?: string;
   readonly workspaceLabel?: string;
+  /** Experimental model-aware geometry bridge. */
+  readonly layoutSolver?: WorkspaceLayoutSolver<TSnapshot>;
+  /** Deterministic logical bounds, primarily for embedded and test surfaces. */
+  readonly layoutBounds?: LogicalRect;
+  readonly splitterSize?: number;
+  /** Experimental injection points used by adapter certification fixtures. */
+  readonly motionDriver?: MotionDriver;
+  readonly frameScheduler?: SurfaceFrameScheduler;
   readonly onAnnouncement?: (message: string) => void;
   readonly onCommandResult?: (result: TResult) => void;
   readonly interpretResult?: WorkspaceResultInterpreter<TCommand, TResult>;
@@ -122,6 +150,11 @@ function SurfaceRenderer<TSnapshot, TCommand, TResult>({
   motion = "productive",
   className,
   workspaceLabel = "Workspace",
+  layoutSolver,
+  layoutBounds,
+  splitterSize = 6,
+  motionDriver,
+  frameScheduler,
   onAnnouncement,
   onCommandResult,
   interpretResult,
@@ -141,7 +174,67 @@ function SurfaceRenderer<TSnapshot, TCommand, TResult>({
   });
   const [movePanelId, setMovePanelId] = useState<string>();
   const [systemReducedMotion, setSystemReducedMotion] = useState(false);
+  const [measuredBounds, setMeasuredBounds] = useState<LogicalRect>(ZERO_LOGICAL_RECT);
+  const [splitOverrides, setSplitOverrides] = useState<
+    Readonly<Record<string, SplitLayoutOverride>>
+  >({});
+  const splitOverridesRef = useRef(splitOverrides);
   const effectiveMotion = motion === "productive" && systemReducedMotion ? "reduced" : motion;
+  const logicalBounds = layoutBounds ?? measuredBounds;
+  const surfaceScheduleKey = `${domIdPrefix}:geometry`;
+  const scheduler = useMemo(
+    () => frameScheduler ?? createBrowserFrameScheduler(),
+    [frameScheduler],
+  );
+  const motionCoordinator = useMemo(
+    () => new MotionCoordinator(motionDriver ?? createMotionDomDriver(), "productive"),
+    [motionDriver],
+  );
+
+  const solveResolvedLayout = useCallback(
+    (overrides: Readonly<Record<string, SplitLayoutOverride>>) => {
+      const request = {
+        projection,
+        rootNodeId: projection.rootNodeId,
+        bounds: logicalBounds,
+        splitterSize,
+        splitOverrides: overrides,
+      };
+      return (
+        layoutSolver?.(snapshot, request) ??
+        solveWorkspaceProjectionLayout(projection, logicalBounds, {
+          splitterSize,
+          splitOverrides: overrides,
+        })
+      );
+    },
+    [layoutSolver, logicalBounds, projection, snapshot, splitterSize],
+  );
+  const resolvedLayout = useMemo(
+    () => solveResolvedLayout(splitOverrides),
+    [solveResolvedLayout, splitOverrides],
+  );
+
+  const previewSplit = useCallback(
+    (splitId: string, weights: readonly number[]) => {
+      const nextOverrides = {
+        ...splitOverridesRef.current,
+        [splitId]: { weights },
+      };
+      splitOverridesRef.current = nextOverrides;
+      setSplitOverrides(nextOverrides);
+      return solveResolvedLayout(nextOverrides);
+    },
+    [solveResolvedLayout],
+  );
+
+  const clearSplitPreview = useCallback((splitId: string) => {
+    if (splitOverridesRef.current[splitId] === undefined) return;
+    const nextOverrides = { ...splitOverridesRef.current };
+    delete nextOverrides[splitId];
+    splitOverridesRef.current = nextOverrides;
+    setSplitOverrides(nextOverrides);
+  }, []);
 
   const announce = useCallback(
     (message: string) => {
@@ -165,6 +258,99 @@ function SurfaceRenderer<TSnapshot, TCommand, TResult>({
       media.removeEventListener("change", update);
     };
   }, []);
+
+  useLayoutEffect(() => {
+    if (layoutBounds !== undefined) return;
+    const element = rootRef.current;
+    const ownerWindow = element?.ownerDocument.defaultView;
+    if (element === null || ownerWindow === undefined || ownerWindow === null) return;
+
+    const updateBounds = (inlineSize: number, blockSize: number) => {
+      const next = {
+        inlineStart: 0,
+        blockStart: 0,
+        inlineSize: Math.max(0, Math.round(inlineSize)),
+        blockSize: Math.max(0, Math.round(blockSize)),
+      };
+      setMeasuredBounds((current) => (sameLogicalRect(current, next) ? current : next));
+    };
+    const measured = element.getBoundingClientRect();
+    updateBounds(measured.width, measured.height);
+
+    const Observer = ownerWindow.ResizeObserver;
+    if (Observer === undefined) return;
+    const observer = new Observer(([entry]) => {
+      if (entry !== undefined) updateBounds(entry.contentRect.width, entry.contentRect.height);
+    });
+    observer.observe(element);
+    return () => {
+      observer.disconnect();
+    };
+  }, [layoutBounds]);
+
+  useEffect(
+    () => () => {
+      scheduler.cancel(surfaceScheduleKey);
+    },
+    [scheduler, surfaceScheduleKey],
+  );
+
+  useEffect(() => {
+    motionCoordinator.setProfile(effectiveMotion);
+  }, [effectiveMotion, motionCoordinator]);
+
+  useEffect(
+    () => () => {
+      motionCoordinator.cancelAll();
+    },
+    [motionCoordinator],
+  );
+
+  const previousLayoutRef = useRef<ResolvedLayout | undefined>(undefined);
+  const previousRevisionRef = useRef<string | undefined>(undefined);
+  useLayoutEffect(() => {
+    const previousLayout = previousLayoutRef.current;
+    const previousRevision = previousRevisionRef.current;
+    previousLayoutRef.current = resolvedLayout;
+    previousRevisionRef.current = projection.revision;
+    if (previousLayout === undefined || previousRevision === projection.revision) return;
+
+    const workspace = rootRef.current;
+    if (workspace === null) return;
+    motionCoordinator.cancelScope(domIdPrefix);
+    const elements = workspace.querySelectorAll<HTMLElement>("[data-workspace-node]");
+    for (const element of elements) {
+      const nodeId = element.dataset.workspaceNode;
+      if (nodeId === undefined) continue;
+      const before = previousLayout.nodeRects[nodeId];
+      const after = resolvedLayout.nodeRects[nodeId];
+      if (before === undefined || after === undefined || sameLogicalRect(before, after)) continue;
+      motionCoordinator.play(
+        element,
+        createFlipPlan({
+          targetId: nodeId,
+          scopeId: domIdPrefix,
+          before: logicalRectToPhysical(before, logicalBounds, direction),
+          after: logicalRectToPhysical(after, logicalBounds, direction),
+          strategy: "translate-and-clip",
+        }),
+      );
+    }
+  }, [
+    direction,
+    domIdPrefix,
+    logicalBounds,
+    motionCoordinator,
+    projection.revision,
+    resolvedLayout,
+  ]);
+
+  useEffect(() => {
+    if (Object.keys(splitOverridesRef.current).length === 0) return;
+    splitOverridesRef.current = {};
+    setSplitOverrides({});
+    scheduler.cancel(surfaceScheduleKey);
+  }, [projection.revision, scheduler, surfaceScheduleKey]);
 
   useLayoutEffect(() => {
     const ownerDocument = rootRef.current?.ownerDocument;
@@ -213,8 +399,10 @@ function SurfaceRenderer<TSnapshot, TCommand, TResult>({
       }
 
       const selected = selectedPanelIds.has(panelId);
+      const policy = panelLifecyclePolicy(panel);
       updateStableHost(host.element, {
         active: projection.activePanelId === panelId,
+        lifecycle: panelLifecycle(selected, projection.activePanelId === panelId, policy),
         labelledBy: panelTabId(domIdPrefix, panelId),
         panelType: panel?.type,
         selected,
@@ -238,6 +426,19 @@ function SurfaceRenderer<TSnapshot, TCommand, TResult>({
       return { result, outcome } satisfies DispatchExecution<TResult>;
     },
     [announce, onCommandResult, resolveOutcome, runtime],
+  );
+
+  const commitSplit = useCallback(
+    (splitId: string, weights: readonly number[], origin: "keyboard" | "pointer") => {
+      const execution = dispatch(
+        commands.resizeSplit(splitId, weights),
+        "Resized workspace panes",
+        origin,
+      );
+      clearSplitPreview(splitId);
+      return execution;
+    },
+    [clearSplitPreview, commands, dispatch],
   );
 
   const selectPanel = useCallback(
@@ -306,6 +507,8 @@ function SurfaceRenderer<TSnapshot, TCommand, TResult>({
       data-direction={direction}
       data-motion={motion}
       data-effective-motion={effectiveMotion}
+      data-geometry-diagnostics={resolvedLayout.diagnostics.length}
+      data-geometry-mode={layoutSolver === undefined ? "projection" : "model"}
       dir={direction}
       aria-label={workspaceLabel}
       tabIndex={-1}
@@ -321,6 +524,14 @@ function SurfaceRenderer<TSnapshot, TCommand, TResult>({
             commands={commands}
             direction={direction}
             domIdPrefix={domIdPrefix}
+            resolvedLayout={resolvedLayout}
+            splitOverrides={splitOverrides}
+            projectionRevision={projection.revision}
+            scheduler={scheduler}
+            scheduleKey={surfaceScheduleKey}
+            previewSplit={previewSplit}
+            commitSplit={commitSplit}
+            clearSplitPreview={clearSplitPreview}
             dispatch={dispatch}
             selectPanel={selectPanel}
             closePanel={closePanel}
@@ -391,6 +602,18 @@ interface LayoutNodeProps<TCommand, TResult> {
   readonly commands: WorkspaceCommandAdapter<TCommand>;
   readonly direction: WorkspaceDirection;
   readonly domIdPrefix: string;
+  readonly resolvedLayout: ResolvedLayout;
+  readonly splitOverrides: Readonly<Record<string, SplitLayoutOverride>>;
+  readonly projectionRevision: string;
+  readonly scheduler: SurfaceFrameScheduler;
+  readonly scheduleKey: string;
+  readonly previewSplit: (splitId: string, weights: readonly number[]) => ResolvedLayout;
+  readonly commitSplit: (
+    splitId: string,
+    weights: readonly number[],
+    origin: "keyboard" | "pointer",
+  ) => DispatchExecution<TResult>;
+  readonly clearSplitPreview: (splitId: string) => void;
   readonly dispatch: (
     command: TCommand,
     label: string,
@@ -410,7 +633,9 @@ interface LayoutNodeProps<TCommand, TResult> {
 function LayoutNode<TCommand, TResult>(props: LayoutNodeProps<TCommand, TResult>) {
   if (props.node.kind === "group") {
     const group = props.projection.groups[props.node.groupId];
-    return group === undefined ? null : <PanelGroup {...props} group={group} />;
+    return group === undefined ? null : (
+      <PanelGroup {...props} group={group} nodeId={props.node.id} />
+    );
   }
 
   return <SplitNode {...props} split={props.node} />;
@@ -422,41 +647,59 @@ function SplitNode<TCommand, TResult>({
 }: Omit<LayoutNodeProps<TCommand, TResult>, "node"> & {
   readonly split: WorkspaceSplitView;
 }) {
-  const [previewWeights, setPreviewWeights] = useState<readonly number[]>();
-  const weights = previewWeights ?? split.weights;
+  const weights = props.splitOverrides[split.id]?.weights ?? split.weights;
+  const splitters = props.resolvedLayout.splitters.filter(
+    (splitter) => splitter.splitNodeId === split.id,
+  );
 
   return (
-    <div className="pf-split" data-axis={split.axis} data-workspace-split={split.id}>
-      {split.childIds.map((childId, index) => {
+    <div
+      className="pf-split"
+      data-axis={split.axis}
+      data-workspace-split={split.id}
+      data-workspace-node={split.id}
+    >
+      {split.childIds.map((childId) => {
         const child = props.projection.nodes[childId];
         if (child === undefined) return null;
-        const weight = weights[index] ?? 1;
+        const childRect = props.resolvedLayout.nodeRects[childId] ?? ZERO_LOGICAL_RECT;
+        const precedingSplitter = splitters.find((item) => item.afterNodeId === childId);
+        const beforeIndex =
+          precedingSplitter === undefined
+            ? -1
+            : split.childIds.indexOf(precedingSplitter.beforeNodeId);
+        const afterIndex = split.childIds.indexOf(childId);
 
         return (
           <Fragment key={childId}>
-            {index > 0 ? (
+            {precedingSplitter !== undefined && beforeIndex >= 0 && afterIndex >= 0 ? (
               <Splitter
                 split={split}
-                index={index - 1}
+                splitter={precedingSplitter}
+                beforeIndex={beforeIndex}
+                afterIndex={afterIndex}
                 weights={weights}
                 direction={props.direction}
-                onPreview={setPreviewWeights}
-                onCommit={(nextWeights, origin) => {
-                  setPreviewWeights(undefined);
-                  props.dispatch(
-                    props.commands.resizeSplit(split.id, nextWeights),
-                    "Resized workspace panes",
-                    origin,
-                  );
-                }}
-                onCancel={() => {
-                  setPreviewWeights(undefined);
-                }}
+                resolvedLayout={props.resolvedLayout}
+                projectionRevision={props.projectionRevision}
+                scheduler={props.scheduler}
+                scheduleKey={props.scheduleKey}
+                onPreview={(nextWeights) => props.previewSplit(split.id, nextWeights)}
+                onCommit={(nextWeights, origin) => props.commitSplit(split.id, nextWeights, origin)}
+                onCancel={() => props.clearSplitPreview(split.id)}
               />
             ) : null}
             <div
               className="pf-split-child"
-              style={{ "--pf-split-weight": weight } as CSSProperties}
+              data-inline-size={childRect.inlineSize}
+              data-block-size={childRect.blockSize}
+              style={
+                {
+                  "--pf-split-size": `${
+                    split.axis === "inline" ? childRect.inlineSize : childRect.blockSize
+                  }px`,
+                } as CSSProperties
+              }
             >
               <LayoutNode {...props} node={child} />
             </div>
@@ -469,100 +712,196 @@ function SplitNode<TCommand, TResult>({
 
 interface SplitterProps {
   readonly split: WorkspaceSplitView;
-  readonly index: number;
+  readonly splitter: ResolvedSplitter;
+  readonly beforeIndex: number;
+  readonly afterIndex: number;
   readonly weights: readonly number[];
   readonly direction: WorkspaceDirection;
-  readonly onPreview: (weights: readonly number[]) => void;
-  readonly onCommit: (weights: readonly number[], origin: "keyboard" | "pointer") => void;
+  readonly resolvedLayout: ResolvedLayout;
+  readonly projectionRevision: string;
+  readonly scheduler: SurfaceFrameScheduler;
+  readonly scheduleKey: string;
+  readonly onPreview: (weights: readonly number[]) => ResolvedLayout;
+  readonly onCommit: (
+    weights: readonly number[],
+    origin: "keyboard" | "pointer",
+  ) => DispatchExecution<unknown>;
   readonly onCancel: () => void;
 }
 
 function Splitter({
   split,
-  index,
+  splitter,
+  beforeIndex,
+  afterIndex,
   weights,
   direction,
+  resolvedLayout,
+  projectionRevision,
+  scheduler,
+  scheduleKey,
   onPreview,
   onCommit,
   onCancel,
 }: SplitterProps) {
   const splitterRef = useRef<HTMLDivElement>(null);
-  const sessionRef = useRef<
-    | {
-        pointerId: number;
-        startCoordinate: number;
-        availableSize: number;
-        weights: readonly number[];
-        latest: readonly number[];
-      }
-    | undefined
-  >(undefined);
+  const [actor] = useState(createResizeActor);
+  const [resizeState, setResizeState] = useState("idle");
+  const sessionRef = useRef<PointerResizeSession | null>(null);
+  const handledRevisionRef = useRef(projectionRevision);
+  const beforeSize = axisSize(resolvedLayout.nodeRects[splitter.beforeNodeId], split.axis);
+  const afterSize = axisSize(resolvedLayout.nodeRects[splitter.afterNodeId], split.axis);
+  const pairSize = beforeSize + afterSize;
+  const value = pairSize === 0 ? 50 : (beforeSize / pairSize) * 100;
 
-  const pairTotal = (weights[index] ?? 0) + (weights[index + 1] ?? 0);
-  const value = pairTotal === 0 ? 50 : ((weights[index] ?? 0) / pairTotal) * 100;
+  useEffect(() => {
+    const subscription = actor.subscribe((state) => {
+      setResizeState(String(state.value));
+    });
+    actor.start();
+    return () => {
+      subscription.unsubscribe();
+      actor.stop();
+    };
+  }, [actor]);
+
+  const send = useCallback(
+    (event: ResizeEvent) => {
+      actor.send(event);
+      const state = String(actor.getSnapshot().value);
+      setResizeState(state);
+      return state;
+    },
+    [actor],
+  );
+
+  useEffect(() => {
+    if (handledRevisionRef.current === projectionRevision) return;
+    handledRevisionRef.current = projectionRevision;
+    if (String(actor.getSnapshot().value) === "idle") return;
+    scheduler.cancel(scheduleKey);
+    sessionRef.current = null;
+    actor.send({ type: "CANCEL" });
+    const state = String(actor.getSnapshot().value);
+    onCancel();
+    if (state === "cancelling") actor.send({ type: "RETURNED" });
+  }, [actor, onCancel, projectionRevision, scheduleKey, scheduler]);
 
   const updatePair = useCallback(
-    (delta: number, baseWeights: readonly number[]) => {
-      const before = baseWeights[index] ?? 0;
-      const after = baseWeights[index + 1] ?? 0;
+    (
+      logicalDelta: number,
+      baseWeights: readonly number[],
+      baseBeforeSize: number,
+      baseAfterSize: number,
+    ) => {
+      const before = positiveNumber(baseWeights[beforeIndex]);
+      const after = positiveNumber(baseWeights[afterIndex]);
       const total = before + after;
-      const minimum = total * 0.12;
-      const nextBefore = clamp(before + delta * total, minimum, total - minimum);
+      const available = Math.max(1, baseBeforeSize + baseAfterSize);
+      const minimum = Math.min(total / 2, Math.max(total * 0.000001, 0.000001));
+      const nextBefore = clamp(
+        before + (logicalDelta / available) * total,
+        minimum,
+        total - minimum,
+      );
       const next = [...baseWeights];
-      next[index] = nextBefore;
-      next[index + 1] = total - nextBefore;
+      next[beforeIndex] = nextBefore;
+      next[afterIndex] = total - nextBefore;
       return next;
     },
-    [index],
+    [afterIndex, beforeIndex],
   );
 
   const onPointerDown = (event: ReactPointerEvent<HTMLDivElement>) => {
-    if (event.button !== 0) return;
-    const container = splitterRef.current?.parentElement;
-    if (container === null || container === undefined) return;
-    const rectangle = container.getBoundingClientRect();
+    if (event.button !== 0 || sessionRef.current !== null) return;
     const coordinate = split.axis === "inline" ? event.clientX : event.clientY;
-    const availableSize = split.axis === "inline" ? rectangle.width : rectangle.height;
     sessionRef.current = {
       pointerId: event.pointerId,
       startCoordinate: coordinate,
-      availableSize: Math.max(1, availableSize),
+      beforeSize,
+      afterSize,
       weights: [...weights],
       latest: [...weights],
+      captureElement: event.currentTarget,
     };
-    event.currentTarget.setPointerCapture(event.pointerId);
+    send({
+      type: "POINTER_START",
+      pointerId: event.pointerId,
+      position: pointerSample(event),
+      baseRevision: safeRevision(projectionRevision),
+    });
+    event.currentTarget.setPointerCapture?.(event.pointerId);
     event.preventDefault();
   };
 
   const onPointerMove = (event: ReactPointerEvent<HTMLDivElement>) => {
     const session = sessionRef.current;
-    if (session === undefined || session.pointerId !== event.pointerId) return;
+    if (session === null || session.pointerId !== event.pointerId) return;
+    send({
+      type: "POINTER_MOVE",
+      pointerId: event.pointerId,
+      position: pointerSample(event),
+    });
     const coordinate = split.axis === "inline" ? event.clientX : event.clientY;
-    const physicalDelta = (coordinate - session.startCoordinate) / session.availableSize;
+    const physicalDelta = coordinate - session.startCoordinate;
     const logicalDelta =
       split.axis === "inline" && direction === "rtl" ? -physicalDelta : physicalDelta;
-    const next = updatePair(logicalDelta, session.weights);
+    const next = updatePair(logicalDelta, session.weights, session.beforeSize, session.afterSize);
     session.latest = next;
-    onPreview(next);
+    const applyPreview = () => {
+      const preview = onPreview(next);
+      const position = splitterPosition(preview, splitter.id);
+      if (position !== undefined && String(actor.getSnapshot().value) === "resizing") {
+        send({ type: "CONSTRAINT_RESULT", position });
+      }
+    };
+    if (!scheduler.schedule(scheduleKey, applyPreview)) applyPreview();
   };
 
   const finishPointer = (event: ReactPointerEvent<HTMLDivElement>) => {
     const session = sessionRef.current;
-    if (session === undefined || session.pointerId !== event.pointerId) return;
-    sessionRef.current = undefined;
-    if (event.currentTarget.hasPointerCapture(event.pointerId)) {
-      event.currentTarget.releasePointerCapture(event.pointerId);
+    if (session === null || session.pointerId !== event.pointerId) return;
+    const state = send({ type: "POINTER_END", pointerId: event.pointerId });
+    scheduler.cancel(scheduleKey);
+    sessionRef.current = null;
+    if (event.currentTarget.hasPointerCapture?.(event.pointerId)) {
+      event.currentTarget.releasePointerCapture?.(event.pointerId);
     }
-    onCommit(session.latest, "pointer");
+    if (state !== "committing") {
+      onCancel();
+      return;
+    }
+    settleCommit(onCommit(session.latest, "pointer").outcome, send);
   };
 
-  const cancelPointer = () => {
-    if (sessionRef.current === undefined) return;
-    sessionRef.current = undefined;
+  const cancelPointer = (event: ReactPointerEvent<HTMLDivElement>) => {
+    const session = sessionRef.current;
+    if (session === null || session.pointerId !== event.pointerId) return;
+    scheduler.cancel(scheduleKey);
+    sessionRef.current = null;
+    const state = send({
+      type: event.type === "lostpointercapture" ? "CAPTURE_LOST" : "POINTER_CANCEL",
+      pointerId: event.pointerId,
+    });
     onCancel();
+    if (state === "cancelling") send({ type: "RETURNED" });
   };
 
   const onKeyDown = (event: KeyboardEvent<HTMLDivElement>) => {
+    if (event.key === "Escape" && sessionRef.current !== null) {
+      event.preventDefault();
+      const session = sessionRef.current;
+      scheduler.cancel(scheduleKey);
+      sessionRef.current = null;
+      const state = send({ type: "CANCEL" });
+      onCancel();
+      if (session.captureElement.hasPointerCapture?.(session.pointerId)) {
+        session.captureElement.releasePointerCapture?.(session.pointerId);
+      }
+      if (state === "cancelling") send({ type: "RETURNED" });
+      return;
+    }
+    if (String(actor.getSnapshot().value) !== "idle") return;
     const negativeKeys = split.axis === "inline" ? ["ArrowLeft"] : ["ArrowUp"];
     const positiveKeys = split.axis === "inline" ? ["ArrowRight"] : ["ArrowDown"];
     let delta = 0;
@@ -571,7 +910,27 @@ function Splitter({
     if (delta === 0) return;
     if (split.axis === "inline" && direction === "rtl") delta *= -1;
     event.preventDefault();
-    onCommit(updatePair(delta * (event.shiftKey ? 0.1 : 0.02), weights), "keyboard");
+    const step = Math.max(1, pairSize) * (event.shiftKey ? 0.1 : 0.02) * delta;
+    const currentPosition = splitterPosition(resolvedLayout, splitter.id) ?? {
+      inline: splitter.rect.inlineStart,
+      block: splitter.rect.blockStart,
+    };
+    send({
+      type: "KEYBOARD_START",
+      position: currentPosition,
+      baseRevision: safeRevision(projectionRevision),
+    });
+    const nextPosition =
+      split.axis === "inline"
+        ? { ...currentPosition, inline: currentPosition.inline + step }
+        : { ...currentPosition, block: currentPosition.block + step };
+    send({ type: "KEYBOARD_STEP", position: nextPosition });
+    const next = updatePair(step, weights, beforeSize, afterSize);
+    const preview = onPreview(next);
+    const constrained = splitterPosition(preview, splitter.id);
+    if (constrained !== undefined) send({ type: "CONSTRAINT_RESULT", position: constrained });
+    send({ type: "COMMIT" });
+    settleCommit(onCommit(next, "keyboard").outcome, send);
   };
 
   return (
@@ -582,10 +941,19 @@ function Splitter({
       tabIndex={0}
       aria-label="Resize adjacent workspace panes"
       aria-orientation={split.axis === "inline" ? "vertical" : "horizontal"}
-      aria-valuemin={12}
-      aria-valuemax={88}
+      aria-valuemin={0}
+      aria-valuemax={100}
       aria-valuenow={Math.round(value)}
       aria-valuetext={`Primary pane ${Math.round(value)} percent`}
+      data-resize-state={resizeState}
+      data-workspace-splitter={splitter.id}
+      data-inline-start={splitter.rect.inlineStart}
+      data-block-start={splitter.rect.blockStart}
+      style={
+        {
+          "--pf-splitter-size": `${axisSize(splitter.rect, split.axis)}px`,
+        } as CSSProperties
+      }
       onPointerDown={onPointerDown}
       onPointerMove={onPointerMove}
       onPointerUp={finishPointer}
@@ -603,10 +971,12 @@ interface PanelGroupProps<TCommand, TResult> extends Omit<
   "node"
 > {
   readonly group: WorkspaceGroupView;
+  readonly nodeId: string;
 }
 
 function PanelGroup<TCommand, TResult>({
   group,
+  nodeId,
   projection,
   panels,
   commands,
@@ -645,6 +1015,7 @@ function PanelGroup<TCommand, TResult>({
   return (
     <section
       className="pf-group"
+      data-workspace-node={nodeId}
       data-workspace-group={group.id}
       data-active={String(group.panelIds.includes(projection.activePanelId ?? ""))}
       aria-labelledby={groupLabelId}
@@ -976,11 +1347,23 @@ function PanelPortals({ projection, registry, hosts }: PanelPortalsProps) {
         );
         const selected = group?.selectedPanelId === panel.id;
         const active = projection.activePanelId === panel.id;
+        const policy = panelLifecyclePolicy(panel);
+        const lifecycle = panelLifecycle(selected, active, policy);
+        if (!selected && policy.hidden === "detach") return null;
         const content =
           definition === undefined ? (
             <MissingPanel panel={panel} />
           ) : (
-            <definition.render panel={panel} selected={selected} active={active} />
+            <PanelContent
+              definition={definition}
+              panel={panel}
+              revision={projection.revision}
+              groupId={group?.id}
+              selected={selected}
+              active={active}
+              lifecycle={lifecycle}
+              policy={policy}
+            />
           );
 
         return createPortal(
@@ -992,6 +1375,98 @@ function PanelPortals({ projection, registry, hosts }: PanelPortalsProps) {
         );
       })}
     </>
+  );
+}
+
+interface PanelContentProps {
+  readonly active: boolean;
+  readonly definition: WorkspacePanelRegistry[string];
+  readonly lifecycle: WorkspacePanelLifecycle;
+  readonly groupId: string | undefined;
+  readonly panel: WorkspacePanelView;
+  readonly policy: WorkspacePanelLifecyclePolicy;
+  readonly revision: string;
+  readonly selected: boolean;
+}
+
+function PanelContent({
+  active,
+  definition,
+  groupId,
+  lifecycle,
+  panel,
+  policy,
+  revision,
+  selected,
+}: PanelContentProps) {
+  const previousLease = useRef<PanelLifecycleLeaseState | undefined>(undefined);
+  const leaseIdentity = [
+    active,
+    groupId ?? "",
+    lifecycle,
+    policy.crossDocumentMove,
+    policy.hidden,
+    policy.sameDocumentMove,
+    selected,
+  ].join(":");
+  const controller = useMemo(() => {
+    void leaseIdentity;
+    return new AbortController();
+  }, [leaseIdentity]);
+  const notifyLifecycle = useEffectEvent(
+    (
+      previous: WorkspacePanelLifecycle | undefined,
+      reason: WorkspacePanelLifecycleReason,
+      signal: AbortSignal,
+    ) => {
+      definition.onLifecycleChange?.({
+        panelId: panel.id,
+        revision,
+        current: lifecycle,
+        ...(previous === undefined ? {} : { previous }),
+        reason,
+        signal,
+        policy,
+      });
+    },
+  );
+
+  useLayoutEffect(() => {
+    const currentLease = { active, groupId, lifecycle, policy, selected };
+    const reason = lifecycleTransitionReason(previousLease.current, currentLease);
+    notifyLifecycle(previousLease.current?.lifecycle, reason, controller.signal);
+    previousLease.current = currentLease;
+    return () => {
+      controller.abort({
+        kind: "panefold-panel-lifecycle-ended",
+        panelId: panel.id,
+        lifecycle,
+      });
+    };
+  }, [
+    active,
+    controller,
+    groupId,
+    lifecycle,
+    panel.id,
+    policy,
+    policy.crossDocumentMove,
+    policy.hidden,
+    policy.sameDocumentMove,
+    selected,
+  ]);
+
+  return (
+    <Fragment key={policy.sameDocumentMove === "remount" ? groupId : "stable-host-content"}>
+      <definition.render
+        panel={panel}
+        selected={selected}
+        active={active}
+        lifecycle={lifecycle}
+        lifecycleSignal={controller.signal}
+        lifecyclePolicy={policy}
+      />
+    </Fragment>
   );
 }
 
@@ -1045,6 +1520,113 @@ function encodeDomId(value: string) {
   return encoded || "empty";
 }
 
+interface PointerResizeSession {
+  readonly pointerId: number;
+  readonly startCoordinate: number;
+  readonly beforeSize: number;
+  readonly afterSize: number;
+  readonly weights: readonly number[];
+  readonly captureElement: HTMLDivElement;
+  latest: readonly number[];
+}
+
+const ZERO_LOGICAL_RECT: LogicalRect = Object.freeze({
+  inlineStart: 0,
+  blockStart: 0,
+  inlineSize: 0,
+  blockSize: 0,
+});
+
+function createBrowserFrameScheduler(): SurfaceFrameScheduler {
+  return new SurfaceFrameScheduler({
+    requestFrame: (callback) => {
+      if (typeof globalThis.requestAnimationFrame === "function") {
+        return globalThis.requestAnimationFrame(callback);
+      }
+      return globalThis.setTimeout(
+        () => callback(globalThis.performance?.now() ?? Date.now()),
+        16,
+      ) as unknown as number;
+    },
+    cancelFrame: (handle) => {
+      globalThis.cancelAnimationFrame?.(handle);
+      globalThis.clearTimeout(handle);
+    },
+  });
+}
+
+function sameLogicalRect(left: LogicalRect, right: LogicalRect): boolean {
+  return (
+    left.inlineStart === right.inlineStart &&
+    left.blockStart === right.blockStart &&
+    left.inlineSize === right.inlineSize &&
+    left.blockSize === right.blockSize
+  );
+}
+
+function logicalRectToPhysical(
+  rect: LogicalRect,
+  bounds: LogicalRect,
+  direction: WorkspaceDirection,
+) {
+  return {
+    x:
+      direction === "rtl"
+        ? bounds.inlineStart +
+          bounds.inlineSize -
+          (rect.inlineStart - bounds.inlineStart) -
+          rect.inlineSize
+        : rect.inlineStart,
+    y: rect.blockStart,
+    width: rect.inlineSize,
+    height: rect.blockSize,
+  };
+}
+
+function safeRevision(value: string) {
+  try {
+    return revision(value);
+  } catch {
+    return revision(0);
+  }
+}
+
+function pointerSample(event: ReactPointerEvent<HTMLDivElement>) {
+  return { inline: event.clientX, block: event.clientY };
+}
+
+function splitterPosition(layout: ResolvedLayout, splitterId: string) {
+  const resolved = layout.splitters.find((item) => item.id === splitterId);
+  return resolved === undefined
+    ? undefined
+    : { inline: resolved.rect.inlineStart, block: resolved.rect.blockStart };
+}
+
+function axisSize(rect: LogicalRect | undefined, axis: WorkspaceSplitView["axis"]): number {
+  if (rect === undefined) return 0;
+  return axis === "inline" ? rect.inlineSize : rect.blockSize;
+}
+
+function positiveNumber(value: number | undefined): number {
+  return value !== undefined && Number.isFinite(value) && value > 0 ? value : 1;
+}
+
+function settleCommit(
+  outcome: WorkspaceDispatchOutcome,
+  send: (event: ResizeEvent) => string,
+): void {
+  if (outcome.status === "committed") {
+    send({ type: "COMMIT_OK" });
+    send({ type: "SETTLED" });
+    return;
+  }
+  send({
+    type: "COMMIT_ERROR",
+    message: outcome.message ?? `Resize did not commit (${outcome.status}).`,
+  });
+  send({ type: "RETURNED" });
+}
+
 function clamp(value: number, minimum: number, maximum: number) {
   return Math.min(maximum, Math.max(minimum, value));
 }
@@ -1053,6 +1635,7 @@ function updateStableHost(
   element: HTMLDivElement,
   options: {
     readonly active: boolean;
+    readonly lifecycle: WorkspacePanelLifecycle;
     readonly labelledBy: string;
     readonly panelType: string | undefined;
     readonly selected: boolean;
@@ -1063,8 +1646,58 @@ function updateStableHost(
   element.setAttribute("aria-hidden", options.selected ? "false" : "true");
   element.setAttribute("aria-labelledby", options.labelledBy);
   element.dataset.active = String(options.active);
+  element.dataset.lifecycle = options.lifecycle;
   if (options.panelType === undefined) delete element.dataset.panelType;
   else element.dataset.panelType = options.panelType;
+}
+
+interface PanelLifecycleLeaseState {
+  readonly active: boolean;
+  readonly groupId: string | undefined;
+  readonly lifecycle: WorkspacePanelLifecycle;
+  readonly policy: WorkspacePanelLifecyclePolicy;
+  readonly selected: boolean;
+}
+
+const DEFAULT_PANEL_LIFECYCLE_POLICY: WorkspacePanelLifecyclePolicy = Object.freeze({
+  hidden: "suspend",
+  sameDocumentMove: "preserve-host",
+  crossDocumentMove: "unsupported",
+});
+
+function panelLifecyclePolicy(
+  panel: WorkspacePanelView | undefined,
+): WorkspacePanelLifecyclePolicy {
+  return panel?.lifecyclePolicy ?? DEFAULT_PANEL_LIFECYCLE_POLICY;
+}
+
+function panelLifecycle(
+  selected: boolean,
+  active: boolean,
+  policy: WorkspacePanelLifecyclePolicy,
+): WorkspacePanelLifecycle {
+  if (active) return "active";
+  if (selected) return "visible";
+  return policy.hidden === "keep-alive" || policy.hidden === "application-managed"
+    ? "visible"
+    : "suspended";
+}
+
+function lifecycleTransitionReason(
+  previous: PanelLifecycleLeaseState | undefined,
+  current: PanelLifecycleLeaseState,
+): WorkspacePanelLifecycleReason {
+  if (previous === undefined) return "mount";
+  if (previous.groupId !== current.groupId) return "same-document-move";
+  if (
+    previous.policy.hidden !== current.policy.hidden ||
+    previous.policy.sameDocumentMove !== current.policy.sameDocumentMove ||
+    previous.policy.crossDocumentMove !== current.policy.crossDocumentMove
+  ) {
+    return "policy-change";
+  }
+  if (previous.selected !== current.selected) return "selection";
+  return "activation";
 }
 
 function clickOrigin(event: ReactMouseEvent<HTMLElement>): "keyboard" | "pointer" {

@@ -44,6 +44,25 @@ export function executeCommand(
   snapshot: WorkspaceSnapshot,
   envelope: CommandEnvelope,
 ): KernelResult {
+  if (String(envelope.id).trim().length === 0) {
+    return rejection(
+      snapshot,
+      envelope,
+      "INVALID_COMMAND",
+      "Every semantic command requires a stable non-empty command ID",
+      ["Provide a stable command ID"],
+    );
+  }
+  const currentViolations = validateWorkspace(snapshot);
+  if (currentViolations.length > 0) {
+    return rejection(
+      snapshot,
+      envelope,
+      "INVARIANT_VIOLATION",
+      `Current workspace violates ${currentViolations.length} invariant${currentViolations.length === 1 ? "" : "s"}: ${currentViolations[0]?.message ?? "unknown violation"}`,
+      ["Recover or restore a valid snapshot before dispatching commands"],
+    );
+  }
   if (envelope.baseRevision !== undefined && envelope.baseRevision !== snapshot.revision) {
     return rejection(
       snapshot,
@@ -99,10 +118,13 @@ export function executeCommand(
 
   const next = withRevision(canonical.snapshot, nextRevision(snapshot.revision));
   const patches = diffSnapshots(snapshot, next);
-  const inverse: WorkspaceCommand = {
-    type: "restore-workspace",
-    snapshot,
-  };
+  const inverse: WorkspaceCommand | undefined =
+    envelope.command.type === "apply-remote-transaction"
+      ? undefined
+      : {
+          type: "restore-workspace",
+          snapshot,
+        };
   const transaction = {
     id: envelope.id,
     origin: envelope.origin,
@@ -117,7 +139,7 @@ export function executeCommand(
     ok: true,
     next,
     patches,
-    inverse,
+    ...(inverse === undefined ? {} : { inverse }),
     effects: [],
     diagnostics: [...reduced.diagnostics, ...canonical.diagnostics],
     transaction,

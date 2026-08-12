@@ -72,6 +72,23 @@ export function diffSnapshots(
     ...tablePatches("surface", before.surfaces, after.surfaces),
   ];
 
+  if (
+    before.schemaVersion !== after.schemaVersion ||
+    before.applicationLayoutVersion !== after.applicationLayoutVersion
+  ) {
+    patches.unshift({
+      kind: "versions",
+      before: {
+        schemaVersion: before.schemaVersion,
+        applicationLayoutVersion: before.applicationLayoutVersion,
+      },
+      after: {
+        schemaVersion: after.schemaVersion,
+        applicationLayoutVersion: after.applicationLayoutVersion,
+      },
+    });
+  }
+
   if (!equal(before.activation, after.activation)) {
     patches.push({
       kind: "activation",
@@ -98,6 +115,13 @@ export function diffSnapshots(
       kind: "closed-panels",
       before: before.recoverableClosedPanels,
       after: after.recoverableClosedPanels,
+    });
+  }
+  if (!equal(before.appliedRemoteTransactions, after.appliedRemoteTransactions)) {
+    patches.push({
+      kind: "remote-transactions",
+      before: before.appliedRemoteTransactions,
+      after: after.appliedRemoteTransactions,
     });
   }
   if (!equal(before.metadata, after.metadata)) {

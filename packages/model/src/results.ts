@@ -26,6 +26,7 @@ export type CommandRejectionCode =
   | "INVALID_COMMAND"
   | "CAPABILITY_DENIED"
   | "INVARIANT_VIOLATION"
+  | "DUPLICATE_TRANSACTION"
   | "HISTORY_EMPTY"
   | "HISTORY_REQUIRED"
   | "UNSUPPORTED_OPERATION";
@@ -40,6 +41,11 @@ export interface CommandRejection {
 }
 
 export type WorkspacePatch =
+  | {
+      readonly kind: "versions";
+      readonly before: Pick<WorkspaceSnapshot, "schemaVersion" | "applicationLayoutVersion">;
+      readonly after: Pick<WorkspaceSnapshot, "schemaVersion" | "applicationLayoutVersion">;
+    }
   | {
       readonly kind: "panel";
       readonly id: PanelId;
@@ -83,6 +89,11 @@ export type WorkspacePatch =
       readonly kind: "closed-panels";
       readonly before: WorkspaceSnapshot["recoverableClosedPanels"];
       readonly after: WorkspaceSnapshot["recoverableClosedPanels"];
+    }
+  | {
+      readonly kind: "remote-transactions";
+      readonly before: WorkspaceSnapshot["appliedRemoteTransactions"];
+      readonly after: WorkspaceSnapshot["appliedRemoteTransactions"];
     }
   | {
       readonly kind: "metadata";

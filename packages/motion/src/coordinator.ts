@@ -25,7 +25,7 @@ export class MotionCoordinator {
   }
 
   public play(element: Element, rawPlan: MotionPlan): MotionHandle {
-    const plan = adaptPlanToProfile(rawPlan, this.#profile);
+    let plan = adaptPlanToProfile(rawPlan, this.#profile);
     const key = this.#key(plan);
     const previous = this.#running.get(key);
 
@@ -36,6 +36,10 @@ export class MotionCoordinator {
       if (plan.interruption === "finish") {
         previous.handle.finish();
       } else {
+        const sampled = this.#driver.sample?.(element, Object.keys(plan.keyframes));
+        if (sampled !== undefined) {
+          plan = { ...plan, keyframes: retargetFromSample(sampled, plan.keyframes) };
+        }
         previous.handle.cancel();
       }
       this.#running.delete(key);
@@ -44,11 +48,14 @@ export class MotionCoordinator {
     const handle =
       plan.durationMs === 0 ? this.#instant(element, plan) : this.#driver.animate(element, plan);
     this.#running.set(key, { plan, handle });
-    void handle.finished.finally(() => {
+    const clear = () => {
       if (this.#running.get(key)?.handle === handle) {
         this.#running.delete(key);
       }
-    });
+    };
+    // Cancellation is an expected outcome for many animation drivers. Observe
+    // both branches so a rejected `finished` promise never becomes unhandled.
+    void handle.finished.then(clear, clear);
     return handle;
   }
 
@@ -85,7 +92,7 @@ export class MotionCoordinator {
   }
 
   #instant(element: Element, plan: MotionPlan): MotionHandle {
-    if (element instanceof HTMLElement || element instanceof SVGElement) {
+    if (isStylableElement(element)) {
       for (const [property, value] of Object.entries(plan.keyframes)) {
         const finalValue = Array.isArray(value) ? value.at(-1) : value;
         if (finalValue !== undefined) {
@@ -99,4 +106,31 @@ export class MotionCoordinator {
       finish() {},
     };
   }
+}
+
+function isStylableElement(
+  element: Element,
+): element is Element & { readonly style: CSSStyleDeclaration } {
+  const view = element.ownerDocument?.defaultView;
+  if (view === null || view === undefined) return false;
+  return element instanceof view.HTMLElement || element instanceof view.SVGElement;
+}
+
+function retargetFromSample(
+  sampled: MotionPlan["keyframes"],
+  target: MotionPlan["keyframes"],
+): MotionPlan["keyframes"] {
+  const result: Record<string, MotionPlan["keyframes"][string]> = {};
+  for (const [property, value] of Object.entries(target)) {
+    const start = sampled[property];
+    if (start === undefined) {
+      result[property] = value;
+      continue;
+    }
+    const startValue = Array.isArray(start) ? start.at(-1) : start;
+    const finalValue = Array.isArray(value) ? value.at(-1) : value;
+    result[property] =
+      finalValue === undefined || startValue === undefined ? value : [startValue, finalValue];
+  }
+  return Object.freeze(result);
 }

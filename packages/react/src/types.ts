@@ -20,6 +20,13 @@ export interface WorkspacePanelView {
   readonly closable?: boolean;
   readonly floatable?: boolean;
   readonly parameters?: unknown;
+  readonly lifecyclePolicy?: WorkspacePanelLifecyclePolicy;
+}
+
+export interface WorkspacePanelLifecyclePolicy {
+  readonly hidden: "keep-alive" | "detach" | "suspend" | "application-managed";
+  readonly sameDocumentMove: "preserve-host" | "remount";
+  readonly crossDocumentMove: "unsupported" | "checkpoint-remount" | "portal-coupled" | "mirror";
 }
 
 export interface WorkspaceGroupView {
@@ -60,11 +67,36 @@ export interface WorkspacePanelRenderProps {
   readonly panel: WorkspacePanelView;
   readonly active: boolean;
   readonly selected: boolean;
+  /**
+   * `suspended` panels remain mounted in their stable host, but their host is
+   * hidden and inert. Panel implementations should pause timers, rendering,
+   * media, and remote work while suspended instead of treating this signal as
+   * an instruction to discard local state.
+   */
+  readonly lifecycle: WorkspacePanelLifecycle;
+  /** Aborted before the next lifecycle lease is delivered, and on unmount. */
+  readonly lifecycleSignal: AbortSignal;
+  readonly lifecyclePolicy: WorkspacePanelLifecyclePolicy;
+}
+
+export type WorkspacePanelLifecycle = "active" | "visible" | "suspended";
+export type WorkspacePanelLifecycleReason =
+  "mount" | "activation" | "selection" | "same-document-move" | "policy-change";
+
+export interface WorkspacePanelLifecycleChange {
+  readonly panelId: string;
+  readonly revision: string;
+  readonly current: WorkspacePanelLifecycle;
+  readonly previous?: WorkspacePanelLifecycle;
+  readonly reason: WorkspacePanelLifecycleReason;
+  readonly signal: AbortSignal;
+  readonly policy: WorkspacePanelLifecyclePolicy;
 }
 
 export interface WorkspacePanelDefinition {
   readonly render: ComponentType<WorkspacePanelRenderProps>;
   readonly icon?: ReactNode;
+  readonly onLifecycleChange?: (change: WorkspacePanelLifecycleChange) => void;
 }
 
 export type WorkspacePanelRegistry = Readonly<Record<string, WorkspacePanelDefinition>>;

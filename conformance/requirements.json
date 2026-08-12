@@ -1,0 +1,1343 @@
+{
+  "schemaVersion": 1,
+  "source": {
+    "path": "docs/spec/SYSTEM_DESIGN.md",
+    "version": "1.0",
+    "date": "2026-08-07",
+    "declaredCount": 190,
+    "extractedCount": 190,
+    "sha256": "01dda9f8263066f1d39dbf6baa5515c106c393f9d46a981c05dbf8d7d8a6962a"
+  },
+  "requirements": [
+    {
+      "id": "A11Y-001",
+      "level": "MUST",
+      "applicability": "profile-scoped",
+      "statement": "The stable release conforms to WCAG 2.2 AA for the declared supported profiles.",
+      "acceptanceEvidence": "Automated and manual accessibility report."
+    },
+    {
+      "id": "A11Y-002",
+      "level": "MUST",
+      "applicability": "profile-scoped",
+      "statement": "Every structural pointer operation has an equivalent keyboard and programmatic command.",
+      "acceptanceEvidence": "Generated action parity matrix."
+    },
+    {
+      "id": "A11Y-003",
+      "level": "MUST",
+      "applicability": "profile-scoped",
+      "statement": "Tabs and splitters implement the applicable WAI-ARIA interaction patterns.",
+      "acceptanceEvidence": "Semantic DOM and keyboard tests."
+    },
+    {
+      "id": "A11Y-004",
+      "level": "MUST",
+      "applicability": "profile-scoped",
+      "statement": "Announcements describe final semantic outcomes and are localizable, replaceable, and rate-controlled.",
+      "acceptanceEvidence": "Screen-reader task recordings and message catalog audit."
+    },
+    {
+      "id": "A11Y-005",
+      "level": "MUST",
+      "applicability": "profile-scoped",
+      "statement": "Workspace controls remain operable at 400% zoom and in forced-colors mode.",
+      "acceptanceEvidence": "Visual and interaction regression suite."
+    },
+    {
+      "id": "A11Y-006",
+      "level": "MUST",
+      "applicability": "profile-scoped",
+      "statement": "Reduced motion removes non-essential spatial movement and does not merely shorten every duration.",
+      "acceptanceEvidence": "Reduced-motion snapshot and behavior tests."
+    },
+    {
+      "id": "A11Y-007",
+      "level": "MUST NOT",
+      "applicability": "profile-scoped",
+      "statement": "Color, motion, hover, or precision dragging is the sole means of communicating state or invoking a structural action.",
+      "acceptanceEvidence": "UX and accessibility audit."
+    },
+    {
+      "id": "A11Y-008",
+      "level": "SHOULD",
+      "applicability": "profile-scoped",
+      "statement": "Voice-control-friendly accessible names remain stable and specific across panels and actions.",
+      "acceptanceEvidence": "Voice-control task review."
+    },
+    {
+      "id": "ACC-001",
+      "level": "MUST",
+      "applicability": "profile-scoped",
+      "statement": "All hard release gates and all MUST requirements in the normative register pass for every stable supported profile.",
+      "acceptanceEvidence": "Signed release conformance bundle."
+    },
+    {
+      "id": "ACC-002",
+      "level": "MUST",
+      "applicability": "profile-scoped",
+      "statement": "Any exception changes the published support claim or releases under an experimental label.",
+      "acceptanceEvidence": "Release manifest and approval record."
+    },
+    {
+      "id": "ACC-003",
+      "level": "MUST",
+      "applicability": "profile-scoped",
+      "statement": "The implementation demonstrates useful superiority through robust outcomes, not feature count or visual polish alone.",
+      "acceptanceEvidence": "Quality scorecard and comparative workload study."
+    },
+    {
+      "id": "API-001",
+      "level": "MUST",
+      "applicability": "profile-scoped",
+      "statement": "Panel parameters and checkpoints are inferred statically and validated at trust boundaries.",
+      "acceptanceEvidence": "Type tests and runtime schema tests."
+    },
+    {
+      "id": "API-002",
+      "level": "MUST",
+      "applicability": "profile-scoped",
+      "statement": "Commands, queries, subscriptions, lifecycle, and operational effects are separate public concepts.",
+      "acceptanceEvidence": "API surface review."
+    },
+    {
+      "id": "API-003",
+      "level": "MUST NOT",
+      "applicability": "profile-scoped",
+      "statement": "Consumers mutate exposed entity objects or reconstruct truth from events alone.",
+      "acceptanceEvidence": "Readonly types and documentation tests."
+    },
+    {
+      "id": "API-004",
+      "level": "MUST",
+      "applicability": "profile-scoped",
+      "statement": "Expected asynchronous failures return typed result values with stable codes and remediation.",
+      "acceptanceEvidence": "Error contract snapshots."
+    },
+    {
+      "id": "API-005",
+      "level": "MUST",
+      "applicability": "profile-scoped",
+      "statement": "Selectors avoid unrelated recomputation and framework rerender.",
+      "acceptanceEvidence": "Dependency-tracking benchmarks."
+    },
+    {
+      "id": "API-006",
+      "level": "SHOULD",
+      "applicability": "profile-scoped",
+      "statement": "First useful workspace setup completes in under ten minutes for an unfamiliar engineer.",
+      "acceptanceEvidence": "Timed onboarding study."
+    },
+    {
+      "id": "API-007",
+      "level": "SHOULD",
+      "applicability": "profile-scoped",
+      "statement": "Custom panel type setup completes in under fifteen minutes without reading internal source.",
+      "acceptanceEvidence": "Timed onboarding study."
+    },
+    {
+      "id": "API-008",
+      "level": "MUST",
+      "applicability": "profile-scoped",
+      "statement": "Advanced Effect and protocol APIs are available without forcing them onto ordinary consumers.",
+      "acceptanceEvidence": "Entry-point and documentation audit."
+    },
+    {
+      "id": "ARC-001",
+      "level": "MUST",
+      "applicability": "profile-scoped",
+      "statement": "The headless model and kernel have no DOM, framework, Effect-runtime, XState, or animation dependency.",
+      "acceptanceEvidence": "Package graph and Node.js execution tests."
+    },
+    {
+      "id": "ARC-002",
+      "level": "MUST",
+      "applicability": "profile-scoped",
+      "statement": "XState actors exist only for active bounded protocols and are disposed when their owning scope closes.",
+      "acceptanceEvidence": "Actor inventory and scope-leak tests."
+    },
+    {
+      "id": "ARC-003",
+      "level": "MUST",
+      "applicability": "profile-scoped",
+      "statement": "Effect wraps fallible operations without imposing fiber scheduling on ordinary synchronous kernel reads and commits.",
+      "acceptanceEvidence": "Hot-path trace and code review."
+    },
+    {
+      "id": "ARC-004",
+      "level": "MUST",
+      "applicability": "profile-scoped",
+      "statement": "Motion drivers implement a stable internal port and do not appear in persisted data.",
+      "acceptanceEvidence": "Serialization schema audit."
+    },
+    {
+      "id": "ARC-005",
+      "level": "SHOULD",
+      "applicability": "profile-scoped",
+      "statement": "The production runtime pins tested library versions and exposes compatibility through adapters rather than broad re-export.",
+      "acceptanceEvidence": "Lockfile, package manifest, and API-surface audit."
+    },
+    {
+      "id": "COL-001",
+      "level": "MUST",
+      "applicability": "profile-scoped",
+      "statement": "Personal layout is the default collaboration mode unless the product explicitly enables shared layout.",
+      "acceptanceEvidence": "Configuration and UX review."
+    },
+    {
+      "id": "COL-002",
+      "level": "MUST",
+      "applicability": "profile-scoped",
+      "statement": "Durable collaboration replicates semantic transactions, not pointer frames or raw DOM events.",
+      "acceptanceEvidence": "Transport trace audit."
+    },
+    {
+      "id": "COL-003",
+      "level": "MUST",
+      "applicability": "profile-scoped",
+      "statement": "Every protocol packet is versioned, schema-validated, session-bound, epoch-bound, and transaction-identified.",
+      "acceptanceEvidence": "Protocol fuzzing."
+    },
+    {
+      "id": "COL-004",
+      "level": "MUST",
+      "applicability": "profile-scoped",
+      "statement": "At most one authoritative owner exists for each panel instance.",
+      "acceptanceEvidence": "TLA+ or equivalent model-checking invariant."
+    },
+    {
+      "id": "COL-005",
+      "level": "MUST",
+      "applicability": "profile-scoped",
+      "statement": "Coordinator loss, duplicate delivery, reordering, and stale epochs have defined recovery behavior.",
+      "acceptanceEvidence": "Distributed failure simulation."
+    },
+    {
+      "id": "COL-006",
+      "level": "SHOULD",
+      "applicability": "profile-scoped",
+      "statement": "Presence and preview traffic uses a separate lossy channel from durable transactions.",
+      "acceptanceEvidence": "Transport architecture test."
+    },
+    {
+      "id": "DOM-001",
+      "level": "MUST",
+      "applicability": "profile-scoped",
+      "statement": "Every panel, group, node, surface, transaction, and motion target has a stable explicit identifier.",
+      "acceptanceEvidence": "Schema and type audit."
+    },
+    {
+      "id": "DOM-002",
+      "level": "MUST NOT",
+      "applicability": "profile-scoped",
+      "statement": "A DOM node, framework instance, array position, or window handle serves as persistent identity.",
+      "acceptanceEvidence": "Persistence-schema and adapter tests."
+    },
+    {
+      "id": "DOM-003",
+      "level": "MUST",
+      "applicability": "profile-scoped",
+      "statement": "Derived geometry and runtime resources are excluded from canonical serialization except documented restore hints.",
+      "acceptanceEvidence": "Round-trip and schema tests."
+    },
+    {
+      "id": "DOM-004",
+      "level": "MUST",
+      "applicability": "profile-scoped",
+      "statement": "Application panel state and workspace layout state have separate codecs, versions, and failure handling.",
+      "acceptanceEvidence": "Checkpoint integration tests."
+    },
+    {
+      "id": "DOM-005",
+      "level": "MUST",
+      "applicability": "profile-scoped",
+      "statement": "Visual tombstones are inert, aria-hidden, pointer-inactive, and hard-bounded in lifetime.",
+      "acceptanceEvidence": "DOM accessibility and leak tests."
+    },
+    {
+      "id": "EXP-001",
+      "level": "MUST",
+      "applicability": "profile-scoped",
+      "statement": "Every structural operation exposes a human-readable command label and deterministic outcome.",
+      "acceptanceEvidence": "Command registry audit and usability tasks."
+    },
+    {
+      "id": "EXP-002",
+      "level": "MUST",
+      "applicability": "profile-scoped",
+      "statement": "The visible drop preview is produced from the same solver and policy result used by commit.",
+      "acceptanceEvidence": "Preview-versus-commit property tests."
+    },
+    {
+      "id": "EXP-003",
+      "level": "MUST",
+      "applicability": "profile-scoped",
+      "statement": "Every completed direct-manipulation gesture creates at most one workspace-history entry.",
+      "acceptanceEvidence": "History conformance tests."
+    },
+    {
+      "id": "EXP-004",
+      "level": "MUST",
+      "applicability": "profile-scoped",
+      "statement": "A failed or blocked external capability keeps content in a safe in-page location.",
+      "acceptanceEvidence": "Popup, permission, and surface failure tests."
+    },
+    {
+      "id": "EXP-005",
+      "level": "SHOULD",
+      "applicability": "profile-scoped",
+      "statement": "A new consumer can render a typed panel workspace in under ten minutes using stable public APIs.",
+      "acceptanceEvidence": "Timed DX study with unfamiliar engineers."
+    },
+    {
+      "id": "EXT-001",
+      "level": "MUST",
+      "applicability": "profile-scoped",
+      "statement": "Extensions use documented registries, ports, policies, and contribution values rather than private internals.",
+      "acceptanceEvidence": "Public extension conformance suite."
+    },
+    {
+      "id": "EXT-002",
+      "level": "MUST",
+      "applicability": "profile-scoped",
+      "statement": "Plugin manifests, protocol messages, persisted namespaces, and panel data are versioned and schema-validated.",
+      "acceptanceEvidence": "Boundary tests."
+    },
+    {
+      "id": "EXT-003",
+      "level": "MUST",
+      "applicability": "profile-scoped",
+      "statement": "Plugin ordering and conflicts are deterministic and diagnosable.",
+      "acceptanceEvidence": "Registration-order tests."
+    },
+    {
+      "id": "EXT-004",
+      "level": "MUST NOT",
+      "applicability": "profile-scoped",
+      "statement": "A plugin mutates canonical state or attaches unscoped global listeners through a supported API.",
+      "acceptanceEvidence": "API and leak tests."
+    },
+    {
+      "id": "EXT-005",
+      "level": "MUST",
+      "applicability": "profile-scoped",
+      "statement": "Unavailable or failed plugins do not erase persisted panels or placements.",
+      "acceptanceEvidence": "Restore and failure tests."
+    },
+    {
+      "id": "EXT-006",
+      "level": "SHOULD",
+      "applicability": "profile-scoped",
+      "statement": "Third-party adapters can run the public conformance suite and publish certification metadata.",
+      "acceptanceEvidence": "Certification workflow."
+    },
+    {
+      "id": "FOC-001",
+      "level": "MUST",
+      "applicability": "profile-scoped",
+      "statement": "Selection, activation, DOM focus, and frontmost-surface state remain distinct in model and API.",
+      "acceptanceEvidence": "Type and behavior tests."
+    },
+    {
+      "id": "FOC-002",
+      "level": "MUST",
+      "applicability": "profile-scoped",
+      "statement": "Clicking an interactive descendant does not lose its natural focus merely to activate a panel.",
+      "acceptanceEvidence": "Form, editor, and grid fixtures."
+    },
+    {
+      "id": "FOC-003",
+      "level": "MUST",
+      "applicability": "profile-scoped",
+      "statement": "Every close, move, transfer, restore, and projection change has deterministic focus recovery.",
+      "acceptanceEvidence": "Operation-by-operation focus matrix."
+    },
+    {
+      "id": "FOC-004",
+      "level": "MUST",
+      "applicability": "profile-scoped",
+      "statement": "Focus is correct immediately after semantic commit and does not wait for animation.",
+      "acceptanceEvidence": "Mid-animation focus assertions."
+    },
+    {
+      "id": "FOC-005",
+      "level": "MUST NOT",
+      "applicability": "profile-scoped",
+      "statement": "Ordinary floating panels use modal semantics or focus trapping.",
+      "acceptanceEvidence": "ARIA and keyboard tests."
+    },
+    {
+      "id": "FOC-006",
+      "level": "SHOULD",
+      "applicability": "profile-scoped",
+      "statement": "Panel renderers may provide stable restoration tokens for meaningful descendants across remount.",
+      "acceptanceEvidence": "Adapter contract tests."
+    },
+    {
+      "id": "FWK-001",
+      "level": "MUST",
+      "applicability": "profile-scoped",
+      "statement": "Every supported framework adapter passes the same semantic and lifecycle contract suite.",
+      "acceptanceEvidence": "Adapter certification report."
+    },
+    {
+      "id": "FWK-002",
+      "level": "MUST",
+      "applicability": "profile-scoped",
+      "statement": "Geometry frames and pointer movement do not trigger workspace-wide framework reconciliation.",
+      "acceptanceEvidence": "Framework profiler traces."
+    },
+    {
+      "id": "FWK-003",
+      "level": "MUST",
+      "applicability": "profile-scoped",
+      "statement": "Framework development modes do not duplicate ownership or leak resources.",
+      "acceptanceEvidence": "Strict/development-mode tests."
+    },
+    {
+      "id": "FWK-004",
+      "level": "MUST",
+      "applicability": "profile-scoped",
+      "statement": "SSR-safe imports and deterministic hydration are documented for supported configurations.",
+      "acceptanceEvidence": "SSR import and hydration tests."
+    },
+    {
+      "id": "FWK-005",
+      "level": "MUST",
+      "applicability": "profile-scoped",
+      "statement": "Cross-document context preservation is explicit and capability-negotiated.",
+      "acceptanceEvidence": "Portal-coupled and remote-mode tests."
+    },
+    {
+      "id": "FWK-006",
+      "level": "SHOULD",
+      "applicability": "profile-scoped",
+      "statement": "Adapter-specific APIs remain idiomatic without changing core semantics.",
+      "acceptanceEvidence": "Framework-user review."
+    },
+    {
+      "id": "GOV-001",
+      "level": "MUST",
+      "applicability": "profile-scoped",
+      "statement": "Each implementation phase has objective exit evidence and does not rely on demo appearance.",
+      "acceptanceEvidence": "Roadmap gate review."
+    },
+    {
+      "id": "GOV-002",
+      "level": "MUST",
+      "applicability": "profile-scoped",
+      "statement": "Public API, persisted schema, surface protocol, and experimental capabilities have explicit versioning policies.",
+      "acceptanceEvidence": "Release policy audit."
+    },
+    {
+      "id": "GOV-003",
+      "level": "MUST",
+      "applicability": "profile-scoped",
+      "statement": "A failed conformance gate cannot be waived for a stable release without changing the support claim.",
+      "acceptanceEvidence": "Release approval record."
+    },
+    {
+      "id": "GOV-004",
+      "level": "MUST",
+      "applicability": "profile-scoped",
+      "statement": "Core ownership, invariant, transaction, lifecycle, and protocol changes require architecture decision records.",
+      "acceptanceEvidence": "ADR repository audit."
+    },
+    {
+      "id": "GOV-005",
+      "level": "SHOULD",
+      "applicability": "profile-scoped",
+      "statement": "Deprecations provide diagnostics and mechanical migration support where feasible.",
+      "acceptanceEvidence": "Deprecation review."
+    },
+    {
+      "id": "GOV-006",
+      "level": "SHOULD",
+      "applicability": "profile-scoped",
+      "statement": "Third-party adapters and plugins can publish machine-readable compatibility and conformance metadata.",
+      "acceptanceEvidence": "Certification manifest."
+    },
+    {
+      "id": "I18N-001",
+      "level": "MUST",
+      "applicability": "profile-scoped",
+      "statement": "All user-visible library text is localizable and avoids English-specific concatenation.",
+      "acceptanceEvidence": "Message catalog audit."
+    },
+    {
+      "id": "I18N-002",
+      "level": "MUST",
+      "applicability": "profile-scoped",
+      "statement": "Logical axes, RTL, and supported writing modes are reflected in layout, movement, resizing, and announcements.",
+      "acceptanceEvidence": "RTL and writing-mode tests."
+    },
+    {
+      "id": "I18N-003",
+      "level": "SHOULD",
+      "applicability": "profile-scoped",
+      "statement": "Platform shortcut names and numeric values are formatted through locale-aware services.",
+      "acceptanceEvidence": "Locale snapshot tests."
+    },
+    {
+      "id": "INT-001",
+      "level": "MUST",
+      "applicability": "profile-scoped",
+      "statement": "Direct pointer manipulation writes visual state at most once per surface animation frame.",
+      "acceptanceEvidence": "Frame-scheduler trace."
+    },
+    {
+      "id": "INT-002",
+      "level": "MUST",
+      "applicability": "profile-scoped",
+      "statement": "Raw pointer coordinates do not enter canonical state, persistence, or transaction history.",
+      "acceptanceEvidence": "Schema and history audit."
+    },
+    {
+      "id": "INT-003",
+      "level": "MUST",
+      "applicability": "profile-scoped",
+      "statement": "Escape, pointer cancellation, capture loss, and scope disposal leave no residual interaction state.",
+      "acceptanceEvidence": "Cancellation matrix."
+    },
+    {
+      "id": "INT-004",
+      "level": "MUST",
+      "applicability": "profile-scoped",
+      "statement": "Every structural pointer action has keyboard, menu or command-palette, and programmatic equivalents.",
+      "acceptanceEvidence": "Generated action-coverage matrix."
+    },
+    {
+      "id": "INT-005",
+      "level": "MUST",
+      "applicability": "profile-scoped",
+      "statement": "Drop previews are policy-valid, solver-exact, labeled, and reversible.",
+      "acceptanceEvidence": "Usability and property tests."
+    },
+    {
+      "id": "INT-006",
+      "level": "MUST",
+      "applicability": "profile-scoped",
+      "statement": "Pointer resize is direct; content resize notifications may be live, throttled, deferred, or adaptive by declared policy.",
+      "acceptanceEvidence": "Heavy-content fixture traces."
+    },
+    {
+      "id": "INT-007",
+      "level": "SHOULD",
+      "applicability": "profile-scoped",
+      "statement": "Target hysteresis prevents oscillation without creating a magnetic offset that impairs precision.",
+      "acceptanceEvidence": "Pointer trajectory test corpus."
+    },
+    {
+      "id": "LAY-001",
+      "level": "MUST",
+      "applicability": "profile-scoped",
+      "statement": "Docked layout uses n-ary splits and canonical flattening of adjacent same-axis nodes.",
+      "acceptanceEvidence": "Topology and canonicalization tests."
+    },
+    {
+      "id": "LAY-002",
+      "level": "MUST",
+      "applicability": "profile-scoped",
+      "statement": "All semantic axes and edges are logical and writing-mode aware.",
+      "acceptanceEvidence": "RTL and vertical-writing conformance."
+    },
+    {
+      "id": "LAY-003",
+      "level": "MUST",
+      "applicability": "profile-scoped",
+      "statement": "Resolved child pixels plus splitters exactly equal available pixels after rounding.",
+      "acceptanceEvidence": "Property tests across fractional sizes and DPRs."
+    },
+    {
+      "id": "LAY-004",
+      "level": "MUST",
+      "applicability": "profile-scoped",
+      "statement": "Infeasible constraints produce an explicit policy outcome and diagnostic, never negative or inaccessible geometry.",
+      "acceptanceEvidence": "Adversarial constraint suite."
+    },
+    {
+      "id": "LAY-005",
+      "level": "MUST",
+      "applicability": "profile-scoped",
+      "statement": "The speculative preview and committed result use the same constraint implementation.",
+      "acceptanceEvidence": "Preview/commit equivalence tests."
+    },
+    {
+      "id": "LAY-006",
+      "level": "SHOULD",
+      "applicability": "profile-scoped",
+      "statement": "A local topology or constraint change invalidates only affected branches and surface indexes.",
+      "acceptanceEvidence": "Incremental invalidation benchmark."
+    },
+    {
+      "id": "LAY-007",
+      "level": "SHOULD",
+      "applicability": "profile-scoped",
+      "statement": "Stable integer or fixed-point weights prevent cumulative resize drift.",
+      "acceptanceEvidence": "Long-sequence resize round-trip tests."
+    },
+    {
+      "id": "LIF-001",
+      "level": "MUST",
+      "applicability": "profile-scoped",
+      "statement": "The lifecycle state machine and callback ordering are public compatibility contracts.",
+      "acceptanceEvidence": "Lifecycle specification and adapter tests."
+    },
+    {
+      "id": "LIF-002",
+      "level": "MUST",
+      "applicability": "profile-scoped",
+      "statement": "Every successful mount has exactly one eventual finalization; duplicate disposal is harmless at the boundary.",
+      "acceptanceEvidence": "Mount/dispose counter fuzzing."
+    },
+    {
+      "id": "LIF-003",
+      "level": "MUST",
+      "applicability": "profile-scoped",
+      "statement": "Hidden content is inert and excluded from accessibility traversal while preserving declared lifecycle state.",
+      "acceptanceEvidence": "DOM and assistive-technology tests."
+    },
+    {
+      "id": "LIF-004",
+      "level": "MUST",
+      "applicability": "profile-scoped",
+      "statement": "Cross-document transfer has an explicit checkpoint/remount or mirror contract.",
+      "acceptanceEvidence": "Surface transfer certification."
+    },
+    {
+      "id": "LIF-005",
+      "level": "MUST",
+      "applicability": "profile-scoped",
+      "statement": "Failed transfer retains or recovers the panel in a safe authoritative surface.",
+      "acceptanceEvidence": "Failure injection after every protocol step."
+    },
+    {
+      "id": "LIF-006",
+      "level": "MUST",
+      "applicability": "profile-scoped",
+      "statement": "Lifecycle callbacks carry cancellation and revision context and cannot mutate canonical state directly.",
+      "acceptanceEvidence": "Type and runtime contract tests."
+    },
+    {
+      "id": "LIF-007",
+      "level": "SHOULD",
+      "applicability": "profile-scoped",
+      "statement": "Visibility reasons allow applications to pause expensive work without conflating selection and document visibility.",
+      "acceptanceEvidence": "Heavy-content integration tests."
+    },
+    {
+      "id": "MOD-001",
+      "level": "MUST",
+      "applicability": "profile-scoped",
+      "statement": "The canonical state satisfies all published invariants after every committed transaction.",
+      "acceptanceEvidence": "Invariant checker in development, test, and import paths."
+    },
+    {
+      "id": "MOD-002",
+      "level": "MUST",
+      "applicability": "profile-scoped",
+      "statement": "Canonicalization is deterministic and idempotent.",
+      "acceptanceEvidence": "Property-based tests across generated states."
+    },
+    {
+      "id": "MOD-003",
+      "level": "MUST",
+      "applicability": "profile-scoped",
+      "statement": "Each relationship has exactly one authoritative representation in canonical state.",
+      "acceptanceEvidence": "Schema and invariant review."
+    },
+    {
+      "id": "MOD-004",
+      "level": "MUST",
+      "applicability": "profile-scoped",
+      "statement": "The optimized kernel is differentially tested against a reference implementation after every generated command.",
+      "acceptanceEvidence": "Differential fuzz CI artifacts."
+    },
+    {
+      "id": "MOD-005",
+      "level": "MUST NOT",
+      "applicability": "profile-scoped",
+      "statement": "NaN, infinity, negative dimensions, duplicate ownership, or cycles are accepted into a committed state.",
+      "acceptanceEvidence": "Malformed-input and command fuzz tests."
+    },
+    {
+      "id": "MOD-006",
+      "level": "SHOULD",
+      "applicability": "profile-scoped",
+      "statement": "Unchanged public entity values preserve referential identity across revisions.",
+      "acceptanceEvidence": "Selector and structural-sharing tests."
+    },
+    {
+      "id": "MOT-001",
+      "level": "MUST",
+      "applicability": "profile-scoped",
+      "statement": "Direct drag and pointer resize have no delayed smoothing between input and controlled object.",
+      "acceptanceEvidence": "High-speed pointer trace and visual-latency measurement."
+    },
+    {
+      "id": "MOT-002",
+      "level": "MUST",
+      "applicability": "profile-scoped",
+      "statement": "Semantic commit, focus, accessibility state, and lifecycle do not wait for motion completion.",
+      "acceptanceEvidence": "Mid-animation state assertions."
+    },
+    {
+      "id": "MOT-003",
+      "level": "MUST",
+      "applicability": "profile-scoped",
+      "statement": "Every running animation belongs to a disposable Scope with finish, cancel, skip, and cleanup behavior.",
+      "acceptanceEvidence": "Scope closure and leak tests."
+    },
+    {
+      "id": "MOT-004",
+      "level": "MUST",
+      "applicability": "profile-scoped",
+      "statement": "A re-grab samples current visual geometry and begins without a jump exceeding one CSS pixel.",
+      "acceptanceEvidence": "Interruption tests at sampled progress points."
+    },
+    {
+      "id": "MOT-005",
+      "level": "MUST",
+      "applicability": "profile-scoped",
+      "statement": "Closing content is semantically removed before an inert visual tombstone exits.",
+      "acceptanceEvidence": "Focus, ARIA, and tombstone tests."
+    },
+    {
+      "id": "MOT-006",
+      "level": "MUST NOT",
+      "applicability": "profile-scoped",
+      "statement": "The library ships a repeating strobe, full-panel luminance flash, or motion-only status indicator.",
+      "acceptanceEvidence": "Preset audit and automated flash analysis."
+    },
+    {
+      "id": "MOT-007",
+      "level": "MUST",
+      "applicability": "profile-scoped",
+      "statement": "View Transitions are optional progressive enhancement; skip or failure cannot prevent state change.",
+      "acceptanceEvidence": "Capability and skipTransition tests."
+    },
+    {
+      "id": "MOT-008",
+      "level": "MUST",
+      "applicability": "profile-scoped",
+      "statement": "Cross-window transfer uses coordinated handoff rather than a claimed continuous cross-screen animation.",
+      "acceptanceEvidence": "Popout UX and documentation review."
+    },
+    {
+      "id": "MOT-009",
+      "level": "MUST",
+      "applicability": "profile-scoped",
+      "statement": "Layout, gesture, presence, clip, and emphasis channels cannot overwrite one another’s owned properties.",
+      "acceptanceEvidence": "Style ownership conformance tests."
+    },
+    {
+      "id": "MOT-010",
+      "level": "SHOULD",
+      "applicability": "profile-scoped",
+      "statement": "The planner degrades decoration before spatial continuity and never degrades direct input tracking.",
+      "acceptanceEvidence": "Load-adaptive motion benchmark."
+    },
+    {
+      "id": "OBS-001",
+      "level": "MUST",
+      "applicability": "profile-scoped",
+      "statement": "The inspector can correlate a committed transaction across model, geometry, renderer, lifecycle, motion, persistence, and surface effects.",
+      "acceptanceEvidence": "End-to-end trace fixture."
+    },
+    {
+      "id": "OBS-002",
+      "level": "MUST",
+      "applicability": "profile-scoped",
+      "statement": "Diagnostic instrumentation is observational and cannot change command ordering or correctness.",
+      "acceptanceEvidence": "Instrumentation-on/off equivalence tests."
+    },
+    {
+      "id": "OBS-003",
+      "level": "MUST",
+      "applicability": "profile-scoped",
+      "statement": "Reproduction exports are deterministic, bounded, versioned, and redacted by default.",
+      "acceptanceEvidence": "Replay and privacy tests."
+    },
+    {
+      "id": "OBS-004",
+      "level": "MUST",
+      "applicability": "profile-scoped",
+      "statement": "Expected errors and invariant defects are distinguishable in diagnostics and telemetry.",
+      "acceptanceEvidence": "Error taxonomy audit."
+    },
+    {
+      "id": "OBS-005",
+      "level": "SHOULD",
+      "applicability": "profile-scoped",
+      "statement": "Property-based failures shrink to a minimal command and event sequence suitable for issue attachment.",
+      "acceptanceEvidence": "Fuzz harness artifact."
+    },
+    {
+      "id": "OBS-006",
+      "level": "MUST",
+      "applicability": "profile-scoped",
+      "statement": "Usage telemetry is disabled by default in the library.",
+      "acceptanceEvidence": "Default configuration test."
+    },
+    {
+      "id": "PER-001",
+      "level": "MUST",
+      "applicability": "profile-scoped",
+      "statement": "Persistence separates kernel, application-layout, protocol, and panel-type versions.",
+      "acceptanceEvidence": "Envelope schema and migration tests."
+    },
+    {
+      "id": "PER-002",
+      "level": "MUST",
+      "applicability": "profile-scoped",
+      "statement": "Every previously supported schema has a tested migration or explicit non-destructive recovery path.",
+      "acceptanceEvidence": "Migration fixture corpus."
+    },
+    {
+      "id": "PER-003",
+      "level": "MUST",
+      "applicability": "profile-scoped",
+      "statement": "Snapshot and journal updates are atomic within the storage adapter’s transaction model.",
+      "acceptanceEvidence": "Crash and fault-injection tests."
+    },
+    {
+      "id": "PER-004",
+      "level": "MUST",
+      "applicability": "profile-scoped",
+      "statement": "Panel checkpoint data is durable before a canonical snapshot references it.",
+      "acceptanceEvidence": "Write-order tests."
+    },
+    {
+      "id": "PER-005",
+      "level": "MUST",
+      "applicability": "profile-scoped",
+      "statement": "A missing panel type is represented by a recoverable placeholder rather than silently deleted.",
+      "acceptanceEvidence": "Plugin removal and restore tests."
+    },
+    {
+      "id": "PER-006",
+      "level": "MUST",
+      "applicability": "profile-scoped",
+      "statement": "Workspace undo is separate from application content undo and has explicit command scope.",
+      "acceptanceEvidence": "Editor integration tests."
+    },
+    {
+      "id": "PER-007",
+      "level": "MUST",
+      "applicability": "profile-scoped",
+      "statement": "Restoring external-window intent never requires automatic popup creation and never loses the panel.",
+      "acceptanceEvidence": "Session restore with popup restrictions."
+    },
+    {
+      "id": "PER-008",
+      "level": "SHOULD",
+      "applicability": "profile-scoped",
+      "statement": "Canonical serialization has stable ordering suitable for hashing and semantic diffing.",
+      "acceptanceEvidence": "Hash stability tests."
+    },
+    {
+      "id": "PKG-001",
+      "level": "MUST",
+      "applicability": "profile-scoped",
+      "statement": "The package graph is acyclic and enforced in continuous integration.",
+      "acceptanceEvidence": "Dependency-cruiser or equivalent report."
+    },
+    {
+      "id": "PKG-002",
+      "level": "MUST",
+      "applicability": "profile-scoped",
+      "statement": "Headless packages import without evaluating browser globals.",
+      "acceptanceEvidence": "Node.js import matrix."
+    },
+    {
+      "id": "PKG-003",
+      "level": "MUST",
+      "applicability": "profile-scoped",
+      "statement": "Optional platform and framework packages are not pulled through the default headless entry point.",
+      "acceptanceEvidence": "Bundle graph and tree-shaking tests."
+    },
+    {
+      "id": "PKG-004",
+      "level": "MUST",
+      "applicability": "profile-scoped",
+      "statement": "Each package publishes a documented public entry-point map and compatibility policy.",
+      "acceptanceEvidence": "Package manifest audit."
+    },
+    {
+      "id": "PKG-005",
+      "level": "SHOULD",
+      "applicability": "profile-scoped",
+      "statement": "The model and reference kernel have zero runtime dependencies.",
+      "acceptanceEvidence": "Package-lock inspection."
+    },
+    {
+      "id": "PRF-001",
+      "level": "MUST",
+      "applicability": "profile-scoped",
+      "statement": "Pointer movement and layout animation do not enter framework-wide render loops.",
+      "acceptanceEvidence": "Profiler traces for every adapter."
+    },
+    {
+      "id": "PRF-002",
+      "level": "MUST",
+      "applicability": "profile-scoped",
+      "statement": "Performance results are reproducible from published workloads and machine-readable manifests.",
+      "acceptanceEvidence": "Benchmark repository artifacts."
+    },
+    {
+      "id": "PRF-003",
+      "level": "MUST",
+      "applicability": "profile-scoped",
+      "statement": "The optimized implementation preserves reference-kernel semantics under differential testing.",
+      "acceptanceEvidence": "Fuzz and benchmark cross-check."
+    },
+    {
+      "id": "PRF-004",
+      "level": "MUST",
+      "applicability": "profile-scoped",
+      "statement": "No interaction, telemetry, persistence, or collaboration queue is unbounded.",
+      "acceptanceEvidence": "Queue policy audit and stress tests."
+    },
+    {
+      "id": "PRF-005",
+      "level": "MUST",
+      "applicability": "profile-scoped",
+      "statement": "Lifecycle torture returns library-owned listeners, observers, actors, fibers, scopes, hosts, and animations to baseline tolerance.",
+      "acceptanceEvidence": "Heap and resource snapshots."
+    },
+    {
+      "id": "PRF-006",
+      "level": "SHOULD",
+      "applicability": "profile-scoped",
+      "statement": "Work scales with affected entities rather than total workspace size for ordinary local operations.",
+      "acceptanceEvidence": "Complexity benchmarks."
+    },
+    {
+      "id": "PRF-007",
+      "level": "MUST",
+      "applicability": "profile-scoped",
+      "statement": "Motion performance is verified at both 60 Hz and 120 Hz.",
+      "acceptanceEvidence": "Display-rate trace set."
+    },
+    {
+      "id": "QLT-001",
+      "level": "MUST",
+      "applicability": "profile-scoped",
+      "statement": "Quality is assessed across all published supported profiles, not a selected favorable benchmark.",
+      "acceptanceEvidence": "Automated scorecard with profile completeness check."
+    },
+    {
+      "id": "QLT-002",
+      "level": "MUST",
+      "applicability": "profile-scoped",
+      "statement": "Any failed hard gate sets the release-quality score to zero.",
+      "acceptanceEvidence": "Release pipeline policy."
+    },
+    {
+      "id": "QLT-003",
+      "level": "MUST",
+      "applicability": "profile-scoped",
+      "statement": "Benchmark results include hardware, browser, version, workload, sample count, and confidence interval.",
+      "acceptanceEvidence": "Machine-readable benchmark manifest."
+    },
+    {
+      "id": "QLT-004",
+      "level": "MUST",
+      "applicability": "profile-scoped",
+      "statement": "Known limitations and unsupported configurations are published with every stable release.",
+      "acceptanceEvidence": "Release notes audit."
+    },
+    {
+      "id": "QLT-005",
+      "level": "SHOULD",
+      "applicability": "profile-scoped",
+      "statement": "The robust overall quality score is at least 0.90 and no dimension is below 0.80.",
+      "acceptanceEvidence": "Signed release scorecard."
+    },
+    {
+      "id": "REN-001",
+      "level": "MUST",
+      "applicability": "profile-scoped",
+      "statement": "Same-document movement in stable-host mode preserves the panel content host and does not remount content.",
+      "acceptanceEvidence": "Mount counter tests with editor, map, iframe, and form fixtures."
+    },
+    {
+      "id": "REN-002",
+      "level": "MUST",
+      "applicability": "profile-scoped",
+      "statement": "Geometry-frame updates bypass framework-wide rendering and update only affected DOM projection.",
+      "acceptanceEvidence": "Framework render-count traces."
+    },
+    {
+      "id": "REN-003",
+      "level": "MUST",
+      "applicability": "profile-scoped",
+      "statement": "Every browser-facing operation uses the relevant surface document and window.",
+      "acceptanceEvidence": "Multi-document and Shadow DOM tests."
+    },
+    {
+      "id": "REN-004",
+      "level": "MUST",
+      "applicability": "profile-scoped",
+      "statement": "Overlay, shield, listener, observer, and host resources are finalized with their owning surface or interaction Scope.",
+      "acceptanceEvidence": "Lifecycle leak tests."
+    },
+    {
+      "id": "REN-005",
+      "level": "MUST",
+      "applicability": "profile-scoped",
+      "statement": "Semantic chrome remains accessible even when content uses a stable flattened host plane.",
+      "acceptanceEvidence": "Screen-reader and DOM-order tests."
+    },
+    {
+      "id": "REN-006",
+      "level": "SHOULD",
+      "applicability": "profile-scoped",
+      "statement": "A panel or group renderer failure is isolated and replaced by a recoverable error surface.",
+      "acceptanceEvidence": "Error-injection fixtures."
+    },
+    {
+      "id": "RSK-001",
+      "level": "MUST",
+      "applicability": "profile-scoped",
+      "statement": "Every principal architectural risk has a named mitigation, test, owner, and decision trigger.",
+      "acceptanceEvidence": "Risk register review."
+    },
+    {
+      "id": "RSK-002",
+      "level": "MUST",
+      "applicability": "profile-scoped",
+      "statement": "A limited use of a rejected alternative is documented at the boundary and cannot become canonical authority.",
+      "acceptanceEvidence": "ADR and package audit."
+    },
+    {
+      "id": "RSK-003",
+      "level": "MUST",
+      "applicability": "profile-scoped",
+      "statement": "Complexity is justified by supported profile evidence rather than generalized abstraction ambition.",
+      "acceptanceEvidence": "Roadmap and adoption review."
+    },
+    {
+      "id": "RSK-004",
+      "level": "SHOULD",
+      "applicability": "profile-scoped",
+      "statement": "The project periodically removes extension points or modes that cannot be conformed or maintained.",
+      "acceptanceEvidence": "Annual support-matrix review."
+    },
+    {
+      "id": "RSP-001",
+      "level": "MUST",
+      "applicability": "profile-scoped",
+      "statement": "Responsive adaptation is a reversible projection and does not mutate canonical layout implicitly.",
+      "acceptanceEvidence": "Viewport round-trip tests."
+    },
+    {
+      "id": "RSP-002",
+      "level": "MUST",
+      "applicability": "profile-scoped",
+      "statement": "Touch use does not depend on hover or precision pointing and respects scrolling and safe areas.",
+      "acceptanceEvidence": "Mobile/touch task suite."
+    },
+    {
+      "id": "SCP-001",
+      "level": "MUST",
+      "applicability": "profile-scoped",
+      "statement": "Every public capability is classified as stable, experimental, deprecated, or unsupported.",
+      "acceptanceEvidence": "Generated API inventory and release manifest."
+    },
+    {
+      "id": "SCP-002",
+      "level": "MUST",
+      "applicability": "profile-scoped",
+      "statement": "Supported claims identify browser, framework, input, accessibility, and workload profiles.",
+      "acceptanceEvidence": "Published support matrix."
+    },
+    {
+      "id": "SCP-003",
+      "level": "MUST NOT",
+      "applicability": "profile-scoped",
+      "statement": "The core promises unrestricted native-window behavior that the web platform cannot guarantee.",
+      "acceptanceEvidence": "Documentation and API terminology review."
+    },
+    {
+      "id": "SCP-004",
+      "level": "MUST",
+      "applicability": "profile-scoped",
+      "statement": "Application-owned panel state has an explicit codec, version, and migration boundary.",
+      "acceptanceEvidence": "Panel registry contract tests."
+    },
+    {
+      "id": "SEC-001",
+      "level": "MUST",
+      "applicability": "profile-scoped",
+      "statement": "Every trust boundary validates a bounded schema and rejects malformed, excessive, NaN, infinite, or prototype-polluting input.",
+      "acceptanceEvidence": "Security fuzz suite."
+    },
+    {
+      "id": "SEC-002",
+      "level": "MUST",
+      "applicability": "profile-scoped",
+      "statement": "Cross-surface messages are authenticated to the workspace session and validated against epoch and revision.",
+      "acceptanceEvidence": "Protocol penetration tests."
+    },
+    {
+      "id": "SEC-003",
+      "level": "MUST",
+      "applicability": "profile-scoped",
+      "statement": "The stable build is compatible with strict CSP and Trusted Types without eval or unsafe HTML requirements.",
+      "acceptanceEvidence": "CSP integration fixture."
+    },
+    {
+      "id": "SEC-004",
+      "level": "MUST",
+      "applicability": "profile-scoped",
+      "statement": "Telemetry and diagnostic exports redact panel titles, parameters, checkpoints, and application data by default.",
+      "acceptanceEvidence": "Privacy snapshot tests."
+    },
+    {
+      "id": "SEC-005",
+      "level": "MUST",
+      "applicability": "profile-scoped",
+      "statement": "Permission denial preserves normal functionality and content safety.",
+      "acceptanceEvidence": "Permission-denied test matrix."
+    },
+    {
+      "id": "SEC-006",
+      "level": "MUST",
+      "applicability": "profile-scoped",
+      "statement": "An invariant defect freezes structural mutation at the last valid snapshot and produces a redacted reproduction.",
+      "acceptanceEvidence": "Fault-injection recovery test."
+    },
+    {
+      "id": "SEC-007",
+      "level": "MUST",
+      "applicability": "profile-scoped",
+      "statement": "Stable releases publish provenance, dependency inventory, security policy, and vulnerability response expectations.",
+      "acceptanceEvidence": "Release artifact audit."
+    },
+    {
+      "id": "SEC-008",
+      "level": "SHOULD",
+      "applicability": "profile-scoped",
+      "statement": "Runtime dependencies and privileged post-install behavior are minimized.",
+      "acceptanceEvidence": "Supply-chain review."
+    },
+    {
+      "id": "SUR-001",
+      "level": "MUST",
+      "applicability": "profile-scoped",
+      "statement": "Every surface exposes explicit capabilities; commands and UI use capability intersection.",
+      "acceptanceEvidence": "Capability matrix tests."
+    },
+    {
+      "id": "SUR-002",
+      "level": "MUST",
+      "applicability": "profile-scoped",
+      "statement": "A browser-window destination is prepared and acknowledged before semantic ownership transfer.",
+      "acceptanceEvidence": "Blocked-popup and bootstrap-failure tests."
+    },
+    {
+      "id": "SUR-003",
+      "level": "MUST",
+      "applicability": "profile-scoped",
+      "statement": "Unexpected surface loss produces deterministic recovery without panel loss.",
+      "acceptanceEvidence": "Close, crash, refresh, and coordinator-failure tests."
+    },
+    {
+      "id": "SUR-004",
+      "level": "MUST",
+      "applicability": "profile-scoped",
+      "statement": "Surface-specific DOM, style, locale, direction, and security context are explicit.",
+      "acceptanceEvidence": "Multi-document rendering tests."
+    },
+    {
+      "id": "SUR-005",
+      "level": "MUST",
+      "applicability": "profile-scoped",
+      "statement": "Restored geometry is clamped to available viewport and monitor configuration with a minimum visible region.",
+      "acceptanceEvidence": "Monitor removal, zoom, and DPR tests."
+    },
+    {
+      "id": "SUR-006",
+      "level": "MUST NOT",
+      "applicability": "profile-scoped",
+      "statement": "Multi-screen permission is required for normal single-screen functionality.",
+      "acceptanceEvidence": "Permission-denied conformance."
+    },
+    {
+      "id": "SUR-007",
+      "level": "MUST",
+      "applicability": "profile-scoped",
+      "statement": "Picture-in-Picture is treated as a restricted optional surface and has an in-page fallback.",
+      "acceptanceEvidence": "Capability and fallback tests."
+    },
+    {
+      "id": "SYS-001",
+      "level": "MUST",
+      "applicability": "profile-scoped",
+      "statement": "The semantic kernel is the sole authority for committed workspace state.",
+      "acceptanceEvidence": "Dependency graph review and mutation-path tests."
+    },
+    {
+      "id": "SYS-002",
+      "level": "MUST",
+      "applicability": "profile-scoped",
+      "statement": "The system separates semantic, protocol, spatial, motion, and operational concerns through typed contracts.",
+      "acceptanceEvidence": "Architecture conformance audit."
+    },
+    {
+      "id": "SYS-003",
+      "level": "MUST",
+      "applicability": "profile-scoped",
+      "statement": "A successful semantic command remains correct when every optional animation is disabled or skipped.",
+      "acceptanceEvidence": "Motion-off conformance suite."
+    },
+    {
+      "id": "SYS-004",
+      "level": "MUST",
+      "applicability": "profile-scoped",
+      "statement": "No supported failure mode silently loses a panel or its recoverable descriptor.",
+      "acceptanceEvidence": "Failure-injection suite and recovery evidence."
+    },
+    {
+      "id": "SYS-005",
+      "level": "SHOULD",
+      "applicability": "profile-scoped",
+      "statement": "The ordinary integration surface hides Effect and XState unless an application opts into advanced APIs.",
+      "acceptanceEvidence": "DX task study and public API review."
+    },
+    {
+      "id": "THM-001",
+      "level": "MUST",
+      "applicability": "profile-scoped",
+      "statement": "The library imposes no global CSS reset, typography, icon set, or unscoped z-index policy.",
+      "acceptanceEvidence": "CSS integration audit."
+    },
+    {
+      "id": "THM-002",
+      "level": "MUST",
+      "applicability": "profile-scoped",
+      "statement": "Themes support forced colors, focus visibility, reduced motion, large text, and touch targets.",
+      "acceptanceEvidence": "Visual regression matrix."
+    },
+    {
+      "id": "TST-001",
+      "level": "MUST",
+      "applicability": "profile-scoped",
+      "statement": "The kernel passes exhaustive bounded exploration and at least ten million generated semantic operations before stable release.",
+      "acceptanceEvidence": "Model test report."
+    },
+    {
+      "id": "TST-002",
+      "level": "MUST",
+      "applicability": "profile-scoped",
+      "statement": "Reference and optimized kernels agree after every generated command.",
+      "acceptanceEvidence": "Differential report."
+    },
+    {
+      "id": "TST-003",
+      "level": "MUST",
+      "applicability": "profile-scoped",
+      "statement": "Every documented protocol transition, interruption, timeout, and recovery path is tested with deterministic time.",
+      "acceptanceEvidence": "State-machine coverage report."
+    },
+    {
+      "id": "TST-004",
+      "level": "MUST",
+      "applicability": "profile-scoped",
+      "statement": "Multi-window ownership invariants are model-checked or equivalently exhaustively verified under message reordering and crash injection.",
+      "acceptanceEvidence": "Formal model artifacts."
+    },
+    {
+      "id": "TST-005",
+      "level": "MUST",
+      "applicability": "profile-scoped",
+      "statement": "Every supported framework and browser profile passes the same applicable conformance suite.",
+      "acceptanceEvidence": "Certification matrix."
+    },
+    {
+      "id": "TST-006",
+      "level": "MUST",
+      "applicability": "profile-scoped",
+      "statement": "Performance CI detects statistically meaningful regressions and preserves raw traces.",
+      "acceptanceEvidence": "Benchmark history."
+    },
+    {
+      "id": "TST-007",
+      "level": "MUST",
+      "applicability": "profile-scoped",
+      "statement": "Stable release requires manual accessibility evidence, not automated scanning alone.",
+      "acceptanceEvidence": "Signed accessibility report."
+    },
+    {
+      "id": "TST-008",
+      "level": "MUST",
+      "applicability": "profile-scoped",
+      "statement": "Motion-off runs produce equivalent canonical state and focus outcomes.",
+      "acceptanceEvidence": "Differential motion conformance."
+    },
+    {
+      "id": "TST-009",
+      "level": "MUST",
+      "applicability": "profile-scoped",
+      "statement": "Failure-injection tests establish the final authoritative location or placeholder for every panel.",
+      "acceptanceEvidence": "Recovery matrix."
+    },
+    {
+      "id": "TXN-001",
+      "level": "MUST",
+      "applicability": "profile-scoped",
+      "statement": "All semantic mutation passes through the command transaction path.",
+      "acceptanceEvidence": "Mutation-path instrumentation and static review."
+    },
+    {
+      "id": "TXN-002",
+      "level": "MUST",
+      "applicability": "profile-scoped",
+      "statement": "Subscribers never observe partially reduced or partially canonicalized state.",
+      "acceptanceEvidence": "Reentrancy and callback tests."
+    },
+    {
+      "id": "TXN-003",
+      "level": "MUST",
+      "applicability": "profile-scoped",
+      "statement": "Commands dispatched during commit notification are queued for a later transaction.",
+      "acceptanceEvidence": "Reentrancy conformance tests."
+    },
+    {
+      "id": "TXN-004",
+      "level": "MUST",
+      "applicability": "profile-scoped",
+      "statement": "Prepared external resources are rolled back when revalidation or commit fails.",
+      "acceptanceEvidence": "Failure injection at every prepare step."
+    },
+    {
+      "id": "TXN-005",
+      "level": "MUST",
+      "applicability": "profile-scoped",
+      "statement": "Post-commit effects carry transaction ID and revision and are safe under duplicate delivery where retryable.",
+      "acceptanceEvidence": "Idempotency tests."
+    },
+    {
+      "id": "TXN-006",
+      "level": "MUST",
+      "applicability": "profile-scoped",
+      "statement": "Policy denial includes a stable code and user-actionable explanation.",
+      "acceptanceEvidence": "Error-contract snapshot tests."
+    },
+    {
+      "id": "TXN-007",
+      "level": "MUST",
+      "applicability": "profile-scoped",
+      "statement": "The final commit revalidates policies and base revision after any asynchronous preparation.",
+      "acceptanceEvidence": "Race-condition tests."
+    },
+    {
+      "id": "TXN-008",
+      "level": "SHOULD",
+      "applicability": "profile-scoped",
+      "statement": "A completed gesture is represented by one semantic command or one explicit atomic batch.",
+      "acceptanceEvidence": "Transaction-history review."
+    }
+  ]
+}

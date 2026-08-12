@@ -3,63 +3,98 @@
 Panefold is an experimental, deterministic workspace runtime for building IDEs, map tools,
 operations consoles, and other panel-heavy web applications.
 
-This repository is the first executable vertical slice of a larger normative system design. It is
-deliberately released as **`0.1.0` (experimental)**: the pure state model, transactional kernel,
-constraint solver, runtime, and React projection are real; cross-window transfer, collaboration,
-plugin isolation, non-React adapters, and stable conformance certification remain future work.
+This repository is an executable implementation companion to the
+[Panefold system design](docs/spec/SYSTEM_DESIGN.md). Version `0.1.0` remains experimental: the
+semantic model, 36-command reference kernel, geometry, runtime, adapters, and operational
+primitives are implemented and tested in the repository, but the project does **not** claim stable
+conformance, product certification, npm publication, or unrestricted browser-window behavior.
 
 ## What works today
 
-- Immutable, normalized workspace state with stable panel, group, node, and surface identities.
-- A pure TypeScript command kernel with deterministic canonicalization and invariant validation.
-- Atomic commands, typed rejections, patches, transaction receipts, and layout undo/redo.
-- N-ary split topology with logical axes and deterministic, constraint-aware pixel allocation.
-- Fine-grained external-store subscriptions; React is a projection, never the source of truth.
-- Accessible tabs and splitters, keyboard operation, serializable focus-recovery descriptors, and
-  live announcements.
-- Headless commands for docking, tab reordering, splitting, resizing, close/reopen, and in-page
-  floating. The map-operations demo exercises tabs, group moves, splitters, close, and undo/redo.
-- Driver-isolated XState interaction protocols, Motion DOM interpolation, and Effect operational
-  adapters that do not leak into the headless model or kernel.
+- Immutable schema-v2 workspace snapshots with normalized panels, groups, layout nodes, surfaces,
+  activation, focus memory, recoverable closes, and bounded remote receipts.
+- A zero-runtime-dependency model and pure reference kernel with all 36 semantic commands,
+  canonicalization, invariants, typed rejection, patches, transaction receipts, batching, and
+  bounded workspace undo/redo.
+- An experimental optimized projection with derived indexes, bounded history, patch replay,
+  seeded differential smoke runs, and a reproducible lookup microbenchmark. It is not yet an
+  independently reducing optimized kernel.
+- A logical-axis n-ary geometry solver with panel constraints, collapse state, exact integer
+  conservation, overflow diagnostics, splitters, hit tests, and drop targets.
+- A React projection that uses the geometry allocator, driver-isolated resize protocols,
+  frame-coalesced previews, accessible tabs and splitters, focus recovery, stable panel hosts,
+  lifecycle leases, and optional FLIP motion.
+- A bounded synchronous runtime plus versioned persistence codecs, atomic snapshot/journal
+  contracts, deterministic schema migration, last-known-good recovery, and an IndexedDB/Effect
+  adapter tested with injected storage. Real browser crash and quota certification is still absent.
+- Driver-neutral protocol contracts, XState machines for drag, resize, persistence, transfer, and
+  coordinator election, plus a prepared external-surface ownership coordinator. These are protocol
+  primitives, not a browser popout or Picture-in-Picture product profile.
+- Native experimental Vue, Svelte, Angular, and Web Components bindings over a shared immutable
+  adapter contract. Current cross-framework evidence is a JSDOM contract harness, not real-browser
+  framework certification.
+- Experimental trusted-plugin, bounded devtools, remote-command-intake, and mobile-projection
+  primitives. They are not untrusted-plugin isolation, durable collaboration, or a certified mobile
+  experience.
+- A machine-checkable 190-requirement register, 36-command parity check, capability/evidence
+  inventories, trace matrix, and explicit accounting for all ten hard release gates.
 
-See [Command support](docs/COMMANDS.md), [Support matrix](docs/SUPPORT.md), and
-[Conformance status](docs/CONFORMANCE.md) before adopting the project.
+Read [Command support](docs/COMMANDS.md), [Support matrix](docs/SUPPORT.md), and
+[Conformance status](docs/CONFORMANCE.md) before adopting any package.
 
 ## Architecture
 
 ```mermaid
 flowchart TB
-  APP["Application + React adapter"] --> DOM["Accessible DOM projection"]
-  DOM --> RUNTIME["Runtime · selectors · transactions"]
+  APP["Application"] --> ADAPTERS["React or framework adapter"]
+  ADAPTERS --> RUNTIME["Runtime · selectors · transactions"]
   RUNTIME --> KERNEL["Pure semantic kernel"]
-  APP -. "optional headless solve" .-> GEO["Pure geometry solver"]
-  RUNTIME -. active protocols .-> XSTATE["Sparse XState actors"]
-  RUNTIME -. visual explanation .-> MOTION["Motion driver"]
-  RUNTIME -. fallible work .-> EFFECT["Effect adapter"]
   KERNEL --> MODEL["Zero-dependency model"]
+  ADAPTERS --> GEO["Pure geometry projection"]
   GEO --> MODEL
+  ADAPTERS -. "temporary interaction" .-> PROTOCOL["Protocol · XState drivers"]
+  ADAPTERS -. "visual explanation" .-> MOTION["Motion coordinator"]
+  RUNTIME -. "fallible operational work" .-> OPS["Persistence · Effect · surfaces"]
+  OPS --> MODEL
+  CONF["Conformance inventories and reports"] -. audits .-> MODEL
+  CONF -. audits .-> KERNEL
+  CONF -. audits .-> ADAPTERS
 ```
 
-Only the semantic kernel owns committed workspace state. Geometry is derived, interaction protocol
-state is temporary, motion explains an already-committed result, and fallible operational work sits
-outside the reducer. In 0.1 the geometry package is tested independently; the compact React demo
-still projects split weights with CSS and does not claim constraint-coupled rendering.
+Only the semantic kernel owns committed workspace state. Geometry is derived; interaction and
+motion are temporary; frameworks project immutable snapshots; persistence and surfaces perform
+fallible work through explicit contracts. See [Architecture](docs/ARCHITECTURE.md) and the accepted
+[ADRs](docs/adr/).
 
-| Package                     | Responsibility                                                 |
-| --------------------------- | -------------------------------------------------------------- |
-| `@panefold/model`           | Branded IDs, immutable records, commands, errors, patches      |
-| `@panefold/kernel`          | Pure reduction, canonicalization, invariants, inverse commands |
-| `@panefold/geometry`        | N-ary constraint solving and exact rounded geometry            |
-| `@panefold/runtime`         | Transaction queue, history, policies, selectors, subscriptions |
-| `@panefold/runtime-effect`  | Optional Effect programs for operational ports                 |
-| `@panefold/protocol-xstate` | Optional bounded drag and resize actors                        |
-| `@panefold/motion`          | Driver-neutral motion plans and Motion DOM adapter             |
-| `@panefold/react`           | React external-store adapter and accessible DOM renderer       |
+## Workspace packages
 
-These packages are workspace-local in 0.1 and are not yet published to npm.
+The workspace contains the private root project, the demo application, and the following 18 library
+packages. Every library below is version `0.1.0`, experimental, workspace-local, and unpublished to
+npm.
 
-The dependency graph is checked in CI. Model, kernel, and geometry cannot import DOM, React,
-Effect, XState, or Motion.
+| Package                      | Current responsibility                                                                |
+| ---------------------------- | ------------------------------------------------------------------------------------- |
+| `@panefold/model`            | Schema-v2 records, branded IDs, 36-command inventory, results, factories, JSON guards |
+| `@panefold/kernel`           | Reference reduction, canonicalization, invariants, patches, hashes, history dispatch  |
+| `@panefold/kernel-optimized` | Experimental indexes, persistent buckets, patch projection, differential smoke tools  |
+| `@panefold/geometry`         | Constraint aggregation, n-ary allocation, resolved rectangles, hit/drop testing       |
+| `@panefold/runtime`          | Bounded dispatch, policies, selectors, persistence codecs, journals, durable runtime  |
+| `@panefold/runtime-effect`   | Optional Effect wrappers and injected IndexedDB journal adapter                       |
+| `@panefold/protocol`         | Driver-neutral protocol identities, scopes, clocks, and bounded traces                |
+| `@panefold/protocol-xstate`  | XState drivers for drag, resize, persistence, transfer, and election                  |
+| `@panefold/surfaces`         | Capability intersection, geometry clamping, prepared transfer, ownership, recovery    |
+| `@panefold/motion`           | Motion plans, channels, frame scheduling, FLIP, coordinator, Motion DOM driver        |
+| `@panefold/adapter-contract` | Shared immutable source, selection, subscription, dispatch, and disposal contract     |
+| `@panefold/react`            | React external-store binding, accessible renderer, stable hosts, geometry bridge      |
+| `@panefold/vue`              | Vue shallow-ref binding and effect-scope disposal                                     |
+| `@panefold/svelte`           | Svelte readable store and component lifecycle helper                                  |
+| `@panefold/angular`          | Angular signal binding, provider, injection, and `DestroyRef` disposal                |
+| `@panefold/web-components`   | SSR-safe custom-element factory and source/dispatch bridge                            |
+| `@panefold/ecosystem`        | Trusted plugin registry, devtools, remote intake, and mobile data projection          |
+| `@panefold/conformance`      | Manifest, command, capability, evidence, requirement, gate, and report validation     |
+
+`@panefold/demo` is the workspace application used for the Atlas reference fixture; it is not a
+published package or a support certification.
 
 ## Run the demo
 
@@ -71,8 +106,10 @@ pnpm install
 pnpm dev
 ```
 
-Then open the URL printed by Vite. The included Atlas demo is a map-operations workspace with route
-explorer, map, layers, notes, feature inspection, validation, problems, and event-timeline panels.
+Open the URL printed by Vite. Atlas exercises a compact map-operations workspace with tabs,
+keyboard commands, splitters, stable content hosts, close/reopen, structural movement, and
+undo/redo. It is a demonstration and automated reference fixture, not evidence for every browser,
+input, framework, or workload.
 
 ## Verify the repository
 
@@ -81,8 +118,12 @@ pnpm check
 pnpm test:e2e
 ```
 
-`pnpm check` runs formatting, lint and dependency-boundary checks, strict TypeScript validation,
-unit/property tests, and production builds.
+`pnpm check` runs formatting, dependency-boundary linting, source security checks, generated
+requirement and conformance-data drift checks, package builds, conformance validation, a Node
+performance smoke workload, strict TypeScript, tests, and the demo production build. The separate
+Playwright suite covers the declared Chromium reference fixture. A green local or CI run is
+repository evidence only; it does not replace manual assistive-technology work, physical 60/120 Hz
+traces, independent security review, real crash testing, or third-party pilots.
 
 ## Kernel usage
 
@@ -109,23 +150,24 @@ if (!result.ok) {
 }
 ```
 
-The exact exported helpers are also exercised in package tests and in the demo. All expected
-failures are typed result values; a rejected command cannot advance revision or publish partial
-state.
+Expected failures are typed result values. A rejected command cannot advance revision or publish a
+partial snapshot.
 
 ## Project status
 
-This is not yet a stable, WCAG-certified, performance-certified, or multi-window-conformant release.
-The end-state design defines 190 normative requirements and ten hard gates. Claiming completion
-without the required model exploration, assistive-technology evidence, 60/120 Hz traces, recovery
-matrix, and formal ownership verification would be misleading.
+All current packages and profiles are experimental. The repository does not claim stable WCAG 2.2
+AA conformance, performance certification, heavy-content certification, browser popout/Picture-in-
+Picture support, multi-screen support, durable distributed collaboration, dynamic untrusted-plugin
+isolation, mobile certification, or a completed security review. Those boundaries are intentional
+and machine-readable in `conformance/`.
 
-The staged plan is documented in [Roadmap](docs/ROADMAP.md). Architectural changes require an ADR.
+Engineering progress and missing exit evidence are separated in the [Roadmap](docs/ROADMAP.md).
+Architectural changes require an ADR.
 
 ## Contributing
 
-Read [CONTRIBUTING.md](CONTRIBUTING.md). Security reports should follow [SECURITY.md](SECURITY.md)
-rather than public issues.
+Read [CONTRIBUTING.md](CONTRIBUTING.md). Report suspected vulnerabilities through the private flow
+described in [SECURITY.md](SECURITY.md), not a public issue.
 
 ## License
 

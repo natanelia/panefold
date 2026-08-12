@@ -90,7 +90,7 @@ function PanelFrame({
   );
 }
 
-function MapCanvasPanel({ panel }: WorkspacePanelRenderProps) {
+function MapCanvasPanel({ panel, lifecycle }: WorkspacePanelRenderProps) {
   const [zoom, setZoom] = useState(15.8);
   const [selectedFeature, setSelectedFeature] = useState("LN-1842");
   const [showLabels, setShowLabels] = useState(true);
@@ -148,6 +148,9 @@ function MapCanvasPanel({ panel }: WorkspacePanelRenderProps) {
         <>
           <span>1.3521° N, 103.8198° E</span>
           <span>Zoom {zoom.toFixed(1)}</span>
+          <span className="demo-lifecycle-badge" data-state={lifecycle}>
+            {lifecycle === "suspended" ? "Render work paused" : `Render ${lifecycle}`}
+          </span>
           <span className="demo-mount-proof" title="Local panel state survives same-document moves">
             Host {mountToken}
           </span>
@@ -631,7 +634,7 @@ function ProblemsPanel() {
   );
 }
 
-function NotesPanel() {
+function NotesPanel({ lifecycle }: WorkspacePanelRenderProps) {
   const [value, setValue] = useState(
     "Review the divider continuity near the Portsdown junction.\n\nCompare the 2026-08-10 capture before approving RA-042.",
   );
@@ -648,6 +651,9 @@ function NotesPanel() {
       status={
         <>
           <span>Saved locally</span>
+          <span className="demo-lifecycle-badge" data-state={lifecycle}>
+            {lifecycle === "suspended" ? "Editor suspended" : `Editor ${lifecycle}`}
+          </span>
           <span className="demo-mount-proof">Host {mountToken}</span>
         </>
       }

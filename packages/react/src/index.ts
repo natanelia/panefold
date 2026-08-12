@@ -6,6 +6,12 @@ export {
   useWorkspaceTransactions,
 } from "./runtime-context";
 export { WorkspaceSurface } from "./WorkspaceSurface";
+export { solveWorkspaceProjectionLayout } from "./geometry";
+export type {
+  ProjectionLayoutOptions,
+  WorkspaceLayoutRequest,
+  WorkspaceLayoutSolver,
+} from "./geometry";
 export type {
   WorkspaceAnnouncement,
   WorkspaceAxis,
@@ -19,6 +25,10 @@ export type {
   WorkspaceGroupView,
   WorkspaceNodeView,
   WorkspacePanelDefinition,
+  WorkspacePanelLifecycle,
+  WorkspacePanelLifecycleChange,
+  WorkspacePanelLifecyclePolicy,
+  WorkspacePanelLifecycleReason,
   WorkspacePanelRegistry,
   WorkspacePanelRenderProps,
   WorkspacePanelView,

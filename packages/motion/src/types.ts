@@ -29,4 +29,6 @@ export interface MotionHandle {
 
 export interface MotionDriver {
   animate(element: Element, plan: MotionPlan): MotionHandle;
+  /** Samples currently rendered properties before an interruptible retarget. */
+  sample?(element: Element, properties: readonly string[]): MotionKeyframes;
 }

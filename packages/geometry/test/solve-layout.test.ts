@@ -264,4 +264,152 @@ describe("solveLayout", () => {
       { numRuns: 500 },
     );
   });
+
+  it("uses speculative weights and collapse state without mutating committed topology", () => {
+    const panels = [panel("p1"), panel("p2"), panel("p3")];
+    const groups = [group("g1", ["p1"]), group("g2", ["p2"]), group("g3", ["p3"])];
+    const leaves = [groupNode("n1", "g1"), groupNode("n2", "g2"), groupNode("n3", "g3")];
+    const root: LayoutNode = {
+      kind: "split",
+      id: nodeId("root"),
+      axis: "inline",
+      children: leaves.map((leaf) => leaf.id),
+      weights: [1, 1, 1],
+      collapsedChildIds: [],
+    };
+    const snapshot = createWorkspaceSnapshot({ panels, groups, nodes: [...leaves, root] });
+    const result = solveLayout(
+      snapshot,
+      root.id,
+      { inlineStart: 0, blockStart: 0, inlineSize: 606, blockSize: 100 },
+      {
+        splitterSize: 6,
+        splitOverrides: {
+          root: { weights: [1, 2, 2], collapsedChildIds: ["n2"] },
+        },
+      },
+    );
+
+    expect(result.nodeRects.n1?.inlineSize).toBe(200);
+    expect(result.nodeRects.n2?.inlineSize).toBe(0);
+    expect(result.nodeRects.n3?.inlineSize).toBe(400);
+    expect(result.collapsedNodeIds).toEqual(["n2"]);
+    expect(root.weights).toEqual([1, 1, 1]);
+    expect(root.collapsedChildIds).toEqual([]);
+  });
+
+  it("keeps weight changes monotonic when preferred sizes exceed the viewport", () => {
+    const panels = [panel("p1", { preferredInline: 400 }), panel("p2", { preferredInline: 400 })];
+    const groups = [group("g1", ["p1"]), group("g2", ["p2"])];
+    const leaves = [groupNode("n1", "g1"), groupNode("n2", "g2")];
+    const root: LayoutNode = {
+      kind: "split",
+      id: nodeId("root"),
+      axis: "inline",
+      children: leaves.map((leaf) => leaf.id),
+      weights: [1, 1],
+      collapsedChildIds: [],
+    };
+    const snapshot = createWorkspaceSnapshot({ panels, groups, nodes: [...leaves, root] });
+    const bounds = { inlineStart: 0, blockStart: 0, inlineSize: 606, blockSize: 100 };
+    const baseline = solveLayout(snapshot, root.id, bounds);
+    const increased = solveLayout(snapshot, root.id, bounds, {
+      splitOverrides: { root: { weights: [2, 1] } },
+    });
+
+    expect(increased.nodeRects.n1?.inlineSize).toBeGreaterThan(
+      baseline.nodeRects.n1?.inlineSize ?? 0,
+    );
+    expect(increased.nodeRects.n2?.inlineSize).toBeLessThan(baseline.nodeRects.n2?.inlineSize ?? 0);
+  });
+
+  it("ignores malformed speculative overrides with an explicit diagnostic", () => {
+    const panels = [panel("p1"), panel("p2")];
+    const groups = [group("g1", ["p1"]), group("g2", ["p2"])];
+    const leaves = [groupNode("n1", "g1"), groupNode("n2", "g2")];
+    const root: LayoutNode = {
+      kind: "split",
+      id: nodeId("root"),
+      axis: "inline",
+      children: leaves.map((leaf) => leaf.id),
+      weights: [1, 1],
+      collapsedChildIds: [],
+    };
+    const snapshot = createWorkspaceSnapshot({ panels, groups, nodes: [...leaves, root] });
+    const bounds = { inlineStart: 0, blockStart: 0, inlineSize: 206, blockSize: 100 };
+    const baseline = solveLayout(snapshot, root.id, bounds);
+    const malformed = solveLayout(snapshot, root.id, bounds, {
+      splitOverrides: { root: { weights: [1, -1, 2], collapsedChildIds: ["missing"] } },
+    });
+
+    expect(malformed.nodeRects).toEqual(baseline.nodeRects);
+    expect(malformed.diagnostics.filter((item) => item.code === "INVALID_OVERRIDE")).toHaveLength(
+      2,
+    );
+  });
+
+  it("uses preferred aspect ratio as a soft allocation target when cross-size is known", () => {
+    const panels = [
+      panel("aspect", { preferredAspectRatio: 2, maxInline: 200 }),
+      panel("remainder"),
+    ];
+    const groups = [group("g1", ["aspect"]), group("g2", ["remainder"])];
+    const leaves = [groupNode("n1", "g1"), groupNode("n2", "g2")];
+    const root: LayoutNode = {
+      kind: "split",
+      id: nodeId("root"),
+      axis: "inline",
+      children: leaves.map((leaf) => leaf.id),
+      weights: [1, 1],
+      collapsedChildIds: [],
+    };
+    const snapshot = createWorkspaceSnapshot({ panels, groups, nodes: [...leaves, root] });
+    const result = solveLayout(snapshot, root.id, {
+      inlineStart: 0,
+      blockStart: 0,
+      inlineSize: 306,
+      blockSize: 100,
+    });
+
+    expect(result.nodeRects.n1?.inlineSize).toBe(200);
+    expect(result.nodeRects.n2?.inlineSize).toBe(100);
+    expect(result.diagnostics).toEqual([]);
+  });
+
+  it("sanitizes every bound and splitter input to finite integer geometry", () => {
+    const panelRecord = panel("p1");
+    const groupRecord = group("g1", ["p1"]);
+    const leaf = groupNode("n1", "g1");
+    const snapshot = createWorkspaceSnapshot({
+      panels: [panelRecord],
+      groups: [groupRecord],
+      nodes: [leaf],
+    });
+    const result = solveLayout(
+      snapshot,
+      leaf.id,
+      {
+        inlineStart: Number.NaN,
+        blockStart: 1.4,
+        inlineSize: Number.POSITIVE_INFINITY,
+        blockSize: -10,
+      },
+      { splitterSize: 2.5 },
+    );
+
+    expect(result.nodeRects.n1).toEqual({
+      inlineStart: 0,
+      blockStart: 1,
+      inlineSize: 0,
+      blockSize: 0,
+    });
+    expect(result.diagnostics.map((item) => item.code)).toEqual(
+      expect.arrayContaining(["INVALID_BOUNDS", "INVALID_SPLITTER_SIZE"]),
+    );
+    expect(
+      Object.values(result.nodeRects)
+        .flatMap((rect) => Object.values(rect))
+        .every(Number.isFinite),
+    ).toBe(true);
+  });
 });

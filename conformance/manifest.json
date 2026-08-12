@@ -2,31 +2,52 @@
   "$schema": "./manifest.schema.json",
   "engineVersion": "0.1.0",
   "classification": "experimental",
-  "generatedAt": "2026-08-11",
+  "generatedAt": "2026-08-12",
   "profiles": [
     {
       "id": "compact-react-chromium-desktop",
       "status": "experimental",
-      "framework": "React 19",
-      "browser": "current Chromium desktop",
+      "framework": "React 19.2.8",
+      "browser": "Chromium via Playwright 1.62.1 on desktop Linux CI",
       "surfaces": ["main"],
       "inputs": ["mouse", "keyboard", "programmatic"],
-      "workload": "compact"
+      "workload": "Atlas compact map-operations fixture",
+      "accessibility": [
+        "axe-core automation and semantic keyboard tests; no manual AT certification"
+      ],
+      "features": [
+        "geometry-dom-projection",
+        "headless-model-kernel",
+        "interaction-motion",
+        "react-stable-host-adapter"
+      ]
+    },
+    {
+      "id": "framework-adapter-contract-jsdom",
+      "status": "experimental",
+      "framework": "Vue 3.5, Svelte 5, Angular 21, and Web Components",
+      "browser": "JSDOM 30 shared contract harness",
+      "surfaces": ["projection"],
+      "inputs": ["programmatic"],
+      "workload": "immutable snapshot, dispatch, selection, lifecycle cleanup, and SSR-safe import contract",
+      "accessibility": ["not a rendered browser or assistive-technology profile"],
+      "features": ["native-framework-adapters"]
     }
   ],
   "unsupported": [
-    "durable-persistence",
-    "in-page-floating-renderer",
-    "browser-popout",
-    "document-picture-in-picture",
-    "multi-screen-placement",
-    "distributed-collaboration",
+    "browser-popout-product-profile",
+    "document-picture-in-picture-product-profile",
+    "durable-distributed-collaboration",
     "dynamic-untrusted-plugins",
-    "vue-adapter",
-    "svelte-adapter",
-    "angular-adapter",
-    "web-components-adapter",
+    "heavy-content-certification",
+    "mobile-touch-certification",
+    "multi-screen-product-profile",
     "stable-conformance-certification"
+  ],
+  "knownLimitations": [
+    "All packages and profiles remain experimental and workspace-local; npm publication is not claimed.",
+    "Cross-document, persistence, adapter, plugin, devtools, remote-intake, and mobile APIs are technical primitives without product certification.",
+    "Manual assistive-technology, physical 60/120 Hz, real browser crash, security review, and third-party pilot evidence is not present."
   ],
   "telemetryDefault": "off"
 }

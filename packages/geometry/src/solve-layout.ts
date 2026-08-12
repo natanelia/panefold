@@ -15,10 +15,13 @@ import type {
   LogicalRect,
   ResolvedLayout,
   ResolvedSplitter,
+  SplitLayoutOverride,
 } from "./types.js";
 
 export interface SolveLayoutOptions {
   readonly splitterSize?: number;
+  /** Ephemeral drag/resize state; the committed snapshot is never mutated. */
+  readonly splitOverrides?: Readonly<Record<string, SplitLayoutOverride>>;
   readonly resolveGroupConstraints?: (
     group: GroupRecord,
     snapshot: WorkspaceSnapshot,
@@ -35,6 +38,11 @@ interface ConstraintContext {
     group: GroupRecord,
     snapshot: WorkspaceSnapshot,
   ) => BoxConstraints;
+  readonly splitOverrides: Readonly<Record<string, SplitLayoutOverride>>;
+  readonly resolvedSplitStates: Map<
+    string,
+    { readonly weights: readonly number[]; readonly collapsedChildIds: readonly NodeId[] }
+  >;
 }
 
 const UNBOUNDED = Number.POSITIVE_INFINITY;
@@ -103,10 +111,64 @@ export function defaultGroupConstraints(
   group: GroupRecord,
   snapshot: WorkspaceSnapshot,
 ): BoxConstraints {
+  const selected = snapshot.panels.byId[String(group.selectedPanelId)];
+  const preferredAspectRatio = selected?.constraints.preferredAspectRatio;
   return {
     inline: selectedPanelConstraints(group, snapshot, "inline"),
     block: selectedPanelConstraints(group, snapshot, "block"),
+    ...(preferredAspectRatio === undefined ||
+    !Number.isFinite(preferredAspectRatio) ||
+    preferredAspectRatio <= 0
+      ? {}
+      : { preferredAspectRatio }),
   };
+}
+
+function resolveSplitState(
+  node: Extract<LayoutNode, { readonly kind: "split" }>,
+  context: ConstraintContext,
+): { readonly weights: readonly number[]; readonly collapsedChildIds: readonly NodeId[] } {
+  const key = String(node.id);
+  const cached = context.resolvedSplitStates.get(key);
+  if (cached !== undefined) return cached;
+  const override = context.splitOverrides[key];
+  let weights = node.weights;
+  let collapsedChildIds = node.collapsedChildIds;
+
+  if (override?.weights !== undefined) {
+    if (
+      override.weights.length === node.children.length &&
+      override.weights.every((weight) => Number.isFinite(weight) && weight > 0)
+    ) {
+      weights = override.weights;
+    } else {
+      context.diagnostics.push({
+        code: "INVALID_OVERRIDE",
+        message: `Speculative weights for ${key} were ignored because their arity or values are invalid.`,
+        nodeId: key,
+      });
+    }
+  }
+  if (override?.collapsedChildIds !== undefined) {
+    const collapsed = override.collapsedChildIds;
+    if (
+      new Set(collapsed).size === collapsed.length &&
+      collapsed.every((childId) => node.children.some((child) => String(child) === childId)) &&
+      collapsed.length < node.children.length
+    ) {
+      const selected = new Set(collapsed);
+      collapsedChildIds = node.children.filter((childId) => selected.has(String(childId)));
+    } else {
+      context.diagnostics.push({
+        code: "INVALID_OVERRIDE",
+        message: `Speculative collapse state for ${key} was ignored because it is invalid.`,
+        nodeId: key,
+      });
+    }
+  }
+  const result = { weights, collapsedChildIds };
+  context.resolvedSplitStates.set(key, result);
+  return result;
 }
 
 function constraintsForAxis(box: BoxConstraints, axis: LogicalAxis): Required<AxisConstraints> {
@@ -222,7 +284,8 @@ function deriveConstraints(nodeId: NodeId, context: ConstraintContext): BoxConst
       result = context.resolveGroupConstraints(group, context.snapshot);
     }
   } else {
-    const collapsed = new Set(node.collapsedChildIds.map(String));
+    const splitState = resolveSplitState(node, context);
+    const collapsed = new Set(splitState.collapsedChildIds.map(String));
     const visibleChildren = node.children.filter((childId) => !collapsed.has(String(childId)));
     const children = visibleChildren.map((childId) => deriveConstraints(childId, context));
     result = {
@@ -265,7 +328,14 @@ export function solveLayout(
   options: SolveLayoutOptions = {},
 ): ResolvedLayout {
   const diagnostics: GeometryDiagnostic[] = [];
-  const splitterSize = safeDimension(options.splitterSize, 6);
+  const requestedSplitterSize = options.splitterSize ?? 6;
+  const splitterSize = Math.round(safeDimension(requestedSplitterSize, 6));
+  if (splitterSize !== requestedSplitterSize) {
+    diagnostics.push({
+      code: "INVALID_SPLITTER_SIZE",
+      message: `Splitter size ${String(requestedSplitterSize)} was replaced with ${splitterSize}.`,
+    });
+  }
   const constraintContext: ConstraintContext = {
     snapshot,
     splitterSize,
@@ -273,6 +343,8 @@ export function solveLayout(
     memo: new Map(),
     resolving: new Set(),
     resolveGroupConstraints: options.resolveGroupConstraints ?? defaultGroupConstraints,
+    splitOverrides: options.splitOverrides ?? {},
+    resolvedSplitStates: new Map(),
   };
   const nodeRects: Record<string, LogicalRect> = {};
   const groupRects: Record<string, LogicalRect> = {};
@@ -305,22 +377,35 @@ export function solveLayout(
     }
 
     const available = node.axis === "inline" ? rect.inlineSize : rect.blockSize;
-    const persistedCollapsed = new Set(node.collapsedChildIds.map(String));
+    const splitState = resolveSplitState(node, constraintContext);
+    const persistedCollapsed = new Set(splitState.collapsedChildIds.map(String));
     const allocation = allocateAxis(
       node.children.map((childId, index) => {
-        const weight = safeDimension(node.weights[index], 1) || 1;
-        const constraints = constraintsForAxis(
-          deriveConstraints(childId, constraintContext),
-          node.axis,
-        );
+        const weight = safeDimension(splitState.weights[index], 1) || 1;
+        const childBox = deriveConstraints(childId, constraintContext);
+        const constraints = constraintsForAxis(childBox, node.axis);
+        const aspectPreferred =
+          childBox.preferredAspectRatio === undefined
+            ? undefined
+            : node.axis === "inline"
+              ? rect.blockSize * childBox.preferredAspectRatio
+              : rect.inlineSize / childBox.preferredAspectRatio;
         return {
           key: String(childId),
           weight,
           collapsed: persistedCollapsed.has(String(childId)),
           constraints: {
             ...constraints,
+            ...(aspectPreferred === undefined
+              ? {}
+              : {
+                  preferred: Math.min(constraints.max, Math.max(constraints.min, aspectPreferred)),
+                }),
             grow: constraints.grow * weight,
-            shrink: constraints.shrink * weight,
+            // A larger canonical weight requests more of the axis. Treat it as
+            // growth priority and inverse shrink pressure so increasing a
+            // child's weight is monotonic even when preferred sizes overflow.
+            shrink: constraints.shrink / weight,
           },
         };
       }),
@@ -370,11 +455,22 @@ export function solveLayout(
     }
   };
 
+  const sanitizeBound = (value: number, kind: "origin" | "size", name: string): number => {
+    const safe =
+      Number.isFinite(value) && (kind === "origin" || value >= 0) ? Math.round(value) : 0;
+    if (safe !== value) {
+      diagnostics.push({
+        code: "INVALID_BOUNDS",
+        message: `${name} ${String(value)} was rounded or clamped to ${safe}.`,
+      });
+    }
+    return safe;
+  };
   visit(rootNodeId, {
-    inlineStart: Math.round(bounds.inlineStart),
-    blockStart: Math.round(bounds.blockStart),
-    inlineSize: Math.max(0, Math.round(bounds.inlineSize)),
-    blockSize: Math.max(0, Math.round(bounds.blockSize)),
+    inlineStart: sanitizeBound(bounds.inlineStart, "origin", "inlineStart"),
+    blockStart: sanitizeBound(bounds.blockStart, "origin", "blockStart"),
+    inlineSize: sanitizeBound(bounds.inlineSize, "size", "inlineSize"),
+    blockSize: sanitizeBound(bounds.blockSize, "size", "blockSize"),
   });
 
   return {

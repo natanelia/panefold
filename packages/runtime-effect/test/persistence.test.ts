@@ -1,12 +1,20 @@
 import {
   MemoryPersistencePort,
+  MemoryWorkspaceJournalPort,
   type PersistencePort,
   type PersistenceRecord,
 } from "@panefold/runtime";
 import { Effect } from "effect";
+import { IDBFactory } from "fake-indexeddb";
 import { describe, expect, it } from "vitest";
 
-import { PersistenceFailure, fromPersistencePort } from "../src";
+import {
+  IndexedDbWorkspaceJournalPort,
+  JournalFailure,
+  PersistenceFailure,
+  fromPersistencePort,
+  fromWorkspaceJournalPort,
+} from "../src";
 
 const record: PersistenceRecord = {
   formatVersion: 1,
@@ -42,5 +50,51 @@ describe("Effect persistence adapter", () => {
     expect(failure).toBeInstanceOf(PersistenceFailure);
     expect(failure.operation).toBe("load");
     expect(failure.cause).toEqual(new Error("offline"));
+  });
+});
+
+describe("Effect journal and IndexedDB adapter", () => {
+  it("persists one atomic bundle through an injected IndexedDB factory", async () => {
+    const indexedDB = new IDBFactory();
+    const port = new IndexedDbWorkspaceJournalPort({
+      indexedDB,
+      databaseName: "panefold-test",
+      storeName: "journals",
+    });
+
+    await port.commit("workspace", {
+      checkpointWrites: [
+        {
+          ref: "checkpoint:one",
+          panelType: "test.panel",
+          typeVersion: 1,
+          value: { text: "durable" },
+          checksum: "sha256:test",
+        },
+      ],
+      requiredCheckpointRefs: ["checkpoint:one"],
+    });
+
+    expect(await port.read("workspace")).toMatchObject({
+      journal: [],
+      checkpoints: { "checkpoint:one": { value: { text: "durable" } } },
+    });
+    await port.clear("workspace");
+    expect(await port.read("workspace")).toBeUndefined();
+    await port.close();
+  });
+
+  it("wraps journal operations in typed Effect failures", async () => {
+    const adapter = fromWorkspaceJournalPort(
+      new MemoryWorkspaceJournalPort({
+        beforeStep: (step) => {
+          if (step === "read") throw new Error("storage offline");
+        },
+      }),
+    );
+
+    const failure = await Effect.runPromise(Effect.flip(adapter.read("workspace")));
+    expect(failure).toBeInstanceOf(JournalFailure);
+    expect(failure.operation).toBe("read");
   });
 });

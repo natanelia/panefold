@@ -54,6 +54,8 @@ export interface WorkspaceRuntimeOptions {
   readonly queueLimit?: number;
   /** Maximum queued commands processed after one top-level dispatch. */
   readonly queueDrainLimit?: number;
+  /** Opt-in because retained exception objects may contain application secrets. */
+  readonly retainSubscriberErrorCause?: boolean;
   readonly policies?: readonly WorkspacePolicy[];
   readonly createCommandId?: () => CommandId;
   /**
@@ -140,6 +142,7 @@ class WorkspaceRuntimeImpl implements WorkspaceRuntime {
   readonly #notificationErrorLimit: number;
   readonly #queueLimit: number;
   readonly #queueDrainLimit: number;
+  readonly #retainSubscriberErrorCause: boolean;
   #queueDrainRemaining: number | undefined;
   #draining = false;
   #notifying = false;
@@ -167,6 +170,7 @@ class WorkspaceRuntimeImpl implements WorkspaceRuntime {
       DEFAULT_QUEUE_DRAIN_LIMIT,
       "queueDrainLimit",
     );
+    this.#retainSubscriberErrorCause = options.retainSubscriberErrorCause ?? false;
     const violations = validateWorkspace(options.initialSnapshot);
     if (violations.length > 0) {
       // Initial state is a trust boundary. Do not canonicalize it silently:
@@ -416,7 +420,14 @@ class WorkspaceRuntimeImpl implements WorkspaceRuntime {
 
   #recordSubscriberFailure(failure: SubscriberNotificationFailure): void {
     if (this.#notificationErrorLimit > 0) {
-      this.#subscriberErrors.push(Object.freeze(failure));
+      this.#subscriberErrors.push(
+        Object.freeze({
+          ...failure,
+          cause: this.#retainSubscriberErrorCause
+            ? failure.cause
+            : summarizeSubscriberCause(failure.cause),
+        }),
+      );
       if (this.#subscriberErrors.length > this.#notificationErrorLimit) {
         this.#subscriberErrors.splice(
           0,
@@ -463,6 +474,12 @@ class WorkspaceRuntimeImpl implements WorkspaceRuntime {
       throw new Error("Workspace runtime has been disposed.");
     }
   }
+}
+
+function summarizeSubscriberCause(cause: unknown): Readonly<{ name: string }> {
+  return Object.freeze({
+    name: cause instanceof Error && cause.name.length > 0 ? cause.name : "UnknownSubscriberError",
+  });
 }
 
 function validatedLimit(value: number | undefined, fallback: number, name: string): number {

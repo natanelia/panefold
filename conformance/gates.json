@@ -1,0 +1,104 @@
+{
+  "schemaVersion": 1,
+  "hardGates": [
+    {
+      "id": "model-integrity",
+      "status": "unresolved",
+      "evidenceIds": [
+        "bounded-exploration",
+        "kernel-laws"
+      ],
+      "note": "Bounded exploration passes, but the required ten million generated commands are not published."
+    },
+    {
+      "id": "determinism",
+      "status": "unresolved",
+      "evidenceIds": [
+        "kernel-laws",
+        "patch-replay-oracle"
+      ],
+      "note": "Automated determinism evidence exists, but the independent optimized-kernel long-run report is incomplete."
+    },
+    {
+      "id": "atomicity",
+      "status": "unresolved",
+      "evidenceIds": [
+        "kernel-laws",
+        "persistence-recovery",
+        "surface-ownership"
+      ],
+      "note": "Kernel atomicity passes locally; the complete fallible operational matrix is not certified."
+    },
+    {
+      "id": "accessibility",
+      "status": "blocked",
+      "evidenceIds": [
+        "react-integration",
+        "manual-accessibility-certification"
+      ],
+      "blockedBy": [
+        "manual-accessibility-certification"
+      ]
+    },
+    {
+      "id": "lifecycle",
+      "status": "blocked",
+      "evidenceIds": [
+        "react-integration"
+      ],
+      "blockedBy": [
+        "real heavy-content browser torture and resource-leak traces"
+      ]
+    },
+    {
+      "id": "performance",
+      "status": "blocked",
+      "evidenceIds": [
+        "performance-smoke",
+        "physical-performance-certification"
+      ],
+      "blockedBy": [
+        "physical-performance-certification"
+      ]
+    },
+    {
+      "id": "recovery",
+      "status": "blocked",
+      "evidenceIds": [
+        "persistence-recovery",
+        "surface-ownership"
+      ],
+      "blockedBy": [
+        "real process, tab, window, IndexedDB quota/corruption, permission, and monitor failure runs"
+      ]
+    },
+    {
+      "id": "security",
+      "status": "blocked",
+      "evidenceIds": [
+        "security-source-check",
+        "independent-security-review"
+      ],
+      "blockedBy": [
+        "independent-security-review"
+      ]
+    },
+    {
+      "id": "migration",
+      "status": "unresolved",
+      "evidenceIds": [
+        "persistence-recovery"
+      ],
+      "note": "Kernel schema v1-to-v2 is tested; application and panel migration certification is not published."
+    },
+    {
+      "id": "public-evidence",
+      "status": "unresolved",
+      "evidenceIds": [
+        "conformance-harness",
+        "performance-smoke"
+      ],
+      "note": "The register and harness are public, but raw traces and signed release approvals are incomplete."
+    }
+  ]
+}

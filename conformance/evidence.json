@@ -1,0 +1,414 @@
+{
+  "schemaVersion": 1,
+  "evidence": [
+    {
+      "id": "dependency-architecture",
+      "kind": "automated-test",
+      "status": "verified",
+      "uri": "repo://.dependency-cruiser.cjs",
+      "sha256": "ebc47e6bfe26fd8b4277f6907b9200e0fcb80b841729c42926d633f79588934a",
+      "producedAt": "2026-08-12T00:00:00Z",
+      "requirementIds": [
+        "ARC-001",
+        "ARC-005"
+      ],
+      "profileIds": [
+        "compact-react-chromium-desktop"
+      ],
+      "note": "Repository-local automated evidence; it does not imply external certification."
+    },
+    {
+      "id": "model-immutability",
+      "kind": "automated-test",
+      "status": "verified",
+      "uri": "repo://packages/model/test/model.test.ts",
+      "sha256": "8fa37646d33a7b3059b046f6057f3475003f3f0a4d5b4bfa0087f57a70f0f43c",
+      "producedAt": "2026-08-12T00:00:00Z",
+      "requirementIds": [
+        "API-003",
+        "DOM-001"
+      ],
+      "profileIds": [
+        "compact-react-chromium-desktop"
+      ],
+      "note": "Repository-local automated evidence; it does not imply external certification."
+    },
+    {
+      "id": "kernel-laws",
+      "kind": "model-report",
+      "status": "verified",
+      "uri": "repo://packages/kernel/test/properties.test.ts",
+      "sha256": "c3c074f4870886eed45649cc1f0fdee5d6c9059c2172bdee2a16de9c93072e20",
+      "producedAt": "2026-08-12T00:00:00Z",
+      "requirementIds": [
+        "LAY-001",
+        "LAY-007",
+        "TXN-001",
+        "TXN-003",
+        "TXN-004",
+        "TXN-005"
+      ],
+      "profileIds": [
+        "compact-react-chromium-desktop"
+      ],
+      "note": "Repository-local automated evidence; it does not imply external certification."
+    },
+    {
+      "id": "bounded-exploration",
+      "kind": "model-report",
+      "status": "verified",
+      "uri": "repo://packages/kernel/test/exploration.test.ts",
+      "sha256": "b4819d6494b7123149866807ad812d041dfb9308b5e7fdaf1b05f773b6d3988c",
+      "producedAt": "2026-08-12T00:00:00Z",
+      "requirementIds": [
+        "TST-001",
+        "TST-002"
+      ],
+      "profileIds": [
+        "compact-react-chromium-desktop"
+      ],
+      "note": "Repository-local automated evidence; it does not imply external certification."
+    },
+    {
+      "id": "patch-replay-oracle",
+      "kind": "automated-test",
+      "status": "verified",
+      "uri": "repo://packages/kernel/test/patches.test.ts",
+      "sha256": "3410652cf3f737bebca016668a154d41b1d8c822d5fdc43aac297018c9c566eb",
+      "producedAt": "2026-08-12T00:00:00Z",
+      "requirementIds": [
+        "TST-002",
+        "PER-008"
+      ],
+      "profileIds": [
+        "compact-react-chromium-desktop"
+      ],
+      "note": "Repository-local automated evidence; it does not imply external certification."
+    },
+    {
+      "id": "geometry-solver",
+      "kind": "automated-test",
+      "status": "verified",
+      "uri": "repo://packages/geometry/test/solve-layout.test.ts",
+      "sha256": "4b40f4600d1e65642745d1cf56773dc6101c1e5a5565d72bdf468c3ac5b8ef03",
+      "producedAt": "2026-08-12T00:00:00Z",
+      "requirementIds": [
+        "LAY-002",
+        "LAY-003",
+        "LAY-004",
+        "LAY-005"
+      ],
+      "profileIds": [
+        "compact-react-chromium-desktop"
+      ],
+      "note": "Repository-local automated evidence; it does not imply external certification."
+    },
+    {
+      "id": "runtime-notification",
+      "kind": "automated-test",
+      "status": "verified",
+      "uri": "repo://packages/runtime/test/runtime.test.ts",
+      "sha256": "b1a5f47072a60eb1e893793e86f3291116a446694855a25065de41cddb308d8e",
+      "producedAt": "2026-08-12T00:00:00Z",
+      "requirementIds": [
+        "API-005",
+        "OBS-002"
+      ],
+      "profileIds": [
+        "compact-react-chromium-desktop"
+      ],
+      "note": "Repository-local automated evidence; it does not imply external certification."
+    },
+    {
+      "id": "persistence-recovery",
+      "kind": "recovery-report",
+      "status": "verified",
+      "uri": "repo://packages/runtime/test/persistence.test.ts",
+      "sha256": "22743e307898cb66c422232ffe20f29eeac0fd247bdf71205ff6682abaae3915",
+      "producedAt": "2026-08-12T00:00:00Z",
+      "requirementIds": [
+        "PER-001",
+        "PER-002",
+        "PER-003",
+        "PER-004",
+        "PER-008",
+        "SEC-001"
+      ],
+      "profileIds": [
+        "compact-react-chromium-desktop"
+      ],
+      "note": "Repository-local automated evidence; it does not imply external certification."
+    },
+    {
+      "id": "indexeddb-effect",
+      "kind": "migration-report",
+      "status": "verified",
+      "uri": "repo://packages/runtime-effect/test/persistence.test.ts",
+      "sha256": "2cd6da5ef9c306a18a67d057e84bf440e93202919afe0b5ce673236aa3bcb538",
+      "producedAt": "2026-08-12T00:00:00Z",
+      "requirementIds": [
+        "ARC-003",
+        "PER-003"
+      ],
+      "profileIds": [
+        "compact-react-chromium-desktop"
+      ],
+      "note": "Repository-local automated evidence; it does not imply external certification."
+    },
+    {
+      "id": "protocol-models",
+      "kind": "model-report",
+      "status": "verified",
+      "uri": "repo://packages/protocol-xstate/test/protocol-machines.test.ts",
+      "sha256": "c6250b1d49f0da1954fea8730db2cf066710f4d4f315dfff31a193fb8e65fcce",
+      "producedAt": "2026-08-12T00:00:00Z",
+      "requirementIds": [
+        "ARC-002",
+        "INT-003",
+        "TST-003"
+      ],
+      "profileIds": [
+        "compact-react-chromium-desktop"
+      ],
+      "note": "Repository-local automated evidence; it does not imply external certification."
+    },
+    {
+      "id": "motion-primitives",
+      "kind": "automated-test",
+      "status": "verified",
+      "uri": "repo://packages/motion/test/motion.test.ts",
+      "sha256": "02b6068c1abaa54b4433da29c0a7bb430254b24082385541e5617abfccc22ed8",
+      "producedAt": "2026-08-12T00:00:00Z",
+      "requirementIds": [
+        "ARC-004",
+        "INT-001",
+        "MOT-003",
+        "MOT-004",
+        "MOT-009",
+        "A11Y-006"
+      ],
+      "profileIds": [
+        "compact-react-chromium-desktop"
+      ],
+      "note": "Repository-local automated evidence; it does not imply external certification."
+    },
+    {
+      "id": "surface-ownership",
+      "kind": "model-report",
+      "status": "verified",
+      "uri": "repo://packages/surfaces/test/surfaces.test.ts",
+      "sha256": "f2a88749d63a88505ead954b192dd10999e23b8d6d64ba776c1325ad63a2a0ee",
+      "producedAt": "2026-08-12T00:00:00Z",
+      "requirementIds": [
+        "COL-004",
+        "LIF-005",
+        "SUR-001",
+        "SUR-003",
+        "SUR-005",
+        "SUR-007",
+        "TST-004",
+        "TST-009"
+      ],
+      "profileIds": [
+        "compact-react-chromium-desktop"
+      ],
+      "note": "Repository-local automated evidence; it does not imply external certification."
+    },
+    {
+      "id": "react-integration",
+      "kind": "automated-test",
+      "status": "verified",
+      "uri": "repo://packages/react/test/WorkspaceSurface.test.tsx",
+      "sha256": "2e012dd5ca09c524d60bd75a5f13bbfa0ca48354ae508f1780d1525c005feb9f",
+      "producedAt": "2026-08-12T00:00:00Z",
+      "requirementIds": [
+        "A11Y-003",
+        "FOC-001",
+        "FOC-003",
+        "FOC-004",
+        "LIF-001",
+        "LIF-003",
+        "LIF-006",
+        "MOT-002",
+        "REN-001",
+        "REN-002",
+        "REN-005"
+      ],
+      "profileIds": [
+        "compact-react-chromium-desktop"
+      ],
+      "note": "Repository-local automated evidence; it does not imply external certification."
+    },
+    {
+      "id": "native-adapter-contract",
+      "kind": "compatibility-report",
+      "status": "verified",
+      "uri": "repo://packages/adapter-contract/test/native-adapters.test.ts",
+      "sha256": "52f513593cbdfbc472e9788fae3dce6928aca642ef156cc0e2018625b062d3b1",
+      "producedAt": "2026-08-12T00:00:00Z",
+      "requirementIds": [
+        "FWK-001",
+        "FWK-003",
+        "FWK-006"
+      ],
+      "profileIds": [
+        "framework-adapter-contract-jsdom"
+      ],
+      "note": "Repository-local automated evidence; it does not imply external certification."
+    },
+    {
+      "id": "web-component-ssr",
+      "kind": "automated-test",
+      "status": "verified",
+      "uri": "repo://packages/web-components/test/ssr-import.test.ts",
+      "sha256": "ca44a0b9c0c7d85431b596ee78191a387e4a8d4b576f6ee89c14d6236e38be29",
+      "producedAt": "2026-08-12T00:00:00Z",
+      "requirementIds": [
+        "FWK-004"
+      ],
+      "profileIds": [
+        "framework-adapter-contract-jsdom"
+      ],
+      "note": "Repository-local automated evidence; it does not imply external certification."
+    },
+    {
+      "id": "ecosystem-primitives",
+      "kind": "automated-test",
+      "status": "verified",
+      "uri": "repo://packages/ecosystem/test/ecosystem.test.ts",
+      "sha256": "f4dd31e1fd11cfc66523e72d2625640bb14d7296a8e9c9e5e07b9cb0764c1a2c",
+      "producedAt": "2026-08-12T00:00:00Z",
+      "requirementIds": [
+        "EXT-001",
+        "EXT-003",
+        "EXT-004",
+        "OBS-002",
+        "OBS-003"
+      ],
+      "profileIds": [
+        "compact-react-chromium-desktop"
+      ],
+      "note": "Repository-local automated evidence; it does not imply external certification."
+    },
+    {
+      "id": "conformance-harness",
+      "kind": "automated-test",
+      "status": "verified",
+      "uri": "repo://packages/conformance/test/report.test.ts",
+      "sha256": "df923c2c0d45d6c42d392f7a29954dfcf33e03003572bb30a9b6b38284ad53d1",
+      "producedAt": "2026-08-12T00:00:00Z",
+      "requirementIds": [
+        "ACC-001",
+        "OBS-006",
+        "QLT-001",
+        "QLT-002",
+        "QLT-004"
+      ],
+      "profileIds": [
+        "compact-react-chromium-desktop",
+        "framework-adapter-contract-jsdom"
+      ],
+      "note": "Repository-local automated evidence; it does not imply external certification."
+    },
+    {
+      "id": "security-source-check",
+      "kind": "security-report",
+      "status": "verified",
+      "uri": "repo://scripts/security-check.mjs",
+      "sha256": "9752f50c8c42f9cae13f72761361860888a369d08aa6026295cbd732386c3e1f",
+      "producedAt": "2026-08-12T00:00:00Z",
+      "requirementIds": [
+        "SEC-003",
+        "SEC-008"
+      ],
+      "profileIds": [
+        "compact-react-chromium-desktop"
+      ],
+      "note": "Repository-local automated evidence; it does not imply external certification."
+    },
+    {
+      "id": "performance-smoke",
+      "kind": "performance-report",
+      "status": "verified",
+      "uri": "repo://scripts/performance-smoke.mjs",
+      "sha256": "887a2f66a8d6ab31b5169db428ac6c3a49d94ef28f1fd21a1b3a931e38138b02",
+      "producedAt": "2026-08-12T00:00:00Z",
+      "requirementIds": [
+        "QLT-003",
+        "TST-006"
+      ],
+      "profileIds": [
+        "compact-react-chromium-desktop"
+      ],
+      "note": "Repository-local automated evidence; it does not imply external certification."
+    },
+    {
+      "id": "manual-accessibility-certification",
+      "kind": "external-certification",
+      "status": "blocked",
+      "requirementIds": [
+        "A11Y-001",
+        "A11Y-005",
+        "A11Y-008",
+        "TST-007"
+      ],
+      "profileIds": [
+        "compact-react-chromium-desktop"
+      ],
+      "blockedBy": [
+        "NVDA, JAWS, VoiceOver, TalkBack, 400% zoom, forced-colors, and voice-control assessment on real supported systems"
+      ],
+      "note": "Automated axe and keyboard tests are present, but they cannot replace manual assistive-technology evidence."
+    },
+    {
+      "id": "physical-performance-certification",
+      "kind": "external-certification",
+      "status": "blocked",
+      "requirementIds": [
+        "QLT-003",
+        "TST-006"
+      ],
+      "profileIds": [
+        "compact-react-chromium-desktop"
+      ],
+      "blockedBy": [
+        "controlled physical 60 Hz and 120 Hz hardware traces across mandatory workloads"
+      ],
+      "note": "The Node smoke workload is a regression guard, not a frame-performance certification."
+    },
+    {
+      "id": "independent-security-review",
+      "kind": "external-certification",
+      "status": "blocked",
+      "requirementIds": [
+        "SEC-002",
+        "SEC-003",
+        "SEC-007"
+      ],
+      "profileIds": [
+        "compact-react-chromium-desktop",
+        "framework-adapter-contract-jsdom"
+      ],
+      "blockedBy": [
+        "independent threat-model, CSP and Trusted Types deployment, protocol, dependency, and provenance review"
+      ],
+      "note": "Repository source checks do not establish absence of high-severity vulnerabilities."
+    },
+    {
+      "id": "third-party-pilots",
+      "kind": "external-certification",
+      "status": "blocked",
+      "requirementIds": [
+        "EXT-006",
+        "FWK-001"
+      ],
+      "profileIds": [
+        "framework-adapter-contract-jsdom"
+      ],
+      "blockedBy": [
+        "independent adopters integrating published packages and returning reproducible certification metadata"
+      ],
+      "note": "A project cannot self-generate third-party pilot evidence."
+    }
+  ]
+}

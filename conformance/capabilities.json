@@ -1,0 +1,229 @@
+{
+  "schemaVersion": 1,
+  "capabilities": [
+    {
+      "id": "headless-model-kernel",
+      "classification": "experimental",
+      "profileIds": [
+        "compact-react-chromium-desktop"
+      ],
+      "evidenceIds": [
+        "model-immutability",
+        "kernel-laws",
+        "bounded-exploration"
+      ],
+      "limitations": [
+        "No stable conformance or ten-million-operation report"
+      ]
+    },
+    {
+      "id": "geometry-dom-projection",
+      "classification": "experimental",
+      "profileIds": [
+        "compact-react-chromium-desktop"
+      ],
+      "evidenceIds": [
+        "geometry-solver",
+        "react-integration"
+      ],
+      "limitations": [
+        "Reference React profile only"
+      ]
+    },
+    {
+      "id": "react-stable-host-adapter",
+      "classification": "experimental",
+      "profileIds": [
+        "compact-react-chromium-desktop"
+      ],
+      "evidenceIds": [
+        "react-integration"
+      ],
+      "limitations": [
+        "Cross-document lifecycle policies are not implemented by the DOM adapter"
+      ]
+    },
+    {
+      "id": "interaction-motion",
+      "classification": "experimental",
+      "profileIds": [
+        "compact-react-chromium-desktop"
+      ],
+      "evidenceIds": [
+        "protocol-models",
+        "motion-primitives",
+        "react-integration"
+      ],
+      "limitations": [
+        "No physical frame traces or tab-drag certification"
+      ]
+    },
+    {
+      "id": "durable-persistence",
+      "classification": "experimental",
+      "profileIds": [
+        "compact-react-chromium-desktop"
+      ],
+      "evidenceIds": [
+        "persistence-recovery",
+        "indexeddb-effect"
+      ],
+      "limitations": [
+        "Failure injection is automated; real crash, quota, and corruption certification is pending"
+      ]
+    },
+    {
+      "id": "prepared-surface-protocol",
+      "classification": "experimental",
+      "profileIds": [
+        "compact-react-chromium-desktop"
+      ],
+      "evidenceIds": [
+        "surface-ownership",
+        "protocol-models"
+      ],
+      "limitations": [
+        "Headless protocol primitive; no published browser-window product profile"
+      ]
+    },
+    {
+      "id": "native-framework-adapters",
+      "classification": "experimental",
+      "profileIds": [
+        "framework-adapter-contract-jsdom"
+      ],
+      "evidenceIds": [
+        "native-adapter-contract",
+        "web-component-ssr"
+      ],
+      "limitations": [
+        "Shared JSDOM contract only; no framework browser rendering certification"
+      ]
+    },
+    {
+      "id": "trusted-plugin-registry",
+      "classification": "experimental",
+      "profileIds": [
+        "compact-react-chromium-desktop"
+      ],
+      "evidenceIds": [
+        "ecosystem-primitives"
+      ],
+      "limitations": [
+        "Trusted in-process declarative contributions only"
+      ]
+    },
+    {
+      "id": "observational-devtools",
+      "classification": "experimental",
+      "profileIds": [
+        "compact-react-chromium-desktop"
+      ],
+      "evidenceIds": [
+        "ecosystem-primitives"
+      ],
+      "limitations": [
+        "Recorder projections must be supplied by the application"
+      ]
+    },
+    {
+      "id": "remote-command-intake",
+      "classification": "experimental",
+      "profileIds": [
+        "compact-react-chromium-desktop"
+      ],
+      "evidenceIds": [
+        "ecosystem-primitives",
+        "kernel-laws"
+      ],
+      "limitations": [
+        "No transport, authentication, durable coordinator, or conflict resolution"
+      ]
+    },
+    {
+      "id": "mobile-projection",
+      "classification": "experimental",
+      "profileIds": [
+        "compact-react-chromium-desktop"
+      ],
+      "evidenceIds": [
+        "ecosystem-primitives"
+      ],
+      "limitations": [
+        "Data-only projection; not a certified touch product"
+      ]
+    },
+    {
+      "id": "browser-popout-product-profile",
+      "classification": "unsupported",
+      "profileIds": [],
+      "evidenceIds": [],
+      "limitations": [
+        "Prepared ownership primitives exist, but no real browser failure matrix is published"
+      ]
+    },
+    {
+      "id": "document-picture-in-picture-product-profile",
+      "classification": "unsupported",
+      "profileIds": [],
+      "evidenceIds": [],
+      "limitations": [
+        "Capability-gated semantic primitives exist, but no browser certification is published"
+      ]
+    },
+    {
+      "id": "durable-distributed-collaboration",
+      "classification": "unsupported",
+      "profileIds": [],
+      "evidenceIds": [],
+      "limitations": [
+        "Remote intake is not distributed collaboration"
+      ]
+    },
+    {
+      "id": "dynamic-untrusted-plugins",
+      "classification": "unsupported",
+      "profileIds": [],
+      "evidenceIds": [],
+      "limitations": [
+        "Trusted in-process registration is not an isolation boundary"
+      ]
+    },
+    {
+      "id": "heavy-content-certification",
+      "classification": "unsupported",
+      "profileIds": [],
+      "evidenceIds": [],
+      "limitations": [
+        "Synthetic lifecycle fixtures are not real editor, WebGL, media, iframe, grid, and microfrontend certification"
+      ]
+    },
+    {
+      "id": "mobile-touch-certification",
+      "classification": "unsupported",
+      "profileIds": [],
+      "evidenceIds": [],
+      "limitations": [
+        "No physical coarse-pointer, virtual-keyboard, or mobile assistive-technology evidence"
+      ]
+    },
+    {
+      "id": "multi-screen-product-profile",
+      "classification": "unsupported",
+      "profileIds": [],
+      "evidenceIds": [],
+      "limitations": [
+        "No permission and monitor-removal browser evidence"
+      ]
+    },
+    {
+      "id": "stable-conformance-certification",
+      "classification": "unsupported",
+      "profileIds": [],
+      "evidenceIds": [],
+      "limitations": [
+        "Hard gates and external approvals remain incomplete"
+      ]
+    }
+  ]
+}

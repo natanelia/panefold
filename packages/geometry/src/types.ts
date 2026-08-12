@@ -29,6 +29,13 @@ export interface AxisConstraints {
 export interface BoxConstraints {
   readonly inline?: AxisConstraints;
   readonly block?: AxisConstraints;
+  /** Soft inline/block ratio used when the opposite axis is known. */
+  readonly preferredAspectRatio?: number;
+}
+
+export interface SplitLayoutOverride {
+  readonly weights?: readonly number[];
+  readonly collapsedChildIds?: readonly string[];
 }
 
 export interface AllocationItem {
@@ -42,6 +49,9 @@ export interface AllocationItem {
 export type GeometryDiagnosticCode =
   | "INVALID_AVAILABLE_SIZE"
   | "INVALID_CONSTRAINT"
+  | "INVALID_BOUNDS"
+  | "INVALID_SPLITTER_SIZE"
+  | "INVALID_OVERRIDE"
   | "CHILD_COLLAPSED"
   | "HARD_MIN_VIOLATED"
   | "MAX_VIOLATED"

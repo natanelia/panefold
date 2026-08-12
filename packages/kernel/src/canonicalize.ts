@@ -1,4 +1,5 @@
 import {
+  APPLIED_REMOTE_TRANSACTION_LIMIT,
   type Diagnostic,
   type LayoutNode,
   type NodeId,
@@ -80,13 +81,22 @@ export function normalizeWeights(
 
 function canonicalizeGroupSelection(state: MutableWorkspace): void {
   for (const group of state.groups.values()) {
-    if (group.panelIds.length === 0 || group.panelIds.includes(group.selectedPanelId)) {
+    if (group.panelIds.length === 0) {
+      if (group.placeholder === false) {
+        const { placeholder: _placeholder, ...rest } = group;
+        void _placeholder;
+        state.groups.set(group.id, rest);
+      }
       continue;
     }
-    state.groups.set(group.id, {
-      ...group,
-      selectedPanelId: group.panelIds[0] as PanelId,
-    });
+    const selectedPanelId = group.panelIds.includes(group.selectedPanelId)
+      ? group.selectedPanelId
+      : (group.panelIds[0] as PanelId);
+    if (selectedPanelId !== group.selectedPanelId || group.placeholder !== undefined) {
+      const { placeholder: _placeholder, ...rest } = group;
+      void _placeholder;
+      state.groups.set(group.id, { ...rest, selectedPanelId });
+    }
   }
 }
 
@@ -101,7 +111,12 @@ function canonicalizeNode(
 
   if (node.kind === "group") {
     const group = state.groups.get(node.groupId);
-    if (group !== undefined && group.panelIds.length === 0 && !group.persistent) {
+    if (
+      group !== undefined &&
+      group.panelIds.length === 0 &&
+      !group.persistent &&
+      (group.placeholder !== true || state.recoverableClosedPanels.length === 0)
+    ) {
       state.groups.delete(group.id);
       state.nodes.delete(node.id);
       diagnostics.push({
@@ -192,8 +207,14 @@ function canonicalizeSurfaces(state: MutableWorkspace, diagnostics: Diagnostic[]
         severity: "info",
         message: `Removed empty surface "${surface.id}"`,
       });
-    } else if (rootNodeId !== surface.rootNodeId) {
-      state.surfaces.set(surface.id, { ...surface, rootNodeId });
+    } else if (rootNodeId !== surface.rootNodeId || surface.minimized === false) {
+      const { minimized: _minimized, ...rest } = surface;
+      void _minimized;
+      state.surfaces.set(surface.id, {
+        ...rest,
+        rootNodeId,
+        ...(surface.minimized === true ? { minimized: true } : {}),
+      });
     }
   }
 
@@ -217,34 +238,46 @@ function canonicalizeActivation(state: MutableWorkspace): void {
     const group = findGroupForPanel(state, livePanel);
     const node = group === undefined ? undefined : findNodeForGroup(state, group.id);
     const surface = node === undefined ? undefined : findSurfaceForNode(state, node.id);
-    state.activation = {
-      activePanelId: livePanel,
-      ...(surface === undefined ? {} : { activeSurfaceId: surface.id }),
-    };
-    if (
-      state.focusMemory.panelId === undefined ||
-      !state.panels.has(state.focusMemory.panelId) ||
-      state.focusMemory.groupId === undefined ||
-      !state.groups.has(state.focusMemory.groupId)
-    ) {
-      state.focusMemory = {
-        panelId: livePanel,
-        ...(group === undefined ? {} : { groupId: group.id }),
-        fallback: "selected-tab",
+    if (surface?.minimized !== true) {
+      state.activation = {
+        activePanelId: livePanel,
+        ...(surface === undefined ? {} : { activeSurfaceId: surface.id }),
       };
+      if (
+        state.focusMemory.panelId === undefined ||
+        !state.panels.has(state.focusMemory.panelId) ||
+        state.focusMemory.groupId === undefined ||
+        !state.groups.has(state.focusMemory.groupId)
+      ) {
+        state.focusMemory = {
+          panelId: livePanel,
+          ...(group === undefined ? {} : { groupId: group.id }),
+          fallback: "selected-tab",
+        };
+      }
+      return;
     }
-    return;
   }
 
   const group = [...state.groups.values()]
-    .filter((candidate) => candidate.panelIds.length > 0)
+    .filter((candidate) => {
+      if (candidate.panelIds.length === 0) return false;
+      const node = findNodeForGroup(state, candidate.id);
+      const surface = node === undefined ? undefined : findSurfaceForNode(state, node.id);
+      return surface?.minimized !== true;
+    })
     .sort((left, right) => compareCanonicalStrings(String(left.id), String(right.id)))[0];
   if (group === undefined) {
     state.activation = {};
     state.focusMemory = { fallback: "workspace-root" };
     return;
   }
-  state.activation = { activePanelId: group.selectedPanelId };
+  const node = findNodeForGroup(state, group.id);
+  const surface = node === undefined ? undefined : findSurfaceForNode(state, node.id);
+  state.activation = {
+    activePanelId: group.selectedPanelId,
+    ...(surface === undefined ? {} : { activeSurfaceId: surface.id }),
+  };
   state.focusMemory = {
     panelId: group.selectedPanelId,
     groupId: group.id,
@@ -258,5 +291,18 @@ export function canonicalizeWorkspace(snapshot: WorkspaceSnapshot): Canonicaliza
   canonicalizeGroupSelection(state);
   canonicalizeSurfaces(state, diagnostics);
   canonicalizeActivation(state);
+  state.recoverableClosedPanels.sort((left, right) =>
+    compareCanonicalStrings(String(left.id), String(right.id)),
+  );
+  if (state.appliedRemoteTransactions.length > APPLIED_REMOTE_TRANSACTION_LIMIT) {
+    state.appliedRemoteTransactions = state.appliedRemoteTransactions.slice(
+      -APPLIED_REMOTE_TRANSACTION_LIMIT,
+    );
+    diagnostics.push({
+      code: "REMOTE_TRANSACTION_LEDGER_TRIMMED",
+      severity: "info",
+      message: `Retained the latest ${APPLIED_REMOTE_TRANSACTION_LIMIT} remote transaction receipts`,
+    });
+  }
   return { snapshot: fromMutable(state), diagnostics };
 }

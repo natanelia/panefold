@@ -20,6 +20,12 @@
     "react": ">=19",
     "react-dom": ">=19"
   },
+  "dependencies": {
+    "@panefold/geometry": "workspace:*",
+    "@panefold/model": "workspace:*",
+    "@panefold/motion": "workspace:*",
+    "@panefold/protocol-xstate": "workspace:*"
+  },
   "devDependencies": {
     "react": "catalog:",
     "react-dom": "catalog:"

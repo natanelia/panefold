@@ -1,6 +1,9 @@
 import type { PersistencePort, PersistenceRecord } from "@panefold/runtime";
 import { Effect } from "effect";
 
+export * from "./indexeddb";
+export * from "./journal";
+
 export class PersistenceFailure {
   readonly _tag = "PersistenceFailure";
 

@@ -16,7 +16,7 @@
     --pf-focus: #8bc4ff;
     --pf-target-size: 32px;
     --pf-tab-size: 34px;
-    --pf-splitter-size: 5px;
+    --pf-splitter-size: 6px;
     --pf-motion-micro: 90ms;
     --pf-motion-structural: 200ms;
     color: var(--pf-text);
@@ -82,7 +82,7 @@
 
   .pf-split-child {
     position: relative;
-    flex: var(--pf-split-weight) 1 0;
+    flex: 0 0 var(--pf-split-size, 0px);
     overflow: clip;
   }
 

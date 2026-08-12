@@ -27,10 +27,17 @@
     "test:watch": "pnpm build:packages && vitest",
     "test:e2e": "playwright test",
     "lint": "eslint . --max-warnings=0 && pnpm architecture:check",
+    "security:check": "node scripts/security-check.mjs",
+    "performance:smoke": "node scripts/performance-smoke.mjs",
+    "requirements:generate": "node scripts/generate-requirements.mjs",
+    "requirements:check": "pnpm requirements:generate && git diff --exit-code -- conformance/requirements.json",
+    "conformance:data:generate": "node scripts/generate-conformance-data.mjs",
+    "conformance:data:check": "pnpm conformance:data:generate && git diff --exit-code -- conformance/capabilities.json conformance/evidence.json conformance/gates.json conformance/traces.json",
+    "conformance:check": "node scripts/check-conformance.mjs",
     "architecture:check": "depcruise packages --config .dependency-cruiser.cjs",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
-    "check": "pnpm format:check && pnpm lint && pnpm build:packages && tsc --noEmit -p tsconfig.json && vitest run && pnpm --filter @panefold/demo run build"
+    "check": "pnpm format:check && pnpm lint && pnpm security:check && pnpm requirements:check && pnpm conformance:data:check && pnpm build:packages && pnpm conformance:check && pnpm performance:smoke && tsc --noEmit -p tsconfig.json && vitest run && pnpm --filter @panefold/demo run build"
   },
   "devDependencies": {
     "@eslint/js": "10.0.1",

@@ -21,8 +21,19 @@ const animateElement = animate as unknown as ElementAnimator;
 
 export function createMotionDomDriver(): MotionDriver {
   return {
+    sample(element: Element, properties: readonly string[]) {
+      if (!isAnimatableElement(element)) return {};
+      const view = element.ownerDocument.defaultView;
+      if (view === null) return {};
+      const computed = view.getComputedStyle(element);
+      const sampled: Record<string, string> = {};
+      for (const property of properties) {
+        sampled[property] = computed.getPropertyValue(property);
+      }
+      return Object.freeze(sampled);
+    },
     animate(element: Element, plan: MotionPlan): MotionHandle {
-      if (!(element instanceof HTMLElement || element instanceof SVGElement)) {
+      if (!isAnimatableElement(element)) {
         return {
           finished: Promise.resolve(),
           cancel() {},
@@ -32,7 +43,7 @@ export function createMotionDomDriver(): MotionDriver {
 
       const controls = animateElement(element, plan.keyframes, {
         duration: Math.max(0, plan.durationMs) / 1_000,
-        ease: plan.easing ?? "ease-out",
+        ease: normalizeDomEasing(plan.easing),
       });
 
       return {
@@ -42,4 +53,29 @@ export function createMotionDomDriver(): MotionDriver {
       };
     },
   };
+}
+
+function normalizeDomEasing(easing: MotionPlan["easing"]): string | readonly number[] {
+  if (easing === undefined) return [0, 0, 0.58, 1];
+  if (typeof easing !== "string") return easing;
+  const presets: Readonly<Record<string, readonly number[]>> = {
+    ease: [0.25, 0.1, 0.25, 1],
+    "ease-in": [0.42, 0, 1, 1],
+    "ease-out": [0, 0, 0.58, 1],
+    "ease-in-out": [0.42, 0, 0.58, 1],
+  };
+  const preset = presets[easing];
+  if (preset !== undefined) return preset;
+  const match =
+    /^cubic-bezier\(\s*(-?(?:\d+\.?\d*|\.\d+))\s*,\s*(-?(?:\d+\.?\d*|\.\d+))\s*,\s*(-?(?:\d+\.?\d*|\.\d+))\s*,\s*(-?(?:\d+\.?\d*|\.\d+))\s*\)$/u.exec(
+      easing,
+    );
+  if (match === null) return easing;
+  return match.slice(1).map(Number);
+}
+
+function isAnimatableElement(element: Element): element is HTMLElement | SVGElement {
+  const view = element.ownerDocument?.defaultView;
+  if (view === null || view === undefined) return false;
+  return element instanceof view.HTMLElement || element instanceof view.SVGElement;
 }

@@ -3,4 +3,5 @@ export * from "./diff";
 export * from "./execute";
 export * from "./hash";
 export * from "./invariants";
+export * from "./patches";
 export * from "./reducer";
