@@ -1,5 +1,5 @@
 import { auditCommandRegistry } from "./commands";
-import { validateEvidenceRecords } from "./evidence";
+import { auditEvidenceScope, validateEvidenceRecords } from "./evidence";
 import { auditHardGates } from "./hard-gates";
 import {
   compareCodeUnits,
@@ -60,7 +60,6 @@ export function generateConformanceReport(input: ConformanceReportInput): Confor
     input.commandRegistry,
   );
   const support = auditSupportClaims(manifestAudit.value, input.capabilities, evidence);
-  const hardGates = auditHardGates(input.hardGates, evidence);
   const traceability = auditRequirementTraceability({
     profiles: manifestAudit.value?.profiles ?? [],
     evidence,
@@ -68,10 +67,18 @@ export function generateConformanceReport(input: ConformanceReportInput): Confor
     traces: input.traces,
     expectedRequirementIds: PANEFOLD_V1_REQUIREMENT_IDS,
   });
+  const profileIds = manifestAudit.value?.profiles.map((profile) => profile.id) ?? [];
+  const evidenceScopeIssues = auditEvidenceScope(evidence, PANEFOLD_V1_REQUIREMENT_IDS, profileIds);
+  const hardGates = auditHardGates(input.hardGates, evidence, {
+    expectedRequirementIds: PANEFOLD_V1_REQUIREMENT_IDS,
+    profileIds,
+    traces: traceability.traces,
+  });
 
   const reportIssues: ConformanceIssue[] = [
     ...manifestAudit.issues,
     ...evidenceAudit.issues,
+    ...evidenceScopeIssues,
     ...commandParity.issues,
     ...support.issues,
     ...traceability.issues,

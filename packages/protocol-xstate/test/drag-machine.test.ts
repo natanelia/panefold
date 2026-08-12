@@ -93,4 +93,29 @@ describe("drag protocol", () => {
     expect(actor.getSnapshot().context.threshold).toBe(5);
     actor.stop();
   });
+
+  it("recovers instead of applying a stale revision result", () => {
+    const actor = createDragActor({ threshold: 0 });
+    actor.start();
+    actor.send({
+      type: "POINTER_DOWN",
+      pointerId: 1,
+      position: { x: 0, y: 0 },
+      baseRevision: revision(2),
+    });
+    actor.send({ type: "POINTER_MOVE", pointerId: 1, position: { x: 1, y: 0 } });
+    actor.send({
+      type: "SET_CANDIDATE",
+      candidate: { id: "group:b", label: "Group B" },
+    });
+    actor.send({ type: "POINTER_UP", pointerId: 1 });
+    actor.send({ type: "REVISION_CONFLICT" });
+    expect(actor.getSnapshot()).toMatchObject({
+      value: "recovering",
+      context: { failure: "revision-conflict" },
+    });
+    actor.send({ type: "RECOVERED" });
+    expect(actor.getSnapshot().value).toBe("idle");
+    actor.stop();
+  });
 });

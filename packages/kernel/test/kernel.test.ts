@@ -54,6 +54,23 @@ describe("reference kernel", () => {
     expect(canonicalSerialize(snapshot)).toContain('"schemaVersion":2');
   });
 
+  it("preserves untouched public values by reference across revisions", () => {
+    const snapshot = fixtureSnapshot();
+    const result = execute(snapshot, {
+      type: "select-panel",
+      panelId: ids.panels[1],
+    });
+
+    expect(result.next.panels).toBe(snapshot.panels);
+    expect(result.next.nodes).toBe(snapshot.nodes);
+    expect(result.next.surfaces).toBe(snapshot.surfaces);
+    expect(result.next.metadata).toBe(snapshot.metadata);
+    expect(result.next.groups).not.toBe(snapshot.groups);
+    expect(result.next.groups.byId[String(ids.groups[1])]).toBe(
+      snapshot.groups.byId[String(ids.groups[1])],
+    );
+  });
+
   it("commits atomically with typed patches, revision, and inverse", () => {
     const snapshot = fixtureSnapshot();
     const result = execute(snapshot, {

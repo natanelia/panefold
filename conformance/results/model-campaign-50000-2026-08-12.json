@@ -1,0 +1,38 @@
+{
+  "schemaVersion": 1,
+  "runner": "panefold-differential-campaign",
+  "producedAt": "2026-08-12T06:40:00Z",
+  "generatorId": "panefold.comprehensive-workspace.v1",
+  "randomAlgorithm": "xorshift32",
+  "completedSteps": 50000,
+  "accepted": 47996,
+  "rejected": 2004,
+  "generatedCommandTypeCount": 36,
+  "missingCommandTypes": [],
+  "divergenceCount": 0,
+  "finalHash": "fnv1a64-v1:6af80a45515fe6da",
+  "elapsedMs": 1001416,
+  "checks": {
+    "invariantValidation": "every-attempt",
+    "committedPatchReplay": "every-accepted-transaction",
+    "inversePatchReplay": "every-accepted-transaction",
+    "optimizedProjectionReplay": "every-accepted-transaction"
+  },
+  "implementation": {
+    "reference": "@panefold/kernel.executeCommand",
+    "candidateId": "@panefold/kernel-optimized.patch-projection",
+    "independentCandidate": false
+  },
+  "thresholds": {
+    "generatedOperationTarget": 10000000,
+    "generatedOperationTargetMet": false,
+    "phaseOneDifferentialEligible": false
+  },
+  "status": "passed-with-thresholds-unmet",
+  "limitations": [
+    "The run establishes no divergence for 50,000 generated attempts, not the ten-million stable threshold.",
+    "The terminal-only run did not retain its seed or complete per-command counter map, so this checked-in record is a bounded execution summary rather than a fully replayable release artifact.",
+    "The optimized implementation is a patch projection and therefore is not an independent semantic reducer.",
+    "At the observed rate, a ten-million run would require approximately 55.6 hours without further campaign optimization."
+  ]
+}

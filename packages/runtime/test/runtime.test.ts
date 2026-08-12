@@ -239,6 +239,7 @@ describe("workspace runtime", () => {
       "notificationErrorLimit",
       "queueLimit",
       "queueDrainLimit",
+      "structuralReproductionTransactionLimit",
     ] as const;
     const invalidValues = [-1, 0.5, Number.NaN, Number.POSITIVE_INFINITY];
 
@@ -482,6 +483,144 @@ describe("workspace runtime", () => {
     expect(runtime.getSnapshot().groups.byId[testGroupId]?.selectedPanelId).toBe(firstPanelId);
     expect(runtime.redo().status).toBe("committed");
     expect(runtime.getSnapshot().groups.byId[testGroupId]?.selectedPanelId).toBe(secondPanelId);
+  });
+
+  it("freezes at the last valid snapshot and emits a bounded redacted reproduction", () => {
+    const structuralFailureListener = vi.fn(() => {
+      throw new Error("Failure reporting must remain observational");
+    });
+    const snapshotListener = vi.fn();
+    const secret = "private-title-parameters-checkpoint-and-label";
+    const runtime = createWorkspaceRuntime({
+      initialSnapshot: fixture(),
+      createCommandId: deterministicIds(),
+      structuralReproductionTransactionLimit: 1,
+      onStructuralFailure: structuralFailureListener,
+    });
+    runtime.subscribe(snapshotListener);
+
+    expect(
+      runtime.dispatch(
+        { type: "select-panel", panelId: secondPanelId },
+        { origin: "keyboard", label: `safe command carrying ${secret}` },
+      ).status,
+    ).toBe("committed");
+    const lastValidSnapshot = runtime.getSnapshot();
+
+    const malformedPanel = {
+      ...panel(panelId("panel:defect")),
+      title: secret,
+      parameters: (() => secret) as never,
+      checkpointRef: secret,
+    } satisfies PanelRecord;
+    const defect = runtime.dispatch(
+      {
+        type: "open-panel",
+        panel: malformedPanel,
+        placement: { groupId: testGroupId },
+      },
+      { origin: "application", label: `defective command carrying ${secret}` },
+    );
+
+    expect(defect.status).toBe("rejected");
+    if (defect.status !== "rejected") throw new Error("Expected a frozen rejection");
+    expect(defect.runtimeCode).toBe("STRUCTURAL_MUTATION_FROZEN");
+    expect(defect.result.error).toMatchObject({
+      code: "INVARIANT_VIOLATION",
+      revision: 1n,
+      details: { runtimeCode: "STRUCTURAL_MUTATION_FROZEN" },
+    });
+    expect(runtime.getSnapshot()).toBe(lastValidSnapshot);
+    expect(runtime.getSnapshot().revision).toBe(1n);
+    expect(snapshotListener).toHaveBeenCalledTimes(1);
+    expect(structuralFailureListener).toHaveBeenCalledTimes(1);
+
+    const failure = runtime.getStructuralFailure();
+    expect(failure).toMatchObject({
+      code: "STRUCTURAL_MUTATION_FROZEN",
+      revision: 1n,
+      reproduction: {
+        schemaVersion: 1,
+        detectedAtRevision: "1",
+        defectKind: "internal-exception",
+        commandType: "open-panel",
+        commandOrigin: "application",
+        causeName: "DataCloneError",
+        workspaceCounts: {
+          panels: 2,
+          groups: 1,
+          nodes: 1,
+          surfaces: 1,
+          recoverableClosedPanels: 0,
+        },
+        recentTransactions: [
+          {
+            origin: "keyboard",
+            commandType: "select-panel",
+            previousRevision: "0",
+            revision: "1",
+          },
+        ],
+      },
+    });
+    expect(Object.isFrozen(failure)).toBe(true);
+    expect(Object.isFrozen(failure?.reproduction)).toBe(true);
+    expect(Object.isFrozen(failure?.reproduction.recentTransactions)).toBe(true);
+    expect(JSON.stringify(failure?.reproduction)).not.toContain(secret);
+
+    const blocked = runtime.dispatch(
+      { type: "select-panel", panelId: firstPanelId },
+      { label: "A valid command after the defect" },
+    );
+    expect(blocked.status).toBe("rejected");
+    if (blocked.status !== "rejected") throw new Error("Expected a frozen rejection");
+    expect(blocked.runtimeCode).toBe("STRUCTURAL_MUTATION_FROZEN");
+    expect(runtime.getSnapshot()).toBe(lastValidSnapshot);
+    expect(runtime.canUndo()).toBe(false);
+    expect(runtime.canRedo()).toBe(false);
+    expect(structuralFailureListener).toHaveBeenCalledTimes(1);
+  });
+
+  it("treats a kernel invariant rejection as a structural defect", () => {
+    const initialSnapshot = fixture();
+    const existingPanel = initialSnapshot.panels.byId[firstPanelId];
+    if (existingPanel === undefined) throw new Error("Fixture panel is missing");
+    const invalidSnapshot = {
+      ...initialSnapshot,
+      panels: {
+        ...initialSnapshot.panels,
+        byId: {
+          ...initialSnapshot.panels.byId,
+          [firstPanelId]: {
+            ...existingPanel,
+            constraints: { preferredInline: Number.NaN },
+          },
+        },
+      },
+    } satisfies WorkspaceSnapshot;
+    const runtime = createWorkspaceRuntime({
+      initialSnapshot,
+      createCommandId: deterministicIds(),
+    });
+    const lastValidSnapshot = runtime.getSnapshot();
+
+    const receipt = runtime.dispatch({
+      type: "restore-workspace",
+      snapshot: invalidSnapshot,
+    });
+
+    expect(receipt.status).toBe("rejected");
+    if (receipt.status !== "rejected") throw new Error("Expected an invariant rejection");
+    expect(receipt.runtimeCode).toBe("STRUCTURAL_MUTATION_FROZEN");
+    expect(runtime.getSnapshot()).toBe(lastValidSnapshot);
+    expect(runtime.getStructuralFailure()?.reproduction).toMatchObject({
+      defectKind: "invariant-rejection",
+      commandType: "restore-workspace",
+      causeName: "InvariantViolation",
+    });
+    expect(runtime.dispatch({ type: "select-panel", panelId: secondPanelId }).status).toBe(
+      "rejected",
+    );
   });
 
   it("rejects an invalid initial snapshot instead of silently canonicalizing it", () => {

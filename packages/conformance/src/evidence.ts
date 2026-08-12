@@ -9,21 +9,26 @@ import {
   MAX_RECORDS,
   parseStringArray,
   result,
+  sortIssues,
   unknownKeys,
 } from "./internal";
 import type {
   AuditResult,
   ConformanceIssue,
   EvidenceApproval,
+  EvidenceArtifactRole,
   EvidenceKind,
   EvidenceRecord,
   EvidenceStatus,
+  EvidenceVerificationClass,
 } from "./types";
 
 const EVIDENCE_KEYS = new Set([
   "id",
   "kind",
   "status",
+  "verificationClass",
+  "artifactRole",
   "uri",
   "sha256",
   "producedAt",
@@ -54,6 +59,25 @@ const EVIDENCE_STATUSES: ReadonlySet<EvidenceStatus> = new Set([
   "unresolved",
   "blocked",
 ]);
+const VERIFICATION_CLASSES: ReadonlySet<EvidenceVerificationClass> = new Set([
+  "code-verifiable",
+  "environment-verifiable",
+  "manual-external",
+]);
+const ARTIFACT_ROLES: ReadonlySet<EvidenceArtifactRole> = new Set([
+  "source",
+  "result",
+  "attestation",
+]);
+const MANUAL_EVIDENCE_KINDS: ReadonlySet<EvidenceKind> = new Set([
+  "accessibility-report",
+  "performance-report",
+  "security-report",
+  "compatibility-report",
+  "manual-assessment",
+  "external-certification",
+  "release-approval",
+]);
 const SHA_256_PATTERN = /^[a-f0-9]{64}$/;
 
 export function isSha256Digest(value: unknown): value is string {
@@ -63,8 +87,11 @@ export function isSha256Digest(value: unknown): value is string {
 export function isEvidenceUri(value: unknown): value is string {
   if (typeof value !== "string" || value.length === 0 || value.length > 2_048) return false;
   if (/^urn:[a-z0-9][a-z0-9-]{0,31}:[A-Za-z0-9()+,.:=@;$_!*'/?#-]+$/.test(value)) return true;
-  if (/^repo:\/\/[A-Za-z0-9._/-]+$/.test(value)) {
-    return !value.split("/").some((segment) => segment === ".." || segment === ".");
+  if (/^repo:\/\/[A-Za-z0-9._-]+(?:\/[A-Za-z0-9._-]+)*$/.test(value)) {
+    return !value
+      .slice("repo://".length)
+      .split("/")
+      .some((segment) => segment === ".." || segment === ".");
   }
   try {
     const parsed = new URL(value);
@@ -219,6 +246,8 @@ function parseEvidence(
   const id = input.id;
   const kind = input.kind;
   const status = input.status;
+  const verificationClass = input.verificationClass;
+  const artifactRole = input.artifactRole;
   if (!isIdentifier(id)) {
     issues.push(
       issue("INVALID_EVIDENCE_ID", "invalid", `${path}/id`, "Invalid evidence identifier."),
@@ -232,6 +261,32 @@ function parseEvidence(
   if (typeof status !== "string" || !EVIDENCE_STATUSES.has(status as EvidenceStatus)) {
     issues.push(
       issue("INVALID_EVIDENCE_STATUS", "invalid", `${path}/status`, "Unknown evidence status."),
+    );
+  }
+  if (
+    typeof verificationClass !== "string" ||
+    !VERIFICATION_CLASSES.has(verificationClass as EvidenceVerificationClass)
+  ) {
+    issues.push(
+      issue(
+        "INVALID_EVIDENCE_VERIFICATION_CLASS",
+        "invalid",
+        `${path}/verificationClass`,
+        "Evidence must be classified as code-verifiable, environment-verifiable, or manual-external.",
+      ),
+    );
+  }
+  if (
+    typeof artifactRole !== "string" ||
+    !ARTIFACT_ROLES.has(artifactRole as EvidenceArtifactRole)
+  ) {
+    issues.push(
+      issue(
+        "INVALID_EVIDENCE_ARTIFACT_ROLE",
+        "invalid",
+        `${path}/artifactRole`,
+        "Evidence must identify whether its artifact is source, a result, or an attestation.",
+      ),
     );
   }
 
@@ -313,19 +368,117 @@ function parseEvidence(
         ),
       );
     }
-    if (
-      (kind === "external-certification" || kind === "release-approval") &&
-      approval === undefined
-    ) {
+    if (verificationClass === "manual-external" && approval === undefined) {
       issues.push(
         issue(
           "EXTERNAL_APPROVAL_UNPROVEN",
           "invalid",
           `${path}/approval`,
-          "A verified external certification or release approval requires a hashed attestation.",
+          "Verified manual or external evidence requires a hashed attestation.",
         ),
       );
     }
+  }
+
+  if (verificationClass === "code-verifiable") {
+    if (artifactRole === "attestation") {
+      issues.push(
+        issue(
+          "CODE_EVIDENCE_USES_ATTESTATION",
+          "invalid",
+          `${path}/artifactRole`,
+          "Code-verifiable evidence must identify source or an automated result, not an attestation.",
+        ),
+      );
+    }
+    if (
+      kind === "manual-assessment" ||
+      kind === "external-certification" ||
+      kind === "release-approval"
+    ) {
+      issues.push(
+        issue(
+          "CODE_EVIDENCE_KIND_MISMATCH",
+          "invalid",
+          `${path}/kind`,
+          `Code-verifiable evidence cannot use the ${String(kind)} kind.`,
+        ),
+      );
+    }
+  }
+  if (verificationClass === "environment-verifiable") {
+    if (artifactRole !== "result") {
+      issues.push(
+        issue(
+          "ENVIRONMENT_EVIDENCE_WITHOUT_RESULT",
+          "invalid",
+          `${path}/artifactRole`,
+          "Environment-verifiable evidence must be a recorded execution result.",
+        ),
+      );
+    }
+    if (
+      kind === "manual-assessment" ||
+      kind === "architecture-decision" ||
+      kind === "external-certification" ||
+      kind === "release-approval"
+    ) {
+      issues.push(
+        issue(
+          "ENVIRONMENT_EVIDENCE_KIND_MISMATCH",
+          "invalid",
+          `${path}/kind`,
+          `Environment-verifiable evidence cannot use the ${String(kind)} kind.`,
+        ),
+      );
+    }
+  }
+  if (verificationClass === "manual-external") {
+    if (artifactRole !== "attestation") {
+      issues.push(
+        issue(
+          "MANUAL_EVIDENCE_WITHOUT_ATTESTATION",
+          "invalid",
+          `${path}/artifactRole`,
+          "Manual or external evidence must be an attestation artifact.",
+        ),
+      );
+    }
+    if (
+      typeof kind === "string" &&
+      EVIDENCE_KINDS.has(kind as EvidenceKind) &&
+      !MANUAL_EVIDENCE_KINDS.has(kind as EvidenceKind)
+    ) {
+      issues.push(
+        issue(
+          "MANUAL_EVIDENCE_KIND_MISMATCH",
+          "invalid",
+          `${path}/kind`,
+          `Manual or external evidence cannot use the ${String(kind)} kind.`,
+        ),
+      );
+    }
+  }
+
+  if (status === "verified" && requirementIds?.length === 0) {
+    issues.push(
+      issue(
+        "VERIFIED_EVIDENCE_WITHOUT_REQUIREMENT_SCOPE",
+        "invalid",
+        `${path}/requirementIds`,
+        "Verified evidence must identify at least one requirement that it substantiates.",
+      ),
+    );
+  }
+  if (status === "verified" && profileIds?.length === 0) {
+    issues.push(
+      issue(
+        "VERIFIED_EVIDENCE_WITHOUT_PROFILE_SCOPE",
+        "invalid",
+        `${path}/profileIds`,
+        "Verified evidence must identify at least one published profile that it substantiates.",
+      ),
+    );
   }
   if (status === "blocked") {
     if (blockedBy === undefined || blockedBy.length === 0) {
@@ -369,6 +522,10 @@ function parseEvidence(
     !EVIDENCE_KINDS.has(kind as EvidenceKind) ||
     typeof status !== "string" ||
     !EVIDENCE_STATUSES.has(status as EvidenceStatus) ||
+    typeof verificationClass !== "string" ||
+    !VERIFICATION_CLASSES.has(verificationClass as EvidenceVerificationClass) ||
+    typeof artifactRole !== "string" ||
+    !ARTIFACT_ROLES.has(artifactRole as EvidenceArtifactRole) ||
     requirementIds === undefined ||
     profileIds === undefined
   ) {
@@ -379,6 +536,8 @@ function parseEvidence(
     id,
     kind: kind as EvidenceKind,
     status: status as EvidenceStatus,
+    verificationClass: verificationClass as EvidenceVerificationClass,
+    artifactRole: artifactRole as EvidenceArtifactRole,
     requirementIds: [...requirementIds].sort(compareCodeUnits),
     profileIds: [...profileIds].sort(compareCodeUnits),
     ...(typeof input.uri === "string" ? { uri: input.uri } : {}),
@@ -388,6 +547,44 @@ function parseEvidence(
     ...(typeof input.note === "string" ? { note: input.note } : {}),
     ...(approval === undefined ? {} : { approval }),
   };
+}
+
+/** Cross-checks evidence scope against the authoritative requirement and published profile sets. */
+export function auditEvidenceScope(
+  evidence: readonly EvidenceRecord[],
+  requirementIds: readonly string[],
+  profileIds: readonly string[],
+): readonly ConformanceIssue[] {
+  const issues: ConformanceIssue[] = [];
+  const requirements = new Set(requirementIds);
+  const profiles = new Set(profileIds);
+  evidence.forEach((record) => {
+    record.requirementIds.forEach((requirementId) => {
+      if (!requirements.has(requirementId)) {
+        issues.push(
+          issue(
+            "EVIDENCE_REFERENCES_UNKNOWN_REQUIREMENT",
+            "invalid",
+            `/evidence/${record.id}/requirementIds`,
+            `Evidence references a requirement outside the authoritative inventory: ${requirementId}`,
+          ),
+        );
+      }
+    });
+    record.profileIds.forEach((profileId) => {
+      if (!profiles.has(profileId)) {
+        issues.push(
+          issue(
+            "EVIDENCE_REFERENCES_UNKNOWN_PROFILE",
+            "invalid",
+            `/evidence/${record.id}/profileIds`,
+            `Evidence references an unpublished profile: ${profileId}`,
+          ),
+        );
+      }
+    });
+  });
+  return sortIssues(issues);
 }
 
 export function validateEvidenceRecords(input: unknown): AuditResult<readonly EvidenceRecord[]> {

@@ -66,6 +66,38 @@
     z-index: 1;
   }
 
+  .pf-region-switcher {
+    position: absolute;
+    inset-block-start: max(0px, env(safe-area-inset-top));
+    inset-inline: max(0px, env(safe-area-inset-left)) max(0px, env(safe-area-inset-right));
+    z-index: 8;
+    display: flex;
+    align-items: center;
+    min-block-size: 52px;
+    padding: 6px;
+    border-block-end: 1px solid var(--pf-border);
+    background: var(--pf-surface-raised);
+  }
+
+  .pf-region-switcher label,
+  .pf-region-switcher select {
+    inline-size: 100%;
+  }
+
+  .pf-region-switcher select {
+    min-block-size: 44px;
+    padding-inline: 12px;
+    border: 1px solid var(--pf-border-strong);
+    border-radius: 7px;
+    color: var(--pf-text);
+    background: var(--pf-surface);
+  }
+
+  .pf-workspace[data-responsive-projection="single-region"] .pf-semantic-layer {
+    inset-block-start: calc(52px + max(0px, env(safe-area-inset-top)));
+    inset-block-end: max(0px, env(safe-area-inset-bottom));
+  }
+
   .pf-split {
     display: flex;
     inline-size: 100%;

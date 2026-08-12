@@ -1,5 +1,7 @@
-import { useId, useState, type ReactNode } from "react";
+import { useEffect, useId, useRef, useState, type ReactNode } from "react";
 import type { WorkspacePanelRegistry, WorkspacePanelRenderProps } from "@panefold/react";
+
+import { HeavyContentFixturePanel } from "./heavy-content-fixture";
 
 type GlyphName =
   "route" | "layers" | "map" | "notes" | "inspect" | "validate" | "problems" | "timeline";
@@ -95,6 +97,28 @@ function MapCanvasPanel({ panel, lifecycle }: WorkspacePanelRenderProps) {
   const [selectedFeature, setSelectedFeature] = useState("LN-1842");
   const [showLabels, setShowLabels] = useState(true);
   const mountToken = useId().replaceAll(":", "");
+  const workProbeRef = useRef<HTMLOutputElement>(null);
+
+  useEffect(() => {
+    const output = workProbeRef.current;
+    const ownerWindow = output?.ownerDocument.defaultView;
+    if (output === null || ownerWindow === undefined || ownerWindow === null) return;
+    output.dataset.lifecycle = lifecycle;
+    if (lifecycle === "suspended") return;
+    let frame = 0;
+    const tick = () => {
+      frame = ownerWindow.requestAnimationFrame(() => {
+        const workUnits = Number(output.dataset.workUnits ?? "0") + 1;
+        output.dataset.workUnits = String(workUnits);
+        output.value = String(workUnits);
+        tick();
+      });
+    };
+    tick();
+    return () => {
+      ownerWindow.cancelAnimationFrame(frame);
+    };
+  }, [lifecycle]);
 
   return (
     <PanelFrame
@@ -151,6 +175,9 @@ function MapCanvasPanel({ panel, lifecycle }: WorkspacePanelRenderProps) {
           <span className="demo-lifecycle-badge" data-state={lifecycle}>
             {lifecycle === "suspended" ? "Render work paused" : `Render ${lifecycle}`}
           </span>
+          <output ref={workProbeRef} aria-label="Map render work units" data-work-units="0">
+            0
+          </output>
           <span className="demo-mount-proof" title="Local panel state survives same-document moves">
             Host {mountToken}
           </span>
@@ -710,4 +737,9 @@ export const demoPanelRegistry: WorkspacePanelRegistry = {
   "map.validation": { render: ValidationPanel, icon: <Glyph name="validate" /> },
   "map.problems": { render: ProblemsPanel, icon: <Glyph name="problems" /> },
   "map.timeline": { render: TimelinePanel, icon: <Glyph name="timeline" /> },
+};
+
+export const heavyContentDemoPanelRegistry: WorkspacePanelRegistry = {
+  ...demoPanelRegistry,
+  "map.canvas": { render: HeavyContentFixturePanel, icon: <Glyph name="map" /> },
 };

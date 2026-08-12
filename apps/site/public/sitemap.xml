@@ -9,11 +9,18 @@
   <url><loc>https://natanelia.github.io/panefold/docs/support/</loc></url>
   <url><loc>https://natanelia.github.io/panefold/docs/conformance/</loc></url>
   <url><loc>https://natanelia.github.io/panefold/docs/roadmap/</loc></url>
+  <url><loc>https://natanelia.github.io/panefold/docs/marketing/</loc></url>
   <url><loc>https://natanelia.github.io/panefold/docs/adr-authoritative-kernel/</loc></url>
   <url><loc>https://natanelia.github.io/panefold/docs/adr-experimental-scope/</loc></url>
   <url><loc>https://natanelia.github.io/panefold/docs/adr-schema-command-catalog/</loc></url>
   <url><loc>https://natanelia.github.io/panefold/docs/adr-panel-lifecycle/</loc></url>
   <url><loc>https://natanelia.github.io/panefold/docs/adr-persistence-trust/</loc></url>
   <url><loc>https://natanelia.github.io/panefold/docs/adr-external-surfaces/</loc></url>
+  <url><loc>https://natanelia.github.io/panefold/docs/adr-panel-plugin-boundaries/</loc></url>
+  <url><loc>https://natanelia.github.io/panefold/docs/adr-single-writer-coordination/</loc></url>
+  <url><loc>https://natanelia.github.io/panefold/docs/adr-fail-closed-runtime/</loc></url>
+  <url><loc>https://natanelia.github.io/panefold/docs/adr-evidence-taxonomy/</loc></url>
+  <url><loc>https://natanelia.github.io/panefold/docs/adr-independent-oracle/</loc></url>
+  <url><loc>https://natanelia.github.io/panefold/docs/adr-protocol-motion-lifecycles/</loc></url>
   <url><loc>https://natanelia.github.io/panefold/docs/system-design/</loc></url>
 </urlset>

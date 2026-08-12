@@ -33,6 +33,7 @@ import {
 import { createResizeActor, type ResizeEvent } from "@panefold/protocol-xstate";
 
 import { solveWorkspaceProjectionLayout, type WorkspaceLayoutSolver } from "./geometry";
+import { ENGLISH_WORKSPACE_MESSAGES, type WorkspaceMessageCatalog } from "./messages";
 import { useWorkspaceRuntime, useWorkspaceSnapshot } from "./runtime-context";
 import type {
   WorkspaceAnnouncement,
@@ -65,21 +66,33 @@ export interface WorkspaceSurfaceProps<TSnapshot, TCommand, TResult> {
   readonly motion?: MotionProfile;
   readonly className?: string;
   readonly workspaceLabel?: string;
+  readonly messageCatalog?: WorkspaceMessageCatalog;
   /** Experimental model-aware geometry bridge. */
   readonly layoutSolver?: WorkspaceLayoutSolver<TSnapshot>;
   /** Deterministic logical bounds, primarily for embedded and test surfaces. */
   readonly layoutBounds?: LogicalRect;
   readonly splitterSize?: number;
+  /**
+   * Reversible single-region projection for narrow/coarse-pointer surfaces.
+   * It changes only the rendered root; canonical desktop topology is untouched.
+   */
+  readonly responsive?: false | "auto";
+  readonly compactBreakpoint?: number;
+  readonly compactGroupId?: string;
+  readonly onCompactGroupChange?: (groupId: string) => void;
   /** Experimental injection points used by adapter certification fixtures. */
   readonly motionDriver?: MotionDriver;
   readonly frameScheduler?: SurfaceFrameScheduler;
   readonly onAnnouncement?: (message: string) => void;
+  /** Coalesces rapid semantic outcomes; zero keeps immediate delivery. */
+  readonly announcementDebounceMs?: number;
   readonly onCommandResult?: (result: TResult) => void;
   readonly interpretResult?: WorkspaceResultInterpreter<TCommand, TResult>;
 }
 
 interface PanelBoundaryProps {
   readonly panel: WorkspacePanelView;
+  readonly messages: WorkspaceMessageCatalog;
   readonly children: ReactNode;
 }
 
@@ -98,15 +111,17 @@ class PanelBoundary extends Component<PanelBoundaryProps, PanelBoundaryState> {
     if (this.state.error !== undefined) {
       return (
         <section className="pf-panel-error" role="alert">
-          <strong>{this.props.panel.title} could not be rendered</strong>
-          <p>The workspace is still safe. Retry or close this panel.</p>
+          <strong>
+            {this.props.messages.panelRenderFailed({ title: this.props.panel.title })}
+          </strong>
+          <p>{this.props.messages.panelRenderRecovery()}</p>
           <button
             type="button"
             onClick={() => {
               this.setState({ error: undefined });
             }}
           >
-            Retry
+            {this.props.messages.retry()}
           </button>
         </section>
       );
@@ -149,16 +164,23 @@ function SurfaceRenderer<TSnapshot, TCommand, TResult>({
   direction = "ltr",
   motion = "productive",
   className,
-  workspaceLabel = "Workspace",
+  workspaceLabel,
+  messageCatalog = ENGLISH_WORKSPACE_MESSAGES,
   layoutSolver,
   layoutBounds,
   splitterSize = 6,
+  responsive = false,
+  compactBreakpoint = 720,
+  compactGroupId,
+  onCompactGroupChange,
   motionDriver,
   frameScheduler,
   onAnnouncement,
+  announcementDebounceMs = 0,
   onCommandResult,
   interpretResult,
 }: SurfaceRendererProps<TSnapshot, TCommand, TResult>) {
+  const messages = messageCatalog;
   const snapshot = useWorkspaceSnapshot<TSnapshot, TCommand, TResult>();
   const projection = useMemo(() => projector(snapshot), [projector, snapshot]);
   const rootRef = useRef<HTMLDivElement>(null);
@@ -172,8 +194,13 @@ function SurfaceRenderer<TSnapshot, TCommand, TResult>({
     id: 0,
     message: "",
   });
+  const announcementTimerRef = useRef<
+    { readonly handle: number; readonly ownerWindow: Window } | undefined
+  >(undefined);
   const [movePanelId, setMovePanelId] = useState<string>();
   const [systemReducedMotion, setSystemReducedMotion] = useState(false);
+  const [coarsePointer, setCoarsePointer] = useState(false);
+  const [internalCompactGroupId, setInternalCompactGroupId] = useState<string>();
   const [measuredBounds, setMeasuredBounds] = useState<LogicalRect>(ZERO_LOGICAL_RECT);
   const [splitOverrides, setSplitOverrides] = useState<
     Readonly<Record<string, SplitLayoutOverride>>
@@ -181,6 +208,33 @@ function SurfaceRenderer<TSnapshot, TCommand, TResult>({
   const splitOverridesRef = useRef(splitOverrides);
   const effectiveMotion = motion === "productive" && systemReducedMotion ? "reduced" : motion;
   const logicalBounds = layoutBounds ?? measuredBounds;
+  const compact =
+    responsive === "auto" &&
+    (coarsePointer ||
+      (logicalBounds.inlineSize > 0 && logicalBounds.inlineSize < compactBreakpoint));
+  const compactGroups = useMemo(() => orderedGroups(projection), [projection]);
+  const effectiveCompactGroupId = compactGroupId ?? internalCompactGroupId;
+  const requestedCompactGroup =
+    effectiveCompactGroupId === undefined ? undefined : projection.groups[effectiveCompactGroupId];
+  const activeCompactGroup = compactGroups.find((group) =>
+    group.panelIds.includes(projection.activePanelId ?? ""),
+  );
+  const selectedCompactGroup = requestedCompactGroup ?? activeCompactGroup ?? compactGroups[0];
+  const compactRootNode =
+    compact && selectedCompactGroup !== undefined
+      ? Object.values(projection.nodes).find(
+          (candidate) =>
+            candidate.kind === "group" && candidate.groupId === selectedCompactGroup.id,
+        )
+      : undefined;
+  const renderedRootNodeId = compactRootNode?.id ?? projection.rootNodeId;
+  const renderedProjection = useMemo(
+    () =>
+      renderedRootNodeId === projection.rootNodeId
+        ? projection
+        : { ...projection, rootNodeId: renderedRootNodeId },
+    [projection, renderedRootNodeId],
+  );
   const surfaceScheduleKey = `${domIdPrefix}:geometry`;
   const scheduler = useMemo(
     () => frameScheduler ?? createBrowserFrameScheduler(),
@@ -194,21 +248,21 @@ function SurfaceRenderer<TSnapshot, TCommand, TResult>({
   const solveResolvedLayout = useCallback(
     (overrides: Readonly<Record<string, SplitLayoutOverride>>) => {
       const request = {
-        projection,
-        rootNodeId: projection.rootNodeId,
+        projection: renderedProjection,
+        rootNodeId: renderedProjection.rootNodeId,
         bounds: logicalBounds,
         splitterSize,
         splitOverrides: overrides,
       };
       return (
         layoutSolver?.(snapshot, request) ??
-        solveWorkspaceProjectionLayout(projection, logicalBounds, {
+        solveWorkspaceProjectionLayout(renderedProjection, logicalBounds, {
           splitterSize,
           splitOverrides: overrides,
         })
       );
     },
-    [layoutSolver, logicalBounds, projection, snapshot, splitterSize],
+    [layoutSolver, logicalBounds, renderedProjection, snapshot, splitterSize],
   );
   const resolvedLayout = useMemo(
     () => solveResolvedLayout(splitOverrides),
@@ -236,12 +290,43 @@ function SurfaceRenderer<TSnapshot, TCommand, TResult>({
     setSplitOverrides(nextOverrides);
   }, []);
 
-  const announce = useCallback(
+  const publishAnnouncement = useCallback(
     (message: string) => {
       setAnnouncement((current) => ({ id: current.id + 1, message }));
       onAnnouncement?.(message);
     },
     [onAnnouncement],
+  );
+
+  const announce = useCallback(
+    (message: string) => {
+      const delay =
+        Number.isFinite(announcementDebounceMs) && announcementDebounceMs > 0
+          ? announcementDebounceMs
+          : 0;
+      const ownerWindow = rootRef.current?.ownerDocument.defaultView;
+      if (delay === 0 || ownerWindow === undefined || ownerWindow === null) {
+        publishAnnouncement(message);
+        return;
+      }
+      if (announcementTimerRef.current !== undefined) {
+        announcementTimerRef.current.ownerWindow.clearTimeout(announcementTimerRef.current.handle);
+      }
+      const handle = ownerWindow.setTimeout(() => {
+        announcementTimerRef.current = undefined;
+        publishAnnouncement(message);
+      }, delay);
+      announcementTimerRef.current = { handle, ownerWindow };
+    },
+    [announcementDebounceMs, publishAnnouncement],
+  );
+
+  useEffect(
+    () => () => {
+      const timer = announcementTimerRef.current;
+      if (timer !== undefined) timer.ownerWindow.clearTimeout(timer.handle);
+    },
+    [],
   );
 
   useEffect(() => {
@@ -258,6 +343,21 @@ function SurfaceRenderer<TSnapshot, TCommand, TResult>({
       media.removeEventListener("change", update);
     };
   }, []);
+
+  useEffect(() => {
+    const ownerWindow = rootRef.current?.ownerDocument.defaultView;
+    if (ownerWindow === undefined || ownerWindow === null || responsive !== "auto") return;
+    const media = ownerWindow.matchMedia?.("(pointer: coarse)");
+    if (media === undefined) return;
+    const update = () => {
+      setCoarsePointer(media.matches);
+    };
+    update();
+    media.addEventListener("change", update);
+    return () => {
+      media.removeEventListener("change", update);
+    };
+  }, [responsive]);
 
   useLayoutEffect(() => {
     if (layoutBounds !== undefined) return;
@@ -408,12 +508,12 @@ function SurfaceRenderer<TSnapshot, TCommand, TResult>({
         selected,
       });
     }
-  }, [domIdPrefix, portalHosts, projection]);
+  }, [domIdPrefix, portalHosts, projection, renderedRootNodeId]);
 
   const resolveOutcome = useCallback(
     (result: TResult, context: WorkspaceDispatchContext<TCommand>) =>
-      interpretResult?.(result, context) ?? defaultResultInterpreter(result, context),
-    [interpretResult],
+      interpretResult?.(result, context) ?? defaultResultInterpreter(result, context, messages),
+    [interpretResult, messages],
   );
 
   const dispatch = useCallback(
@@ -432,25 +532,29 @@ function SurfaceRenderer<TSnapshot, TCommand, TResult>({
     (splitId: string, weights: readonly number[], origin: "keyboard" | "pointer") => {
       const execution = dispatch(
         commands.resizeSplit(splitId, weights),
-        "Resized workspace panes",
+        messages.resizedWorkspacePanes(),
         origin,
       );
       clearSplitPreview(splitId);
       return execution;
     },
-    [clearSplitPreview, commands, dispatch],
+    [clearSplitPreview, commands, dispatch, messages],
   );
 
   const selectPanel = useCallback(
     (panel: WorkspacePanelView, focusTab = false, origin: WorkspaceCommandOrigin = "keyboard") => {
-      dispatch(commands.selectPanel(panel.id), `Selected ${panel.title}`, origin);
+      dispatch(
+        commands.selectPanel(panel.id),
+        messages.selectedPanel({ title: panel.title }),
+        origin,
+      );
       if (focusTab) {
         queueMicrotask(() => {
           rootRef.current?.ownerDocument.getElementById(panelTabId(domIdPrefix, panel.id))?.focus();
         });
       }
     },
-    [commands, dispatch, domIdPrefix],
+    [commands, dispatch, domIdPrefix, messages],
   );
 
   const closePanel = useCallback(
@@ -467,7 +571,11 @@ function SurfaceRenderer<TSnapshot, TCommand, TResult>({
           controls?.contains(activeElement) === true ||
           host?.contains(activeElement) === true);
       const successorPanelId = findFocusSuccessor(projection, panel.id);
-      const execution = dispatch(commands.closePanel(panel.id), `Closed ${panel.title}`, origin);
+      const execution = dispatch(
+        commands.closePanel(panel.id),
+        messages.closedPanel({ title: panel.title }),
+        origin,
+      );
 
       if (hadFocus && execution.outcome.status === "committed") {
         queueMicrotask(() => {
@@ -481,7 +589,7 @@ function SurfaceRenderer<TSnapshot, TCommand, TResult>({
         });
       }
     },
-    [commands, dispatch, domIdPrefix, projection],
+    [commands, dispatch, domIdPrefix, messages, projection],
   );
 
   const restoreMoveTrigger = useCallback(
@@ -498,7 +606,7 @@ function SurfaceRenderer<TSnapshot, TCommand, TResult>({
     [domIdPrefix],
   );
 
-  const node = projection.nodes[projection.rootNodeId];
+  const node = renderedProjection.nodes[renderedProjection.rootNodeId];
 
   return (
     <div
@@ -509,18 +617,45 @@ function SurfaceRenderer<TSnapshot, TCommand, TResult>({
       data-effective-motion={effectiveMotion}
       data-geometry-diagnostics={resolvedLayout.diagnostics.length}
       data-geometry-mode={layoutSolver === undefined ? "projection" : "model"}
+      data-responsive-projection={compact ? "single-region" : "full-layout"}
       dir={direction}
-      aria-label={workspaceLabel}
+      aria-label={workspaceLabel ?? messages.workspaceLabel()}
       tabIndex={-1}
     >
+      {compact && selectedCompactGroup !== undefined ? (
+        <nav className="pf-region-switcher" aria-label={messages.workspaceRegions()}>
+          <label>
+            <span className="pf-visually-hidden">{messages.currentWorkspaceRegion()}</span>
+            <select
+              aria-label={messages.currentWorkspaceRegion()}
+              value={selectedCompactGroup.id}
+              onChange={(event) => {
+                setInternalCompactGroupId(event.target.value);
+                onCompactGroupChange?.(event.target.value);
+              }}
+            >
+              {compactGroups.map((group) => (
+                <option key={group.id} value={group.id}>
+                  {messages.regionOption({
+                    label: group.label ?? messages.panelGroupFallback(),
+                    panelCount: group.panelIds.length,
+                  })}
+                </option>
+              ))}
+            </select>
+          </label>
+        </nav>
+      ) : null}
+
       <div className="pf-semantic-layer" data-workspace-layer="chrome">
         {node === undefined ? (
-          <WorkspaceEmptyState />
+          <WorkspaceEmptyState messages={messages} />
         ) : (
           <LayoutNode
             node={node}
-            projection={projection}
+            projection={renderedProjection}
             panels={panels}
+            messages={messages}
             commands={commands}
             direction={direction}
             domIdPrefix={domIdPrefix}
@@ -557,13 +692,17 @@ function SurfaceRenderer<TSnapshot, TCommand, TResult>({
           <KeyboardMoveOverlay
             panel={projection.panels[movePanelId]}
             groups={Object.values(projection.groups)}
+            messages={messages}
             onMove={(groupId) => {
               const panelId = movePanelId;
               const panel = projection.panels[movePanelId];
               if (commands.movePanel !== undefined && panel !== undefined) {
                 dispatch(
                   commands.movePanel(movePanelId, groupId),
-                  `Moved ${panel.title} to ${projection.groups[groupId]?.label ?? "group"}`,
+                  messages.movedPanelTo({
+                    title: panel.title,
+                    group: projection.groups[groupId]?.label ?? messages.groupFallback(),
+                  }),
                   "keyboard",
                 );
               }
@@ -573,14 +712,19 @@ function SurfaceRenderer<TSnapshot, TCommand, TResult>({
             onCancel={() => {
               const panelId = movePanelId;
               setMovePanelId(undefined);
-              announce("Move cancelled");
+              announce(messages.moveCancelled());
               restoreMoveTrigger(panelId);
             }}
           />
         ) : null}
       </div>
 
-      <PanelPortals projection={projection} registry={panels} hosts={portalHosts} />
+      <PanelPortals
+        projection={projection}
+        registry={panels}
+        hosts={portalHosts}
+        messages={messages}
+      />
 
       <div
         key={announcement.id}
@@ -599,6 +743,7 @@ interface LayoutNodeProps<TCommand, TResult> {
   readonly node: WorkspaceNodeView;
   readonly projection: WorkspaceProjection;
   readonly panels: WorkspacePanelRegistry;
+  readonly messages: WorkspaceMessageCatalog;
   readonly commands: WorkspaceCommandAdapter<TCommand>;
   readonly direction: WorkspaceDirection;
   readonly domIdPrefix: string;
@@ -687,6 +832,7 @@ function SplitNode<TCommand, TResult>({
                 onPreview={(nextWeights) => props.previewSplit(split.id, nextWeights)}
                 onCommit={(nextWeights, origin) => props.commitSplit(split.id, nextWeights, origin)}
                 onCancel={() => props.clearSplitPreview(split.id)}
+                messages={props.messages}
               />
             ) : null}
             <div
@@ -727,6 +873,7 @@ interface SplitterProps {
     origin: "keyboard" | "pointer",
   ) => DispatchExecution<unknown>;
   readonly onCancel: () => void;
+  readonly messages: WorkspaceMessageCatalog;
 }
 
 function Splitter({
@@ -743,6 +890,7 @@ function Splitter({
   onPreview,
   onCommit,
   onCancel,
+  messages,
 }: SplitterProps) {
   const splitterRef = useRef<HTMLDivElement>(null);
   const [actor] = useState(createResizeActor);
@@ -871,7 +1019,7 @@ function Splitter({
       onCancel();
       return;
     }
-    settleCommit(onCommit(session.latest, "pointer").outcome, send);
+    settleCommit(onCommit(session.latest, "pointer").outcome, send, messages);
   };
 
   const cancelPointer = (event: ReactPointerEvent<HTMLDivElement>) => {
@@ -930,7 +1078,7 @@ function Splitter({
     const constrained = splitterPosition(preview, splitter.id);
     if (constrained !== undefined) send({ type: "CONSTRAINT_RESULT", position: constrained });
     send({ type: "COMMIT" });
-    settleCommit(onCommit(next, "keyboard").outcome, send);
+    settleCommit(onCommit(next, "keyboard").outcome, send, messages);
   };
 
   return (
@@ -939,12 +1087,12 @@ function Splitter({
       className="pf-splitter"
       role="separator"
       tabIndex={0}
-      aria-label="Resize adjacent workspace panes"
+      aria-label={messages.resizeAdjacentPanes()}
       aria-orientation={split.axis === "inline" ? "vertical" : "horizontal"}
       aria-valuemin={0}
       aria-valuemax={100}
       aria-valuenow={Math.round(value)}
-      aria-valuetext={`Primary pane ${Math.round(value)} percent`}
+      aria-valuetext={messages.primaryPanePercent({ percent: Math.round(value) })}
       data-resize-state={resizeState}
       data-workspace-splitter={splitter.id}
       data-inline-start={splitter.rect.inlineStart}
@@ -987,6 +1135,7 @@ function PanelGroup<TCommand, TResult>({
   closePanel,
   registerSlot,
   setMovePanelId,
+  messages,
 }: PanelGroupProps<TCommand, TResult>) {
   const pointerFocusPanelRef = useRef<string | undefined>(undefined);
   const groupLabelId = useId();
@@ -1021,7 +1170,7 @@ function PanelGroup<TCommand, TResult>({
       aria-labelledby={groupLabelId}
     >
       <h2 id={groupLabelId} className="pf-visually-hidden">
-        {group.label ?? "Panel group"}
+        {group.label ?? messages.panelGroupFallback()}
       </h2>
       <div className="pf-tab-strip">
         <div className="pf-tab-list" role="tablist" aria-label={group.label}>
@@ -1050,7 +1199,11 @@ function PanelGroup<TCommand, TResult>({
                   const origin = pointerFocusPanelRef.current === panel.id ? "pointer" : "keyboard";
                   pointerFocusPanelRef.current = undefined;
                   if (selected && projection.activePanelId !== panel.id) {
-                    dispatch(commands.activatePanel(panel.id), `Activated ${panel.title}`, origin);
+                    dispatch(
+                      commands.activatePanel(panel.id),
+                      messages.activatedPanel({ title: panel.title }),
+                      origin,
+                    );
                   }
                 }}
                 onKeyDown={(event) => {
@@ -1086,8 +1239,8 @@ function PanelGroup<TCommand, TResult>({
               <button
                 className="pf-tab-close"
                 type="button"
-                aria-label={`Close ${selectedPanel.title}`}
-                title={`Close ${selectedPanel.title}`}
+                aria-label={messages.closePanel({ title: selectedPanel.title })}
+                title={messages.closePanel({ title: selectedPanel.title })}
                 onClick={(event) => {
                   closePanel(selectedPanel, clickOrigin(event));
                 }}
@@ -1100,6 +1253,7 @@ function PanelGroup<TCommand, TResult>({
               <TabActions
                 panel={selectedPanel}
                 groups={Object.values(projection.groups)}
+                messages={messages}
                 triggerId={panelActionsId(domIdPrefix, selectedPanel.id)}
                 onStartKeyboardMove={
                   createMovePanelCommand === undefined
@@ -1114,7 +1268,7 @@ function PanelGroup<TCommand, TResult>({
                     : (targetGroupId) => {
                         dispatch(
                           createMovePanelCommand(selectedPanel.id, targetGroupId),
-                          `Moved ${selectedPanel.title}`,
+                          messages.movedPanel({ title: selectedPanel.title }),
                           "menu",
                         );
                       }
@@ -1125,7 +1279,7 @@ function PanelGroup<TCommand, TResult>({
                     : () => {
                         dispatch(
                           createFloatPanelCommand(selectedPanel.id),
-                          `Floated ${selectedPanel.title}`,
+                          messages.floatedPanel({ title: selectedPanel.title }),
                           "menu",
                         );
                       }
@@ -1149,6 +1303,7 @@ function PanelGroup<TCommand, TResult>({
 interface TabActionsProps {
   readonly panel: WorkspacePanelView;
   readonly groups: readonly WorkspaceGroupView[];
+  readonly messages: WorkspaceMessageCatalog;
   readonly triggerId: string;
   readonly onStartKeyboardMove: (() => void) | undefined;
   readonly onMove: ((groupId: string) => void) | undefined;
@@ -1158,6 +1313,7 @@ interface TabActionsProps {
 function TabActions({
   panel,
   groups,
+  messages,
   triggerId,
   onStartKeyboardMove,
   onMove,
@@ -1186,7 +1342,7 @@ function TabActions({
         id={triggerId}
         type="button"
         className="pf-tab-more"
-        aria-label={`Actions for ${panel.title}`}
+        aria-label={messages.actionsForPanel({ title: panel.title })}
         aria-haspopup="menu"
         aria-expanded={open}
         onClick={() => {
@@ -1206,7 +1362,7 @@ function TabActions({
           ref={menuRef}
           className="pf-menu"
           role="menu"
-          aria-label={`${panel.title} actions`}
+          aria-label={messages.panelActions({ title: panel.title })}
           onKeyDown={(event) => {
             const items = menuItems(menuRef.current);
             const activeElement = menuRef.current?.ownerDocument.activeElement;
@@ -1239,7 +1395,7 @@ function TabActions({
                 onStartKeyboardMove();
               }}
             >
-              Choose destination…
+              {messages.chooseDestination()}
             </button>
           )}
           {onMove === undefined
@@ -1254,7 +1410,9 @@ function TabActions({
                     onMove(group.id);
                   }}
                 >
-                  Move to {group.label ?? "group"}
+                  {messages.moveToGroup({
+                    group: group.label ?? messages.groupFallback(),
+                  })}
                 </button>
               ))}
           {panel.floatable === false || onFloat === undefined ? null : (
@@ -1266,7 +1424,7 @@ function TabActions({
                 onFloat();
               }}
             >
-              Float panel
+              {messages.floatPanel({ title: panel.title })}
             </button>
           )}
         </div>
@@ -1278,11 +1436,18 @@ function TabActions({
 interface KeyboardMoveOverlayProps {
   readonly panel: WorkspacePanelView | undefined;
   readonly groups: readonly WorkspaceGroupView[];
+  readonly messages: WorkspaceMessageCatalog;
   readonly onMove: (groupId: string) => void;
   readonly onCancel: () => void;
 }
 
-function KeyboardMoveOverlay({ panel, groups, onMove, onCancel }: KeyboardMoveOverlayProps) {
+function KeyboardMoveOverlay({
+  panel,
+  groups,
+  messages,
+  onMove,
+  onCancel,
+}: KeyboardMoveOverlayProps) {
   const [index, setIndex] = useState(0);
   const overlayRef = useRef<HTMLDivElement>(null);
 
@@ -1296,7 +1461,9 @@ function KeyboardMoveOverlay({ panel, groups, onMove, onCancel }: KeyboardMoveOv
       ref={overlayRef}
       className="pf-keyboard-move"
       role="dialog"
-      aria-label={`Move ${panel?.title ?? "panel"}`}
+      aria-label={messages.movePanelDialog({
+        title: panel?.title ?? messages.panelFallback(),
+      })}
       tabIndex={-1}
       onKeyDown={(event) => {
         if (event.key === "Escape") {
@@ -1317,9 +1484,9 @@ function KeyboardMoveOverlay({ panel, groups, onMove, onCancel }: KeyboardMoveOv
         }
       }}
     >
-      <p className="pf-keyboard-move-eyebrow">Choose destination</p>
-      <strong>{selectedGroup?.label ?? "No available group"}</strong>
-      <p>Use arrow keys to preview, Enter to move, or Escape to cancel.</p>
+      <p className="pf-keyboard-move-eyebrow">{messages.chooseDestination()}</p>
+      <strong>{selectedGroup?.label ?? messages.noAvailableGroup()}</strong>
+      <p>{messages.moveInstructions()}</p>
       <div className="pf-keyboard-move-dots" aria-hidden="true">
         {groups.map((group, groupIndex) => (
           <span key={group.id} data-current={String(groupIndex === index)} />
@@ -1333,9 +1500,10 @@ interface PanelPortalsProps {
   readonly projection: WorkspaceProjection;
   readonly registry: WorkspacePanelRegistry;
   readonly hosts: ReadonlyMap<string, HostRecord>;
+  readonly messages: WorkspaceMessageCatalog;
 }
 
-function PanelPortals({ projection, registry, hosts }: PanelPortalsProps) {
+function PanelPortals({ projection, registry, hosts, messages }: PanelPortalsProps) {
   return (
     <>
       {Object.values(projection.panels).map((panel) => {
@@ -1352,7 +1520,7 @@ function PanelPortals({ projection, registry, hosts }: PanelPortalsProps) {
         if (!selected && policy.hidden === "detach") return null;
         const content =
           definition === undefined ? (
-            <MissingPanel panel={panel} />
+            <MissingPanel panel={panel} messages={messages} />
           ) : (
             <PanelContent
               definition={definition}
@@ -1367,7 +1535,7 @@ function PanelPortals({ projection, registry, hosts }: PanelPortalsProps) {
           );
 
         return createPortal(
-          <PanelBoundary key={panel.id} panel={panel}>
+          <PanelBoundary key={panel.id} panel={panel} messages={messages}>
             {content}
           </PanelBoundary>,
           host,
@@ -1470,23 +1638,26 @@ function PanelContent({
   );
 }
 
-function MissingPanel({ panel }: { readonly panel: WorkspacePanelView }) {
+function MissingPanel({
+  panel,
+  messages,
+}: {
+  readonly panel: WorkspacePanelView;
+  readonly messages: WorkspaceMessageCatalog;
+}) {
   return (
     <section className="pf-panel-placeholder">
       <strong>{panel.title}</strong>
-      <p>
-        Renderer <code>{panel.type}</code> is unavailable. The panel descriptor and placement remain
-        recoverable.
-      </p>
+      <p>{messages.missingRenderer({ type: panel.type })}</p>
     </section>
   );
 }
 
-function WorkspaceEmptyState() {
+function WorkspaceEmptyState({ messages }: { readonly messages: WorkspaceMessageCatalog }) {
   return (
     <section className="pf-empty-state">
-      <strong>No workspace layout</strong>
-      <p>Open a panel or restore a workspace preset to begin.</p>
+      <strong>{messages.noWorkspaceLayout()}</strong>
+      <p>{messages.emptyWorkspaceInstructions()}</p>
     </section>
   );
 }
@@ -1614,6 +1785,7 @@ function positiveNumber(value: number | undefined): number {
 function settleCommit(
   outcome: WorkspaceDispatchOutcome,
   send: (event: ResizeEvent) => string,
+  messages: WorkspaceMessageCatalog,
 ): void {
   if (outcome.status === "committed") {
     send({ type: "COMMIT_OK" });
@@ -1622,7 +1794,7 @@ function settleCommit(
   }
   send({
     type: "COMMIT_ERROR",
-    message: outcome.message ?? `Resize did not commit (${outcome.status}).`,
+    message: outcome.message ?? messages.resizeDidNotCommit({ status: outcome.status }),
   });
   send({ type: "RETURNED" });
 }
@@ -1735,9 +1907,33 @@ function findFocusSuccessor(
   return undefined;
 }
 
+function orderedGroups(projection: WorkspaceProjection): readonly WorkspaceGroupView[] {
+  const ordered: WorkspaceGroupView[] = [];
+  const visitedNodes = new Set<string>();
+  const visit = (nodeId: string) => {
+    if (visitedNodes.has(nodeId)) return;
+    visitedNodes.add(nodeId);
+    const node = projection.nodes[nodeId];
+    if (node?.kind === "group") {
+      const group = projection.groups[node.groupId];
+      if (group !== undefined) ordered.push(group);
+      return;
+    }
+    if (node?.kind === "split") {
+      for (const childId of node.childIds) visit(childId);
+    }
+  };
+  visit(projection.rootNodeId);
+  for (const group of Object.values(projection.groups)) {
+    if (!ordered.some((candidate) => candidate.id === group.id)) ordered.push(group);
+  }
+  return ordered;
+}
+
 function defaultResultInterpreter<TCommand, TResult>(
   result: TResult,
   context: WorkspaceDispatchContext<TCommand>,
+  messages: WorkspaceMessageCatalog,
 ): WorkspaceDispatchOutcome {
   if (!isRecord(result)) return { status: "unknown" };
   const status = result.status;
@@ -1745,16 +1941,16 @@ function defaultResultInterpreter<TCommand, TResult>(
     return { status, message: context.label };
   }
   if (status === "queued") {
-    return { status, message: `${context.label} queued` };
+    return { status, message: messages.commandQueued({ label: context.label }) };
   }
   if (status === "rejected") {
     const reason = extractErrorMessage(result);
     return {
       status,
-      message:
-        reason === undefined
-          ? `${context.label} was rejected`
-          : `${context.label} was rejected. ${reason}`,
+      message: messages.commandRejected({
+        label: context.label,
+        ...(reason === undefined ? {} : { reason }),
+      }),
     };
   }
   return { status: "unknown" };

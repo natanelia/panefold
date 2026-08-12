@@ -1,0 +1,61 @@
+{
+  "schemaVersion": 1,
+  "kind": "differential-model-result",
+  "profile": "compact-react-chromium-desktop",
+  "producedAt": "2026-08-12T03:00:00Z",
+  "status": "passed-with-thresholds-unmet",
+  "runner": "panefold-differential-campaign",
+  "environment": {
+    "operatingSystem": "Linux x86_64",
+    "node": "24.14.0",
+    "pnpm": "11.16.0"
+  },
+  "campaign": {
+    "seed": 20260812,
+    "generatorId": "panefold.comprehensive-workspace.v1",
+    "randomAlgorithm": "xorshift32",
+    "completedSteps": 10000,
+    "accepted": 8895,
+    "rejected": 1105,
+    "generatedCommandTypeCount": 36,
+    "missingCommandTypes": [],
+    "divergenceCount": 0,
+    "finalHash": "fnv1a64-v1:0de5fe50d1f80aa6",
+    "elapsedMs": 62829
+  },
+  "suite": {
+    "testFiles": 5,
+    "tests": 21,
+    "passed": 21,
+    "failed": 0
+  },
+  "checks": {
+    "curatedCommandDiscriminants": 36,
+    "candidateComparison": "complete accepted and rejected result contract after every generated attempt",
+    "invariantValidation": "every attempt",
+    "committedPatchReplay": "every accepted transaction",
+    "inversePatchReplay": "every accepted transaction",
+    "optimizedProjectionReplay": "every accepted transaction"
+  },
+  "implementation": {
+    "reference": "@panefold/kernel.executeCommand",
+    "candidateId": "@panefold/kernel-optimized.independent-semantic-reducer.v1",
+    "independentSemanticDecisions": true,
+    "retainedStatefulOptimization": false,
+    "phaseOneDifferentialEligible": false
+  },
+  "thresholds": {
+    "generatedOperationTarget": 10000000,
+    "generatedOperationTargetMet": false
+  },
+  "sourceDigests": {
+    "packages/kernel-optimized/src/independent-reducer.ts": "822901c011339653a4bcd5411bb1d1ef4e00f42ce2134041a859b2f119e1e23e",
+    "packages/kernel-optimized/src/independent-workspace.ts": "c3c78ac416aae9f7899e6aac3aa3680be7d3668f3f4a063cccbb179be5ba4250",
+    "packages/kernel-optimized/test/independent-reducer.test.ts": "18716581e2581c80a4c0fc0e11ee39d14593f2df7a432367e8932bc75e83e35d"
+  },
+  "limitations": [
+    "The correctness-first candidate rebuilds Map and entity-table state for each command; it is an independent semantic oracle, not a retained performance-optimized production kernel.",
+    "Ten thousand generated attempts are far below the ten-million stable threshold.",
+    "The current command-line campaign entry uses internal source imports because the candidate is intentionally not part of the public package API."
+  ]
+}

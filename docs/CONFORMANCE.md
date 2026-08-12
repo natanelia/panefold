@@ -3,90 +3,100 @@
 Panefold `0.1.0` is an **experimental executable implementation**. It does not claim stable
 conformance to the [Panefold system design](spec/SYSTEM_DESIGN.md).
 
-The current conformance report is intentionally blocked/unresolved rather than promoted to a pass:
-all 36 commands, all 190 Appendix A requirements, and all ten hard gates are represented, but many
-profile traces and release gates lack the required evidence. An experimental build may remain
-usable while those gaps stay explicit; a stable build may not waive them.
+The current machine report is structurally valid and intentionally reports **blocked**: all 36
+commands, all 190 Appendix A requirements, and all ten hard gates are present, but stable-release
+evidence is incomplete. On the two published experimental profiles, the 380 trace cells currently
+contain 115 verified, 110 unresolved, 42 blocked, and 127 explicitly out-of-scope results. A missing
+result never becomes an implicit pass.
+
+## Evidence taxonomy
+
+Every trace and evidence record declares one proof class:
+
+| Class                      | Meaning                                                                                                | Current totals             |
+| -------------------------- | ------------------------------------------------------------------------------------------------------ | -------------------------- |
+| A — code-verifiable        | Repository implementation, model/property proof, source contract, or deterministic code result         | 93 verified, 51 unresolved |
+| B — environment-verifiable | Executed browser, framework, workload, recovery, or performance result with environment metadata       | 22 verified, 54 unresolved |
+| C — manual/external        | Manual AT/physical evidence, independent review, adoption record, usability result, or signed approval | 33 blocked                 |
+| D — future scope           | Capability the specific experimental profile does not publish                                          | 127 not applicable         |
+
+Evidence also distinguishes source, executed result, and attestation. A source hash proves exactly
+which artifact was reviewed; it does not pretend that the test passed. A result records a bounded
+execution and its limitations. A certification or release approval must be content-addressed,
+timestamped, and signed by the declared issuer.
 
 ## Machine-readable artifacts
 
-| Artifact                                                | Purpose                                                                                             |
-| ------------------------------------------------------- | --------------------------------------------------------------------------------------------------- |
-| [`manifest.json`](../conformance/manifest.json)         | Experimental profiles, features, limitations, and unsupported product claims                        |
-| [`commands.json`](../conformance/commands.json)         | Status and boundaries for the exhaustive 36-command inventory                                       |
-| [`capabilities.json`](../conformance/capabilities.json) | Classification, profile scope, evidence links, and limitations for public capabilities              |
-| [`requirements.json`](../conformance/requirements.json) | Generated 190-row Appendix A register linked to the checked-in system design                        |
-| [`evidence.json`](../conformance/evidence.json)         | Content-addressed repository artifacts plus explicit external blockers                              |
-| [`traces.json`](../conformance/traces.json)             | One explicit status for every requirement/profile cell                                              |
-| [`gates.json`](../conformance/gates.json)               | Verified, unresolved, or blocked state for each hard release gate                                   |
-| [`@panefold/conformance`](../packages/conformance/)     | Closed manifest validation, parity checks, trace/gate auditing, and deterministic report generation |
+| Artifact                                                | Purpose                                                                               |
+| ------------------------------------------------------- | ------------------------------------------------------------------------------------- |
+| [`manifest.json`](../conformance/manifest.json)         | Experimental profiles, feature IDs, limitations, and unsupported product claims       |
+| [`commands.json`](../conformance/commands.json)         | Status and exact boundary for the exhaustive 36-command inventory                     |
+| [`capabilities.json`](../conformance/capabilities.json) | Public capability classification, profile scope, evidence links, and limitations      |
+| [`requirements.json`](../conformance/requirements.json) | Generated 190-row Appendix A register linked to the checked-in system design          |
+| [`evidence.json`](../conformance/evidence.json)         | Content-addressed source/results plus explicit external blockers                      |
+| [`traces.json`](../conformance/traces.json)             | One status and proof class for every requirement/profile cell                         |
+| [`gates.json`](../conformance/gates.json)               | Exact requirement/profile/evidence-class scope for all ten release gates              |
+| [`results/`](../conformance/results/)                   | Checked-in Chromium, framework, protocol/motion, performance, and model-run results   |
+| [`@panefold/conformance`](../packages/conformance/)     | Closed validators, trace/gate audit, deterministic report, and certification contract |
 
-The harness rejects malformed claim shapes, unknown or duplicate command records, unsupported
-capabilities that carry support claims, bad evidence URIs/hashes, invented requirement IDs,
-uncovered verified traces, and verified gates backed by unresolved evidence. It uses deterministic
-UTF-16 ordering and an explicit report timestamp; it does not infer approval or time from the host.
+The validators reject malformed or duplicate claims, unsupported capabilities carrying support
+evidence, bad URIs/hashes, hash drift, invented requirement/profile IDs, proof-class mismatch,
+uncovered verified traces, and verified gates backed by open evidence. The public third-party
+certification schema cannot mark a candidate certified without a signed, immutable approval.
 
-Run the current checks with:
+Run the report with:
 
 ```bash
 pnpm conformance:data:check
 pnpm conformance:check
 ```
 
-`conformance:check` fails structural/claim-invalid reports. A blocked or unresolved report is an
-expected outcome for this experimental release and must remain visible.
+`conformance:check` exits non-zero only for invalid claims or a prohibited stable-release claim. A
+blocked/unresolved report is the correct result for this experimental version and remains visible in
+the command output.
 
-## Repository evidence present
+## Executed results checked in
 
-- Strict TypeScript, formatting, dependency-boundary, package-build, and test automation.
-- Immutable model boundaries, reference-kernel laws, canonicalization, rejection atomicity, patch
-  replay, bounded exploration, and workspace history tests.
-- N-ary geometry constraint, overflow, rounding, exact-conservation, hit, and drop-target tests.
-- Bounded runtime queue, reentrancy, subscriber isolation, selector, persistence codec, journal,
-  migration, and injected IndexedDB tests.
-- Deterministic protocol-machine tests for drag, resize, persistence, transfer, and election.
-- React semantics, keyboard, focus, geometry, motion, stable-host, lifecycle-lease, and synthetic
-  heavy-content fixtures.
-- Shared JSDOM adapter-contract tests for Vue, Svelte, Angular, and Web Components, including
-  lifecycle disposal and SSR-safe import behavior.
-- Headless surface ownership/recovery and ecosystem primitive tests.
-- Automated Chromium/Playwright and axe checks for the compact Atlas reference fixture.
-- A Node performance smoke workload and a source/CSP sink scan.
-
-Each item is narrow repository-local evidence. A content hash proves which source artifact was
-recorded; it does not by itself prove an external assessment, a passing run on every target, or a
-stable support claim.
+- The compact Chromium fixture passed 10/10 tasks: semantics/axe, LTR/RTL resize, motion preference,
+  stable-host lifecycle, all 17 panel classes, forced colors, popup loss/recovery, touch projection,
+  and raw splitter-frame capture.
+- The framework JSDOM contract passed 20/20 tests across Vue, Svelte, Angular, and Web Components.
+- Protocol/motion validation passed 49/49 focused tests plus 18/18 React integration tests. It
+  covers the twelve-actor catalog, cancellation/revision conflicts, disposable motion leases,
+  progressive View Transition fallback, and deterministic load degradation.
+- The independent semantic reducer matched the complete reference result for all 36 curated command
+  variants, 6,000 generated test attempts, and a separate reproducible 10,000-attempt campaign
+  (8,895 accepted, 1,105 typed rejections, zero divergence). It remains an oracle that rebuilds
+  state per command, not the retained optimized production kernel.
+- The earlier 50,000-attempt projection campaign completed with zero replay/projection divergence.
+  It is below the ten-million stable threshold and its checked-in summary records the missing seed.
+- The container interaction capture retained 179 frame deltas, including its long task, as an
+  experimental regression guard—not a physical performance certification.
 
 ## Hard release gates
 
-| Gate            | Current state | Missing release evidence                                                                                                     |
-| --------------- | ------------- | ---------------------------------------------------------------------------------------------------------------------------- |
-| Model integrity | Unresolved    | Required published ten-million-operation run and complete model report                                                       |
-| Determinism     | Unresolved    | Independent optimized reducer and long-run differential results after every generated command                                |
-| Atomicity       | Unresolved    | Complete fallible operational/failure matrix beyond local kernel and injected-driver tests                                   |
-| Accessibility   | Blocked       | Manual NVDA, JAWS, VoiceOver, TalkBack, 400% zoom, forced-colors, and voice-control work on declared systems                 |
-| Lifecycle       | Blocked       | Real editor, map/WebGL, grid, media, iframe, and microfrontend torture plus resource baselines                               |
-| Performance     | Blocked       | Controlled physical 60 Hz and 120 Hz traces across mandatory workloads with raw data/confidence intervals                    |
-| Recovery        | Blocked       | Real process, tab, window, quota/corruption, permission, and monitor-loss failure runs                                       |
-| Security        | Blocked       | Independent threat model, protocol/dependency review, CSP/Trusted Types deployment evidence, provenance, and advisory review |
-| Migration       | Unresolved    | Application-layout and panel-type migration corpus in addition to the tested kernel v1-to-v2 path                            |
-| Public evidence | Unresolved    | Complete raw reports, compatibility records, and signed release approvals                                                    |
+| Gate            | State      | Evidence still required                                                                                                     |
+| --------------- | ---------- | --------------------------------------------------------------------------------------------------------------------------- |
+| Model integrity | Unresolved | Publish the required ten-million-operation report                                                                           |
+| Determinism     | Unresolved | Retained optimized-kernel campaign at the stable threshold; the independent semantic oracle is bounded correctness evidence |
+| Atomicity       | Unresolved | Complete fallible persistence/surface operational matrix beyond local and injected-driver tests                             |
+| Accessibility   | Blocked    | Manual NVDA, JAWS, VoiceOver, TalkBack, 400% zoom, forced-colors, and voice-control records on declared systems             |
+| Lifecycle       | Blocked    | Third-party heavy-content torture plus heap/listener/observer/resource baselines                                            |
+| Performance     | Blocked    | Controlled physical 60 Hz and 120 Hz traces with raw data and confidence intervals                                          |
+| Recovery        | Blocked    | Real process/tab/window, IndexedDB quota/corruption, permission, monitor-loss, and upgrade runs                             |
+| Security        | Blocked    | Independent threat/protocol/dependency/provenance review and deployed CSP/Trusted Types evidence                            |
+| Migration       | Unresolved | Application-layout and panel-type migration corpus beyond the tested kernel and panel-codec paths                           |
+| Public evidence | Unresolved | Remaining raw compatibility records, independent certifications, and signed release approval                                |
 
-## Profiles and certification boundary
+## Published profile boundary
 
-Two experimental profiles are declared:
+- `compact-react-chromium-desktop` is one React 19.2.8 / Playwright Chromium Linux fixture, with a
+  390×844 touch-emulation subprofile and controlled same-origin popup. It is not a general browser,
+  OS, mobile hardware, PiP, multi-screen, crash, security, or assistive-technology promise.
+- `framework-adapter-contract-jsdom` is an immutable-store/lifecycle/SSR contract for Vue, Svelte,
+  Angular, and Web Components. JSDOM is not rendering, hydration, focus, accessibility, performance,
+  or third-party adoption evidence.
 
-- `compact-react-chromium-desktop` covers the compact Atlas React fixture in automated Chromium CI
-  with mouse, keyboard, and programmatic inputs.
-- `framework-adapter-contract-jsdom` covers programmatic immutable-store/lifecycle contracts for
-  Vue, Svelte, Angular, and Web Components in JSDOM.
-
-Neither profile is a stable browser/framework compatibility promise. Automated axe and semantic
-tests are not manual assistive-technology certification. JSDOM is not browser-rendering evidence.
-The Node smoke benchmark is not physical frame certification. Injected storage and headless surface
-drivers are not real crash/popout recovery certification. Repository source checks are not an
-independent security review.
-
-Any future stable claim must pass every applicable `MUST`, all ten hard gates, and the complete
-published profile matrix. Missing evidence narrows or blocks the claim; it is never treated as a
-pass.
+Any future stable claim must close every applicable `MUST`, all ten hard gates, and the entire
+published profile matrix. External evidence that this repository cannot ethically self-issue stays
+blocked; the support claim remains experimental until that evidence exists.

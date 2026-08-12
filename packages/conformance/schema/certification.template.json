@@ -1,0 +1,35 @@
+{
+  "$schema": "https://panefold.dev/schema/third-party-certification-v1.json",
+  "schemaVersion": 1,
+  "certificationId": "example.adapter-chromium",
+  "status": "candidate",
+  "subject": {
+    "kind": "adapter",
+    "id": "example.adapter",
+    "packageName": "@example/panefold-adapter"
+  },
+  "versions": {
+    "subject": "1.0.0",
+    "engine": "0.1.0",
+    "protocol": 1,
+    "framework": "Example Framework 1.0",
+    "browser": "Chromium 140"
+  },
+  "profile": {
+    "id": "example-adapter-chromium-desktop",
+    "surfaces": ["main"],
+    "inputs": ["keyboard", "programmatic"],
+    "workload": "Panefold compact conformance workload"
+  },
+  "evidence": [
+    {
+      "id": "shared-contract-report",
+      "kind": "compatibility-report",
+      "uri": "https://example.test/panefold/reports/shared-contract.json",
+      "sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "producedAt": "2026-08-12T01:02:03Z",
+      "requirementIds": ["EXT-006", "FWK-001", "GOV-006"],
+      "profileId": "example-adapter-chromium-desktop"
+    }
+  ]
+}

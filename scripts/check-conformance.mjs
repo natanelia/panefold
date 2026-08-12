@@ -1,4 +1,6 @@
-import { readFile } from "node:fs/promises";
+import { createHash } from "node:crypto";
+import { readFile, realpath } from "node:fs/promises";
+import { isAbsolute, relative, resolve, sep } from "node:path";
 import process from "node:process";
 import { isDeepStrictEqual } from "node:util";
 
@@ -52,6 +54,7 @@ const report = generateConformanceReport({
 });
 
 const { summary } = report;
+const taxonomy = report.traceability.byVerificationClass;
 process.stdout.write(
   [
     `Conformance report: ${report.status}.`,
@@ -59,10 +62,69 @@ process.stdout.write(
     `${String(summary.definedRequirements)}/${String(summary.expectedRequirements)} requirements registered.`,
     `${String(summary.definedHardGates)}/${String(summary.expectedHardGates)} hard gates accounted for.`,
     `${String(summary.invalid)} invalid, ${String(summary.blocked)} blocked, ${String(summary.unresolved)} unresolved.`,
+    `Trace taxonomy: A/code ${formatTraceCounts(taxonomy["code-verifiable"])};`,
+    `B/environment ${formatTraceCounts(taxonomy["environment-verifiable"])};`,
+    `C/manual-external ${formatTraceCounts(taxonomy["manual-external"])};`,
+    `D/future ${formatTraceCounts(taxonomy["future-scope"])}.`,
   ].join(" ") + "\n",
 );
 
-if (report.status === "invalid") {
+const artifactFailures = await verifyRepositoryEvidence(report.evidence);
+artifactFailures.forEach((failure) => process.stderr.write(`${failure}\n`));
+
+if (report.status === "invalid" || artifactFailures.length > 0) {
   process.stderr.write(serializeConformanceReport(report));
   process.exitCode = 1;
+}
+
+if (report.classification === "stable" && report.status !== "verified") {
+  process.stderr.write(
+    `Stable release claim rejected: conformance status is ${report.status}, not verified.\n`,
+  );
+  process.exitCode = 1;
+}
+
+if (process.argv.includes("--require-verified") && report.status !== "verified") {
+  process.stderr.write(
+    `Verified conformance was required explicitly, but the report status is ${report.status}.\n`,
+  );
+  process.exitCode = 1;
+}
+
+function formatTraceCounts(counts) {
+  return `${String(counts.verified)} verified/${String(counts.unresolved)} unresolved/${String(counts.blocked)} blocked/${String(counts.notApplicable)} n/a`;
+}
+
+async function verifyRepositoryEvidence(evidence) {
+  const failures = [];
+  const root = await realpath(process.cwd());
+  for (const record of evidence) {
+    if (record.status !== "verified" || !record.uri?.startsWith("repo://")) continue;
+    const repositoryPath = record.uri.slice("repo://".length);
+    const candidate = resolve(root, repositoryPath);
+    let target;
+    try {
+      target = await realpath(candidate);
+    } catch (error) {
+      failures.push(
+        `Evidence artifact missing for ${record.id}: ${repositoryPath} (${error instanceof Error ? error.message : String(error)}).`,
+      );
+      continue;
+    }
+    const pathFromRoot = relative(root, target);
+    if (pathFromRoot === ".." || pathFromRoot.startsWith(`..${sep}`) || isAbsolute(pathFromRoot)) {
+      failures.push(
+        `Evidence artifact escapes the repository for ${record.id}: ${repositoryPath}.`,
+      );
+      continue;
+    }
+    const bytes = await readFile(target);
+    const actual = createHash("sha256").update(bytes).digest("hex");
+    if (actual !== record.sha256) {
+      failures.push(
+        `Evidence digest mismatch for ${record.id}: expected ${record.sha256}, received ${actual}.`,
+      );
+    }
+  }
+  return failures;
 }

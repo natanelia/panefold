@@ -1,0 +1,149 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://panefold.dev/schema/third-party-certification-v1.json",
+  "title": "Panefold third-party adapter or plugin certification manifest",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "certificationId",
+    "status",
+    "subject",
+    "versions",
+    "profile",
+    "evidence"
+  ],
+  "properties": {
+    "$schema": { "type": "string", "minLength": 1, "maxLength": 8192 },
+    "schemaVersion": { "const": 1 },
+    "certificationId": { "$ref": "#/$defs/identifier" },
+    "status": { "enum": ["candidate", "certified"] },
+    "subject": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["kind", "id", "packageName"],
+      "properties": {
+        "kind": { "enum": ["adapter", "plugin"] },
+        "id": { "$ref": "#/$defs/identifier" },
+        "packageName": {
+          "type": "string",
+          "maxLength": 214,
+          "pattern": "^(?:@[a-z0-9][a-z0-9._-]*/)?[a-z0-9][a-z0-9._-]*$"
+        }
+      }
+    },
+    "versions": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["subject", "engine", "protocol"],
+      "properties": {
+        "subject": { "$ref": "#/$defs/semver" },
+        "engine": { "$ref": "#/$defs/semver" },
+        "protocol": { "type": "integer", "minimum": 1 },
+        "framework": { "$ref": "#/$defs/nonEmptyString" },
+        "browser": { "$ref": "#/$defs/nonEmptyString" }
+      }
+    },
+    "profile": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "surfaces", "inputs", "workload"],
+      "properties": {
+        "id": { "$ref": "#/$defs/identifier" },
+        "surfaces": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 10000,
+          "uniqueItems": true,
+          "items": { "$ref": "#/$defs/identifier" }
+        },
+        "inputs": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 10000,
+          "uniqueItems": true,
+          "items": { "$ref": "#/$defs/identifier" }
+        },
+        "workload": { "$ref": "#/$defs/nonEmptyString" }
+      }
+    },
+    "evidence": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 10000,
+      "items": { "$ref": "#/$defs/evidence" }
+    },
+    "approval": { "$ref": "#/$defs/approval" }
+  },
+  "allOf": [
+    {
+      "if": { "properties": { "status": { "const": "certified" } }, "required": ["status"] },
+      "then": { "required": ["approval"] },
+      "else": { "not": { "required": ["approval"] } }
+    }
+  ],
+  "$defs": {
+    "identifier": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 8192,
+      "pattern": "^[a-z0-9]+(?:[.:_-][a-z0-9]+)*$"
+    },
+    "nonEmptyString": { "type": "string", "minLength": 1, "maxLength": 8192 },
+    "semver": {
+      "type": "string",
+      "pattern": "^(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)(?:-[0-9A-Za-z-]+(?:\\.[0-9A-Za-z-]+)*)?(?:\\+[0-9A-Za-z-]+(?:\\.[0-9A-Za-z-]+)*)?$"
+    },
+    "sha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "uri": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 2048,
+      "pattern": "^(?:https://[^#\\s]+|urn:[a-z0-9][a-z0-9-]{0,31}:[A-Za-z0-9()+,.:=@;$_!*'/?#-]+|repo://[A-Za-z0-9._-]+(?:/[A-Za-z0-9._-]+)*)$"
+    },
+    "requirementId": { "type": "string", "pattern": "^[A-Z][A-Z0-9]{1,7}-[0-9]{3}$" },
+    "evidence": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "kind", "uri", "sha256", "producedAt", "requirementIds", "profileId"],
+      "properties": {
+        "id": { "$ref": "#/$defs/identifier" },
+        "kind": {
+          "enum": [
+            "automated-test",
+            "model-report",
+            "accessibility-report",
+            "performance-report",
+            "security-report",
+            "migration-report",
+            "recovery-report",
+            "compatibility-report",
+            "formal-artifact"
+          ]
+        },
+        "uri": { "$ref": "#/$defs/uri" },
+        "sha256": { "$ref": "#/$defs/sha256" },
+        "producedAt": { "type": "string", "format": "date-time" },
+        "requirementIds": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 10000,
+          "uniqueItems": true,
+          "items": { "$ref": "#/$defs/requirementId" }
+        },
+        "profileId": { "$ref": "#/$defs/identifier" }
+      }
+    },
+    "approval": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["issuer", "signedAt", "uri", "sha256"],
+      "properties": {
+        "issuer": { "$ref": "#/$defs/nonEmptyString" },
+        "signedAt": { "type": "string", "format": "date-time" },
+        "uri": { "$ref": "#/$defs/uri" },
+        "sha256": { "$ref": "#/$defs/sha256" }
+      }
+    }
+  }
+}

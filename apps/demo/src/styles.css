@@ -400,6 +400,104 @@
     overflow: auto;
   }
 
+  .demo-heavy-lab {
+    display: grid;
+    grid-template-rows: auto minmax(0, 1fr) auto;
+    min-block-size: 100%;
+    color: var(--demo-text);
+    background: var(--demo-bg);
+  }
+
+  .demo-heavy-lab > header,
+  .demo-heavy-lab > footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 10px 12px;
+    border-block-end: 1px solid var(--demo-border);
+    background: var(--demo-surface-raised);
+  }
+
+  .demo-heavy-lab > header h3 {
+    margin: 3px 0 0;
+    font-size: 13px;
+  }
+
+  .demo-heavy-lab > footer {
+    border-block-start: 1px solid var(--demo-border);
+    border-block-end: 0;
+    color: var(--demo-muted);
+    font-size: 9px;
+  }
+
+  .demo-heavy-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 8px;
+    min-block-size: 0;
+    padding: 8px;
+    overflow: auto;
+  }
+
+  .demo-heavy-fixture {
+    display: grid;
+    align-content: start;
+    gap: 7px;
+    min-block-size: 112px;
+    padding: 10px;
+    border: 1px solid var(--demo-border);
+    border-radius: 7px;
+    background: var(--demo-surface);
+    font-size: 10px;
+  }
+
+  .demo-heavy-fixture > strong {
+    color: var(--demo-valid);
+    font:
+      700 8px ui-monospace,
+      monospace;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+  }
+
+  .demo-heavy-fixture label {
+    display: grid;
+    gap: 5px;
+    color: var(--demo-muted);
+  }
+
+  .demo-heavy-fixture :is(input, textarea, button) {
+    min-block-size: 32px;
+    border: 1px solid var(--demo-border-strong);
+    border-radius: 5px;
+    color: var(--demo-text);
+    background: var(--demo-surface-raised);
+  }
+
+  .demo-heavy-fixture canvas,
+  .demo-heavy-fixture iframe,
+  .demo-heavy-fixture video {
+    max-inline-size: 100%;
+    border: 1px solid var(--demo-border);
+  }
+
+  .demo-heavy-table-scroll {
+    max-block-size: 84px;
+    overflow: auto;
+  }
+
+  .demo-heavy-table-scroll table {
+    inline-size: 100%;
+    border-collapse: collapse;
+  }
+
+  .demo-heavy-table-scroll :is(th, td) {
+    padding: 3px;
+    border-block-end: 1px solid var(--demo-border);
+    text-align: start;
+  }
+
   .demo-kicker {
     color: var(--demo-faint);
     font-size: 8px;

@@ -42,6 +42,24 @@ test("normalizes static-host trailing-slash routes", async ({ page }) => {
   ).toBeVisible();
 });
 
+test("publishes the complete decision and marketing documentation", async ({ page }) => {
+  await page.goto("./docs/adr-independent-oracle/");
+  await expect(
+    page.getByRole("heading", { name: "Independent semantic oracle", exact: true }),
+  ).toBeVisible();
+  await expect(page.getByText("ADR 0011", { exact: true })).toBeVisible();
+
+  await page.goto("./docs/adr-protocol-motion-lifecycles/");
+  await expect(
+    page.getByRole("heading", { name: "Protocol and motion lifecycles", exact: true }),
+  ).toBeVisible();
+
+  await page.goto("./docs/marketing/");
+  await expect(
+    page.getByRole("heading", { name: "Marketing and launch", exact: true }),
+  ).toBeVisible();
+});
+
 test("renders the complete system design with its original figures", async ({ page }) => {
   await page.goto("./docs/system-design/");
   await expect(page.getByRole("heading", { name: "System design", exact: true })).toBeVisible();

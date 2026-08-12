@@ -12,6 +12,7 @@ export interface ResizeContext {
   readonly current: ResizeSample | undefined;
   readonly constrained: ResizeSample | undefined;
   readonly input: "pointer" | "keyboard" | undefined;
+  readonly deliveryPolicy: "live" | "throttled" | "deferred" | "adaptive";
   readonly failure: string | undefined;
 }
 
@@ -33,9 +34,14 @@ export type ResizeEvent =
     }
   | { readonly type: "KEYBOARD_STEP"; readonly position: ResizeSample }
   | { readonly type: "CONSTRAINT_RESULT"; readonly position: ResizeSample }
+  | {
+      readonly type: "DELIVERY_POLICY_CHANGED";
+      readonly policy: ResizeContext["deliveryPolicy"];
+    }
   | { readonly type: "COMMIT" }
   | { readonly type: "COMMIT_OK" }
   | { readonly type: "COMMIT_ERROR"; readonly message: string }
+  | { readonly type: "REVISION_CONFLICT" }
   | { readonly type: "SETTLED" }
   | { readonly type: "CANCEL" }
   | { readonly type: "RETURNED" };
@@ -86,7 +92,16 @@ export const resizeMachine = setup({
     constrain: assign(({ event }) =>
       event.type === "CONSTRAINT_RESULT" ? { constrained: event.position } : {},
     ),
-    fail: assign(({ event }) => (event.type === "COMMIT_ERROR" ? { failure: event.message } : {})),
+    changeDeliveryPolicy: assign(({ event }) =>
+      event.type === "DELIVERY_POLICY_CHANGED" ? { deliveryPolicy: event.policy } : {},
+    ),
+    fail: assign(({ event }) =>
+      event.type === "COMMIT_ERROR"
+        ? { failure: event.message }
+        : event.type === "REVISION_CONFLICT"
+          ? { failure: "revision-conflict" }
+          : {},
+    ),
     reset: assign({
       pointerId: undefined,
       baseRevision: undefined,
@@ -105,6 +120,7 @@ export const resizeMachine = setup({
     current: undefined,
     constrained: undefined,
     input: undefined,
+    deliveryPolicy: "live",
     failure: undefined,
   },
   states: {
@@ -136,6 +152,7 @@ export const resizeMachine = setup({
         CAPTURE_LOST: { guard: "pointerMatches", target: "cancelling" },
         KEYBOARD_STEP: { actions: "sampleKeyboard" },
         CONSTRAINT_RESULT: { actions: "constrain" },
+        DELIVERY_POLICY_CHANGED: { actions: "changeDeliveryPolicy" },
         COMMIT: { target: "committing" },
         CANCEL: { target: "cancelling" },
       },
@@ -144,6 +161,7 @@ export const resizeMachine = setup({
       on: {
         COMMIT_OK: { target: "settling" },
         COMMIT_ERROR: { target: "cancelling", actions: "fail" },
+        REVISION_CONFLICT: { target: "cancelling", actions: "fail" },
         CANCEL: { target: "cancelling" },
       },
     },

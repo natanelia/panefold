@@ -6,6 +6,8 @@ const EVIDENCE: EvidenceRecord = {
   id: "headless-report",
   kind: "automated-test",
   status: "verified",
+  verificationClass: "code-verifiable",
+  artifactRole: "source",
   uri: "repo://conformance/evidence/headless-report.json",
   sha256: "d".repeat(64),
   producedAt: "2026-08-12T01:02:03Z",

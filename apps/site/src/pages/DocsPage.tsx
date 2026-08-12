@@ -41,6 +41,8 @@ const markdownRouteMap: Readonly<Record<string, string>> = {
   "CONFORMANCE.md": "/docs/conformance",
   "docs/ROADMAP.md": "/docs/roadmap",
   "ROADMAP.md": "/docs/roadmap",
+  "docs/MARKETING.md": "/docs/marketing",
+  "MARKETING.md": "/docs/marketing",
   "docs/spec/SYSTEM_DESIGN.md": "/docs/system-design",
   "spec/SYSTEM_DESIGN.md": "/docs/system-design",
   "docs/adr/0001-authoritative-kernel.md": "/docs/adr-authoritative-kernel",
@@ -55,6 +57,18 @@ const markdownRouteMap: Readonly<Record<string, string>> = {
   "adr/0005-durable-journal-and-trust-boundaries.md": "/docs/adr-persistence-trust",
   "docs/adr/0006-prepared-external-surface-ownership.md": "/docs/adr-external-surfaces",
   "adr/0006-prepared-external-surface-ownership.md": "/docs/adr-external-surfaces",
+  "docs/adr/0007-versioned-panel-and-plugin-boundaries.md": "/docs/adr-panel-plugin-boundaries",
+  "adr/0007-versioned-panel-and-plugin-boundaries.md": "/docs/adr-panel-plugin-boundaries",
+  "docs/adr/0008-single-writer-remote-coordination.md": "/docs/adr-single-writer-coordination",
+  "adr/0008-single-writer-remote-coordination.md": "/docs/adr-single-writer-coordination",
+  "docs/adr/0009-fail-closed-runtime.md": "/docs/adr-fail-closed-runtime",
+  "adr/0009-fail-closed-runtime.md": "/docs/adr-fail-closed-runtime",
+  "docs/adr/0010-executable-evidence-taxonomy.md": "/docs/adr-evidence-taxonomy",
+  "adr/0010-executable-evidence-taxonomy.md": "/docs/adr-evidence-taxonomy",
+  "docs/adr/0011-independent-semantic-oracle.md": "/docs/adr-independent-oracle",
+  "adr/0011-independent-semantic-oracle.md": "/docs/adr-independent-oracle",
+  "docs/adr/0012-bounded-protocol-and-motion-lifecycles.md": "/docs/adr-protocol-motion-lifecycles",
+  "adr/0012-bounded-protocol-and-motion-lifecycles.md": "/docs/adr-protocol-motion-lifecycles",
 };
 
 export function DocsPage({ slug, navigate }: DocsPageProps) {

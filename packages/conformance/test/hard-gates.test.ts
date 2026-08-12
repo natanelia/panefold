@@ -6,6 +6,8 @@ const EVIDENCE: EvidenceRecord = {
   id: "model-report",
   kind: "model-report",
   status: "verified",
+  verificationClass: "code-verifiable",
+  artifactRole: "result",
   uri: "repo://conformance/evidence/model-report.json",
   sha256: "c".repeat(64),
   producedAt: "2026-08-12T01:02:03Z",
@@ -38,10 +40,20 @@ describe("hard release gates", () => {
   it("requires content-addressed verified evidence and preserves blocked gates", () => {
     const report = auditHardGates(
       [
-        { id: "model-integrity", status: "verified", evidenceIds: [EVIDENCE.id] },
+        {
+          id: "model-integrity",
+          status: "verified",
+          requirementIds: ["TST-001"],
+          profileIds: ["desktop"],
+          requiredEvidenceClasses: ["code-verifiable"],
+          evidenceIds: [EVIDENCE.id],
+        },
         {
           id: "accessibility",
           status: "blocked",
+          requirementIds: ["TST-007"],
+          profileIds: ["desktop"],
+          requiredEvidenceClasses: ["manual-external"],
           evidenceIds: [],
           blockedBy: ["manual assistive-technology certification not performed"],
         },
@@ -60,6 +72,8 @@ describe("hard release gates", () => {
       id: "pending-model-report",
       kind: "model-report",
       status: "unresolved",
+      verificationClass: "code-verifiable",
+      artifactRole: "result",
       requirementIds: ["TST-001"],
       profileIds: ["desktop"],
       note: "Ten-million-operation run is pending.",
@@ -69,6 +83,9 @@ describe("hard release gates", () => {
         {
           id: "model-integrity",
           status: "verified",
+          requirementIds: ["TST-001"],
+          profileIds: ["desktop"],
+          requiredEvidenceClasses: ["code-verifiable"],
           evidenceIds: [unresolvedEvidence.id, "absent-report"],
         },
       ],
@@ -80,6 +97,43 @@ describe("hard release gates", () => {
         "UNKNOWN_HARD_GATE_EVIDENCE",
         "VERIFIED_HARD_GATE_USES_UNVERIFIED_EVIDENCE",
       ]),
+    );
+  });
+
+  it("rejects a verified gate while any scoped requirement trace remains open", () => {
+    const report = auditHardGates(
+      [
+        {
+          id: "model-integrity",
+          status: "verified",
+          requirementIds: ["TST-001"],
+          profileIds: ["desktop"],
+          requiredEvidenceClasses: ["code-verifiable"],
+          evidenceIds: [EVIDENCE.id],
+        },
+      ],
+      [EVIDENCE],
+      {
+        expectedRequirementIds: ["TST-001"],
+        profileIds: ["desktop"],
+        traces: [
+          {
+            requirementId: "TST-001",
+            profileId: "desktop",
+            status: "unresolved",
+            verificationClass: "code-verifiable",
+            evidenceIds: [EVIDENCE.id],
+            rationale: "Long-run report is incomplete.",
+          },
+        ],
+      },
+    );
+
+    expect(report.issues).toContainEqual(
+      expect.objectContaining({
+        code: "VERIFIED_HARD_GATE_HAS_OPEN_TRACE",
+        disposition: "invalid",
+      }),
     );
   });
 });
