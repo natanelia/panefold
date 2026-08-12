@@ -28,6 +28,17 @@ for (const directive of ["script-src 'self'", "object-src 'none'", "base-uri 'se
   if (!demoHtml.includes(directive)) failures.push(`apps/demo/index.html: CSP lacks ${directive}`);
 }
 
+const siteHtml = await readFile("apps/site/index.html", "utf8");
+for (const directive of [
+  "default-src 'self'",
+  "script-src 'self'",
+  "object-src 'none'",
+  "base-uri 'self'",
+  "form-action 'none'",
+]) {
+  if (!siteHtml.includes(directive)) failures.push(`apps/site/index.html: CSP lacks ${directive}`);
+}
+
 if (failures.length > 0) {
   process.stderr.write(`${failures.join("\n")}\n`);
   process.exitCode = 1;

@@ -3,6 +3,11 @@
 Panefold is an experimental, deterministic workspace runtime for building IDEs, map tools,
 operations consoles, and other panel-heavy web applications.
 
+[Website](https://natanelia.github.io/panefold/) ·
+[Live demo](https://natanelia.github.io/panefold/demo/) ·
+[Documentation](https://natanelia.github.io/panefold/docs/) ·
+[Source](https://github.com/natanelia/panefold)
+
 This repository is an executable implementation companion to the
 [Panefold system design](docs/spec/SYSTEM_DESIGN.md). Version `0.1.0` remains experimental: the
 semantic model, 36-command reference kernel, geometry, runtime, adapters, and operational
@@ -116,14 +121,16 @@ input, framework, or workload.
 ```bash
 pnpm check
 pnpm test:e2e
+pnpm test:site:e2e
 ```
 
 `pnpm check` runs formatting, dependency-boundary linting, source security checks, generated
 requirement and conformance-data drift checks, package builds, conformance validation, a Node
-performance smoke workload, strict TypeScript, tests, and the demo production build. The separate
-Playwright suite covers the declared Chromium reference fixture. A green local or CI run is
-repository evidence only; it does not replace manual assistive-technology work, physical 60/120 Hz
-traces, independent security review, real crash testing, or third-party pilots.
+performance smoke workload, strict TypeScript, tests, and the demo plus website production builds.
+The two Playwright suites cover the declared Chromium reference fixture and the responsive
+marketing/documentation experience. A green local or CI run is repository evidence only; it does
+not replace manual assistive-technology work, physical 60/120 Hz traces, independent security
+review, real crash testing, or third-party pilots.
 
 ## Kernel usage
 

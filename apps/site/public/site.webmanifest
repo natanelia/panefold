@@ -1,0 +1,17 @@
+{
+  "name": "Panefold",
+  "short_name": "Panefold",
+  "description": "Deterministic workspace runtime for panel-heavy web applications.",
+  "start_url": "/panefold/",
+  "display": "standalone",
+  "background_color": "#070a0f",
+  "theme_color": "#070a0f",
+  "icons": [
+    {
+      "src": "favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    }
+  ]
+}

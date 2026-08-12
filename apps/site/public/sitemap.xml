@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  <url><loc>https://natanelia.github.io/panefold/</loc></url>
+  <url><loc>https://natanelia.github.io/panefold/demo/</loc></url>
+  <url><loc>https://natanelia.github.io/panefold/docs/</loc></url>
+  <url><loc>https://natanelia.github.io/panefold/docs/overview/</loc></url>
+  <url><loc>https://natanelia.github.io/panefold/docs/architecture/</loc></url>
+  <url><loc>https://natanelia.github.io/panefold/docs/commands/</loc></url>
+  <url><loc>https://natanelia.github.io/panefold/docs/support/</loc></url>
+  <url><loc>https://natanelia.github.io/panefold/docs/conformance/</loc></url>
+  <url><loc>https://natanelia.github.io/panefold/docs/roadmap/</loc></url>
+  <url><loc>https://natanelia.github.io/panefold/docs/adr-authoritative-kernel/</loc></url>
+  <url><loc>https://natanelia.github.io/panefold/docs/adr-experimental-scope/</loc></url>
+  <url><loc>https://natanelia.github.io/panefold/docs/adr-schema-command-catalog/</loc></url>
+  <url><loc>https://natanelia.github.io/panefold/docs/adr-panel-lifecycle/</loc></url>
+  <url><loc>https://natanelia.github.io/panefold/docs/adr-persistence-trust/</loc></url>
+  <url><loc>https://natanelia.github.io/panefold/docs/adr-external-surfaces/</loc></url>
+  <url><loc>https://natanelia.github.io/panefold/docs/system-design/</loc></url>
+</urlset>

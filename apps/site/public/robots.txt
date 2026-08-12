@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://natanelia.github.io/panefold/sitemap.xml
