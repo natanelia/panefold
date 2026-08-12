@@ -129,6 +129,25 @@ application can supply `solveLayout`; the projection solver uses the same exact-
 allocator as a constraint-free compatibility fallback. Pointer resize uses a sparse XState actor and
 frame-coalesced preview before one semantic commit.
 
+Direct panel placement uses the same geometry result. The renderer derives mutually exclusive
+center and logical-edge candidates, keeps pointer identity/candidate state in a bounded drag actor,
+and asks the application to pure-plan each candidate against one captured revision. The application
+adapter allocates semantic IDs, uses `planPanelDropCommand` to select `move-panel`, `move-group`,
+`split-group`, or one atomic batch, pure-reduces it, and solves the resulting group rectangle. React
+retains the selected candidate's exact command and preview, revalidates the revision, and dispatches
+that command on release. Preview state is neither persisted nor entered into history; one accepted
+gesture publishes one transaction. Menu and keyboard routes use the same planner.
+
+External ownership transitions use an explicit history barrier. A browser window depends on
+transient activation and an imperative live-host lease, so semantic undo/redo cannot safely recreate
+it. A successful prepared transfer or recovery clears prior workspace undo/redo history and is not
+itself recorded; this prevents canonical ownership from diverging from the browser resource.
+
+Tab placement and label treatment are projection preferences rather than topology. A static value or
+per-group resolver can choose `block-start`, `block-end`, `inline-start`, or `inline-end`, plus
+icon-and-label, icon-only, or label-only content. Logical orientation drives keyboard behavior and
+accessible names remain present when labels are visually hidden.
+
 React reads the runtime through `useSyncExternalStore`. Workspace state is not copied into a changing
 context value, and pointer frames do not cause a framework-wide semantic render loop.
 
@@ -146,8 +165,10 @@ editor, WebGL/canvas, grid, video, same/opaque iframe, Web Component, microfront
 guards, corruption, failure, slow resize, and missing-provider recovery. The automated fixture
 proves stable identity, pause/resume, containment, and cleanup behavior in one Chromium profile; it
 does not certify production third-party editors/media or replace heap and physical-system traces.
-Cross-document content uses checkpoint/remount through the prepared surface protocol; portal/mirror
-policies remain application-specific. See [ADR-0004](adr/0004-panel-lifecycle-contract.md).
+Cross-document renderer strategy remains application policy. The prepared surface protocol supports
+checkpoint/remount, while Atlas exercises one controlled same-origin portal-coupled profile; mirror
+and general cross-origin policies remain outside the React reference claim. See
+[ADR-0004](adr/0004-panel-lifecycle-contract.md).
 
 ## Persistence and recovery
 
@@ -161,19 +182,32 @@ The Effect package wraps persistence failures and supplies an IndexedDB implemen
 against an injected database factory. Automated fault injection does not establish real browser
 crash, quota, corruption, or upgrade certification.
 
+`openDurableWorkspace` reads, verifies, migrates, and replays the journal before constructing the
+synchronous runtime. Consumers therefore never observe a default snapshot that is later swapped for
+persisted state. Incomplete or corrupt recovery is a non-destructive failure; it requires an explicit
+application reset/export/migration decision. Status observers report queued/in-flight writes and the
+last verified persisted revision without being able to break persistence.
+
 ## External surfaces
 
 External transfer is modeled as capability check, destination prepare/bootstrap, checkpoint,
 revision revalidation, ownership commit, destination mount/readiness, and source release. Tokens are
-bound to destination identity, protocol version, session context, and owner epoch. Failure rolls back
-or compensates to one authoritative safe owner; unexpected surface loss has an explicit recovery
-operation.
+bound to destination identity, protocol version, session context, and owner epoch. Failure reports
+one authoritative owner: the source only after rollback is confirmed, or the destination in a
+pending state when compensation cannot be confirmed within its independent safety budget. The
+destination resource and recovery lease are retained in that case. Unexpected surface loss has an
+explicit recovery operation.
 
 The operational adapter is SSR-safe and receives its browser environment explicitly. It supports
 same-origin popup and capability-gated Document Picture-in-Picture preparation; transfers locale,
 direction, writing mode, theme tokens, nonce annotations, and allowlisted stylesheets; validates
 workspace/session/protocol context; mounts one lease; and observes intentional close or unexpected
-loss. The automated Chromium fixture covers popup prepare/ready/loss/recovery/close. Real
+loss. The React adapter passes an explicit stable host and source-document parking element to the
+application handler while it is still inside pointer-up/user activation. Atlas uses that contract to
+move the same live panel host into a controlled same-origin popup, commit semantic surface ownership,
+redock on requested return, and recover on unexpected close. This is a portal-coupled reference
+profile, not a generic cross-origin renderer. The automated Chromium fixture covers popup
+prepare/ready/live-state preservation/redock/loss recovery. Real
 permissioned PiP, cross-origin deployment, multi-screen placement, process crashes, and CSP
 deployment remain product evidence work.
 
@@ -215,3 +249,4 @@ review, real OS failure testing, or third-party pilots.
 - [ADR-0010: Executable evidence taxonomy](adr/0010-executable-evidence-taxonomy.md)
 - [ADR-0011: Independent semantic oracle](adr/0011-independent-semantic-oracle.md)
 - [ADR-0012: Bounded protocol and motion lifecycles](adr/0012-bounded-protocol-and-motion-lifecycles.md)
+- [ADR-0013: Direct placement, durable opening, and controlled popouts](adr/0013-direct-placement-durable-demo.md)

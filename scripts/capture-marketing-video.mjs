@@ -66,11 +66,12 @@ try {
   });
 
   let recording = true;
+  let capturePage = page;
   let frame = 0;
   const capture = (async () => {
     while (recording) {
       const started = performance.now();
-      await page.screenshot({
+      await capturePage.screenshot({
         path: resolve(framesDirectory, `frame-${String(frame).padStart(5, "0")}.jpg`),
         type: "jpeg",
         quality: 82,
@@ -82,41 +83,69 @@ try {
     }
   })();
 
+  await delay(850);
+  const notesTab = page.getByRole("tab", { name: "Notes" });
+  const inspector = page.locator('[data-workspace-group="inspector"]');
+  await dragTo(notesTab, inspector, "Dock · direct center drop");
+  await inspector.locator('[data-workspace-panel-tab="notes"]').waitFor();
   await delay(900);
-  const splitter = page.getByRole("separator").nth(1);
-  await cue(splitter, "Resize · transient preview");
+
+  const undoButton = page.getByRole("button", { name: "Undo layout change" });
+  await cue(undoButton, "Undo · one history entry");
+  await undoButton.click();
+  await page
+    .locator('[data-workspace-group="primary"] [data-workspace-panel-tab="notes"]')
+    .waitFor();
+  await delay(700);
+
+  await dragTo(
+    page.locator('[data-workspace-panel-tab="notes"]'),
+    inspector,
+    "Split · edge creates a container",
+    "inline-start",
+  );
+  await page.locator("[data-workspace-group]").nth(4).waitFor();
+  await delay(900);
+
+  const settingsButton = page.getByRole("button", { name: "Workspace appearance" });
+  await cue(settingsButton, "Tabs · logical and application-owned");
+  await settingsButton.click();
+  const settings = page.getByRole("dialog", { name: "Workspace appearance" });
+  await settings.getByRole("combobox", { name: "Tab rail" }).selectOption("inline-start");
+  await settings.getByRole("combobox", { name: "Tab labels" }).selectOption("icon-only");
+  await delay(1000);
+  await settingsButton.click();
+
+  const splitter = page.getByRole("separator").first();
+  await cue(splitter, "Resize · solver-constrained preview");
   await splitter.focus();
   await splitter.press("Shift+ArrowRight");
-  await delay(450);
+  await delay(500);
   await splitter.press("Shift+ArrowRight");
+  await delay(850);
+
+  const actionsButton = page.getByRole("button", { name: "Actions for Notes" });
+  await cue(actionsButton, "Pop out · same live panel host");
+  await actionsButton.click();
+  const popupPromise = page.waitForEvent("popup");
+  await page.getByRole("menuitem", { name: "Open in new window" }).click();
+  const popup = await popupPromise;
+  await popup.setViewportSize({ width: 1440, height: 900 });
+  await popup.locator("#panefold-surface-root[data-panefold-ready='true']").waitFor();
+  capturePage = popup;
+  await delay(1300);
+  capturePage = page;
+  await page.bringToFront();
+  await popup
+    .getByRole("button", { name: "Return to main window" })
+    .evaluate((element) => element.click());
+  await page.locator('[data-workspace-panel-tab="notes"]').waitFor();
   await delay(800);
 
-  const notesTab = page.getByRole("tab", { name: "Notes" });
-  await cue(notesTab, "Select · semantic command");
-  await notesTab.click();
-  await delay(700);
-  const actionsButton = page.getByRole("button", { name: "Actions for Notes" });
-  await cue(actionsButton, "Move · stable panel host");
-  await actionsButton.click();
-  await delay(500);
-  const moveItem = page.getByRole("menuitem", { name: /Move to Problems and activity/i });
-  await cue(moveItem, "Commit · one transaction");
-  await moveItem.click();
-  await delay(1100);
-
-  const closeButton = page.getByRole("button", { name: "Close Notes" });
-  await cue(closeButton, "Close · recoverable structure");
-  await closeButton.click();
-  await delay(900);
-  const undoButton = page.getByRole("button", { name: "Undo layout change" });
-  await cue(undoButton, "Undo · restore once");
-  await undoButton.click();
-  await delay(1100);
-
-  await page.keyboard.press("Control+K");
-  await delay(1000);
-  await page.keyboard.press("Escape");
-  await delay(700);
+  const persistence = page.locator("[data-persistence-state='saved']");
+  await persistence.waitFor();
+  await cue(persistence, "Persist · exact IndexedDB revision");
+  await delay(950);
 
   recording = false;
   await capture;
@@ -181,6 +210,30 @@ try {
       { x: bounds.x + bounds.width / 2, y: bounds.y + bounds.height / 2, nextLabel: label },
     );
     await delay(280);
+  }
+
+  async function dragTo(source, target, label, edge) {
+    const sourceBounds = await source.boundingBox();
+    const targetBounds = await target.boundingBox();
+    if (sourceBounds === null || targetBounds === null) {
+      throw new Error(`Could not measure the ${label} interaction`);
+    }
+    await cue(source, label);
+    const destination =
+      edge === "inline-start"
+        ? { x: targetBounds.x + 8, y: targetBounds.y + targetBounds.height / 2 }
+        : {
+            x: targetBounds.x + targetBounds.width / 2,
+            y: targetBounds.y + targetBounds.height / 2,
+          };
+    await page.mouse.move(
+      sourceBounds.x + sourceBounds.width / 2,
+      sourceBounds.y + sourceBounds.height / 2,
+    );
+    await page.mouse.down();
+    await page.mouse.move(destination.x, destination.y, { steps: 14 });
+    await delay(320);
+    await page.mouse.up();
   }
 } finally {
   preview.kill("SIGTERM");

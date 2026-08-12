@@ -352,10 +352,12 @@
     {
       "requirementId": "EXP-002",
       "profileId": "compact-react-chromium-desktop",
-      "status": "unresolved",
+      "status": "verified",
       "verificationClass": "environment-verifiable",
-      "evidenceIds": [],
-      "rationale": "A reproducible automated environment result with profile, workload, and execution metadata has not been recorded."
+      "evidenceIds": [
+        "chromium-reference-result"
+      ],
+      "rationale": "Covered by repository-local automated evidence for this experimental profile."
     },
     {
       "requirementId": "EXP-003",
@@ -587,7 +589,8 @@
         "evidence-taxonomy",
         "architecture-contract",
         "independent-oracle-decision",
-        "protocol-motion-decision"
+        "protocol-motion-decision",
+        "direct-placement-durability-decision"
       ],
       "rationale": "Covered by repository-local automated evidence for this experimental profile."
     },
@@ -678,10 +681,12 @@
     {
       "requirementId": "INT-005",
       "profileId": "compact-react-chromium-desktop",
-      "status": "unresolved",
+      "status": "verified",
       "verificationClass": "environment-verifiable",
-      "evidenceIds": [],
-      "rationale": "A reproducible automated environment result with profile, workload, and execution metadata has not been recorded."
+      "evidenceIds": [
+        "chromium-reference-result"
+      ],
+      "rationale": "Covered by repository-local automated evidence for this experimental profile."
     },
     {
       "requirementId": "INT-006",
@@ -1128,10 +1133,12 @@
     {
       "requirementId": "PER-007",
       "profileId": "compact-react-chromium-desktop",
-      "status": "unresolved",
+      "status": "verified",
       "verificationClass": "environment-verifiable",
-      "evidenceIds": [],
-      "rationale": "A reproducible automated environment result with profile, workload, and execution metadata has not been recorded."
+      "evidenceIds": [
+        "chromium-reference-result"
+      ],
+      "rationale": "Covered by repository-local automated evidence for this experimental profile."
     },
     {
       "requirementId": "PER-008",
@@ -1804,7 +1811,8 @@
       "status": "verified",
       "verificationClass": "code-verifiable",
       "evidenceIds": [
-        "kernel-laws"
+        "kernel-laws",
+        "panel-drop-planner"
       ],
       "rationale": "Covered by repository-local automated evidence for this experimental profile."
     },
@@ -1835,7 +1843,8 @@
       "status": "verified",
       "verificationClass": "code-verifiable",
       "evidenceIds": [
-        "kernel-laws"
+        "kernel-laws",
+        "panel-drop-planner"
       ],
       "rationale": "Covered by repository-local automated evidence for this experimental profile."
     },

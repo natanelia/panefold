@@ -1,4 +1,4 @@
-import { canonicalSerialize, executeCommand } from "@panefold/kernel";
+import { canonicalSerialize, executeCommand, planPanelDropCommand } from "@panefold/kernel";
 import {
   DEFAULT_PANEL_CAPABILITIES,
   DEFAULT_PANEL_LIFECYCLE,
@@ -260,6 +260,164 @@ describe("independent optimized semantic reducer", () => {
       6,
     );
     expect(floating.surfaces.byId["surface:floating-accepted"]).toBeUndefined();
+  });
+
+  it("has independent parity for every panel-drop planner shape", () => {
+    const scenarios = [
+      {
+        panelId: ids.panelA,
+        target: { kind: "center", groupId: ids.groupB } as const,
+      },
+      {
+        panelId: ids.panelB,
+        target: {
+          kind: "edge",
+          groupId: ids.groupA,
+          edge: "block-start",
+          ratio: 0.35,
+        } as const,
+      },
+      {
+        panelId: ids.panelA,
+        target: {
+          kind: "edge",
+          groupId: ids.groupB,
+          edge: "block-end",
+          ratio: 0.4,
+        } as const,
+      },
+      {
+        panelId: ids.panelC,
+        target: {
+          kind: "edge",
+          groupId: ids.groupA,
+          edge: "inline-start",
+          ratio: 0.3,
+        } as const,
+      },
+    ];
+
+    scenarios.forEach((intent, index) => {
+      const snapshot = fixture();
+      const plan = planPanelDropCommand(snapshot, intent, {
+        newGroupId: groupId(`group:planned:${String(index)}`),
+        newGroupNodeId: nodeId(`node:planned-group:${String(index)}`),
+        splitNodeId: nodeId(`node:planned-split:${String(index)}`),
+      });
+      expect(plan).toMatchObject({ ok: true });
+      if (!plan.ok) throw new Error(plan.message);
+      expectAcceptedParity(snapshot, plan.command, 20 + index);
+    });
+  });
+
+  it("mirrors ratio, node-alias, and cross-document rejection boundaries", () => {
+    const base = fixture();
+    expectParity(
+      base,
+      {
+        type: "split-group",
+        targetGroupId: ids.groupA,
+        panelIds: [ids.panelB],
+        newGroupId: groupId("group:tiny-parity"),
+        newGroupNodeId: nodeId("node:tiny-parity"),
+        splitNodeId: nodeId("node:tiny-split-parity"),
+        edge: "inline-end",
+        ratio: Number.MIN_VALUE,
+      },
+      30,
+    );
+    const aliasedId = nodeId("node:aliased-parity");
+    expectParity(
+      base,
+      {
+        type: "split-group",
+        targetGroupId: ids.groupA,
+        panelIds: [ids.panelB],
+        newGroupId: groupId("group:aliased-parity"),
+        newGroupNodeId: aliasedId,
+        splitNodeId: aliasedId,
+        edge: "block-end",
+        ratio: 0.5,
+      },
+      31,
+    );
+
+    const browserId = surfaceId("surface:boundary-parity-browser");
+    let external = expectAcceptedParity(
+      base,
+      {
+        type: "transfer-to-browser-window",
+        groupId: ids.groupB,
+        surfaceId: browserId,
+        ownerEpoch: 21,
+        preparedSurfaceToken: "prepared:boundary-parity-browser",
+      },
+      32,
+    );
+    expectParity(
+      external,
+      {
+        type: "move-group",
+        groupId: ids.groupA,
+        targetGroupId: ids.groupB,
+        edge: "block-start",
+        splitNodeId: nodeId("node:cross-document-parity"),
+        ratio: 0.5,
+      },
+      33,
+    );
+
+    const pipId = surfaceId("surface:boundary-parity-pip");
+    external = expectAcceptedParity(
+      external,
+      {
+        type: "move-to-picture-in-picture",
+        panelId: ids.panelA,
+        newGroupId: groupId("group:boundary-parity-pip"),
+        newGroupNodeId: nodeId("node:boundary-parity-pip"),
+        surfaceId: pipId,
+        ownerEpoch: 22,
+        capabilityToken: "prepared:boundary-parity-pip",
+        mode: "move",
+      },
+      34,
+    );
+    expectParity(
+      external,
+      {
+        type: "redock-surface",
+        surfaceId: pipId,
+        expectedOwnerEpoch: 22,
+        target: { groupId: ids.groupB },
+      },
+      35,
+    );
+    expectParity(
+      external,
+      {
+        type: "recover-orphaned-surface",
+        surfaceId: pipId,
+        expectedOwnerEpoch: 22,
+        targetGroupId: ids.groupB,
+        edge: "inline-start",
+        splitNodeId: nodeId("node:recover-cross-document-parity"),
+        ratio: 0.5,
+      },
+      36,
+    );
+    expectParity(
+      external,
+      {
+        type: "recover-orphaned-surface",
+        surfaceId: pipId,
+        expectedOwnerEpoch: 22,
+        targetGroupId: ids.groupA,
+        edge: "inline-start",
+        splitNodeId: nodeId("node:recover-tiny-parity"),
+        ratio: Number.MIN_VALUE,
+      },
+      37,
+    );
   });
 
   it("matches every generated attempt and complete transaction contract", () => {

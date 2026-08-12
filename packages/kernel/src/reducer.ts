@@ -23,6 +23,7 @@ import {
   fromMutable,
   insertByAnchor,
   isFiniteRect,
+  NORMALIZED_WEIGHT_TOTAL,
   replaceNodeReference,
   toMutable,
   unique,
@@ -70,6 +71,25 @@ function requireEntity<T>(entity: T | undefined, kind: string, id: string): T {
     );
   }
   return entity;
+}
+
+function requireCanonicalRatio(value: number, intent: string): number {
+  if (!Number.isFinite(value) || value <= 0 || value >= 1) {
+    reject(
+      "INVALID_COMMAND",
+      `${intent} ratio must be between 0 and 1`,
+      "Choose a ratio such as 0.5",
+    );
+  }
+  const weight = Math.round(value * NORMALIZED_WEIGHT_TOTAL);
+  if (weight <= 0 || weight >= NORMALIZED_WEIGHT_TOTAL) {
+    reject(
+      "INVALID_COMMAND",
+      `${intent} ratio must produce two positive canonical weights`,
+      "Choose a ratio from 0.000001 through 0.999999",
+    );
+  }
+  return weight;
 }
 
 function populatedGroup(group: GroupRecord, panelIds: readonly PanelId[]): GroupRecord {
@@ -650,13 +670,7 @@ function reduceMoveGroup(
       "Supply a new split ID",
     );
   }
-  if (!Number.isFinite(command.ratio) || command.ratio <= 0 || command.ratio >= 1) {
-    reject(
-      "INVALID_COMMAND",
-      "Move-group ratio must be between 0 and 1",
-      "Choose a ratio such as 0.5",
-    );
-  }
+  const ratio = requireCanonicalRatio(command.ratio, "Move-group");
   const sourceGroup = requireEntity(state.groups.get(command.groupId), "Group", command.groupId);
   const targetGroup = requireEntity(
     state.groups.get(command.targetGroupId),
@@ -680,6 +694,26 @@ function reduceMoveGroup(
     "Target group node",
     targetGroup.id,
   );
+  const sourceSurface = requireEntity(
+    findSurfaceForNode(state, sourceNode.id),
+    "Source group surface",
+    sourceNode.id,
+  );
+  const targetSurface = requireEntity(
+    findSurfaceForNode(state, targetNode.id),
+    "Target group surface",
+    targetNode.id,
+  );
+  if (
+    sourceSurface.id !== targetSurface.id &&
+    (sourceSurface.capabilities.crossDocument || targetSurface.capabilities.crossDocument)
+  ) {
+    reject(
+      "CAPABILITY_DENIED",
+      "A group cannot move across cross-document ownership without preparation",
+      "Use a prepared transfer, redock, or recovery command",
+    );
+  }
   const sourceLocation = requireEntity(
     locateNode(state, sourceNode.id),
     "Group location",
@@ -689,30 +723,31 @@ function reduceMoveGroup(
   if (sourceLocation.parentNodeId !== undefined) {
     detachNodeReference(state, sourceNode.id);
   } else if (sourceLocation.surfaceId !== undefined) {
-    const sourceSurface = requireEntity(
+    const sourceRootSurface = requireEntity(
       state.surfaces.get(sourceLocation.surfaceId),
       "Source surface",
       sourceLocation.surfaceId,
     );
-    if (sourceSurface.kind !== "floating") {
+    if (sourceRootSurface.kind !== "floating") {
       reject(
         "CAPABILITY_DENIED",
         "Only an in-page floating root can move without an ownership recovery protocol",
         "Use redock or recover-orphaned-surface for external ownership",
       );
     }
-    state.surfaces.delete(sourceSurface.id);
-    state.floatingOrder = state.floatingOrder.filter((id) => id !== sourceSurface.id);
+    state.surfaces.delete(sourceRootSurface.id);
+    state.floatingOrder = state.floatingOrder.filter((id) => id !== sourceRootSurface.id);
   }
 
   const movedFirst = command.edge.endsWith("start");
-  const ratio = Math.round(command.ratio * 1_000_000);
   const split: LayoutNode = {
     kind: "split",
     id: command.splitNodeId,
     axis: edgeAxis(command.edge),
     children: movedFirst ? [sourceNode.id, targetNode.id] : [targetNode.id, sourceNode.id],
-    weights: movedFirst ? [ratio, 1_000_000 - ratio] : [1_000_000 - ratio, ratio],
+    weights: movedFirst
+      ? [ratio, NORMALIZED_WEIGHT_TOTAL - ratio]
+      : [NORMALIZED_WEIGHT_TOTAL - ratio, ratio],
     collapsedChildIds: [],
   };
   replaceNodeReference(state, targetNode.id, split.id);
@@ -809,7 +844,8 @@ function reduceSplitGroup(
   if (
     state.groups.has(command.newGroupId) ||
     state.nodes.has(command.newGroupNodeId) ||
-    state.nodes.has(command.splitNodeId)
+    state.nodes.has(command.splitNodeId) ||
+    command.newGroupNodeId === command.splitNodeId
   ) {
     reject(
       "DUPLICATE_ENTITY",
@@ -817,13 +853,7 @@ function reduceSplitGroup(
       "Supply new stable IDs",
     );
   }
-  if (!Number.isFinite(command.ratio) || command.ratio <= 0 || command.ratio >= 1) {
-    reject(
-      "INVALID_COMMAND",
-      "Split ratio must be greater than 0 and less than 1",
-      "Choose a ratio such as 0.5",
-    );
-  }
+  const ratio = requireCanonicalRatio(command.ratio, "Split");
   if (
     command.panelIds.length === 0 ||
     !unique(command.panelIds) ||
@@ -858,7 +888,6 @@ function reduceSplitGroup(
     groupId: command.newGroupId,
   };
   const newFirst = command.edge.endsWith("start");
-  const ratio = Math.round(command.ratio * 1_000_000);
   const split: LayoutNode = {
     kind: "split",
     id: command.splitNodeId,
@@ -866,7 +895,9 @@ function reduceSplitGroup(
     children: newFirst
       ? [command.newGroupNodeId, targetNode.id]
       : [targetNode.id, command.newGroupNodeId],
-    weights: newFirst ? [ratio, 1_000_000 - ratio] : [1_000_000 - ratio, ratio],
+    weights: newFirst
+      ? [ratio, NORMALIZED_WEIGHT_TOTAL - ratio]
+      : [NORMALIZED_WEIGHT_TOTAL - ratio, ratio],
     collapsedChildIds: [],
   };
   state.groups.set(newGroup.id, newGroup);
@@ -1369,13 +1400,7 @@ function reduceRecoverOrphanedSurface(
       "Supply a new split ID",
     );
   }
-  if (!Number.isFinite(command.ratio) || command.ratio <= 0 || command.ratio >= 1) {
-    reject(
-      "INVALID_COMMAND",
-      "Recovery ratio must be between 0 and 1",
-      "Choose a ratio such as 0.5",
-    );
-  }
+  const ratio = requireCanonicalRatio(command.ratio, "Recovery");
   const targetGroup = requireEntity(
     state.groups.get(command.targetGroupId),
     "Recovery target group",
@@ -1398,8 +1423,14 @@ function reduceRecoverOrphanedSurface(
       "Choose a group on another surface",
     );
   }
+  if (targetSurface.capabilities.crossDocument) {
+    reject(
+      "CAPABILITY_DENIED",
+      "An orphaned surface cannot recover into a cross-document target",
+      "Choose a target on an in-page surface",
+    );
+  }
   const recoveredFirst = command.edge.endsWith("start");
-  const ratio = Math.round(command.ratio * 1_000_000);
   const split: LayoutNode = {
     kind: "split",
     id: command.splitNodeId,
@@ -1407,7 +1438,9 @@ function reduceRecoverOrphanedSurface(
     children: recoveredFirst
       ? [surface.rootNodeId, targetNode.id]
       : [targetNode.id, surface.rootNodeId],
-    weights: recoveredFirst ? [ratio, 1_000_000 - ratio] : [1_000_000 - ratio, ratio],
+    weights: recoveredFirst
+      ? [ratio, NORMALIZED_WEIGHT_TOTAL - ratio]
+      : [NORMALIZED_WEIGHT_TOTAL - ratio, ratio],
     collapsedChildIds: [],
   };
   state.surfaces.delete(surface.id);
@@ -1465,6 +1498,23 @@ function reduceRedockSurface(
       "INVALID_COMMAND",
       "Floating surface cannot redock into itself",
       "Choose a docked target group",
+    );
+  }
+  const targetNode = requireEntity(
+    findNodeForGroup(state, target.id),
+    "Redock target node",
+    target.id,
+  );
+  const targetSurface = requireEntity(
+    findSurfaceForNode(state, targetNode.id),
+    "Redock target surface",
+    targetNode.id,
+  );
+  if (targetSurface.capabilities.crossDocument) {
+    reject(
+      "CAPABILITY_DENIED",
+      "A surface cannot redock into a cross-document target",
+      "Choose a target on an in-page surface",
     );
   }
   const panelIds = insertByAnchor(

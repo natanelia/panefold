@@ -1,6 +1,7 @@
+import fc from "fast-check";
 import { describe, expect, it } from "vitest";
 
-import { createDropTargets, hitTestNodes } from "../src/index.js";
+import { containsPoint, createDropTargets, hitTestNodes } from "../src/index.js";
 import type { ResolvedLayout } from "../src/index.js";
 
 describe("logical hit testing", () => {
@@ -40,5 +41,43 @@ describe("logical hit testing", () => {
       "block-start",
       "block-end",
     ]);
+    expect(targets[1]?.rect).toEqual({
+      inlineStart: 10,
+      blockStart: 20,
+      inlineSize: 10,
+      blockSize: 20,
+    });
+    expect(targets[3]?.rect).toEqual({
+      inlineStart: 10,
+      blockStart: 10,
+      inlineSize: 40,
+      blockSize: 10,
+    });
   });
+
+  it("partitions every integer point into one deterministic target, including tiny rectangles", () => {
+    fc.assert(
+      fc.property(
+        fc.integer({ min: 1, max: 40 }),
+        fc.integer({ min: 1, max: 40 }),
+        fc.double({ min: 0, max: 0.45, noNaN: true }),
+        (inlineSize, blockSize, ratio) => {
+          const rect = { inlineStart: 7, blockStart: 11, inlineSize, blockSize };
+          const targets = createDropTargets("leaf", rect, ratio);
+
+          for (let inline = rect.inlineStart; inline < rect.inlineStart + inlineSize; inline += 1) {
+            for (let block = rect.blockStart; block < rect.blockStart + blockSize; block += 1) {
+              expect(
+                targets.filter((target) => containsPoint(target.rect, { inline, block })),
+              ).toHaveLength(1);
+            }
+          }
+          expect(
+            targets.every((target) => target.rect.inlineSize >= 0 && target.rect.blockSize >= 0),
+          ).toBe(true);
+        },
+      ),
+      { numRuns: 500 },
+    );
+  }, 15_000);
 });

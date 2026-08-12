@@ -1,7 +1,9 @@
 import type { ComponentType, ReactNode } from "react";
+import type { LogicalRect } from "@panefold/geometry";
 
 export type WorkspaceDirection = "ltr" | "rtl";
 export type WorkspaceAxis = "inline" | "block";
+export type WorkspaceLogicalEdge = "inline-start" | "inline-end" | "block-start" | "block-end";
 export type WorkspaceCommandOrigin =
   | "pointer"
   | "keyboard"
@@ -35,6 +37,21 @@ export interface WorkspaceGroupView {
   readonly selectedPanelId: string;
   readonly label?: string;
 }
+
+export type WorkspaceTabPlacement = "block-start" | "block-end" | "inline-start" | "inline-end";
+
+export type WorkspaceTabContent = "icon-and-label" | "icon-only" | "label-only";
+
+/** View-only tab chrome. Applications decide whether and how this preference is persisted. */
+export interface WorkspaceTabPresentation {
+  readonly placement: WorkspaceTabPlacement;
+  readonly content: WorkspaceTabContent;
+}
+
+export type WorkspaceTabPresentationResolver = (
+  group: WorkspaceGroupView,
+  projection: WorkspaceProjection,
+) => WorkspaceTabPresentation;
 
 export interface WorkspaceSplitView {
   readonly kind: "split";
@@ -101,6 +118,60 @@ export interface WorkspacePanelDefinition {
 
 export type WorkspacePanelRegistry = Readonly<Record<string, WorkspacePanelDefinition>>;
 
+export interface WorkspacePanelDropRequest {
+  /** Projection revision whose geometry and panel context produced this request. */
+  readonly revision: string;
+  /** Immutable panel value from the previewed projection revision. */
+  readonly panel: WorkspacePanelView;
+  /** Immutable source group value from the previewed projection revision. */
+  readonly sourceGroup: WorkspaceGroupView;
+  /** Ordered immutable source panel values from the previewed projection revision. */
+  readonly sourcePanels: readonly WorkspacePanelView[];
+  /** Immutable target group value from the previewed projection revision. */
+  readonly targetGroup: WorkspaceGroupView;
+  /** Ordered immutable target panel values from the previewed projection revision. */
+  readonly targetPanels: readonly WorkspacePanelView[];
+  readonly targetNodeId: string;
+  readonly target:
+    | { readonly kind: "center"; readonly ratio: 1 }
+    | {
+        readonly kind: "edge";
+        readonly edge: WorkspaceLogicalEdge;
+        readonly ratio: number;
+      };
+}
+
+export interface WorkspaceExternalPanelPosition {
+  readonly clientX: number;
+  readonly clientY: number;
+  readonly screenX: number;
+  readonly screenY: number;
+}
+
+export interface WorkspaceExternalPanelRequest {
+  readonly panel: WorkspacePanelView;
+  readonly sourceGroup: WorkspaceGroupView;
+  readonly sourcePanels: readonly WorkspacePanelView[];
+  /** The panel's stable same-document host. The handler never needs a private DOM query. */
+  readonly host: HTMLElement;
+  /** Safe source-document parking supplied explicitly for prepare/rollback workflows. */
+  readonly parkingElement: HTMLElement;
+  readonly origin: Extract<WorkspaceCommandOrigin, "pointer" | "keyboard" | "menu">;
+  readonly position: WorkspaceExternalPanelPosition;
+  readonly pointer?: {
+    readonly pointerId: number;
+    readonly pointerType: string;
+  };
+}
+
+export type WorkspaceExternalPanelOutcome =
+  | { readonly status: "committed"; readonly message?: string }
+  | { readonly status: "rejected"; readonly message?: string };
+
+export type WorkspaceExternalPanelHandler = (
+  request: WorkspaceExternalPanelRequest,
+) => WorkspaceExternalPanelOutcome | Promise<WorkspaceExternalPanelOutcome>;
+
 /**
  * Converts a semantic runtime snapshot into the small immutable view required
  * by the DOM renderer. It may derive indexes, but must never mutate the
@@ -120,6 +191,26 @@ export interface WorkspaceCommandAdapter<TCommand> {
   readonly resizeSplit: (splitId: string, weights: readonly number[]) => TCommand;
   readonly movePanel?: (panelId: string, groupId: string) => TCommand;
   readonly floatPanel?: (panelId: string) => TCommand;
+  /**
+   * Pure, revision-bound direct-manipulation plan. The application owns real
+   * topology, IDs, constraints, policy, and command representation. The
+   * renderer retains this exact command for pointerup.
+   */
+  readonly planPanelDrop?: (
+    request: WorkspacePanelDropRequest,
+    context: WorkspacePanelDropPlanContext,
+  ) => WorkspacePanelDropPlan<TCommand> | undefined;
+}
+
+export interface WorkspacePanelDropPlanContext {
+  readonly bounds: LogicalRect;
+  readonly targetRect: LogicalRect;
+  readonly splitterSize: number;
+}
+
+export interface WorkspacePanelDropPlan<TCommand> {
+  readonly command: TCommand;
+  readonly previewRect: LogicalRect;
 }
 
 export interface WorkspaceRuntimeLike<TSnapshot, TCommand, TResult> {

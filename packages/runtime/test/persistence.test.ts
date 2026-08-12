@@ -27,6 +27,7 @@ import {
   createWorkspaceEnvelope,
   createWorkspaceRuntime,
   decodeWorkspaceEnvelope,
+  openDurableWorkspace,
   recoverWorkspaceBundle,
   type WorkspaceJournalEntry,
 } from "../src";
@@ -296,6 +297,183 @@ describe("workspace journal", () => {
 });
 
 describe("durable workspace runtime", () => {
+  it("opens at the recovered journal revision before exposing the runtime", async () => {
+    const port = new MemoryWorkspaceJournalPort();
+    const first = await openDurableWorkspace({
+      initialSnapshot: fixture(),
+      journal: port,
+      key: "recreate",
+      recovery: decodeOptions,
+      durability: "strict",
+    });
+    expect(first.ok).toBe(true);
+    if (!first.ok) return;
+    expect(first.restoration).toMatchObject({
+      status: "initialized",
+      source: "initial",
+      revision: "0",
+    });
+    expect((await port.read("recreate"))?.latestSnapshot?.snapshotRevision).toBe("0");
+
+    await first.durable.dispatch({ type: "select-panel", panelId: secondPanelId });
+    await first.durable.dispose();
+    first.runtime.dispose();
+    // The default compaction interval leaves revision one in the journal, so
+    // this exercises replay rather than merely loading a newer snapshot.
+    expect((await port.read("recreate"))?.journal.at(-1)?.revision).toBe("1");
+
+    const reopened = await openDurableWorkspace({
+      initialSnapshot: fixture(),
+      journal: port,
+      key: "recreate",
+      recovery: decodeOptions,
+      durability: "strict",
+    });
+    expect(reopened.ok).toBe(true);
+    if (!reopened.ok) return;
+
+    expect(reopened.restoration).toMatchObject({
+      status: "restored",
+      source: "latest",
+      revision: "1",
+      appliedTransactions: 1,
+    });
+    expect(reopened.runtime.getSnapshot().groups.byId[String(testGroupId)]).toMatchObject({
+      selectedPanelId: secondPanelId,
+    });
+    expect(reopened.durable.getStatus()).toMatchObject({
+      pendingWrites: 0,
+      lastPersistedRevision: "1",
+      degraded: false,
+    });
+    await reopened.durable.dispose();
+    reopened.runtime.dispose();
+  });
+
+  it("does not overwrite an unrecoverable bundle with the initial snapshot", async () => {
+    const port = new MemoryWorkspaceJournalPort();
+    const envelope = await createWorkspaceEnvelope(fixture());
+    await port.commit("corrupt-open", {
+      snapshot: { ...envelope, checksum: "sha256:corrupt" },
+      markLastKnownGood: true,
+    });
+    const before = await port.read("corrupt-open");
+
+    const opened = await openDurableWorkspace({
+      initialSnapshot: fixture(),
+      journal: port,
+      key: "corrupt-open",
+      recovery: decodeOptions,
+    });
+
+    expect(opened).toMatchObject({ ok: false, error: { code: "CHECKSUM_MISMATCH" } });
+    expect(await port.read("corrupt-open")).toEqual(before);
+  });
+
+  it("restores a last-known-good-only bundle without silently repairing it", async () => {
+    const envelope = await createWorkspaceEnvelope(fixture());
+    const commit = vi.fn(async () => undefined);
+    const journal = {
+      read: async () => ({
+        lastKnownGoodSnapshot: envelope,
+        journal: [],
+        checkpoints: {},
+      }),
+      commit,
+      clear: async () => undefined,
+    };
+
+    const opened = await openDurableWorkspace({
+      initialSnapshot: fixture(),
+      journal,
+      key: "last-known-good-only",
+      recovery: decodeOptions,
+    });
+
+    expect(opened).toMatchObject({
+      ok: true,
+      restoration: { status: "restored", source: "last-known-good", revision: "0" },
+    });
+    expect(commit).not.toHaveBeenCalled();
+    if (opened.ok) {
+      await opened.durable.dispose();
+      opened.runtime.dispose();
+    }
+  });
+
+  it("fails closed without appending behind an interrupted journal replay", async () => {
+    const port = new MemoryWorkspaceJournalPort();
+    const initial = fixture();
+    const envelope = selectionEnvelope(initial);
+    const selected = executeCommand(initial, envelope);
+    expect(selected.ok).toBe(true);
+    if (!selected.ok) return;
+
+    await port.commit("interrupted-replay", {
+      snapshot: await createWorkspaceEnvelope(initial),
+      markLastKnownGood: true,
+    });
+    await port.commit("interrupted-replay", {
+      journalEntry: {
+        sequence: 0,
+        transactionId: String(envelope.id),
+        previousRevision: initial.revision.toString(),
+        revision: selected.next.revision.toString(),
+        envelope,
+        resultChecksum: "sha256:corrupt",
+      },
+    });
+    const before = await port.read("interrupted-replay");
+
+    const opened = await openDurableWorkspace({
+      initialSnapshot: fixture(),
+      journal: port,
+      key: "interrupted-replay",
+      recovery: decodeOptions,
+    });
+
+    expect(opened).toMatchObject({
+      ok: false,
+      error: { code: "JOURNAL_RECOVERY_INCOMPLETE" },
+      diagnostics: [{ code: "JOURNAL_CHECKSUM_MISMATCH" }],
+    });
+    expect(await port.read("interrupted-replay")).toEqual(before);
+  });
+
+  it("publishes saving transitions and isolates status subscribers", async () => {
+    const statusSubscriberFailure = vi.fn();
+    const statuses: Array<{ readonly pendingWrites: number; readonly revision?: string }> = [];
+    const runtime = createWorkspaceRuntime({ initialSnapshot: fixture() });
+    const durable = await createDurableWorkspaceRuntime({
+      runtime,
+      journal: new MemoryWorkspaceJournalPort(),
+      key: "observable",
+      durability: "strict",
+      onStatusSubscriberError: statusSubscriberFailure,
+    });
+    durable.subscribeStatus(() => {
+      throw new Error("observer defect");
+    });
+    durable.subscribeStatus((status) => {
+      statuses.push({
+        pendingWrites: status.pendingWrites,
+        ...(status.lastPersistedRevision === undefined
+          ? {}
+          : { revision: status.lastPersistedRevision }),
+      });
+    });
+
+    await expect(
+      durable.dispatch({ type: "select-panel", panelId: secondPanelId }),
+    ).resolves.toMatchObject({ status: "committed" });
+
+    expect(statusSubscriberFailure).toHaveBeenCalled();
+    expect(statuses.some((status) => status.pendingWrites > 0)).toBe(true);
+    expect(statuses.at(-1)).toEqual({ pendingWrites: 0, revision: "1" });
+    await durable.dispose();
+    runtime.dispose();
+  });
+
   it("waits for strict durability and records the committed revision", async () => {
     const port = new MemoryWorkspaceJournalPort();
     const runtime = createWorkspaceRuntime({ initialSnapshot: fixture() });

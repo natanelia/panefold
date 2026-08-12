@@ -383,6 +383,130 @@ describe("extended command catalog", () => {
     expect(getEntity(pip.surfaces, surfaceId("surface:pip"))?.kind).toBe("document-pip");
   });
 
+  it("rejects unrepresentable splits, node aliases, and unprepared ownership crossings", () => {
+    const initial = fixtureSnapshot();
+    const tinySplit = executeCommand(
+      initial,
+      envelope(initial, {
+        type: "split-group",
+        targetGroupId: ids.groups[0],
+        panelIds: [ids.panels[1]],
+        newGroupId: groupId("group:tiny"),
+        newGroupNodeId: nodeId("node:tiny"),
+        splitNodeId: nodeId("node:tiny-split"),
+        edge: "inline-end",
+        ratio: Number.MIN_VALUE,
+      }),
+    );
+    expect(tinySplit).toMatchObject({ ok: false, error: { code: "INVALID_COMMAND" } });
+
+    const aliasedNodeId = nodeId("node:aliased-split");
+    const aliasedSplit = executeCommand(
+      initial,
+      envelope(initial, {
+        type: "split-group",
+        targetGroupId: ids.groups[0],
+        panelIds: [ids.panels[1]],
+        newGroupId: groupId("group:aliased-split"),
+        newGroupNodeId: aliasedNodeId,
+        splitNodeId: aliasedNodeId,
+        edge: "block-end",
+        ratio: 0.5,
+      }),
+    );
+    expect(aliasedSplit).toMatchObject({ ok: false, error: { code: "DUPLICATE_ENTITY" } });
+
+    const transferable = mapPanels(initial, (record) => ({
+      ...record,
+      capabilities: {
+        ...record.capabilities,
+        popout: true,
+        pictureInPicture: true,
+      },
+    }));
+    const browserSurfaceId = surfaceId("surface:boundary-browser");
+    let external = execute(transferable, {
+      type: "transfer-to-browser-window",
+      groupId: ids.groups[1],
+      surfaceId: browserSurfaceId,
+      ownerEpoch: 11,
+      preparedSurfaceToken: "prepared:boundary-browser",
+    }).next;
+
+    const crossDocumentMove = executeCommand(
+      external,
+      envelope(external, {
+        type: "move-group",
+        groupId: ids.groups[0],
+        targetGroupId: ids.groups[1],
+        edge: "block-start",
+        splitNodeId: nodeId("node:cross-document-move"),
+        ratio: 0.5,
+      }),
+    );
+    expect(crossDocumentMove).toMatchObject({
+      ok: false,
+      error: { code: "CAPABILITY_DENIED" },
+    });
+
+    const pipSurfaceId = surfaceId("surface:boundary-pip");
+    external = execute(external, {
+      type: "move-to-picture-in-picture",
+      panelId: ids.panels[0],
+      newGroupId: groupId("group:boundary-pip"),
+      newGroupNodeId: nodeId("node:boundary-pip"),
+      surfaceId: pipSurfaceId,
+      ownerEpoch: 12,
+      capabilityToken: "prepared:boundary-pip",
+      mode: "move",
+    }).next;
+
+    const redockToBrowser = executeCommand(
+      external,
+      envelope(external, {
+        type: "redock-surface",
+        surfaceId: pipSurfaceId,
+        expectedOwnerEpoch: 12,
+        target: { groupId: ids.groups[1] },
+      }),
+    );
+    expect(redockToBrowser).toMatchObject({
+      ok: false,
+      error: { code: "CAPABILITY_DENIED" },
+    });
+
+    const recoverToBrowser = executeCommand(
+      external,
+      envelope(external, {
+        type: "recover-orphaned-surface",
+        surfaceId: pipSurfaceId,
+        expectedOwnerEpoch: 12,
+        targetGroupId: ids.groups[1],
+        edge: "inline-start",
+        splitNodeId: nodeId("node:cross-document-recovery"),
+        ratio: 0.5,
+      }),
+    );
+    expect(recoverToBrowser).toMatchObject({
+      ok: false,
+      error: { code: "CAPABILITY_DENIED" },
+    });
+
+    const tinyRecovery = executeCommand(
+      external,
+      envelope(external, {
+        type: "recover-orphaned-surface",
+        surfaceId: pipSurfaceId,
+        expectedOwnerEpoch: 12,
+        targetGroupId: ids.groups[0],
+        edge: "inline-start",
+        splitNodeId: nodeId("node:tiny-recovery"),
+        ratio: Number.MIN_VALUE,
+      }),
+    );
+    expect(tinyRecovery).toMatchObject({ ok: false, error: { code: "INVALID_COMMAND" } });
+  });
+
   it("applies replace/merge snapshots and authenticated remote commands deterministically", () => {
     const initial = fixtureSnapshot();
     const preset = onePanelWorkspace("preset");

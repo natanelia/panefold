@@ -20,11 +20,20 @@ export type CommandOrigin =
   | "recovery"
   | "history";
 
+/**
+ * `barrier` is reserved for structural platform transitions that cannot be
+ * replayed safely from semantic state alone (for example, acquiring a browser
+ * window under transient user activation). A successful barrier clears both
+ * workspace-history stacks and is not itself added to undo history.
+ */
+export type CommandHistoryMode = "record" | "barrier";
+
 export interface CommandEnvelope<C extends WorkspaceCommand = WorkspaceCommand> {
   readonly id: CommandId;
   readonly origin: CommandOrigin;
   readonly label: string;
   readonly baseRevision?: Revision;
+  readonly history?: CommandHistoryMode;
   readonly command: C;
 }
 

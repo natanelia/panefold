@@ -29,18 +29,21 @@ conformance, product certification, npm publication, or unrestricted browser-win
   so it is not presented as the retained optimized production kernel; recorded runs also remain
   below the stable ten-million threshold.
 - A logical-axis n-ary geometry solver with panel constraints, collapse state, exact integer
-  conservation, overflow diagnostics, splitters, hit tests, and drop targets.
+  conservation, overflow diagnostics, working splitters, and deterministic non-overlapping drop
+  targets.
 - A React projection that uses the geometry allocator, driver-isolated resize protocols,
-  frame-coalesced previews, accessible tabs and splitters, focus recovery, stable panel hosts,
-  lifecycle leases, and optional FLIP motion.
+  frame-coalesced previews, direct center/edge panel docking, accessible tabs and splitters, four-way
+  keyboard/menu splitting, configurable logical tab rails and content, focus recovery, stable panel
+  hosts, lifecycle leases, and optional FLIP motion.
 - A bounded synchronous runtime plus versioned persistence codecs, atomic snapshot/journal
-  contracts, deterministic schema migration, last-known-good recovery, and an IndexedDB/Effect
-  adapter tested with injected storage. Real browser crash and quota certification is still absent.
+  contracts, deterministic schema migration, last-known-good recovery, a restore-before-render open
+  path, observable save status, and an IndexedDB/Effect adapter. Atlas visibly reports the exact
+  saved/restored canonical revision. Real browser crash and quota certification is still absent.
 - Driver-neutral protocol contracts and a public twelve-actor XState catalog with scoped disposal,
   deterministic traces, revision-conflict handling, and prepared external-surface ownership. The
   injected same-origin browser adapter opens, bootstraps, observes, recovers, and closes a real
-  Chromium popup fixture; Picture-in-Picture and unrestricted popouts are still not a certified
-  product profile.
+  Chromium popup containing the same live React panel host. Picture-in-Picture, arbitrary origins,
+  and unrestricted popouts are still not a certified product profile.
 - Native experimental Vue, Svelte, Angular, and Web Components bindings over a shared immutable
   adapter contract. Current cross-framework evidence is a JSDOM contract harness, not real-browser
   framework certification.
@@ -121,11 +124,24 @@ pnpm install
 pnpm dev
 ```
 
-Open the URL printed by Vite. Atlas exercises a compact map-operations workspace with tabs,
-keyboard commands, splitters, stable content hosts, close/reopen, structural movement, undo/redo,
-a mobile single-region projection, an optional 17-kind lifecycle lab, and a same-origin popup
-fixture. It is an automated reference fixture, not evidence for every browser, input, framework,
-workload, or deployment.
+Open the URL printed by Vite. Atlas lets you drag a tab into another group, drop it on any logical
+edge to create a group, drag it beyond the workspace into a controlled same-origin browser window,
+split from the keyboard/menu, resize splitters, choose top/bottom/vertical and icon/label tab chrome,
+and reload the canonical arrangement from IndexedDB. Stable panel-host identity, undo/redo, a mobile
+single-region projection, and an optional 17-kind lifecycle lab remain observable in the same
+fixture. Panel-owned document content needs an application checkpoint codec; the demo does not imply
+support for every browser, input, framework, workload, or deployment.
+
+### Direct-interaction proof in Atlas
+
+1. Drag **Notes** onto the center of **Inspector** to dock it in that tab group.
+2. Drag a tab onto a group edge—or use **Actions → Split left/right/above/below**—to create a new
+   container in one undoable transaction.
+3. Drag a popout-capable tab beyond the workspace, or choose **Open in new window**, to move the live
+   host into a same-origin popup. Edit Notes there, then return or close the popup to see recovery.
+4. Open **Workspace appearance** to select a logical tab rail and icon/label treatment.
+5. Wait for **Saved revision _n_ in IndexedDB**, reload, and inspect **Restored revision _n_** plus
+   the recovered layout.
 
 ## Verify the repository
 

@@ -12,9 +12,6 @@ import { solveLayout } from "@panefold/geometry";
 import {
   getEntity,
   nodeId,
-  panelId,
-  revision,
-  surfaceId,
   type CommittedTransaction,
   type WorkspaceCommand,
   type WorkspaceSnapshot,
@@ -27,64 +24,103 @@ import {
   type WorkspaceDirection,
   type WorkspaceLayoutSolver,
   type WorkspaceProjection,
+  type WorkspaceTabContent,
+  type WorkspaceTabPlacement,
 } from "@panefold/react";
-import {
-  createWorkspaceRuntime,
-  type RuntimeDispatchReceipt,
-  type WorkspaceRuntime,
+import type {
+  DurableWorkspaceStatus,
+  RuntimeDispatchReceipt,
+  WorkspaceRuntime,
 } from "@panefold/runtime";
-import {
-  BrowserExternalSurfaceAdapter,
-  type PrepareSurfaceRequest,
-  type PreparedSurfaceHandle,
-} from "@panefold/surfaces";
 
 import { demoPanelRegistry, Glyph, heavyContentDemoPanelRegistry } from "./demo-panels";
+import { DemoExternalPanelController } from "./external-panels";
 import { createRedactedReproduction } from "./reproduction";
-import { demoCommands, initialWorkspaceSnapshot, projectWorkspace } from "./workspace-config";
+import {
+  createDemoWorkspaceFailureResult,
+  openDemoWorkspaceSession,
+  type DemoWorkspaceRestoration,
+  type DemoWorkspaceSession,
+  type OpenDemoWorkspaceSessionResult,
+} from "./runtime-session";
+import {
+  readDemoViewPreferences,
+  writeDemoViewPreferences,
+  type DemoMotionProfile,
+  type DemoTheme,
+  type DemoViewPreferences,
+} from "./view-preferences";
+import { createDemoCommands, initialWorkspaceSnapshot, projectWorkspace } from "./workspace-config";
 
-type Theme = "dark" | "light";
-type MotionProfile = "off" | "reduced" | "productive";
 type InspectorTab = "topology" | "transactions" | "focus";
 
-export default function App() {
-  const runtime = useMemo(
-    () =>
-      createWorkspaceRuntime({
-        initialSnapshot: initialWorkspaceSnapshot,
-        historyLimit: 200,
-        transactionLimit: 100,
-      }),
-    [],
-  );
+type BootstrapState =
+  | { readonly status: "loading" }
+  | { readonly status: "ready"; readonly session: DemoWorkspaceSession }
+  | {
+      readonly status: "failed";
+      readonly result: Extract<OpenDemoWorkspaceSessionResult, { readonly ok: false }>;
+    };
 
-  useEffect(
-    () => () => {
-      runtime.dispose();
-    },
-    [runtime],
-  );
+export default function App() {
+  const [bootstrap, setBootstrap] = useState<BootstrapState>({ status: "loading" });
+
+  useEffect(() => {
+    let active = true;
+    let session: DemoWorkspaceSession | undefined;
+    void openDemoWorkspaceSession()
+      .then((result) => {
+        if (!active) {
+          if (result.ok) void result.session.dispose().catch(() => undefined);
+          return;
+        }
+        if (result.ok) {
+          session = result.session;
+          setBootstrap({ status: "ready", session });
+        } else {
+          setBootstrap({ status: "failed", result });
+        }
+      })
+      .catch((cause: unknown) => {
+        if (!active) return;
+        setBootstrap({
+          status: "failed",
+          result: createDemoWorkspaceFailureResult(cause),
+        });
+      });
+    return () => {
+      active = false;
+      if (session !== undefined) void session.dispose().catch(() => undefined);
+    };
+  }, []);
+
+  if (bootstrap.status === "loading") return <WorkspaceBootstrap />;
+  if (bootstrap.status === "failed") return <WorkspaceRecoveryFailure result={bootstrap.result} />;
 
   return (
-    <WorkspaceRuntimeProvider runtime={runtime}>
-      <MapWorkspaceApp runtime={runtime} />
+    <WorkspaceRuntimeProvider runtime={bootstrap.session.runtime}>
+      <MapWorkspaceApp session={bootstrap.session} />
     </WorkspaceRuntimeProvider>
   );
 }
 
-function MapWorkspaceApp({ runtime }: { readonly runtime: WorkspaceRuntime }) {
+function MapWorkspaceApp({ session }: { readonly session: DemoWorkspaceSession }) {
+  const runtime = session.runtime;
   const snapshot = useWorkspaceSnapshot<
     WorkspaceSnapshot,
     WorkspaceCommand,
     RuntimeDispatchReceipt
   >();
-  const [theme, setTheme] = useState<Theme>("dark");
-  const [direction, setDirection] = useState<WorkspaceDirection>("ltr");
-  const [motion, setMotion] = useState<MotionProfile>("productive");
+  const [preferences, setPreferences] = useState<DemoViewPreferences>(readDemoViewPreferences);
+  const { theme, direction, motion, tabPlacement, tabContent } = preferences;
   const [inspectorOpen, setInspectorOpen] = useState(false);
   const [paletteOpen, setPaletteOpen] = useState(false);
   const [compactGroupId, setCompactGroupId] = useState("primary");
-  const [surfaceStatus, setSurfaceStatus] = useState("External surface ready to try");
+  const [surfaceStatus, setSurfaceStatus] = useState(
+    "Drag a tab to another group, an edge, or beyond the workspace",
+  );
+  const [persistenceStatus, setPersistenceStatus] = useState(() => session.durable.getStatus());
+  const [changedSinceRestore, setChangedSinceRestore] = useState(false);
   const panelRegistry = useMemo(
     () =>
       new URL(window.location.href).searchParams.get("fixture") === "heavy"
@@ -93,6 +129,51 @@ function MapWorkspaceApp({ runtime }: { readonly runtime: WorkspaceRuntime }) {
     [],
   );
   const workspaceFrameRef = useRef<HTMLDivElement>(null);
+
+  const updatePreferences = useCallback((patch: Partial<DemoViewPreferences>) => {
+    setPreferences((current) => {
+      const next = { ...current, ...patch };
+      writeDemoViewPreferences(next);
+      return next;
+    });
+  }, []);
+
+  const commands = useMemo(() => createDemoCommands(() => runtime.getSnapshot()), [runtime]);
+  const externalPanels = useMemo(
+    () =>
+      new DemoExternalPanelController({
+        runtime,
+        // Preferences are synchronously mirrored to local storage by the
+        // controls below. Reading that application-owned view state lazily
+        // keeps popup creation current without making a React ref part of the
+        // render path.
+        getTheme: () => readDemoViewPreferences().theme,
+        getDirection: () => readDemoViewPreferences().direction,
+        onStatus: setSurfaceStatus,
+      }),
+    [runtime],
+  );
+
+  useEffect(
+    () => session.registerBeforeDispose(() => externalPanels.returnAll()),
+    [externalPanels, session],
+  );
+
+  useEffect(
+    () =>
+      session.durable.subscribeStatus((status) => {
+        setPersistenceStatus(status);
+      }),
+    [session],
+  );
+
+  useEffect(
+    () =>
+      runtime.subscribeTransactions(() => {
+        setChangedSinceRestore(true);
+      }),
+    [runtime],
+  );
 
   useEffect(() => {
     const onKeyDown = (event: KeyboardEvent) => {
@@ -159,14 +240,6 @@ function MapWorkspaceApp({ runtime }: { readonly runtime: WorkspaceRuntime }) {
         </div>
         <span className="demo-toolbar-spacer" />
         <ToolbarButton
-          label="Open external surface fixture"
-          onClick={() => {
-            void openExternalSurfaceFixture(setSurfaceStatus);
-          }}
-        >
-          ↗
-        </ToolbarButton>
-        <ToolbarButton
           label="Undo layout change"
           disabled={!canUndo}
           onClick={() => {
@@ -205,16 +278,35 @@ function MapWorkspaceApp({ runtime }: { readonly runtime: WorkspaceRuntime }) {
           theme={theme}
           direction={direction}
           motion={motion}
-          onTheme={setTheme}
-          onDirection={setDirection}
-          onMotion={setMotion}
+          tabPlacement={tabPlacement}
+          tabContent={tabContent}
+          onTheme={(value) => {
+            updatePreferences({ theme: value });
+          }}
+          onDirection={(value) => {
+            updatePreferences({ direction: value });
+          }}
+          onMotion={(value) => {
+            updatePreferences({ motion: value });
+          }}
+          onTabPlacement={(value) => {
+            updatePreferences({ tabPlacement: value });
+          }}
+          onTabContent={(value) => {
+            updatePreferences({ tabContent: value });
+          }}
+          onResetLayout={() => {
+            void session.resetLayout().then(() => {
+              setSurfaceStatus("Saved layout reset to the Atlas starting workspace");
+            });
+          }}
         />
       </header>
 
       <main className="demo-main" ref={workspaceFrameRef}>
         <WorkspaceSurface
           projector={projector}
-          commands={demoCommands}
+          commands={commands}
           panels={panelRegistry}
           layoutSolver={layoutSolver}
           direction={direction}
@@ -224,6 +316,8 @@ function MapWorkspaceApp({ runtime }: { readonly runtime: WorkspaceRuntime }) {
           responsive="auto"
           compactGroupId={compactGroupId}
           onCompactGroupChange={setCompactGroupId}
+          tabPresentation={{ placement: tabPlacement, content: tabContent }}
+          onExternalPanelRequest={externalPanels.handleRequest}
         />
         {inspectorOpen ? (
           <WorkspaceInspector
@@ -248,17 +342,29 @@ function MapWorkspaceApp({ runtime }: { readonly runtime: WorkspaceRuntime }) {
                 invariantViolations.length === 1 ? "violation" : "violations"
               }`}
         </span>
-        <span>Revision {snapshot.revision.toString()}</span>
-        <span>
+        <span
+          className="demo-status-revision"
+          data-workspace-revision={snapshot.revision.toString()}
+        >
+          Revision {snapshot.revision.toString()}
+        </span>
+        <span className="demo-status-topology">
           {snapshot.panels.ids.length} panels · {snapshot.groups.ids.length} groups
         </span>
         <span className="demo-toolbar-spacer" />
-        <span>Active: {activePanel?.title ?? "None"}</span>
-        <span>Responsive projection</span>
-        <span>{motion} motion</span>
-        <span role="status">{surfaceStatus}</span>
-        <span>Stable hosts · hidden work suspends</span>
-        <span>Session memory only</span>
+        <span className="demo-status-active">Active: {activePanel?.title ?? "None"}</span>
+        <span className="demo-status-projection">Responsive projection</span>
+        <span className="demo-status-motion">{motion} motion</span>
+        <span className="demo-surface-status" role="status">
+          {surfaceStatus}
+        </span>
+        <span className="demo-status-lifecycle">Stable hosts · hidden work suspends</span>
+        <PersistenceBadge
+          snapshot={snapshot}
+          status={persistenceStatus}
+          restoration={session.restoration}
+          changedSinceRestore={changedSinceRestore}
+        />
       </footer>
 
       {paletteOpen ? (
@@ -271,6 +377,109 @@ function MapWorkspaceApp({ runtime }: { readonly runtime: WorkspaceRuntime }) {
         />
       ) : null}
     </div>
+  );
+}
+
+function WorkspaceBootstrap() {
+  return (
+    <main className="demo-bootstrap" aria-busy="true" aria-label="Opening Atlas workspace">
+      <span className="demo-brand-mark" aria-hidden="true">
+        <i />
+        <i />
+        <i />
+      </span>
+      <div>
+        <strong>Opening Atlas</strong>
+        <span>Checking the saved workspace before first render…</span>
+      </div>
+    </main>
+  );
+}
+
+function WorkspaceRecoveryFailure({
+  result,
+}: {
+  readonly result: Extract<OpenDemoWorkspaceSessionResult, { readonly ok: false }>;
+}) {
+  const [resetting, setResetting] = useState(false);
+  const [resetError, setResetError] = useState<string>();
+  return (
+    <main className="demo-bootstrap demo-recovery-failure">
+      <span className="demo-kicker">Safe recovery boundary</span>
+      <h1>The saved workspace was not overwritten.</h1>
+      <p>{result.error.message}</p>
+      {result.diagnostics.length === 0 ? null : (
+        <ul>
+          {result.diagnostics.map((diagnostic) => (
+            <li key={`${diagnostic.code}:${diagnostic.message}`}>
+              <strong>{diagnostic.code}</strong> {diagnostic.message}
+            </li>
+          ))}
+        </ul>
+      )}
+      {resetError === undefined ? null : <p role="alert">Reset failed: {resetError}</p>}
+      <button
+        type="button"
+        disabled={resetting}
+        onClick={() => {
+          setResetting(true);
+          setResetError(undefined);
+          void result.reset().then(
+            () => window.location.reload(),
+            (cause: unknown) => {
+              setResetting(false);
+              setResetError(cause instanceof Error ? cause.message : "IndexedDB reset failed");
+            },
+          );
+        }}
+      >
+        {resetting ? "Resetting…" : "Discard saved data and open the default layout"}
+      </button>
+    </main>
+  );
+}
+
+function PersistenceBadge({
+  snapshot,
+  status,
+  restoration,
+  changedSinceRestore,
+}: {
+  readonly snapshot: WorkspaceSnapshot;
+  readonly status: DurableWorkspaceStatus;
+  readonly restoration: DemoWorkspaceRestoration;
+  readonly changedSinceRestore: boolean;
+}) {
+  let state = "saved";
+  let label: string;
+  if (status.degraded) {
+    state = "degraded";
+    label = "IndexedDB unavailable · layout remains safe in memory";
+  } else if (status.pendingWrites > 0) {
+    state = "saving";
+    label = `Saving revision ${snapshot.revision.toString()} to IndexedDB…`;
+  } else if (restoration.status === "restored" && !changedSinceRestore) {
+    state = "restored";
+    label = `Restored revision ${restoration.revision} from IndexedDB`;
+    if (restoration.recoveredExternalSurfaces > 0) {
+      label += ` · recovered ${String(restoration.recoveredExternalSurfaces)} external ${
+        restoration.recoveredExternalSurfaces === 1 ? "surface" : "surfaces"
+      } · saved revision ${status.lastPersistedRevision ?? snapshot.revision.toString()}`;
+    }
+  } else {
+    label = `Saved revision ${status.lastPersistedRevision ?? snapshot.revision.toString()} in IndexedDB`;
+  }
+  return (
+    <span
+      className="demo-persistence-status"
+      role="status"
+      data-persistence-state={state}
+      data-persisted-revision={status.lastPersistedRevision ?? ""}
+      title="Canonical layout snapshots and semantic transactions use the checksummed Panefold journal. Panel-owned document content requires its own checkpoint codec."
+    >
+      <i aria-hidden="true" />
+      <span>{label}</span>
+    </span>
   );
 }
 
@@ -302,135 +511,30 @@ function ToolbarButton({
   );
 }
 
-async function openExternalSurfaceFixture(setStatus: (status: string) => void): Promise<void> {
-  const destinationSurfaceId = surfaceId("demo-external");
-  let handle: PreparedSurfaceHandle | undefined;
-  const adapter = new BrowserExternalSurfaceAdapter<{ readonly title: string }>({
-    environment: { sourceWindow: window },
-    mount: ({ checkpoint, document: ownerDocument, root, window: ownerWindow }) => {
-      const article = ownerDocument.createElement("article");
-      article.className = "demo-external-fixture";
-      Object.assign(article.style, {
-        background: "#08101d",
-        color: "#edf3fb",
-        display: "grid",
-        fontFamily: "Inter, ui-sans-serif, system-ui, sans-serif",
-        gap: "16px",
-        minHeight: "100vh",
-        padding: "32px",
-      });
-      const heading = ownerDocument.createElement("h1");
-      heading.textContent = checkpoint.title;
-      const explanation = ownerDocument.createElement("p");
-      explanation.textContent =
-        "Prepared under user activation, bootstrapped with explicit surface context, then acknowledged ready.";
-      const closeButton = ownerDocument.createElement("button");
-      closeButton.type = "button";
-      closeButton.textContent = "Close external fixture";
-      closeButton.addEventListener("click", () => {
-        if (handle !== undefined) void adapter.close(handle);
-      });
-      const unexpectedCloseButton = ownerDocument.createElement("button");
-      unexpectedCloseButton.type = "button";
-      unexpectedCloseButton.textContent = "Simulate unexpected surface loss";
-      unexpectedCloseButton.addEventListener("click", () => {
-        ownerWindow.setTimeout(() => ownerWindow.close(), 0);
-      });
-      for (const button of [closeButton, unexpectedCloseButton]) {
-        Object.assign(button.style, {
-          background: "#172235",
-          border: "1px solid #40526c",
-          borderRadius: "7px",
-          color: "#edf3fb",
-          justifySelf: "start",
-          minHeight: "44px",
-          paddingInline: "16px",
-        });
-      }
-      article.append(heading, explanation, closeButton, unexpectedCloseButton);
-      root.append(article);
-      return {
-        ready: Promise.resolve(),
-        dispose: () => {
-          article.remove();
-        },
-      };
-    },
-    onSurfaceLost: ({ reason }) => {
-      setStatus(`External surface recovered after ${reason}`);
-    },
-  });
-  const request = {
-    destinationSurfaceId,
-    kind: "browser-window",
-    bounds: { x: window.screenX + 80, y: window.screenY + 80, width: 520, height: 360 },
-    security: {
-      protocolVersion: 1,
-      workspaceId: "atlas-demo",
-      sessionNonce: "atlas-demo-session",
-      allowedOrigins: [window.location.origin],
-    },
-    presentation: {
-      locale: document.documentElement.lang || "en-SG",
-      direction: document.documentElement.dir === "rtl" ? "rtl" : "ltr",
-      writingMode: "horizontal-tb",
-      stylesheets: [],
-      themeTokens: {
-        "demo-accent": "#58a6ff",
-        "demo-background": "#08101d",
-      },
-    },
-    userActivation: navigator.userActivation?.isActive ?? true,
-  } as const satisfies PrepareSurfaceRequest;
-  const controller = new AbortController();
-
-  try {
-    setStatus("Preparing external surface…");
-    handle = await adapter.prepare(request, controller.signal);
-    await adapter.bootstrap(handle, request, controller.signal);
-    await adapter.mount(
-      handle,
-      {
-        panelId: panelId("map-canvas"),
-        checkpoint: { title: "Panefold external surface" },
-        ownership: {
-          token: "demo-ownership",
-          panelId: panelId("map-canvas"),
-          sourceSurfaceId: surfaceId("main"),
-          destinationSurfaceId,
-          coordinatorEpoch: 1,
-          sessionNonce: "atlas-demo-session",
-          baseRevision: revision(0),
-        },
-      },
-      controller.signal,
-    );
-    await adapter.waitUntilReady(handle, controller.signal);
-    setStatus("External surface ready");
-  } catch (error) {
-    if (handle !== undefined) await adapter.close(handle);
-    setStatus(
-      error instanceof Error
-        ? `External surface stayed safe: ${error.message}`
-        : "External surface stayed safe",
-    );
-  }
-}
-
 function SettingsMenu({
   theme,
   direction,
   motion,
+  tabPlacement,
+  tabContent,
   onTheme,
   onDirection,
   onMotion,
+  onTabPlacement,
+  onTabContent,
+  onResetLayout,
 }: {
-  readonly theme: Theme;
+  readonly theme: DemoTheme;
   readonly direction: WorkspaceDirection;
-  readonly motion: MotionProfile;
-  readonly onTheme: (value: Theme) => void;
+  readonly motion: DemoMotionProfile;
+  readonly tabPlacement: WorkspaceTabPlacement;
+  readonly tabContent: WorkspaceTabContent;
+  readonly onTheme: (value: DemoTheme) => void;
   readonly onDirection: (value: WorkspaceDirection) => void;
-  readonly onMotion: (value: MotionProfile) => void;
+  readonly onMotion: (value: DemoMotionProfile) => void;
+  readonly onTabPlacement: (value: WorkspaceTabPlacement) => void;
+  readonly onTabContent: (value: WorkspaceTabContent) => void;
+  readonly onResetLayout: () => void;
 }) {
   const [open, setOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
@@ -464,7 +568,7 @@ function SettingsMenu({
             <select
               value={theme}
               onChange={(event: ChangeEvent<HTMLSelectElement>) => {
-                onTheme(event.target.value as Theme);
+                onTheme(event.target.value as DemoTheme);
               }}
             >
               <option value="dark">Dark</option>
@@ -481,6 +585,33 @@ function SettingsMenu({
             >
               <option value="ltr">Left to right</option>
               <option value="rtl">Right to left</option>
+            </select>
+          </label>
+          <label>
+            Tab rail
+            <select
+              value={tabPlacement}
+              onChange={(event) => {
+                onTabPlacement(event.target.value as WorkspaceTabPlacement);
+              }}
+            >
+              <option value="block-start">Top · horizontal</option>
+              <option value="block-end">Bottom · horizontal</option>
+              <option value="inline-start">Leading · vertical</option>
+              <option value="inline-end">Trailing · vertical</option>
+            </select>
+          </label>
+          <label>
+            Tab labels
+            <select
+              value={tabContent}
+              onChange={(event) => {
+                onTabContent(event.target.value as WorkspaceTabContent);
+              }}
+            >
+              <option value="icon-and-label">Icon and label</option>
+              <option value="icon-only">Icons only</option>
+              <option value="label-only">Labels only</option>
             </select>
           </label>
           <fieldset>
@@ -500,6 +631,9 @@ function SettingsMenu({
               </label>
             ))}
           </fieldset>
+          <button className="demo-settings-reset" type="button" onClick={onResetLayout}>
+            Reset saved layout
+          </button>
         </div>
       ) : null}
     </div>

@@ -31,6 +31,12 @@ export interface SurfaceCapabilityProfile {
   readonly capabilities: SurfaceCapabilities;
 }
 
+/** Application policy for content leaving its current semantic surface. */
+export interface SurfaceSourceTransferPolicy {
+  readonly allowBrowserWindow: boolean;
+  readonly allowDocumentPictureInPicture: boolean;
+}
+
 export interface PreparedSurfaceHandle {
   /** Opaque process-local identity. It is never persisted or used as canonical identity. */
   readonly resource: object;
@@ -146,17 +152,20 @@ export type SurfaceTransferResult =
   | {
       readonly ok: false;
       readonly panelId: PanelId;
-      /** The authoritative safe owner after rollback or compensation. */
+      /**
+       * The authoritative owner known when the operation returns. This is the
+       * source after confirmed rollback, or the destination while ownership is
+       * ready/pending and compensation has not been confirmed.
+       */
       readonly safeSurfaceId: SurfaceId;
       readonly error: SurfaceTransferError;
       readonly completedStages: readonly SurfaceTransferStage[];
     };
 
-export interface SurfaceTransferRequest<Checkpoint extends JsonValue = JsonValue> {
+interface SurfaceTransferRequestBase<Checkpoint extends JsonValue = JsonValue> {
   readonly panelId: PanelId;
   readonly sourceSurfaceId: SurfaceId;
   readonly destination: PrepareSurfaceRequest;
-  readonly sourceCapabilities: SurfaceCapabilities;
   readonly panelCapabilities: {
     readonly popout: boolean;
     readonly pictureInPicture: boolean;
@@ -167,11 +176,36 @@ export interface SurfaceTransferRequest<Checkpoint extends JsonValue = JsonValue
   readonly restorationToken?: string;
 }
 
+export type SurfaceTransferRequest<Checkpoint extends JsonValue = JsonValue> =
+  SurfaceTransferRequestBase<Checkpoint> &
+    (
+      | {
+          readonly sourcePolicy: SurfaceSourceTransferPolicy;
+          readonly destinationCapabilities: SurfaceCapabilities;
+          readonly sourceCapabilities?: never;
+        }
+      | {
+          /**
+           * @deprecated Ambiguous legacy input retained only for source
+           * compatibility. It grants no transfer; provide `sourcePolicy` and
+           * `destinationCapabilities` explicitly.
+           */
+          readonly sourceCapabilities: SurfaceCapabilities;
+          readonly sourcePolicy?: never;
+          readonly destinationCapabilities?: never;
+        }
+    );
+
 export interface SurfaceTransferHooks {
   currentRevision(): Revision;
-  commitOwnership(token: OwnershipToken): Promise<boolean>;
-  releaseSource(token: OwnershipToken): Promise<void>;
-  compensateOwnership(token: OwnershipToken, reason: SurfaceTransferError): Promise<void>;
+  /** Must synchronously commit or reject semantic ownership atomically. */
+  commitOwnership(token: OwnershipToken): boolean;
+  releaseSource(token: OwnershipToken, signal: AbortSignal): Promise<void>;
+  compensateOwnership(
+    token: OwnershipToken,
+    reason: SurfaceTransferError,
+    signal: AbortSignal,
+  ): Promise<void>;
 }
 
 export interface SurfaceTransferCoordinatorOptions<Checkpoint extends JsonValue = JsonValue> {

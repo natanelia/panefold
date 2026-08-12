@@ -57,11 +57,13 @@ the command output.
 
 ## Executed results checked in
 
-- The compact Chromium fixture passed 10/10 tasks: semantics/axe, LTR/RTL resize, motion preference,
-  stable-host lifecycle, all 17 panel classes, forced colors, popup loss/recovery, touch projection,
-  and raw splitter-frame capture.
+- The compact Chromium fixture covers semantics/axe, center docking, four-way container creation,
+  working pointer/keyboard splitters, logical and icon-only tab rails, exact IndexedDB
+  save/reload/restore evidence, live same-origin popup transfer/redock/loss recovery, LTR/RTL resize,
+  motion preference, stable-host lifecycle, all 17 panel classes, forced colors, touch projection,
+  and raw splitter-frame capture. The checked-in result records 23/23 passing browser tasks.
 - The framework JSDOM contract passed 20/20 tests across Vue, Svelte, Angular, and Web Components.
-- Protocol/motion validation passed 49/49 focused tests plus 18/18 React integration tests. It
+- Protocol/motion validation passed 49/49 focused tests plus 41/41 React integration tests. It
   covers the twelve-actor catalog, cancellation/revision conflicts, disposable motion leases,
   progressive View Transition fallback, and deterministic load degradation.
 - The independent semantic reducer matched the complete reference result for all 36 curated command

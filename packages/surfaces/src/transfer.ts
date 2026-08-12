@@ -1,6 +1,6 @@
 import type { JsonValue, SurfaceId } from "@panefold/model";
 
-import { intersectSurfaceCapabilities, supportsExternalKind } from "./capabilities";
+import { supportsExternalKind } from "./capabilities";
 import type {
   OwnershipToken,
   PreparedSurfaceHandle,
@@ -37,7 +37,7 @@ export class SurfaceTransferCoordinator<Checkpoint extends JsonValue = JsonValue
     const completed: SurfaceTransferStage[] = [];
     let prepared: PreparedSurfaceHandle | undefined;
     let ownership: OwnershipToken | undefined;
-    let committed = false;
+    let requiresCompensation = false;
     let destinationReady = false;
     const timeoutController = new AbortController();
     const combined = combineSignals(signal, timeoutController.signal);
@@ -52,15 +52,28 @@ export class SurfaceTransferCoordinator<Checkpoint extends JsonValue = JsonValue
     const timer = setTimer(() => timeoutController.abort("timeout"), this.#timeoutMs);
 
     try {
+      throwIfAborted(combined);
       this.#assertCapability(request);
       completed.push("capability");
       this.#registerSourceOwnership(request);
-      prepared = await this.#options.adapter.prepare(request.destination, combined);
+      const preparation = invokeAsPromise(() =>
+        this.#options.adapter.prepare(request.destination, combined),
+      );
+      try {
+        prepared = await waitWithSignal(preparation, combined);
+      } catch (cause) {
+        closeLatePreparation(preparation, this.#options.adapter);
+        throw cause;
+      }
+      const preparedHandle = prepared;
       completed.push("prepare");
-      this.#assertPrepared(request, prepared);
-      await this.#options.adapter.bootstrap(prepared, request.destination, combined);
+      this.#assertPrepared(request, preparedHandle);
+      await runWithSignal(
+        () => this.#options.adapter.bootstrap(preparedHandle, request.destination, combined),
+        combined,
+      );
       completed.push("bootstrap");
-      const checkpoint = await request.checkpoint(combined);
+      const checkpoint = await runWithSignal(() => request.checkpoint(combined), combined);
       completed.push("checkpoint");
       throwIfAborted(combined);
       if (this.#options.hooks.currentRevision() !== request.baseRevision) {
@@ -73,8 +86,9 @@ export class SurfaceTransferCoordinator<Checkpoint extends JsonValue = JsonValue
       }
       completed.push("revalidate");
 
-      ownership = this.#createOwnership(request, prepared);
-      if (!this.#options.ownership.begin(ownership)) {
+      ownership = this.#createOwnership(request, preparedHandle);
+      const ownershipToken = ownership;
+      if (!this.#options.ownership.begin(ownershipToken)) {
         throw failure(
           "OWNERSHIP_CONFLICT",
           "ownership-commit",
@@ -82,8 +96,11 @@ export class SurfaceTransferCoordinator<Checkpoint extends JsonValue = JsonValue
           ["Refresh surface ownership", "Retry from the authoritative surface"],
         );
       }
-      const kernelCommitted = await this.#options.hooks.commitOwnership(ownership);
+      requiresCompensation = true;
+      throwIfAborted(combined);
+      const kernelCommitted = this.#options.hooks.commitOwnership(ownershipToken);
       if (!kernelCommitted) {
+        requiresCompensation = false;
         throw failure(
           "OWNERSHIP_CONFLICT",
           "ownership-commit",
@@ -91,8 +108,7 @@ export class SurfaceTransferCoordinator<Checkpoint extends JsonValue = JsonValue
           ["Keep the panel in its source surface", "Retry after synchronization"],
         );
       }
-      committed = true;
-      if (!this.#options.ownership.commit(ownership)) {
+      if (!this.#options.ownership.commit(ownershipToken)) {
         throw failure(
           "OWNERSHIP_CONFLICT",
           "ownership-commit",
@@ -101,21 +117,28 @@ export class SurfaceTransferCoordinator<Checkpoint extends JsonValue = JsonValue
         );
       }
       completed.push("ownership-commit");
-      await this.#options.adapter.mount(
-        prepared,
-        {
-          panelId: request.panelId,
-          checkpoint,
-          ownership,
-          ...(request.restorationToken === undefined
-            ? {}
-            : { restorationToken: request.restorationToken }),
-        },
+      await runWithSignal(
+        () =>
+          this.#options.adapter.mount(
+            preparedHandle,
+            {
+              panelId: request.panelId,
+              checkpoint,
+              ownership: ownershipToken,
+              ...(request.restorationToken === undefined
+                ? {}
+                : { restorationToken: request.restorationToken }),
+            },
+            combined,
+          ),
         combined,
       );
       completed.push("destination-mount");
-      await this.#options.adapter.waitUntilReady(prepared, combined);
-      if (!this.#options.ownership.ready(ownership)) {
+      await runWithSignal(
+        () => this.#options.adapter.waitUntilReady(preparedHandle, combined),
+        combined,
+      );
+      if (!this.#options.ownership.ready(ownershipToken)) {
         throw failure(
           "OWNERSHIP_CONFLICT",
           "destination-ready",
@@ -125,13 +148,16 @@ export class SurfaceTransferCoordinator<Checkpoint extends JsonValue = JsonValue
       }
       destinationReady = true;
       completed.push("destination-ready");
-      await this.#options.hooks.releaseSource(ownership);
+      await runWithSignal(
+        () => this.#options.hooks.releaseSource(ownershipToken, combined),
+        combined,
+      );
       completed.push("source-release");
       return Object.freeze({
         ok: true,
         panelId: request.panelId,
         surfaceId: request.destination.destinationSurfaceId,
-        ownership,
+        ownership: ownershipToken,
         completedStages: Object.freeze(completed),
       });
     } catch (cause) {
@@ -139,42 +165,80 @@ export class SurfaceTransferCoordinator<Checkpoint extends JsonValue = JsonValue
       let safeSurfaceId = destinationReady
         ? request.destination.destinationSurfaceId
         : (this.#options.ownership.ownerOf(request.panelId)?.surfaceId ?? request.sourceSurfaceId);
-
-      if (!destinationReady && ownership !== undefined) {
-        safeSurfaceId = this.#options.ownership.rollback(ownership) ?? request.sourceSurfaceId;
-      }
-      if (!destinationReady && committed && ownership !== undefined) {
+      let reportedError = error;
+      if (!destinationReady && requiresCompensation && ownership !== undefined) {
+        const ownershipToken = ownership;
+        const compensationController = new AbortController();
+        const compensationSignal = compensationController.signal;
+        const compensationTimer = setTimer(
+          () => compensationController.abort("timeout"),
+          this.#timeoutMs,
+        );
+        const compensation = invokeAsPromise(() =>
+          this.#options.hooks.compensateOwnership(ownershipToken, error, compensationSignal),
+        );
         try {
-          await this.#options.hooks.compensateOwnership(ownership, error);
+          await waitWithSignal(compensation, compensationSignal);
+          safeSurfaceId =
+            this.#options.ownership.rollback(ownershipToken) ?? request.sourceSurfaceId;
           completed.push("compensation");
         } catch (compensationCause) {
-          return Object.freeze({
-            ok: false,
-            panelId: request.panelId,
-            safeSurfaceId,
-            error: failure(
-              "COMPENSATION_FAILED",
-              "compensation",
-              "Transfer failed and its ownership compensation also failed.",
-              ["Recover the panel into the configured recovery surface", "Export diagnostics"],
-              compensationCause,
-            ),
-            completedStages: Object.freeze(completed),
-          });
+          reportedError = failure(
+            "COMPENSATION_FAILED",
+            "compensation",
+            "Transfer failed and its ownership compensation did not complete authoritatively.",
+            ["Recover the panel into the configured recovery surface", "Export diagnostics"],
+            compensationCause,
+          );
+          safeSurfaceId =
+            this.#options.ownership.ownerOf(request.panelId)?.surfaceId ?? safeSurfaceId;
+          if (compensationSignal.aborted) {
+            observeLateCompensation(
+              compensation,
+              ownershipToken,
+              prepared,
+              this.#options.ownership,
+              this.#options.adapter,
+            );
+          }
+        } finally {
+          clearTimer(compensationTimer);
         }
+      } else if (!destinationReady && ownership !== undefined) {
+        safeSurfaceId = this.#options.ownership.rollback(ownership) ?? request.sourceSurfaceId;
       }
-      if (!destinationReady && prepared !== undefined) {
+      if (
+        !destinationReady &&
+        prepared !== undefined &&
+        reportedError.code !== "COMPENSATION_FAILED"
+      ) {
+        const preparedHandle = prepared;
+        const cleanupController = new AbortController();
+        const cleanupSignal = cleanupController.signal;
+        const cleanupTimer = setTimer(() => cleanupController.abort("timeout"), this.#timeoutMs);
         try {
-          await this.#options.adapter.close(prepared);
-        } catch {
+          const cleanup = invokeAsPromise(() => this.#options.adapter.close(preparedHandle));
+          await waitWithSignal(cleanup, cleanupSignal);
+        } catch (cleanupCause) {
+          if (cleanupSignal.reason === "timeout") {
+            reportedError = failure(
+              "TRANSFER_TIMEOUT",
+              reportedError.stage,
+              "Surface transfer cleanup exceeded its time budget.",
+              ["Authoritative ownership is safe; retry destination cleanup"],
+              cleanupCause,
+            );
+          }
           // Destination cleanup is best effort after authoritative ownership is safe.
+        } finally {
+          clearTimer(cleanupTimer);
         }
       }
       return Object.freeze({
         ok: false,
         panelId: request.panelId,
         safeSurfaceId,
-        error,
+        error: reportedError,
         completedStages: Object.freeze(completed),
       });
     } finally {
@@ -211,16 +275,40 @@ export class SurfaceTransferCoordinator<Checkpoint extends JsonValue = JsonValue
         ["Retry from a button or keyboard command", "Keep the panel in-page"],
       );
     }
-    const capabilities = intersectSurfaceCapabilities(request.sourceCapabilities);
+    const sourcePolicy = request.sourcePolicy;
+    const destinationCapabilities = request.destinationCapabilities;
+    if (
+      "sourceCapabilities" in request ||
+      sourcePolicy === undefined ||
+      destinationCapabilities === undefined
+    ) {
+      throw failure(
+        "CAPABILITY_DENIED",
+        "capability",
+        "Legacy source capabilities cannot prove an external transfer is allowed.",
+        [
+          "Provide an explicit source transfer policy",
+          "Provide capabilities detected for the prepared destination kind",
+        ],
+      );
+    }
+    const sourceAllowed =
+      request.destination.kind === "browser-window"
+        ? sourcePolicy.allowBrowserWindow
+        : sourcePolicy.allowDocumentPictureInPicture;
     const panelAllowed =
       request.destination.kind === "browser-window"
         ? request.panelCapabilities.popout
         : request.panelCapabilities.pictureInPicture;
-    if (!panelAllowed || !supportsExternalKind(request.destination.kind, capabilities)) {
+    if (
+      !sourceAllowed ||
+      !panelAllowed ||
+      !supportsExternalKind(request.destination.kind, destinationCapabilities)
+    ) {
       throw failure(
         "CAPABILITY_DENIED",
         "capability",
-        `The panel or source does not support ${request.destination.kind}.`,
+        `The source policy, panel, or destination does not support ${request.destination.kind}.`,
         ["Use an in-page floating surface", "Choose a supported panel"],
       );
     }
@@ -277,6 +365,88 @@ export class SurfaceTransferCoordinator<Checkpoint extends JsonValue = JsonValue
       baseRevision: request.baseRevision,
     });
   }
+}
+
+function closeLatePreparation<Checkpoint extends JsonValue>(
+  preparation: Promise<PreparedSurfaceHandle>,
+  adapter: SurfaceTransferCoordinatorOptions<Checkpoint>["adapter"],
+): void {
+  void preparation.then(
+    (handle) => {
+      void invokeAsPromise(() => adapter.close(handle)).catch(() => {
+        // A destination prepared after cancellation is abandoned; closing it
+        // remains best effort and cannot retain the completed transfer.
+      });
+    },
+    () => {
+      // The primary wait already observes the preparation rejection.
+    },
+  );
+}
+
+function observeLateCompensation<Checkpoint extends JsonValue>(
+  compensation: Promise<void>,
+  ownership: OwnershipToken,
+  prepared: PreparedSurfaceHandle | undefined,
+  registry: SurfaceTransferCoordinatorOptions<Checkpoint>["ownership"],
+  adapter: SurfaceTransferCoordinatorOptions<Checkpoint>["adapter"],
+): void {
+  void compensation.then(
+    () => {
+      const recovered = registry.rollback(ownership);
+      if (recovered === undefined || prepared === undefined) return;
+      void invokeAsPromise(() => adapter.close(prepared)).catch(() => {
+        // Late semantic recovery is authoritative even if browser cleanup fails.
+      });
+    },
+    () => {
+      // The bounded compensation path already reported this failure.
+    },
+  );
+}
+
+function invokeAsPromise<Value>(operation: () => Value | PromiseLike<Value>): Promise<Value> {
+  try {
+    return Promise.resolve(operation());
+  } catch (cause) {
+    return Promise.reject(cause);
+  }
+}
+
+function runWithSignal<Value>(
+  operation: () => Value | PromiseLike<Value>,
+  signal: AbortSignal,
+): Promise<Value> {
+  throwIfAborted(signal);
+  return waitWithSignal(invokeAsPromise(operation), signal);
+}
+
+function waitWithSignal<Value>(promise: Promise<Value>, signal: AbortSignal): Promise<Value> {
+  return new Promise<Value>((resolve, reject) => {
+    let settled = false;
+    const finish = () => {
+      if (settled) return false;
+      settled = true;
+      signal.removeEventListener("abort", onAbort);
+      return true;
+    };
+    const onAbort = () => {
+      if (finish()) reject(signal.reason);
+    };
+
+    // Attach both reactions before observing an already-aborted signal. This
+    // contains late rejections from callbacks that ignore cancellation.
+    promise.then(
+      (value) => {
+        if (finish()) resolve(value);
+      },
+      (cause: unknown) => {
+        if (finish()) reject(cause);
+      },
+    );
+    if (signal.aborted) onAbort();
+    else signal.addEventListener("abort", onAbort, { once: true });
+  });
 }
 
 function failure(

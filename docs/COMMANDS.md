@@ -13,10 +13,12 @@ surface, remote-intake, persistence, and mobile-related commands do not certify 
 Picture-in-Picture, distributed collaboration, durable recovery, or mobile support.
 
 Direct dispatch uses a `CommandEnvelope` with a stable command ID, origin, human-readable label,
-optional base revision, and command value. Invalid input, stale revision, policy rejection, or
-invariant failure returns a typed rejection without changing the snapshot. An accepted atomic
-command increments revision once and returns patches and a transaction; eligible local commands
-also return a snapshot-based inverse.
+optional base revision, optional `record | barrier` history mode, and command value. Invalid input,
+stale revision, policy rejection, or invariant failure returns a typed rejection without changing
+the snapshot. An accepted atomic command increments revision once and returns patches and a
+transaction; eligible local commands also return a snapshot-based inverse. `barrier` is reserved for
+non-replayable platform ownership changes: an accepted barrier clears both history stacks and is not
+itself undoable.
 
 | Command `type`               | Execution             | Implemented semantic behavior and boundary                                                                                                                                                                                                                                   |
 | ---------------------------- | --------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |

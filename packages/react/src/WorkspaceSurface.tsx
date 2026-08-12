@@ -33,8 +33,29 @@ import {
 import { createResizeActor, type ResizeEvent } from "@panefold/protocol-xstate";
 
 import { solveWorkspaceProjectionLayout, type WorkspaceLayoutSolver } from "./geometry";
-import { ENGLISH_WORKSPACE_MESSAGES, type WorkspaceMessageCatalog } from "./messages";
+import {
+  ENGLISH_WORKSPACE_MESSAGES,
+  resolveWorkspaceInteractionMessages,
+  type ResolvedWorkspaceInteractionMessages,
+  type WorkspaceMessageCatalog,
+} from "./messages";
+import {
+  PanelDragOverlay,
+  usePanelDrag,
+  type ExternalPanelInvocation,
+  type PanelDragController,
+} from "./panel-drag";
+import {
+  createPanelDropRequest,
+  groupForPanel,
+  logicalEdgeLabel,
+  nodeForGroup,
+  panelsForGroup,
+  planPanelDrop as resolvePanelDropPlan,
+  splitLabel,
+} from "./panel-drop";
 import { useWorkspaceRuntime, useWorkspaceSnapshot } from "./runtime-context";
+import { resolveTabPresentation, tabOrientation } from "./tab-presentation";
 import type {
   WorkspaceAnnouncement,
   WorkspaceCommandAdapter,
@@ -42,9 +63,13 @@ import type {
   WorkspaceDirection,
   WorkspaceDispatchContext,
   WorkspaceDispatchOutcome,
+  WorkspaceExternalPanelHandler,
+  WorkspaceExternalPanelOutcome,
+  WorkspaceExternalPanelPosition,
   WorkspaceGroupView,
   WorkspaceNodeView,
   WorkspacePanelRegistry,
+  WorkspacePanelDropRequest,
   WorkspacePanelLifecycle,
   WorkspacePanelLifecyclePolicy,
   WorkspacePanelLifecycleReason,
@@ -54,6 +79,9 @@ import type {
   WorkspaceRuntimeLike,
   WorkspaceResultInterpreter,
   WorkspaceSplitView,
+  WorkspaceTabPresentation,
+  WorkspaceTabPresentationResolver,
+  WorkspaceLogicalEdge,
 } from "./types";
 
 type MotionProfile = "off" | "reduced" | "productive";
@@ -88,6 +116,13 @@ export interface WorkspaceSurfaceProps<TSnapshot, TCommand, TResult> {
   readonly announcementDebounceMs?: number;
   readonly onCommandResult?: (result: TResult) => void;
   readonly interpretResult?: WorkspaceResultInterpreter<TCommand, TResult>;
+  /** Static or per-group logical placement and tab content treatment. */
+  readonly tabPresentation?: WorkspaceTabPresentation | WorkspaceTabPresentationResolver;
+  /**
+   * Handles a panel released outside this surface. It is called synchronously
+   * from pointerup so popup creation can use browser transient activation.
+   */
+  readonly onExternalPanelRequest?: WorkspaceExternalPanelHandler;
 }
 
 interface PanelBoundaryProps {
@@ -179,10 +214,20 @@ function SurfaceRenderer<TSnapshot, TCommand, TResult>({
   announcementDebounceMs = 0,
   onCommandResult,
   interpretResult,
+  tabPresentation,
+  onExternalPanelRequest,
 }: SurfaceRendererProps<TSnapshot, TCommand, TResult>) {
   const messages = messageCatalog;
+  const interactionMessages = useMemo(
+    () => resolveWorkspaceInteractionMessages(messages),
+    [messages],
+  );
   const snapshot = useWorkspaceSnapshot<TSnapshot, TCommand, TResult>();
   const projection = useMemo(() => projector(snapshot), [projector, snapshot]);
+  const projectionRef = useRef(projection);
+  useLayoutEffect(() => {
+    projectionRef.current = projection;
+  }, [projection]);
   const rootRef = useRef<HTMLDivElement>(null);
   const workspaceInstanceId = useId();
   const domIdPrefix = `pf-${encodeDomId(workspaceInstanceId)}`;
@@ -190,6 +235,8 @@ function SurfaceRenderer<TSnapshot, TCommand, TResult>({
   const slotsRef = useRef(new Map<string, HTMLDivElement>());
   const hostsRef = useRef(new Map<string, HostRecord>());
   const [portalHosts, setPortalHosts] = useState<ReadonlyMap<string, HostRecord>>(() => new Map());
+  const [portalOwnershipRevision, setPortalOwnershipRevision] = useState(0);
+  const [surfaceDocument, setSurfaceDocument] = useState<Document>();
   const [announcement, setAnnouncement] = useState<WorkspaceAnnouncement>({
     id: 0,
     message: "",
@@ -388,6 +435,11 @@ function SurfaceRenderer<TSnapshot, TCommand, TResult>({
     };
   }, [layoutBounds]);
 
+  useLayoutEffect(() => {
+    const ownerDocument = rootRef.current?.ownerDocument;
+    if (ownerDocument !== undefined) setSurfaceDocument(ownerDocument);
+  }, []);
+
   useEffect(
     () => () => {
       scheduler.cancel(surfaceScheduleKey);
@@ -482,33 +534,47 @@ function SurfaceRenderer<TSnapshot, TCommand, TResult>({
   }, [domIdPrefix, projection.panels]);
 
   useLayoutEffect(() => {
+    void portalOwnershipRevision;
     const selectedPanelIds = new Set(
       Object.values(projection.groups).map((group) => group.selectedPanelId),
     );
+    const surfaceDocument = rootRef.current?.ownerDocument;
 
     for (const [panelId, host] of portalHosts) {
       const panel = projection.panels[panelId];
       const selectedGroup = Object.values(projection.groups).find(
         (group) => group.selectedPanelId === panelId,
       );
-      const destination =
-        selectedGroup === undefined ? parkingRef.current : slotsRef.current.get(selectedGroup.id);
-
-      if (destination !== undefined && destination !== null) {
-        destination.append(host.element);
+      const localSlot =
+        selectedGroup === undefined ? undefined : slotsRef.current.get(selectedGroup.id);
+      const wasInExternalDocument =
+        surfaceDocument !== undefined && host.element.ownerDocument !== surfaceDocument;
+      if (localSlot !== undefined && !wasInExternalDocument) {
+        localSlot.append(host.element);
+      } else if (!wasInExternalDocument && parkingRef.current !== null) {
+        parkingRef.current.append(host.element);
       }
+
+      const inExternalDocument =
+        surfaceDocument !== undefined && host.element.ownerDocument !== surfaceDocument;
 
       const selected = selectedPanelIds.has(panelId);
       const policy = panelLifecyclePolicy(panel);
       updateStableHost(host.element, {
         active: projection.activePanelId === panelId,
-        lifecycle: panelLifecycle(selected, projection.activePanelId === panelId, policy),
-        labelledBy: panelTabId(domIdPrefix, panelId),
+        lifecycle: panelLifecycle(
+          inExternalDocument ? true : selected,
+          projection.activePanelId === panelId,
+          policy,
+        ),
+        ...(inExternalDocument
+          ? { label: panel?.title ?? messages.panelFallback() }
+          : { labelledBy: panelTabId(domIdPrefix, panelId) }),
         panelType: panel?.type,
-        selected,
+        selected: inExternalDocument ? true : selected,
       });
     }
-  }, [domIdPrefix, portalHosts, projection, renderedRootNodeId]);
+  }, [domIdPrefix, messages, portalHosts, portalOwnershipRevision, projection, renderedRootNodeId]);
 
   const resolveOutcome = useCallback(
     (result: TResult, context: WorkspaceDispatchContext<TCommand>) =>
@@ -606,6 +672,150 @@ function SurfaceRenderer<TSnapshot, TCommand, TResult>({
     [domIdPrefix],
   );
 
+  const restorePanelTab = useCallback(
+    (panelId: string) => {
+      queueMicrotask(() => {
+        const workspace = rootRef.current;
+        if (workspace === null) return;
+        const tab = workspace.ownerDocument.getElementById(panelTabId(domIdPrefix, panelId));
+        (tab ?? workspace).focus();
+      });
+    },
+    [domIdPrefix],
+  );
+
+  const commitPanelDrop = useCallback(
+    (
+      request: WorkspacePanelDropRequest,
+      label: string,
+      origin: Extract<WorkspaceCommandOrigin, "pointer" | "keyboard" | "menu">,
+      plannedCommand?: TCommand,
+    ): WorkspaceDispatchOutcome => {
+      if (projectionRef.current.revision !== request.revision) {
+        const message = interactionMessages.workspaceChangedBeforePanelMove();
+        announce(message);
+        return { status: "rejected", message };
+      }
+      const planner = commands.planPanelDrop;
+      if (planner === undefined) {
+        const message = interactionMessages.directPanelPlacementUnsupported();
+        announce(message);
+        return { status: "rejected", message };
+      }
+      const targetRect = resolvedLayout.groupRects[request.targetGroup.id];
+      const plan =
+        plannedCommand === undefined && targetRect !== undefined
+          ? resolvePanelDropPlan(planner, request, targetRect, resolvedLayout, splitterSize)
+          : undefined;
+      const command = plannedCommand ?? plan?.command;
+      if (command === undefined) {
+        const message = interactionMessages.panelPlacementUnavailable();
+        announce(message);
+        return { status: "rejected", message };
+      }
+      return dispatch(command, label, origin).outcome;
+    },
+    [announce, commands, dispatch, interactionMessages, resolvedLayout, splitterSize],
+  );
+
+  const requestExternalPanel = useCallback(
+    (
+      invocation: ExternalPanelInvocation,
+    ): WorkspaceExternalPanelOutcome | Promise<WorkspaceExternalPanelOutcome> => {
+      const handler = onExternalPanelRequest;
+      if (handler === undefined) {
+        return { status: "rejected", message: interactionMessages.newWindowUnavailable() };
+      }
+      const host = hostsRef.current.get(invocation.panel.id)?.element;
+      const parkingElement = parkingRef.current;
+      if (host === undefined || parkingElement === null) {
+        return {
+          status: "rejected",
+          message: interactionMessages.panelNotReadyForNewWindow(),
+        };
+      }
+      const surfaceDocument = rootRef.current?.ownerDocument;
+      const labelledBy = panelTabId(domIdPrefix, invocation.panel.id);
+      prepareHostForExternalAccessibility(host, invocation.panel.title);
+      let outcome: WorkspaceExternalPanelOutcome | Promise<WorkspaceExternalPanelOutcome>;
+      try {
+        outcome = handler({
+          panel: invocation.panel,
+          sourceGroup: invocation.sourceGroup,
+          sourcePanels: invocation.sourcePanels,
+          host,
+          parkingElement,
+          origin: invocation.origin,
+          position: invocation.position,
+          ...(invocation.pointer === undefined ? {} : { pointer: invocation.pointer }),
+        });
+        // Host adoption is an imperative DOM operation. Make that ownership
+        // change observable to the declarative portal/lifecycle projection even
+        // when the application has not published its semantic transfer yet.
+        setPortalOwnershipRevision((current) => current + 1);
+      } catch (error) {
+        finalizeExternalHostAccessibility(
+          host,
+          invocation.panel.title,
+          labelledBy,
+          surfaceDocument,
+        );
+        setPortalOwnershipRevision((current) => current + 1);
+        throw error;
+      }
+      if (!isPromiseLike(outcome)) {
+        finalizeExternalHostAccessibility(
+          host,
+          invocation.panel.title,
+          labelledBy,
+          surfaceDocument,
+        );
+        return outcome;
+      }
+      return outcome.then(
+        (result) => {
+          finalizeExternalHostAccessibility(
+            host,
+            invocation.panel.title,
+            labelledBy,
+            surfaceDocument,
+          );
+          setPortalOwnershipRevision((current) => current + 1);
+          return result;
+        },
+        (error: unknown) => {
+          finalizeExternalHostAccessibility(
+            host,
+            invocation.panel.title,
+            labelledBy,
+            surfaceDocument,
+          );
+          setPortalOwnershipRevision((current) => current + 1);
+          throw error;
+        },
+      );
+    },
+    [domIdPrefix, interactionMessages, onExternalPanelRequest],
+  );
+
+  const panelDrag = usePanelDrag({
+    projection,
+    resolvedLayout,
+    logicalBounds,
+    direction,
+    messages: interactionMessages,
+    enabled: commands.planPanelDrop !== undefined || onExternalPanelRequest !== undefined,
+    internalEnabled: commands.planPanelDrop !== undefined,
+    externalAvailable: onExternalPanelRequest !== undefined,
+    splitterSize,
+    planDrop: commands.planPanelDrop,
+    getRoot: () => rootRef.current,
+    announce,
+    commitDrop: commitPanelDrop,
+    requestExternal: requestExternalPanel,
+    restoreFocus: restorePanelTab,
+  });
+
   const node = renderedProjection.nodes[renderedProjection.rootNodeId];
 
   return (
@@ -618,6 +828,10 @@ function SurfaceRenderer<TSnapshot, TCommand, TResult>({
       data-geometry-diagnostics={resolvedLayout.diagnostics.length}
       data-geometry-mode={layoutSolver === undefined ? "projection" : "model"}
       data-responsive-projection={compact ? "single-region" : "full-layout"}
+      data-panel-drag-state={panelDrag.state}
+      data-panel-drop-enabled={String(
+        commands.planPanelDrop !== undefined || onExternalPanelRequest !== undefined,
+      )}
       dir={direction}
       aria-label={workspaceLabel ?? messages.workspaceLabel()}
       tabIndex={-1}
@@ -676,6 +890,13 @@ function SurfaceRenderer<TSnapshot, TCommand, TResult>({
             }}
             movePanelId={movePanelId}
             setMovePanelId={setMovePanelId}
+            tabPresentation={tabPresentation}
+            panelDrag={panelDrag}
+            commitPanelDrop={commitPanelDrop}
+            requestExternalPanel={requestExternalPanel}
+            externalPanelAvailable={onExternalPanelRequest !== undefined}
+            announce={announce}
+            interactionMessages={interactionMessages}
           />
         )}
       </div>
@@ -688,15 +909,42 @@ function SurfaceRenderer<TSnapshot, TCommand, TResult>({
       />
 
       <div className="pf-overlay-layer" data-workspace-layer="overlay">
+        {panelDrag.view === undefined ? null : <PanelDragOverlay view={panelDrag.view} />}
         {movePanelId !== undefined ? (
           <KeyboardMoveOverlay
             panel={projection.panels[movePanelId]}
             groups={Object.values(projection.groups)}
             messages={messages}
+            direction={direction}
             onMove={(groupId) => {
               const panelId = movePanelId;
               const panel = projection.panels[movePanelId];
-              if (commands.movePanel !== undefined && panel !== undefined) {
+              const targetGroup = projection.groups[groupId];
+              const targetNodeId = nodeForGroup(projection, groupId);
+              if (
+                commands.planPanelDrop !== undefined &&
+                panel !== undefined &&
+                targetGroup !== undefined &&
+                targetNodeId !== undefined
+              ) {
+                const request = createPanelDropRequest(
+                  projection,
+                  panel.id,
+                  targetGroup.id,
+                  targetNodeId,
+                  { kind: "center", ratio: 1 },
+                );
+                if (request !== undefined) {
+                  commitPanelDrop(
+                    request,
+                    interactionMessages.movedPanelTo({
+                      title: panel.title,
+                      group: targetGroup.label ?? messages.groupFallback(),
+                    }),
+                    "keyboard",
+                  );
+                }
+              } else if (commands.movePanel !== undefined && panel !== undefined) {
                 dispatch(
                   commands.movePanel(movePanelId, groupId),
                   messages.movedPanelTo({
@@ -709,6 +957,103 @@ function SurfaceRenderer<TSnapshot, TCommand, TResult>({
               setMovePanelId(undefined);
               restoreMoveTrigger(panelId);
             }}
+            onSplit={
+              commands.planPanelDrop === undefined
+                ? undefined
+                : (edge) => {
+                    const panelId = movePanelId;
+                    const panel = projection.panels[panelId];
+                    const sourceGroup = groupForPanel(projection, panelId);
+                    const sourceNodeId =
+                      sourceGroup === undefined
+                        ? undefined
+                        : nodeForGroup(projection, sourceGroup.id);
+                    if (
+                      panel !== undefined &&
+                      sourceGroup !== undefined &&
+                      sourceNodeId !== undefined
+                    ) {
+                      const request = createPanelDropRequest(
+                        projection,
+                        panel.id,
+                        sourceGroup.id,
+                        sourceNodeId,
+                        { kind: "edge", edge, ratio: 0.5 },
+                      );
+                      if (request !== undefined) {
+                        commitPanelDrop(
+                          request,
+                          splitLabel(
+                            panel,
+                            sourceGroup,
+                            edge,
+                            direction,
+                            interactionMessages.splitPanel,
+                          ),
+                          "keyboard",
+                        );
+                      }
+                    }
+                    setMovePanelId(undefined);
+                    restoreMoveTrigger(panelId);
+                  }
+            }
+            onExternal={
+              onExternalPanelRequest === undefined
+                ? undefined
+                : () => {
+                    const panelId = movePanelId;
+                    const panel = projection.panels[panelId];
+                    const sourceGroup = groupForPanel(projection, panelId);
+                    const rootRect = rootRef.current?.getBoundingClientRect();
+                    if (panel !== undefined && sourceGroup !== undefined) {
+                      const clientX = (rootRect?.left ?? 0) + (rootRect?.width ?? 0) / 2;
+                      const clientY = (rootRect?.top ?? 0) + (rootRect?.height ?? 0) / 2;
+                      const ownerWindow = rootRef.current?.ownerDocument.defaultView;
+                      let outcome:
+                        WorkspaceExternalPanelOutcome | Promise<WorkspaceExternalPanelOutcome>;
+                      try {
+                        outcome = requestExternalPanel({
+                          panel,
+                          sourceGroup,
+                          sourcePanels: panelsForGroup(projection, sourceGroup),
+                          origin: "keyboard",
+                          position: {
+                            clientX,
+                            clientY,
+                            screenX: (ownerWindow?.screenX ?? 0) + clientX,
+                            screenY: (ownerWindow?.screenY ?? 0) + clientY,
+                          },
+                        });
+                        const handle = (result: WorkspaceExternalPanelOutcome) => {
+                          announce(
+                            result.message ??
+                              (result.status === "committed"
+                                ? interactionMessages.openedPanelInNewWindow({
+                                    title: panel.title,
+                                  })
+                                : interactionMessages.couldNotOpenPanelInNewWindow({
+                                    title: panel.title,
+                                  })),
+                          );
+                        };
+                        if (isPromiseLike(outcome)) {
+                          void outcome.then(handle, () => handle({ status: "rejected" }));
+                        } else handle(outcome);
+                      } catch (error) {
+                        announce(
+                          error instanceof Error
+                            ? error.message
+                            : interactionMessages.couldNotOpenPanelInNewWindow({
+                                title: panel.title,
+                              }),
+                        );
+                      }
+                    }
+                    setMovePanelId(undefined);
+                    restoreMoveTrigger(panelId);
+                  }
+            }
             onCancel={() => {
               const panelId = movePanelId;
               setMovePanelId(undefined);
@@ -724,6 +1069,8 @@ function SurfaceRenderer<TSnapshot, TCommand, TResult>({
         registry={panels}
         hosts={portalHosts}
         messages={messages}
+        ownershipRevision={portalOwnershipRevision}
+        surfaceDocument={surfaceDocument}
       />
 
       <div
@@ -773,6 +1120,19 @@ interface LayoutNodeProps<TCommand, TResult> {
   readonly registerSlot: (groupId: string, element: HTMLDivElement | null) => void;
   readonly movePanelId: string | undefined;
   readonly setMovePanelId: (panelId: string | undefined) => void;
+  readonly tabPresentation: WorkspaceTabPresentation | WorkspaceTabPresentationResolver | undefined;
+  readonly panelDrag: PanelDragController;
+  readonly commitPanelDrop: (
+    request: WorkspacePanelDropRequest,
+    label: string,
+    origin: Extract<WorkspaceCommandOrigin, "pointer" | "keyboard" | "menu">,
+  ) => WorkspaceDispatchOutcome;
+  readonly requestExternalPanel: (
+    invocation: ExternalPanelInvocation,
+  ) => WorkspaceExternalPanelOutcome | Promise<WorkspaceExternalPanelOutcome>;
+  readonly externalPanelAvailable: boolean;
+  readonly announce: (message: string) => void;
+  readonly interactionMessages: ResolvedWorkspaceInteractionMessages;
 }
 
 function LayoutNode<TCommand, TResult>(props: LayoutNodeProps<TCommand, TResult>) {
@@ -982,6 +1342,29 @@ function Splitter({
     event.preventDefault();
   };
 
+  const requestedPointerWeights = (
+    session: PointerResizeSession,
+    event: ReactPointerEvent<HTMLDivElement>,
+  ) => {
+    const coordinate = split.axis === "inline" ? event.clientX : event.clientY;
+    const physicalDelta = coordinate - session.startCoordinate;
+    const logicalDelta =
+      split.axis === "inline" && direction === "rtl" ? -physicalDelta : physicalDelta;
+    return updatePair(logicalDelta, session.weights, session.beforeSize, session.afterSize);
+  };
+
+  const applyPointerPreview = (
+    session: PointerResizeSession,
+    requestedWeights: readonly number[],
+  ) => {
+    const preview = onPreview(requestedWeights);
+    const position = splitterPosition(preview, splitter.id);
+    if (position !== undefined && String(actor.getSnapshot().value) === "resizing") {
+      session.latest = solvedPairWeights(split, requestedWeights, preview, beforeIndex, afterIndex);
+      send({ type: "CONSTRAINT_RESULT", position });
+    }
+  };
+
   const onPointerMove = (event: ReactPointerEvent<HTMLDivElement>) => {
     const session = sessionRef.current;
     if (session === null || session.pointerId !== event.pointerId) return;
@@ -990,27 +1373,26 @@ function Splitter({
       pointerId: event.pointerId,
       position: pointerSample(event),
     });
-    const coordinate = split.axis === "inline" ? event.clientX : event.clientY;
-    const physicalDelta = coordinate - session.startCoordinate;
-    const logicalDelta =
-      split.axis === "inline" && direction === "rtl" ? -physicalDelta : physicalDelta;
-    const next = updatePair(logicalDelta, session.weights, session.beforeSize, session.afterSize);
-    session.latest = next;
-    const applyPreview = () => {
-      const preview = onPreview(next);
-      const position = splitterPosition(preview, splitter.id);
-      if (position !== undefined && String(actor.getSnapshot().value) === "resizing") {
-        send({ type: "CONSTRAINT_RESULT", position });
-      }
-    };
+    const next = requestedPointerWeights(session, event);
+    const applyPreview = () => applyPointerPreview(session, next);
     if (!scheduler.schedule(scheduleKey, applyPreview)) applyPreview();
   };
 
   const finishPointer = (event: ReactPointerEvent<HTMLDivElement>) => {
     const session = sessionRef.current;
     if (session === null || session.pointerId !== event.pointerId) return;
-    const state = send({ type: "POINTER_END", pointerId: event.pointerId });
     scheduler.cancel(scheduleKey);
+    // A coalesced move may still be waiting for its frame when pointerup
+    // arrives. Resolve the release sample synchronously through the same
+    // constraint solver so the visible final preview and committed weights
+    // describe one exact geometry result.
+    send({
+      type: "POINTER_MOVE",
+      pointerId: event.pointerId,
+      position: pointerSample(event),
+    });
+    applyPointerPreview(session, requestedPointerWeights(session, event));
+    const state = send({ type: "POINTER_END", pointerId: event.pointerId });
     sessionRef.current = null;
     if (event.currentTarget.hasPointerCapture?.(event.pointerId)) {
       event.currentTarget.releasePointerCapture?.(event.pointerId);
@@ -1077,8 +1459,9 @@ function Splitter({
     const preview = onPreview(next);
     const constrained = splitterPosition(preview, splitter.id);
     if (constrained !== undefined) send({ type: "CONSTRAINT_RESULT", position: constrained });
+    const committedWeights = solvedPairWeights(split, next, preview, beforeIndex, afterIndex);
     send({ type: "COMMIT" });
-    settleCommit(onCommit(next, "keyboard").outcome, send, messages);
+    settleCommit(onCommit(committedWeights, "keyboard").outcome, send, messages);
   };
 
   return (
@@ -1135,9 +1518,17 @@ function PanelGroup<TCommand, TResult>({
   closePanel,
   registerSlot,
   setMovePanelId,
+  tabPresentation,
+  panelDrag,
+  commitPanelDrop,
+  requestExternalPanel,
+  externalPanelAvailable,
+  announce,
+  interactionMessages,
   messages,
 }: PanelGroupProps<TCommand, TResult>) {
   const pointerFocusPanelRef = useRef<string | undefined>(undefined);
+  const groupRef = useRef<HTMLElement>(null);
   const groupLabelId = useId();
   const groupPanels = group.panelIds
     .map((id) => projection.panels[id])
@@ -1145,10 +1536,84 @@ function PanelGroup<TCommand, TResult>({
   const selectedPanel = groupPanels.find((panel) => panel.id === group.selectedPanelId);
   const createMovePanelCommand = commands.movePanel;
   const createFloatPanelCommand = commands.floatPanel;
+  const createDropPanelCommand = commands.planPanelDrop;
+  const presentation = resolveTabPresentation(tabPresentation, group, projection);
+  const orientation = tabOrientation(presentation);
+
+  const commitMenuDrop = (
+    panel: WorkspacePanelView,
+    targetGroup: WorkspaceGroupView,
+    target: WorkspacePanelDropRequest["target"],
+  ) => {
+    const targetNodeId = nodeForGroup(projection, targetGroup.id);
+    if (targetNodeId === undefined) return;
+    const request = createPanelDropRequest(
+      projection,
+      panel.id,
+      targetGroup.id,
+      targetNodeId,
+      target,
+    );
+    if (request === undefined) return;
+    const label =
+      target.kind === "center"
+        ? interactionMessages.movedPanelTo({
+            title: panel.title,
+            group: targetGroup.label ?? messages.groupFallback(),
+          })
+        : splitLabel(panel, targetGroup, target.edge, direction, interactionMessages.splitPanel);
+    commitPanelDrop(request, label, "menu");
+  };
+
+  const externalFromTab = (panel: WorkspacePanelView, origin: "keyboard" | "menu") => {
+    const sourceGroup = groupForPanel(projection, panel.id);
+    const tab =
+      groupRef.current?.ownerDocument.getElementById(panelTabId(domIdPrefix, panel.id)) ?? null;
+    if (sourceGroup === undefined || tab === null) return;
+    const rect = tab.getBoundingClientRect();
+    const ownerWindow = tab.ownerDocument.defaultView;
+    const clientX = rect.left + rect.width / 2;
+    const clientY = rect.top + rect.height / 2;
+    const position: WorkspaceExternalPanelPosition = {
+      clientX,
+      clientY,
+      screenX: (ownerWindow?.screenX ?? 0) + clientX,
+      screenY: (ownerWindow?.screenY ?? 0) + clientY,
+    };
+    let outcome: WorkspaceExternalPanelOutcome | Promise<WorkspaceExternalPanelOutcome>;
+    try {
+      outcome = requestExternalPanel({
+        panel,
+        sourceGroup,
+        sourcePanels: panelsForGroup(projection, sourceGroup),
+        origin,
+        position,
+      });
+    } catch (error) {
+      announce(
+        error instanceof Error
+          ? error.message
+          : interactionMessages.couldNotOpenPanelInNewWindow({ title: panel.title }),
+      );
+      return;
+    }
+    const handle = (result: WorkspaceExternalPanelOutcome) => {
+      announce(
+        result.message ??
+          (result.status === "committed"
+            ? interactionMessages.openedPanelInNewWindow({ title: panel.title })
+            : interactionMessages.couldNotOpenPanelInNewWindow({ title: panel.title })),
+      );
+    };
+    if (isPromiseLike(outcome)) void outcome.then(handle, () => handle({ status: "rejected" }));
+    else handle(outcome);
+  };
 
   const navigateTabs = (event: KeyboardEvent, currentIndex: number) => {
-    const visualPrevious = direction === "rtl" ? "ArrowRight" : "ArrowLeft";
-    const visualNext = direction === "rtl" ? "ArrowLeft" : "ArrowRight";
+    const visualPrevious =
+      orientation === "vertical" ? "ArrowUp" : direction === "rtl" ? "ArrowRight" : "ArrowLeft";
+    const visualNext =
+      orientation === "vertical" ? "ArrowDown" : direction === "rtl" ? "ArrowLeft" : "ArrowRight";
     let nextIndex: number | undefined;
     if (event.key === visualPrevious) nextIndex = currentIndex - 1;
     if (event.key === visualNext) nextIndex = currentIndex + 1;
@@ -1163,17 +1628,26 @@ function PanelGroup<TCommand, TResult>({
 
   return (
     <section
+      ref={groupRef}
       className="pf-group"
       data-workspace-node={nodeId}
       data-workspace-group={group.id}
       data-active={String(group.panelIds.includes(projection.activePanelId ?? ""))}
+      data-tab-placement={presentation.placement}
+      data-tab-content={presentation.content}
+      data-tab-orientation={orientation}
       aria-labelledby={groupLabelId}
     >
       <h2 id={groupLabelId} className="pf-visually-hidden">
         {group.label ?? messages.panelGroupFallback()}
       </h2>
       <div className="pf-tab-strip">
-        <div className="pf-tab-list" role="tablist" aria-label={group.label}>
+        <div
+          className="pf-tab-list"
+          role="tablist"
+          aria-labelledby={groupLabelId}
+          aria-orientation={orientation}
+        >
           {groupPanels.map((panel, index) => {
             const selected = group.selectedPanelId === panel.id;
             const definition = panels[panel.type];
@@ -1190,11 +1664,17 @@ function PanelGroup<TCommand, TResult>({
                 title={panel.title}
                 data-workspace-panel-tab={panel.id}
                 onClick={(event) => {
+                  if (panelDrag.consumeClick(panel.id)) return;
                   selectPanel(panel, false, clickOrigin(event));
                 }}
-                onPointerDown={() => {
+                onPointerDown={(event) => {
                   pointerFocusPanelRef.current = panel.id;
+                  panelDrag.begin(panel, group, event);
                 }}
+                onPointerMove={panelDrag.move}
+                onPointerUp={panelDrag.finish}
+                onPointerCancel={panelDrag.cancel}
+                onLostPointerCapture={panelDrag.cancel}
                 onFocus={() => {
                   const origin = pointerFocusPanelRef.current === panel.id ? "pointer" : "keyboard";
                   pointerFocusPanelRef.current = undefined;
@@ -1208,18 +1688,29 @@ function PanelGroup<TCommand, TResult>({
                 }}
                 onKeyDown={(event) => {
                   navigateTabs(event, index);
+                  panelDrag.keyDown(event);
                   if (event.key === "Delete" && panel.closable !== false) {
                     event.preventDefault();
                     closePanel(panel, "keyboard");
                   }
                 }}
               >
-                {definition?.icon === undefined ? null : (
+                {definition?.icon === undefined || presentation.content === "label-only" ? null : (
                   <span className="pf-tab-icon" aria-hidden="true">
                     {definition.icon}
                   </span>
                 )}
-                <span className="pf-tab-title" dir="auto">
+                <span
+                  className={[
+                    "pf-tab-title",
+                    presentation.content === "icon-only" && definition?.icon !== undefined
+                      ? "pf-visually-hidden"
+                      : "",
+                  ]
+                    .filter(Boolean)
+                    .join(" ")}
+                  dir="auto"
+                >
                   {panel.title}
                 </span>
               </button>
@@ -1229,7 +1720,9 @@ function PanelGroup<TCommand, TResult>({
         {selectedPanel === undefined ||
         (selectedPanel.closable === false &&
           createMovePanelCommand === undefined &&
-          createFloatPanelCommand === undefined) ? null : (
+          createFloatPanelCommand === undefined &&
+          createDropPanelCommand === undefined &&
+          !externalPanelAvailable) ? null : (
           <div
             id={panelControlsId(domIdPrefix, selectedPanel.id)}
             className="pf-tab-controls"
@@ -1249,29 +1742,55 @@ function PanelGroup<TCommand, TResult>({
               </button>
             )}
             {createMovePanelCommand === undefined &&
-            createFloatPanelCommand === undefined ? null : (
+            createFloatPanelCommand === undefined &&
+            createDropPanelCommand === undefined &&
+            !externalPanelAvailable ? null : (
               <TabActions
                 panel={selectedPanel}
                 groups={Object.values(projection.groups)}
                 messages={messages}
+                interactionMessages={interactionMessages}
                 triggerId={panelActionsId(domIdPrefix, selectedPanel.id)}
                 onStartKeyboardMove={
-                  createMovePanelCommand === undefined
+                  createMovePanelCommand === undefined && createDropPanelCommand === undefined
                     ? undefined
                     : () => {
                         setMovePanelId(selectedPanel.id);
                       }
                 }
                 onMove={
-                  createMovePanelCommand === undefined
+                  createMovePanelCommand === undefined && createDropPanelCommand === undefined
                     ? undefined
                     : (targetGroupId) => {
-                        dispatch(
-                          createMovePanelCommand(selectedPanel.id, targetGroupId),
-                          messages.movedPanel({ title: selectedPanel.title }),
-                          "menu",
-                        );
+                        const targetGroup = projection.groups[targetGroupId];
+                        if (targetGroup === undefined) return;
+                        if (createDropPanelCommand !== undefined) {
+                          commitMenuDrop(selectedPanel, targetGroup, { kind: "center", ratio: 1 });
+                        } else if (createMovePanelCommand !== undefined) {
+                          dispatch(
+                            createMovePanelCommand(selectedPanel.id, targetGroupId),
+                            messages.movedPanel({ title: selectedPanel.title }),
+                            "menu",
+                          );
+                        }
                       }
+                }
+                onSplit={
+                  createDropPanelCommand === undefined || group.panelIds.length <= 1
+                    ? undefined
+                    : (edge) => {
+                        commitMenuDrop(selectedPanel, group, {
+                          kind: "edge",
+                          edge,
+                          ratio: 0.5,
+                        });
+                      }
+                }
+                direction={direction}
+                onExternal={
+                  externalPanelAvailable
+                    ? (origin) => externalFromTab(selectedPanel, origin)
+                    : undefined
                 }
                 onFloat={
                   createFloatPanelCommand === undefined
@@ -1304,28 +1823,60 @@ interface TabActionsProps {
   readonly panel: WorkspacePanelView;
   readonly groups: readonly WorkspaceGroupView[];
   readonly messages: WorkspaceMessageCatalog;
+  readonly interactionMessages: ResolvedWorkspaceInteractionMessages;
   readonly triggerId: string;
   readonly onStartKeyboardMove: (() => void) | undefined;
   readonly onMove: ((groupId: string) => void) | undefined;
   readonly onFloat: (() => void) | undefined;
+  readonly onSplit: ((edge: WorkspaceLogicalEdge) => void) | undefined;
+  readonly direction: WorkspaceDirection;
+  readonly onExternal: ((origin: "keyboard" | "menu") => void) | undefined;
 }
 
 function TabActions({
   panel,
   groups,
   messages,
+  interactionMessages,
   triggerId,
   onStartKeyboardMove,
   onMove,
   onFloat,
+  onSplit,
+  direction,
+  onExternal,
 }: TabActionsProps) {
   const [open, setOpen] = useState(false);
+  const actionsRef = useRef<HTMLDivElement>(null);
   const triggerRef = useRef<HTMLButtonElement>(null);
   const menuRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (!open) return;
     menuItems(menuRef.current)[0]?.focus();
+  }, [open]);
+
+  useEffect(() => {
+    if (!open) return;
+    const ownerDocument = actionsRef.current?.ownerDocument;
+    if (ownerDocument === undefined) return;
+    const dismissOutside = (event: Event) => {
+      const NodeConstructor = ownerDocument.defaultView?.Node;
+      if (
+        NodeConstructor !== undefined &&
+        event.target instanceof NodeConstructor &&
+        actionsRef.current?.contains(event.target)
+      ) {
+        return;
+      }
+      setOpen(false);
+    };
+    ownerDocument.addEventListener("pointerdown", dismissOutside, true);
+    ownerDocument.addEventListener("focusin", dismissOutside);
+    return () => {
+      ownerDocument.removeEventListener("pointerdown", dismissOutside, true);
+      ownerDocument.removeEventListener("focusin", dismissOutside);
+    };
   }, [open]);
 
   const closeAndRestoreFocus = () => {
@@ -1336,7 +1887,7 @@ function TabActions({
   };
 
   return (
-    <div className="pf-tab-actions">
+    <div ref={actionsRef} className="pf-tab-actions">
       <button
         ref={triggerRef}
         id={triggerId}
@@ -1415,6 +1966,43 @@ function TabActions({
                   })}
                 </button>
               ))}
+          {onSplit === undefined
+            ? null
+            : (["inline-start", "inline-end", "block-start", "block-end"] as const).map((edge) => (
+                <button
+                  key={edge}
+                  role="menuitem"
+                  type="button"
+                  onClick={(event) => {
+                    const ownerDocument = event.currentTarget.ownerDocument;
+                    setOpen(false);
+                    onSplit(edge);
+                    if (event.detail === 0) {
+                      queueMicrotask(() => ownerDocument.getElementById(triggerId)?.focus());
+                    }
+                  }}
+                >
+                  {interactionMessages.splitEdge({
+                    edge: logicalEdgeLabel(edge, direction),
+                  })}
+                </button>
+              ))}
+          {onExternal === undefined ? null : (
+            <button
+              role="menuitem"
+              type="button"
+              onClick={(event) => {
+                const ownerDocument = event.currentTarget.ownerDocument;
+                setOpen(false);
+                onExternal(event.detail === 0 ? "keyboard" : "menu");
+                if (event.detail === 0) {
+                  queueMicrotask(() => ownerDocument.getElementById(triggerId)?.focus());
+                }
+              }}
+            >
+              {interactionMessages.openInNewWindow()}
+            </button>
+          )}
           {panel.floatable === false || onFloat === undefined ? null : (
             <button
               role="menuitem"
@@ -1437,7 +2025,10 @@ interface KeyboardMoveOverlayProps {
   readonly panel: WorkspacePanelView | undefined;
   readonly groups: readonly WorkspaceGroupView[];
   readonly messages: WorkspaceMessageCatalog;
+  readonly direction: WorkspaceDirection;
   readonly onMove: (groupId: string) => void;
+  readonly onSplit: ((edge: WorkspaceLogicalEdge) => void) | undefined;
+  readonly onExternal: (() => void) | undefined;
   readonly onCancel: () => void;
 }
 
@@ -1445,17 +2036,39 @@ function KeyboardMoveOverlay({
   panel,
   groups,
   messages,
+  direction,
   onMove,
+  onSplit,
+  onExternal,
   onCancel,
 }: KeyboardMoveOverlayProps) {
   const [index, setIndex] = useState(0);
   const overlayRef = useRef<HTMLDivElement>(null);
+  const interactionMessages = resolveWorkspaceInteractionMessages(messages);
 
   useEffect(() => {
     overlayRef.current?.focus();
   }, []);
 
-  const selectedGroup = groups[index];
+  const sourceGroup = groups.find((group) => group.panelIds.includes(panel?.id ?? ""));
+  const destinations: readonly KeyboardPanelDestination[] = [
+    ...groups.map((group) => ({
+      id: `group:${group.id}`,
+      label: group.label ?? messages.groupFallback(),
+      commit: () => onMove(group.id),
+    })),
+    ...(onSplit === undefined || sourceGroup === undefined || sourceGroup.panelIds.length <= 1
+      ? []
+      : (["inline-start", "inline-end", "block-start", "block-end"] as const).map((edge) => ({
+          id: `edge:${edge}`,
+          label: interactionMessages.splitEdge({ edge: logicalEdgeLabel(edge, direction) }),
+          commit: () => onSplit(edge),
+        }))),
+    ...(onExternal === undefined
+      ? []
+      : [{ id: "external", label: interactionMessages.openInNewWindow(), commit: onExternal }]),
+  ];
+  const selectedDestination = destinations[index];
   return (
     <div
       ref={overlayRef}
@@ -1472,28 +2085,45 @@ function KeyboardMoveOverlay({
         }
         if (event.key === "ArrowRight" || event.key === "ArrowDown") {
           event.preventDefault();
-          setIndex((value) => (value + 1) % groups.length);
+          setIndex((value) => (value + 1) % Math.max(1, destinations.length));
         }
         if (event.key === "ArrowLeft" || event.key === "ArrowUp") {
           event.preventDefault();
-          setIndex((value) => (value - 1 + groups.length) % groups.length);
+          setIndex(
+            (value) =>
+              (value - 1 + Math.max(1, destinations.length)) % Math.max(1, destinations.length),
+          );
         }
-        if (event.key === "Enter" && selectedGroup !== undefined) {
+        if (event.key === "Home" && destinations.length > 0) {
           event.preventDefault();
-          onMove(selectedGroup.id);
+          setIndex(0);
+        }
+        if (event.key === "End" && destinations.length > 0) {
+          event.preventDefault();
+          setIndex(destinations.length - 1);
+        }
+        if (event.key === "Enter" && selectedDestination !== undefined) {
+          event.preventDefault();
+          selectedDestination.commit();
         }
       }}
     >
       <p className="pf-keyboard-move-eyebrow">{messages.chooseDestination()}</p>
-      <strong>{selectedGroup?.label ?? messages.noAvailableGroup()}</strong>
+      <strong>{selectedDestination?.label ?? messages.noAvailableGroup()}</strong>
       <p>{messages.moveInstructions()}</p>
       <div className="pf-keyboard-move-dots" aria-hidden="true">
-        {groups.map((group, groupIndex) => (
-          <span key={group.id} data-current={String(groupIndex === index)} />
+        {destinations.map((destination, destinationIndex) => (
+          <span key={destination.id} data-current={String(destinationIndex === index)} />
         ))}
       </div>
     </div>
   );
+}
+
+interface KeyboardPanelDestination {
+  readonly id: string;
+  readonly label: string;
+  readonly commit: () => void;
 }
 
 interface PanelPortalsProps {
@@ -1501,9 +2131,21 @@ interface PanelPortalsProps {
   readonly registry: WorkspacePanelRegistry;
   readonly hosts: ReadonlyMap<string, HostRecord>;
   readonly messages: WorkspaceMessageCatalog;
+  readonly ownershipRevision: number;
+  readonly surfaceDocument: Document | undefined;
 }
 
-function PanelPortals({ projection, registry, hosts, messages }: PanelPortalsProps) {
+function PanelPortals({
+  projection,
+  registry,
+  hosts,
+  messages,
+  ownershipRevision,
+  surfaceDocument,
+}: PanelPortalsProps) {
+  // The revision is deliberately read here: adopting an existing portal host
+  // does not itself participate in React reconciliation.
+  void ownershipRevision;
   return (
     <>
       {Object.values(projection.panels).map((panel) => {
@@ -1513,7 +2155,9 @@ function PanelPortals({ projection, registry, hosts, messages }: PanelPortalsPro
         const group = Object.values(projection.groups).find((candidate) =>
           candidate.panelIds.includes(panel.id),
         );
-        const selected = group?.selectedPanelId === panel.id;
+        const inExternalDocument =
+          surfaceDocument !== undefined && host.ownerDocument !== surfaceDocument;
+        const selected = inExternalDocument || group?.selectedPanelId === panel.id;
         const active = projection.activePanelId === panel.id;
         const policy = panelLifecyclePolicy(panel);
         const lifecycle = panelLifecycle(selected, active, policy);
@@ -1782,6 +2426,40 @@ function positiveNumber(value: number | undefined): number {
   return value !== undefined && Number.isFinite(value) && value > 0 ? value : 1;
 }
 
+function solvedPairWeights(
+  split: WorkspaceSplitView,
+  requestedWeights: readonly number[],
+  solvedLayout: ResolvedLayout,
+  beforeIndex: number,
+  afterIndex: number,
+): readonly number[] {
+  const beforeNodeId = split.childIds[beforeIndex];
+  const afterNodeId = split.childIds[afterIndex];
+  const solvedBefore = axisSize(
+    beforeNodeId === undefined ? undefined : solvedLayout.nodeRects[beforeNodeId],
+    split.axis,
+  );
+  const solvedAfter = axisSize(
+    afterNodeId === undefined ? undefined : solvedLayout.nodeRects[afterNodeId],
+    split.axis,
+  );
+  const solvedTotal = solvedBefore + solvedAfter;
+  if (solvedTotal <= 0) return requestedWeights;
+
+  const pairWeight =
+    positiveNumber(requestedWeights[beforeIndex]) + positiveNumber(requestedWeights[afterIndex]);
+  const minimum = Math.min(pairWeight / 2, Math.max(pairWeight * 0.000001, 0.000001));
+  const nextBefore = clamp(
+    pairWeight * (solvedBefore / solvedTotal),
+    minimum,
+    pairWeight - minimum,
+  );
+  const solvedWeights = [...requestedWeights];
+  solvedWeights[beforeIndex] = nextBefore;
+  solvedWeights[afterIndex] = pairWeight - nextBefore;
+  return solvedWeights;
+}
+
 function settleCommit(
   outcome: WorkspaceDispatchOutcome,
   send: (event: ResizeEvent) => string,
@@ -1808,7 +2486,8 @@ function updateStableHost(
   options: {
     readonly active: boolean;
     readonly lifecycle: WorkspacePanelLifecycle;
-    readonly labelledBy: string;
+    readonly labelledBy?: string;
+    readonly label?: string;
     readonly panelType: string | undefined;
     readonly selected: boolean;
   },
@@ -1816,11 +2495,37 @@ function updateStableHost(
   element.hidden = !options.selected;
   element.inert = !options.selected;
   element.setAttribute("aria-hidden", options.selected ? "false" : "true");
-  element.setAttribute("aria-labelledby", options.labelledBy);
+  if (options.labelledBy === undefined) element.removeAttribute("aria-labelledby");
+  else element.setAttribute("aria-labelledby", options.labelledBy);
+  if (options.label === undefined) element.removeAttribute("aria-label");
+  else element.setAttribute("aria-label", options.label);
   element.dataset.active = String(options.active);
   element.dataset.lifecycle = options.lifecycle;
   if (options.panelType === undefined) delete element.dataset.panelType;
   else element.dataset.panelType = options.panelType;
+}
+
+function prepareHostForExternalAccessibility(host: HTMLElement, panelTitle: string) {
+  host.removeAttribute("aria-labelledby");
+  host.setAttribute("aria-label", panelTitle);
+}
+
+function finalizeExternalHostAccessibility(
+  host: HTMLElement,
+  panelTitle: string,
+  labelledBy: string,
+  surfaceDocument: Document | undefined,
+) {
+  if (surfaceDocument !== undefined && host.ownerDocument === surfaceDocument) {
+    host.setAttribute("aria-labelledby", labelledBy);
+    host.removeAttribute("aria-label");
+    return;
+  }
+  host.removeAttribute("aria-labelledby");
+  host.setAttribute("aria-label", panelTitle);
+  host.hidden = false;
+  host.inert = false;
+  host.setAttribute("aria-hidden", "false");
 }
 
 interface PanelLifecycleLeaseState {
@@ -1971,4 +2676,8 @@ function extractErrorMessage(receipt: Readonly<Record<string, unknown>>) {
 
 function isRecord(value: unknown): value is Readonly<Record<string, unknown>> {
   return typeof value === "object" && value !== null;
+}
+
+function isPromiseLike<T>(value: T | Promise<T>): value is Promise<T> {
+  return typeof (value as Promise<T>).then === "function";
 }

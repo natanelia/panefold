@@ -81,6 +81,7 @@ interface BrowserPreparedResource {
   mounted: boolean;
   ready: Promise<void>;
   removeLossListener: () => void;
+  removeSourceLossListener: () => void;
   stopClosedWatch: () => void;
 }
 
@@ -114,10 +115,12 @@ export class BrowserExternalSurfaceAdapter<
       mounted: false,
       ready: Promise.resolve(),
       removeLossListener: () => undefined,
+      removeSourceLossListener: () => undefined,
       stopClosedWatch: () => undefined,
     };
     this.#resources.add(resource);
     resource.removeLossListener = this.#listenForLoss(resource);
+    resource.removeSourceLossListener = this.#listenForSourceLoss(resource);
     resource.stopClosedWatch = this.#watchForClosedWindow(resource);
 
     return Object.freeze({
@@ -144,7 +147,6 @@ export class BrowserExternalSurfaceAdapter<
     document.documentElement.lang = presentation.locale;
     document.documentElement.dir = presentation.direction;
     document.documentElement.style.writingMode = presentation.writingMode;
-    document.title = "Panefold workspace surface";
 
     const head = document.head;
     const body = document.body;
@@ -153,6 +155,7 @@ export class BrowserExternalSurfaceAdapter<
     // claims to enforce a Content Security Policy.
     head.replaceChildren();
     body.replaceChildren();
+    document.title = "Panefold workspace surface";
 
     head.append(
       createMeta(document, "charset", "utf-8"),
@@ -210,14 +213,32 @@ export class BrowserExternalSurfaceAdapter<
     }
 
     resource.mounted = true;
-    const lease = await this.#options.mount({
-      checkpoint: request.checkpoint,
-      document,
-      handle,
-      mount: request,
-      root,
-      window: resource.destinationWindow,
-    });
+    const mounting = invokeAsPromise(() =>
+      this.#options.mount({
+        checkpoint: request.checkpoint,
+        document,
+        handle,
+        mount: request,
+        root,
+        window: resource.destinationWindow,
+      }),
+    );
+    let lease: void | BrowserSurfaceMountLease;
+    try {
+      lease = await waitWithSignal(mounting, signal);
+    } catch (cause) {
+      observeAbandonedMount(mounting);
+      throw cause;
+    }
+    if (resource.intentionalClose || resource.lostNotified || resource.destinationWindow.closed) {
+      disposeLease(lease);
+      throw new SurfaceTransferError(
+        "DESTINATION_CLOSED",
+        "destination-mount",
+        "The destination closed before its renderer mount completed.",
+        ["Recover the panel to its source surface"],
+      );
+    }
     if (lease !== undefined) {
       resource.dispose = lease.dispose;
       resource.ready = lease.ready ?? Promise.resolve();
@@ -247,14 +268,18 @@ export class BrowserExternalSurfaceAdapter<
     if (resource.intentionalClose) return;
     resource.intentionalClose = true;
     resource.removeLossListener();
+    resource.removeSourceLossListener();
     resource.stopClosedWatch();
+    // Revoke the browser resource immediately. Renderer cleanup is advisory
+    // and may reject or never settle, so it cannot gate an intentional close.
     try {
-      await disposeOnce(resource);
+      if (!resource.destinationWindow.closed) resource.destinationWindow.close();
     } catch {
-      // Application cleanup is isolated so a rejected disposer cannot strand
-      // an external browser surface or turn an intentional close into loss.
+      // The destination may already be inaccessible after navigation.
     }
-    if (!resource.destinationWindow.closed) resource.destinationWindow.close();
+    void disposeOnce(resource).catch(() => {
+      // Application cleanup is isolated from browser-resource ownership.
+    });
   }
 
   async #createDestination(request: PrepareSurfaceRequest, signal: AbortSignal): Promise<Window> {
@@ -276,7 +301,7 @@ export class BrowserExternalSurfaceAdapter<
           ["Use an in-page floating surface", "Use a supported browser profile"],
         );
       }
-      const pipWindow = await waitWithSignal(
+      const requestWindow = invokeAsPromise(() =>
         controller.requestWindow({
           ...(request.bounds?.width === undefined
             ? {}
@@ -285,9 +310,22 @@ export class BrowserExternalSurfaceAdapter<
             ? {}
             : { height: Math.max(1, Math.round(request.bounds.height)) }),
         }),
-        signal,
       );
-      return pipWindow;
+      try {
+        return await waitWithSignal(requestWindow, signal);
+      } catch (cause) {
+        void requestWindow.then(
+          (lateWindow) => {
+            try {
+              if (!lateWindow.closed) lateWindow.close();
+            } catch {
+              // A late capability result is abandoned after cancellation.
+            }
+          },
+          () => undefined,
+        );
+        throw cause;
+      }
     }
 
     const openWindow =
@@ -364,6 +402,38 @@ export class BrowserExternalSurfaceAdapter<
     };
   }
 
+  #listenForSourceLoss(resource: BrowserPreparedResource): () => void {
+    const sourceWindow = this.#options.environment.sourceWindow;
+    const onPageHide = (event: PageTransitionEvent) => {
+      // A bfcache entry may resume with the same live resources. A real source
+      // unload/reload cannot keep a framework lease authoritative, so close
+      // the child and let persisted semantic recovery rehome it on next boot.
+      if (event.persisted || resource.intentionalClose || resource.lostNotified) return;
+      resource.intentionalClose = true;
+      resource.removeLossListener();
+      resource.removeSourceLossListener();
+      resource.stopClosedWatch();
+      // Closing cannot wait for renderer cleanup: pagehide gives the source no
+      // reliable time to settle promises, and a disposer may never resolve.
+      // Detach the browser resource synchronously, then make lease cleanup a
+      // contained best-effort operation.
+      try {
+        if (!resource.destinationWindow.closed) resource.destinationWindow.close();
+      } catch {
+        // The destination may have navigated or become inaccessible while the
+        // source was unloading. Persisted semantic recovery remains the owner.
+      }
+      void disposeOnce(resource).catch(() => {
+        // Neither a synchronous throw nor an asynchronous rejection may escape
+        // the source pagehide event.
+      });
+    };
+    sourceWindow.addEventListener("pagehide", onPageHide);
+    return () => {
+      sourceWindow.removeEventListener("pagehide", onPageHide);
+    };
+  }
+
   #watchForClosedWindow(resource: BrowserPreparedResource): () => void {
     const setTimer =
       this.#options.environment.setTimer ??
@@ -392,6 +462,7 @@ export class BrowserExternalSurfaceAdapter<
     if (resource.intentionalClose || resource.lostNotified) return;
     resource.lostNotified = true;
     resource.removeLossListener();
+    resource.removeSourceLossListener();
     resource.stopClosedWatch();
     void disposeOnce(resource).catch(() => {
       // Loss recovery is already authoritative; disposal failure must not
@@ -525,6 +596,38 @@ async function disposeOnce(resource: BrowserPreparedResource): Promise<void> {
   const dispose = resource.dispose;
   resource.dispose = undefined;
   await dispose?.();
+}
+
+function invokeAsPromise<Value>(operation: () => Value | PromiseLike<Value>): Promise<Value> {
+  try {
+    return Promise.resolve(operation());
+  } catch (cause) {
+    return Promise.reject(cause);
+  }
+}
+
+function observeAbandonedMount(mounting: Promise<void | BrowserSurfaceMountLease>): void {
+  void mounting.then(
+    (lease) => {
+      disposeLease(lease);
+    },
+    () => {
+      // The signal-bounded mount already owns the primary failure path.
+    },
+  );
+}
+
+function disposeLease(lease: void | BrowserSurfaceMountLease): void {
+  void lease?.ready?.catch(() => {
+    // Readiness no longer has an owner once its mount was abandoned.
+  });
+  try {
+    void Promise.resolve(lease?.dispose?.()).catch(() => {
+      // Late renderer disposal is isolated from completed transfer recovery.
+    });
+  } catch {
+    // Synchronous disposer failures are isolated for the same reason.
+  }
 }
 
 function throwIfAborted(signal: AbortSignal): void {

@@ -170,6 +170,15 @@ export const docPages = [
     eyebrow: "ADR 0012",
   },
   {
+    slug: "adr-direct-placement-durable-demo",
+    title: "Direct placement and durable Atlas",
+    description:
+      "Revision-bound docking, controlled live popouts, tab presentation, and restore-before-render persistence.",
+    section: "Decisions",
+    loadSource: raw(() => import("../../../../docs/adr/0013-direct-placement-durable-demo.md?raw")),
+    eyebrow: "ADR 0013",
+  },
+  {
     slug: "system-design",
     title: "System design",
     description: "The complete normative design and 190-requirement register source.",
