@@ -13,6 +13,7 @@
     }
   },
   "dependencies": {
+    "@panefold/model": "workspace:*",
     "motion": "catalog:"
   },
   "scripts": {

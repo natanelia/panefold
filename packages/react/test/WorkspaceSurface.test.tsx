@@ -1,8 +1,15 @@
 // @vitest-environment jsdom
 
+import { useEffect, useRef } from "react";
 import { afterEach, describe, expect, it } from "vitest";
-import { cleanup, render, screen, waitFor } from "@testing-library/react";
+import { act, cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
+import {
+  SurfaceFrameScheduler,
+  type MotionDriver,
+  type MotionHandle,
+  type MotionPlan,
+} from "@panefold/motion";
 
 import {
   WorkspaceRuntimeProvider,
@@ -10,6 +17,7 @@ import {
   type WorkspaceCommandAdapter,
   type WorkspaceCommandOrigin,
   type WorkspacePanelRegistry,
+  type WorkspacePanelRenderProps,
   type WorkspaceProjection,
   type WorkspaceRuntimeLike,
 } from "../src";
@@ -156,6 +164,123 @@ describe("WorkspaceSurface", () => {
       expect(root.weights[1]).toBeCloseTo(0.96);
     }
     expect(runtime.transactions.at(-1)?.origin).toBe("keyboard");
+  });
+
+  it("uses one geometry projection for pointer preview and commit", async () => {
+    const runtime = new FixtureRuntime(initialProjection);
+    const frames = createManualFrameScheduler();
+    const view = renderWorkspace(runtime, { frameScheduler: frames.scheduler });
+    const splitter = await screen.findByRole("separator", { name: /resize adjacent/i });
+    installPointerCapture(splitter);
+    const firstChild = requiredElement(
+      view.container.querySelector('[data-workspace-split="root"] > .pf-split-child'),
+    );
+    expect(firstChild.dataset.inlineSize).toBe("497");
+
+    fireEvent.pointerDown(splitter, { button: 0, pointerId: 7, clientX: 497, clientY: 0 });
+    fireEvent.pointerMove(splitter, { pointerId: 7, clientX: 550, clientY: 0 });
+    fireEvent.pointerMove(splitter, { pointerId: 7, clientX: 597, clientY: 0 });
+    expect(firstChild.dataset.inlineSize).toBe("497");
+    act(() => {
+      frames.flush();
+    });
+
+    const previewSize = firstChild.dataset.inlineSize;
+    expect(previewSize).toBe("597");
+    expect(runtime.getSnapshot().projection.revision).toBe("0");
+
+    fireEvent.pointerUp(splitter, { pointerId: 7, clientX: 597, clientY: 0 });
+    await waitFor(() => {
+      expect(runtime.getSnapshot().projection.revision).toBe("1");
+    });
+    expect(firstChild.dataset.inlineSize).toBe(previewSize);
+    expect(runtime.transactions.at(-1)?.origin).toBe("pointer");
+  });
+
+  it("keeps pointer ownership in the resize actor and restores geometry on cancellation", async () => {
+    const runtime = new FixtureRuntime(initialProjection);
+    const frames = createManualFrameScheduler();
+    const view = renderWorkspace(runtime, { frameScheduler: frames.scheduler });
+    const splitter = await screen.findByRole("separator", { name: /resize adjacent/i });
+    installPointerCapture(splitter);
+    const firstChild = requiredElement(
+      view.container.querySelector('[data-workspace-split="root"] > .pf-split-child'),
+    );
+
+    fireEvent.pointerDown(splitter, { button: 0, pointerId: 11, clientX: 497, clientY: 0 });
+    expect(splitter.dataset.resizeState).toBe("armed");
+    fireEvent.pointerMove(splitter, { pointerId: 12, clientX: 650, clientY: 0 });
+    fireEvent.pointerUp(splitter, { pointerId: 12, clientX: 650, clientY: 0 });
+    expect(frames.hasPending()).toBe(false);
+    expect(firstChild.dataset.inlineSize).toBe("497");
+    expect(runtime.transactions).toHaveLength(0);
+
+    fireEvent.pointerMove(splitter, { pointerId: 11, clientX: 570, clientY: 0 });
+    act(() => {
+      frames.flush();
+    });
+    expect(firstChild.dataset.inlineSize).toBe("570");
+    expect(splitter.dataset.resizeState).toBe("resizing");
+
+    fireEvent.pointerCancel(splitter, { pointerId: 11, clientX: 570, clientY: 0 });
+    await waitFor(() => {
+      expect(firstChild.dataset.inlineSize).toBe("497");
+      expect(splitter.dataset.resizeState).toBe("idle");
+    });
+    expect(runtime.transactions).toHaveLength(0);
+  });
+
+  it("maps keyboard steps through logical axes in RTL", async () => {
+    const inlineRuntime = new FixtureRuntime(initialProjection);
+    const inlineView = renderWorkspace(inlineRuntime, { direction: "rtl" });
+    const inlineSplitter = await screen.findByRole("separator", {
+      name: /resize adjacent/i,
+    });
+    inlineSplitter.focus();
+    await userEvent.keyboard("{ArrowRight}");
+    await waitFor(() => {
+      expect(inlineRuntime.getSnapshot().projection.revision).toBe("1");
+    });
+    const inlineRoot = inlineRuntime.getSnapshot().projection.nodes.root;
+    expect(inlineRoot?.kind === "split" ? inlineRoot.weights[0] : undefined).toBeCloseTo(0.96);
+    inlineView.unmount();
+
+    const root = initialProjection.nodes.root;
+    if (root?.kind !== "split") throw new Error("Fixture requires a root split");
+    const blockRuntime = new FixtureRuntime({
+      ...initialProjection,
+      nodes: { ...initialProjection.nodes, root: { ...root, axis: "block" } },
+    });
+    renderWorkspace(blockRuntime, { direction: "rtl" });
+    const blockSplitter = await screen.findByRole("separator", { name: /resize adjacent/i });
+    blockSplitter.focus();
+    await userEvent.keyboard("{ArrowDown}");
+    await waitFor(() => {
+      expect(blockRuntime.getSnapshot().projection.revision).toBe("1");
+    });
+    const blockRoot = blockRuntime.getSnapshot().projection.nodes.root;
+    expect(blockRoot?.kind === "split" ? blockRoot.weights[0] : undefined).toBeCloseTo(1.04);
+  });
+
+  it("adapts structural FLIP plans to reduced motion", async () => {
+    const runtime = new FixtureRuntime(initialProjection);
+    const driver = new RecordingMotionDriver();
+    renderWorkspace(runtime, { motion: "reduced", motionDriver: driver });
+
+    act(() => {
+      runtime.dispatch(
+        { type: "resize", splitId: "root", weights: [1.4, 0.6] },
+        { origin: "application", label: "External layout change" },
+      );
+    });
+
+    await waitFor(() => {
+      expect(driver.plans.length).toBeGreaterThan(0);
+    });
+    for (const plan of driver.plans) {
+      expect(plan.durationMs).toBeLessThanOrEqual(90);
+      expect(plan.keyframes).not.toHaveProperty("transform");
+    }
   });
 
   it("announces rejection instead of a false success", async () => {
@@ -352,6 +477,170 @@ describe("WorkspaceSurface", () => {
     expect(input.value).toBe("local draft survives");
     expect(input.closest("[data-workspace-panel-host]")).toBe(host);
   });
+
+  it("aborts each lifecycle lease before delivering its replacement", async () => {
+    const runtime = new FixtureRuntime(initialProjection);
+    const events: string[] = [];
+    const abortCounts = new Map<AbortSignal, number>();
+    const lifecycleRegistry: WorkspacePanelRegistry = {
+      fixture: {
+        render: panels.fixture?.render ?? (() => null),
+        onLifecycleChange: (change) => {
+          if (change.panelId !== "alpha") return;
+          events.push(`callback:${change.reason}:${change.current}:${change.signal.aborted}`);
+          change.signal.addEventListener(
+            "abort",
+            () => {
+              abortCounts.set(change.signal, (abortCounts.get(change.signal) ?? 0) + 1);
+              events.push(`abort:${change.current}`);
+              expect(change.signal.reason).toMatchObject({
+                kind: "panefold-panel-lifecycle-ended",
+                panelId: "alpha",
+              });
+            },
+            { once: true },
+          );
+        },
+      },
+    };
+    const view = renderWorkspace(runtime, { registry: lifecycleRegistry });
+    await waitFor(() => {
+      expect(events).toContain("callback:mount:active:false");
+    });
+
+    await userEvent.click(screen.getByRole("tab", { name: "Beta" }));
+    await userEvent.click(screen.getByRole("tab", { name: "Alpha" }));
+    act(() => {
+      runtime.dispatch(
+        { type: "move", panelId: "alpha", groupId: "right" },
+        { origin: "application", label: "Move Alpha" },
+      );
+    });
+    await waitFor(() => {
+      expect(events).toContain("callback:same-document-move:active:false");
+    });
+
+    expect(events).toEqual([
+      "callback:mount:active:false",
+      "abort:active",
+      "callback:selection:suspended:false",
+      "abort:suspended",
+      "callback:selection:active:false",
+      "abort:active",
+      "callback:same-document-move:active:false",
+    ]);
+    view.unmount();
+    expect(events.at(-1)).toBe("abort:active");
+    expect([...abortCounts.values()].every((count) => count === 1)).toBe(true);
+    expect(abortCounts.size).toBe(4);
+  });
+
+  it("keeps heavy-content fixtures mounted while cooperatively suspending hidden panels", async () => {
+    const user = userEvent.setup();
+    const runtime = new FixtureRuntime(initialProjection);
+    const mounts = new Map<string, number>();
+    const unmounts = new Map<string, number>();
+    const transitions: string[] = [];
+
+    function HeavyFixture({ panel: item, lifecycle }: WorkspacePanelRenderProps) {
+      const mountIdentity = useRef({ panelId: item.id });
+      useEffect(() => {
+        mounts.set(item.id, (mounts.get(item.id) ?? 0) + 1);
+        return () => {
+          unmounts.set(item.id, (unmounts.get(item.id) ?? 0) + 1);
+        };
+      }, [item.id]);
+
+      return (
+        <div data-heavy-fixture={mountIdentity.current.panelId} data-fixture-lifecycle={lifecycle}>
+          <label>
+            Editor for {item.title}
+            <textarea defaultValue={`draft:${item.id}`} />
+          </label>
+          <svg role="img" aria-label={`Map for ${item.title}`} data-map-fixture="true" />
+          <table data-grid-fixture="true">
+            <caption>Grid for {item.title}</caption>
+            <tbody>
+              <tr>
+                <td>row</td>
+              </tr>
+            </tbody>
+          </table>
+          <video aria-label={`Media for ${item.title}`} preload="none" data-media-fixture="true" />
+          <iframe
+            title={`Frame for ${item.title}`}
+            srcDoc="<!doctype html><p>isolated fixture</p>"
+            sandbox=""
+            data-iframe-fixture="true"
+          />
+          <div data-microfrontend-fixture="true">Microfrontend fixture</div>
+        </div>
+      );
+    }
+
+    const lifecycleRegistry: WorkspacePanelRegistry = {
+      fixture: {
+        render: HeavyFixture,
+        onLifecycleChange: ({ panelId, previous, current }) => {
+          transitions.push(`${panelId}:${previous ?? "mount"}->${current}`);
+        },
+      },
+    };
+    const view = renderWorkspace(runtime, { registry: lifecycleRegistry });
+
+    const alphaEditor = (await screen.findByLabelText("Editor for Alpha")) as HTMLTextAreaElement;
+    const alphaHost = alphaEditor.closest<HTMLElement>("[data-workspace-panel-host]");
+    const alphaMap = alphaHost?.querySelector("[data-map-fixture]");
+    const alphaGrid = alphaHost?.querySelector("[data-grid-fixture]");
+    const alphaMedia = alphaHost?.querySelector("[data-media-fixture]");
+    const alphaFrame = alphaHost?.querySelector("[data-iframe-fixture]");
+    const alphaMicrofrontend = alphaHost?.querySelector("[data-microfrontend-fixture]");
+    expect(alphaHost).toBeTruthy();
+
+    await waitFor(() => {
+      expect(mounts.get("alpha")).toBe(1);
+      expect(mounts.get("beta")).toBe(1);
+      expect(mounts.get("gamma")).toBe(1);
+    });
+
+    await user.clear(alphaEditor);
+    await user.type(alphaEditor, "unsaved heavy-content state");
+    for (let iteration = 0; iteration < 4; iteration += 1) {
+      await user.click(screen.getByRole("tab", { name: "Beta" }));
+      await waitFor(() => {
+        expect(alphaHost?.dataset.lifecycle).toBe("suspended");
+        expect(alphaHost?.hidden).toBe(true);
+        expect(alphaHost?.inert).toBe(true);
+      });
+      await user.click(screen.getByRole("tab", { name: "Alpha" }));
+    }
+
+    runtime.dispatch(
+      { type: "move", panelId: "alpha", groupId: "right" },
+      { origin: "application", label: "Move Alpha to Right" },
+    );
+
+    await waitFor(() => {
+      expect(screen.getByLabelText("Editor for Alpha")).toBe(alphaEditor);
+      expect(alphaHost?.parentElement?.dataset.workspacePanelSlot).toBe("right");
+    });
+    expect(alphaEditor.value).toBe("unsaved heavy-content state");
+    expect(alphaHost?.querySelector("[data-map-fixture]")).toBe(alphaMap);
+    expect(alphaHost?.querySelector("[data-grid-fixture]")).toBe(alphaGrid);
+    expect(alphaHost?.querySelector("[data-media-fixture]")).toBe(alphaMedia);
+    expect(alphaHost?.querySelector("[data-iframe-fixture]")).toBe(alphaFrame);
+    expect(alphaHost?.querySelector("[data-microfrontend-fixture]")).toBe(alphaMicrofrontend);
+    expect(mounts.get("alpha")).toBe(1);
+    expect(unmounts.get("alpha")).toBeUndefined();
+    expect(transitions).toContain("alpha:mount->active");
+    expect(transitions).toContain("alpha:active->suspended");
+    expect(transitions).toContain("alpha:suspended->active");
+
+    view.unmount();
+    expect(unmounts.get("alpha")).toBe(1);
+    expect(unmounts.get("beta")).toBe(1);
+    expect(unmounts.get("gamma")).toBe(1);
+  });
 });
 
 class FixtureRuntime implements WorkspaceRuntimeLike<
@@ -512,7 +801,13 @@ function reduceProjection(
 
 function renderWorkspace(
   runtime: FixtureRuntime,
-  options: { readonly motion?: "off" | "reduced" | "productive" } = {},
+  options: {
+    readonly motion?: "off" | "reduced" | "productive";
+    readonly registry?: WorkspacePanelRegistry;
+    readonly direction?: "ltr" | "rtl";
+    readonly frameScheduler?: SurfaceFrameScheduler;
+    readonly motionDriver?: MotionDriver;
+  } = {},
 ) {
   return render(
     <WorkspaceRuntimeProvider runtime={runtime}>
@@ -520,8 +815,14 @@ function renderWorkspace(
         <WorkspaceSurface
           projector={(snapshot: FixtureSnapshot) => snapshot.projection}
           commands={commands}
-          panels={panels}
+          panels={options.registry ?? panels}
+          layoutBounds={{ inlineStart: 0, blockStart: 0, inlineSize: 1000, blockSize: 700 }}
           workspaceLabel="Fixture workspace"
+          {...(options.direction === undefined ? {} : { direction: options.direction })}
+          {...(options.frameScheduler === undefined
+            ? {}
+            : { frameScheduler: options.frameScheduler })}
+          {...(options.motionDriver === undefined ? {} : { motionDriver: options.motionDriver })}
           {...(options.motion === undefined ? {} : { motion: options.motion })}
         />
       </div>
@@ -546,4 +847,59 @@ function cloneProjection(projection: WorkspaceProjection): WorkspaceProjection {
     groups: { ...projection.groups },
     panels: { ...projection.panels },
   };
+}
+
+function createManualFrameScheduler() {
+  let pending: FrameRequestCallback | undefined;
+  let nextHandle = 0;
+  const scheduler = new SurfaceFrameScheduler({
+    requestFrame: (callback) => {
+      pending = callback;
+      nextHandle += 1;
+      return nextHandle;
+    },
+    cancelFrame: () => {
+      pending = undefined;
+    },
+  });
+  return {
+    scheduler,
+    flush() {
+      const callback = pending;
+      pending = undefined;
+      callback?.(16);
+    },
+    hasPending() {
+      return pending !== undefined;
+    },
+  };
+}
+
+function installPointerCapture(element: HTMLElement) {
+  let capturedPointer: number | undefined;
+  element.setPointerCapture = (pointerId) => {
+    capturedPointer = pointerId;
+  };
+  element.hasPointerCapture = (pointerId) => capturedPointer === pointerId;
+  element.releasePointerCapture = (pointerId) => {
+    if (capturedPointer === pointerId) capturedPointer = undefined;
+  };
+}
+
+function requiredElement(element: Element | null): HTMLElement {
+  if (!(element instanceof HTMLElement)) throw new Error("Expected fixture element");
+  return element;
+}
+
+class RecordingMotionDriver implements MotionDriver {
+  public readonly plans: MotionPlan[] = [];
+
+  public animate(_element: Element, plan: MotionPlan): MotionHandle {
+    this.plans.push(plan);
+    return {
+      finished: Promise.resolve(),
+      cancel() {},
+      finish() {},
+    };
+  }
 }

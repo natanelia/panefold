@@ -8,8 +8,10 @@ import {
   type ReactNode,
 } from "react";
 import { canonicalHash, validateWorkspace } from "@panefold/kernel";
+import { solveLayout } from "@panefold/geometry";
 import {
   getEntity,
+  nodeId,
   type CommittedTransaction,
   type WorkspaceCommand,
   type WorkspaceSnapshot,
@@ -20,6 +22,7 @@ import {
   useWorkspaceSnapshot,
   useWorkspaceTransactions,
   type WorkspaceDirection,
+  type WorkspaceLayoutSolver,
   type WorkspaceProjection,
 } from "@panefold/react";
 import {
@@ -29,6 +32,7 @@ import {
 } from "@panefold/runtime";
 
 import { demoPanelRegistry, Glyph } from "./demo-panels";
+import { createRedactedReproduction } from "./reproduction";
 import { demoCommands, initialWorkspaceSnapshot, projectWorkspace } from "./workspace-config";
 
 type Theme = "dark" | "light";
@@ -117,6 +121,14 @@ function MapWorkspaceApp({ runtime }: { readonly runtime: WorkspaceRuntime }) {
       return groupNode === undefined ? projection : { ...projection, rootNodeId: groupNode.id };
     },
     [compact, compactGroupId],
+  );
+  const layoutSolver = useCallback<WorkspaceLayoutSolver<WorkspaceSnapshot>>(
+    (layoutSnapshot, request) =>
+      solveLayout(layoutSnapshot, nodeId(request.rootNodeId), request.bounds, {
+        splitterSize: request.splitterSize,
+        splitOverrides: request.splitOverrides,
+      }),
+    [],
   );
 
   const activePanel =
@@ -216,6 +228,7 @@ function MapWorkspaceApp({ runtime }: { readonly runtime: WorkspaceRuntime }) {
           projector={projector}
           commands={demoCommands}
           panels={demoPanelRegistry}
+          layoutSolver={layoutSolver}
           direction={direction}
           motion={motion}
           workspaceLabel="Map operations workspace"
@@ -252,6 +265,7 @@ function MapWorkspaceApp({ runtime }: { readonly runtime: WorkspaceRuntime }) {
         <span>Active: {activePanel?.title ?? "None"}</span>
         <span>{compact ? "Phone projection" : "Desktop projection"}</span>
         <span>{motion} motion</span>
+        <span>Stable hosts · hidden work suspends</span>
         <span>Session memory only</span>
       </footer>
 
@@ -713,23 +727,6 @@ function glyphForPanel(type: string): Parameters<typeof Glyph>[0]["name"] {
 }
 
 async function copyReproduction(runtime: WorkspaceRuntime) {
-  const snapshot = runtime.getSnapshot();
-  const reproduction = {
-    engineVersion: "0.1.0",
-    revision: snapshot.revision.toString(),
-    capabilityProfile: { surface: "main", direction: document.dir || "ltr" },
-    topology: {
-      groups: snapshot.groups.ids,
-      nodes: snapshot.nodes.ids,
-      surfaces: snapshot.surfaces.ids,
-    },
-    commands: runtime.getTransactions().map((transaction) => ({
-      id: transaction.id,
-      origin: transaction.origin,
-      label: transaction.label,
-      revision: transaction.revision.toString(),
-      type: transaction.command.type,
-    })),
-  };
+  const reproduction = createRedactedReproduction(runtime, document.dir || "ltr");
   await navigator.clipboard.writeText(JSON.stringify(reproduction, null, 2));
 }

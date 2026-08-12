@@ -16,4 +16,5 @@ export type {
   LogicalRect,
   ResolvedLayout,
   ResolvedSplitter,
+  SplitLayoutOverride,
 } from "./types.js";

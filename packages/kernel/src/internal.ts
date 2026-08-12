@@ -1,5 +1,7 @@
 import {
+  type AppliedRemoteTransaction,
   type ClosedPanelRecord,
+  cloneAndFreeze,
   type EntityTable,
   type GroupId,
   type GroupRecord,
@@ -26,7 +28,7 @@ function createCanonicalEntityTable<Id extends string, Entity extends { readonly
     compareCanonicalStrings(String(left.id), String(right.id)),
   );
   const byId: Record<string, Entity> = Object.create(null) as Record<string, Entity>;
-  for (const entity of sorted) byId[String(entity.id)] = entity;
+  for (const entity of sorted) byId[String(entity.id)] = cloneAndFreeze(entity);
   return Object.freeze({
     ids: Object.freeze(sorted.map((entity) => entity.id)),
     byId: Object.freeze(byId),
@@ -45,6 +47,7 @@ export interface MutableWorkspace {
   focusMemory: WorkspaceSnapshot["focusMemory"];
   floatingOrder: SurfaceId[];
   recoverableClosedPanels: ClosedPanelRecord[];
+  appliedRemoteTransactions: AppliedRemoteTransaction[];
   metadata: WorkspaceSnapshot["metadata"];
 }
 
@@ -68,6 +71,7 @@ export function toMutable(snapshot: WorkspaceSnapshot): MutableWorkspace {
     focusMemory: snapshot.focusMemory,
     floatingOrder: [...snapshot.floatingOrder],
     recoverableClosedPanels: [...snapshot.recoverableClosedPanels],
+    appliedRemoteTransactions: [...snapshot.appliedRemoteTransactions],
     metadata: snapshot.metadata,
   };
 }
@@ -81,11 +85,16 @@ export function fromMutable(state: MutableWorkspace): WorkspaceSnapshot {
     groups: createCanonicalEntityTable<GroupId, GroupRecord>([...state.groups.values()]),
     nodes: createCanonicalEntityTable<NodeId, LayoutNode>([...state.nodes.values()]),
     surfaces: createCanonicalEntityTable<SurfaceId, SurfaceRecord>([...state.surfaces.values()]),
-    activation: Object.freeze(state.activation),
-    focusMemory: Object.freeze(state.focusMemory),
+    activation: cloneAndFreeze(state.activation),
+    focusMemory: cloneAndFreeze(state.focusMemory),
     floatingOrder: Object.freeze([...state.floatingOrder]),
-    recoverableClosedPanels: Object.freeze([...state.recoverableClosedPanels]),
-    metadata: Object.freeze({ ...state.metadata }),
+    recoverableClosedPanels: Object.freeze(
+      state.recoverableClosedPanels.map((record) => cloneAndFreeze(record)),
+    ),
+    appliedRemoteTransactions: Object.freeze(
+      state.appliedRemoteTransactions.map((transaction) => cloneAndFreeze(transaction)),
+    ),
+    metadata: cloneAndFreeze(state.metadata),
   });
 }
 

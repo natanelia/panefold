@@ -1,0 +1,2842 @@
+{
+  "schemaVersion": 1,
+  "traces": [
+    {
+      "requirementId": "A11Y-001",
+      "profileId": "compact-react-chromium-desktop",
+      "status": "not-applicable",
+      "evidenceIds": [
+        "manual-accessibility-certification"
+      ],
+      "rationale": "The published profile is explicitly experimental; this stable-release requirement is not claimed."
+    },
+    {
+      "requirementId": "A11Y-002",
+      "profileId": "compact-react-chromium-desktop",
+      "status": "unresolved",
+      "evidenceIds": [],
+      "rationale": "The complete acceptance evidence described by the system design has not yet been produced for this profile."
+    },
+    {
+      "requirementId": "A11Y-003",
+      "profileId": "compact-react-chromium-desktop",
+      "status": "verified",
+      "evidenceIds": [
+        "react-integration"
+      ],
+      "rationale": "Covered by repository-local automated evidence for this experimental profile."
+    },
+    {
+      "requirementId": "A11Y-004",
+      "profileId": "compact-react-chromium-desktop",
+      "status": "unresolved",
+      "evidenceIds": [],
+      "rationale": "The complete acceptance evidence described by the system design has not yet been produced for this profile."
+    },
+    {
+      "requirementId": "A11Y-005",
+      "profileId": "compact-react-chromium-desktop",
+      "status": "unresolved",
+      "evidenceIds": [
+        "manual-accessibility-certification"
+      ],
+      "rationale": "The complete acceptance evidence described by the system design has not yet been produced for this profile."
+    },
+    {
+      "requirementId": "A11Y-006",
+      "profileId": "compact-react-chromium-desktop",
+      "status": "verified",
+      "evidenceIds": [
+        "motion-primitives"
+      ],
+      "rationale": "Covered by repository-local automated evidence for this experimental profile."
+    },
+    {
+      "requirementId": "A11Y-007",
+      "profileId": "compact-react-chromium-desktop",
+      "status": "unresolved",
+      "evidenceIds": [],
+      "rationale": "The complete acceptance evidence described by the system design has not yet been produced for this profile."
+    },
+    {
+      "requirementId": "A11Y-008",
+      "profileId": "compact-react-chromium-desktop",
+      "status": "unresolved",
+      "evidenceIds": [
+        "manual-accessibility-certification"
+      ],
+      "rationale": "The complete acceptance evidence described by the system design has not yet been produced for this profile."
+    },
+    {
+      "requirementId": "ACC-001",
+      "profileId": "compact-react-chromium-desktop",
+      "status": "not-applicable",
+      "evidenceIds": [
+        "conformance-harness"
+      ],
+      "rationale": "The published profile is explicitly experimental; this stable-release requirement is not claimed."
+    },
+    {
+      "requirementId": "ACC-002",
+      "profileId": "compact-react-chromium-desktop",
+      "status": "unresolved",
+      "evidenceIds": [],
+      "rationale": "The complete acceptance evidence described by the system design has not yet been produced for this profile."
+    },
+    {
+      "requirementId": "ACC-003",
+      "profileId": "compact-react-chromium-desktop",
+      "status": "unresolved",
+      "evidenceIds": [],
+      "rationale": "The complete acceptance evidence described by the system design has not yet been produced for this profile."
+    },
+    {
+      "requirementId": "API-001",
+      "profileId": "compact-react-chromium-desktop",
+      "status": "unresolved",
+      "evidenceIds": [],
+      "rationale": "The complete acceptance evidence described by the system design has not yet been produced for this profile."
+    },
+    {
+      "requirementId": "API-002",
+      "profileId": "compact-react-chromium-desktop",
+      "status": "unresolved",
+      "evidenceIds": [],
+      "rationale": "The complete acceptance evidence described by the system design has not yet been produced for this profile."
+    },
+    {
+      "requirementId": "API-003",
+      "profileId": "compact-react-chromium-desktop",
+      "status": "verified",
+      "evidenceIds": [
+        "model-immutability"
+      ],
+      "rationale": "Covered by repository-local automated evidence for this experimental profile."
+    },
+    {
+      "requirementId": "API-004",
+      "profileId": "compact-react-chromium-desktop",
+      "status": "unresolved",
+      "evidenceIds": [],
+      "rationale": "The complete acceptance evidence described by the system design has not yet been produced for this profile."
+    },
+    {
+      "requirementId": "API-005",
+      "profileId": "compact-react-chromium-desktop",
+      "status": "verified",
+      "evidenceIds": [
+        "runtime-notification"
+      ],
+      "rationale": "Covered by repository-local automated evidence for this experimental profile."
+    },
+    {
+      "requirementId": "API-006",
+      "profileId": "compact-react-chromium-desktop",
+      "status": "unresolved",
+      "evidenceIds": [],
+      "rationale": "The complete acceptance evidence described by the system design has not yet been produced for this profile."
+    },
+    {
+      "requirementId": "API-007",
+      "profileId": "compact-react-chromium-desktop",
+      "status": "unresolved",
+      "evidenceIds": [],
+      "rationale": "The complete acceptance evidence described by the system design has not yet been produced for this profile."
+    },
+    {
+      "requirementId": "API-008",
+      "profileId": "compact-react-chromium-desktop",
+      "status": "unresolved",
+      "evidenceIds": [],
+      "rationale": "The complete acceptance evidence described by the system design has not yet been produced for this profile."
+    },
+    {
+      "requirementId": "ARC-001",
+      "profileId": "compact-react-chromium-desktop",
+      "status": "verified",
+      "evidenceIds": [
+        "dependency-architecture"
+      ],
+      "rationale": "Covered by repository-local automated evidence for this experimental profile."
+    },
+    {
+      "requirementId": "ARC-002",
+      "profileId": "compact-react-chromium-desktop",
+      "status": "verified",
+      "evidenceIds": [
+        "protocol-models"
+      ],
+      "rationale": "Covered by repository-local automated evidence for this experimental profile."
+    },
+    {
+      "requirementId": "ARC-003",
+      "profileId": "compact-react-chromium-desktop",
+      "status": "verified",
+      "evidenceIds": [
+        "indexeddb-effect"
+      ],
+      "rationale": "Covered by repository-local automated evidence for this experimental profile."
+    },
+    {
+      "requirementId": "ARC-004",
+      "profileId": "compact-react-chromium-desktop",
+      "status": "unresolved",
+      "evidenceIds": [
+        "motion-primitives"
+      ],
+      "rationale": "The complete acceptance evidence described by the system design has not yet been produced for this profile."
+    },
+    {
+      "requirementId": "ARC-005",
+      "profileId": "compact-react-chromium-desktop",
+      "status": "unresolved",
+      "evidenceIds": [
+        "dependency-architecture"
+      ],
+      "rationale": "The complete acceptance evidence described by the system design has not yet been produced for this profile."
+    },
+    {
+      "requirementId": "COL-001",
+      "profileId": "compact-react-chromium-desktop",
+      "status": "unresolved",
+      "evidenceIds": [],
+      "rationale": "The complete acceptance evidence described by the system design has not yet been produced for this profile."
+    },
+    {
+      "requirementId": "COL-002",
+      "profileId": "compact-react-chromium-desktop",
+      "status": "unresolved",
+      "evidenceIds": [],
+      "rationale": "The complete acceptance evidence described by the system design has not yet been produced for this profile."
+    },
+    {
+      "requirementId": "COL-003",
+      "profileId": "compact-react-chromium-desktop",
+      "status": "unresolved",
+      "evidenceIds": [],
+      "rationale": "The complete acceptance evidence described by the system design has not yet been produced for this profile."
+    },
+    {
+      "requirementId": "COL-004",
+      "profileId": "compact-react-chromium-desktop",
+      "status": "unresolved",
+      "evidenceIds": [
+        "surface-ownership"
+      ],
+      "rationale": "The complete acceptance evidence described by the system design has not yet been produced for this profile."
+    },
+    {
+      "requirementId": "COL-005",
+      "profileId": "compact-react-chromium-desktop",
+      "status": "unresolved",
+      "evidenceIds": [],
+      "rationale": "The complete acceptance evidence described by the system design has not yet been produced for this profile."
+    },
+    {
+      "requirementId": "COL-006",
+      "profileId": "compact-react-chromium-desktop",
+      "status": "unresolved",
+      "evidenceIds": [],
+      "rationale": "The complete acceptance evidence described by the system design has not yet been produced for this profile."
+    },
+    {
+      "requirementId": "DOM-001",
+      "profileId": "compact-react-chromium-desktop",
+      "status": "verified",
+      "evidenceIds": [
+        "model-immutability"
+      ],
+      "rationale": "Covered by repository-local automated evidence for this experimental profile."
+    },
+    {
+      "requirementId": "DOM-002",
+      "profileId": "compact-react-chromium-desktop",
+      "status": "unresolved",
+      "evidenceIds": [],
+      "rationale": "The complete acceptance evidence described by the system design has not yet been produced for this profile."
+    },
+    {
+      "requirementId": "DOM-003",
+      "profileId": "compact-react-chromium-desktop",
+      "status": "unresolved",
+      "evidenceIds": [],
+      "rationale": "The complete acceptance evidence described by the system design has not yet been produced for this profile."
+    },
+    {
+      "requirementId": "DOM-004",
+      "profileId": "compact-react-chromium-desktop",
+      "status": "unresolved",
+      "evidenceIds": [],
+      "rationale": "The complete acceptance evidence described by the system design has not yet been produced for this profile."
+    },
+    {
+      "requirementId": "DOM-005",
+      "profileId": "compact-react-chromium-desktop",
+      "status": "unresolved",
+      "evidenceIds": [],
+      "rationale": "The complete acceptance evidence described by the system design has not yet been produced for this profile."
+    },
+    {
+      "requirementId": "EXP-001",
+      "profileId": "compact-react-chromium-desktop",
+      "status": "unresolved",
+      "evidenceIds": [],
+      "rationale": "The complete acceptance evidence described by the system design has not yet been produced for this profile."
+    },
+    {
+      "requirementId": "EXP-002",
+      "profileId": "compact-react-chromium-desktop",
+      "status": "unresolved",
+      "evidenceIds": [],
+      "rationale": "The complete acceptance evidence described by the system design has not yet been produced for this profile."
+    },
+    {
+      "requirementId": "EXP-003",
+      "profileId": "compact-react-chromium-desktop",
+      "status": "unresolved",
+      "evidenceIds": [],
+      "rationale": "The complete acceptance evidence described by the system design has not yet been produced for this profile."
+    },
+    {
+      "requirementId": "EXP-004",
+      "profileId": "compact-react-chromium-desktop",
+      "status": "unresolved",
+      "evidenceIds": [],
+      "rationale": "The complete acceptance evidence described by the system design has not yet been produced for this profile."
+    },
+    {
+      "requirementId": "EXP-005",
+      "profileId": "compact-react-chromium-desktop",
+      "status": "unresolved",
+      "evidenceIds": [],
+      "rationale": "The complete acceptance evidence described by the system design has not yet been produced for this profile."
+    },
+    {
+      "requirementId": "EXT-001",
+      "profileId": "compact-react-chromium-desktop",
+      "status": "unresolved",
+      "evidenceIds": [
+        "ecosystem-primitives"
+      ],
+      "rationale": "The complete acceptance evidence described by the system design has not yet been produced for this profile."
+    },
+    {
+      "requirementId": "EXT-002",
+      "profileId": "compact-react-chromium-desktop",
+      "status": "unresolved",
+      "evidenceIds": [],
+      "rationale": "The complete acceptance evidence described by the system design has not yet been produced for this profile."
+    },
+    {
+      "requirementId": "EXT-003",
+      "profileId": "compact-react-chromium-desktop",
+      "status": "unresolved",
+      "evidenceIds": [
+        "ecosystem-primitives"
+      ],
+      "rationale": "The complete acceptance evidence described by the system design has not yet been produced for this profile."
+    },
+    {
+      "requirementId": "EXT-004",
+      "profileId": "compact-react-chromium-desktop",
+      "status": "unresolved",
+      "evidenceIds": [
+        "ecosystem-primitives"
+      ],
+      "rationale": "The complete acceptance evidence described by the system design has not yet been produced for this profile."
+    },
+    {
+      "requirementId": "EXT-005",
+      "profileId": "compact-react-chromium-desktop",
+      "status": "unresolved",
+      "evidenceIds": [],
+      "rationale": "The complete acceptance evidence described by the system design has not yet been produced for this profile."
+    },
+    {
+      "requirementId": "EXT-006",
+      "profileId": "compact-react-chromium-desktop",
+      "status": "unresolved",
+      "evidenceIds": [],
+      "rationale": "The complete acceptance evidence described by the system design has not yet been produced for this profile."
+    },
+    {
+      "requirementId": "FOC-001",
+      "profileId": "compact-react-chromium-desktop",
+      "status": "verified",
+      "evidenceIds": [
+        "react-integration"
+      ],
+      "rationale": "Covered by repository-local automated evidence for this experimental profile."
+    },
+    {
+      "requirementId": "FOC-002",
+      "profileId": "compact-react-chromium-desktop",
+      "status": "unresolved",
+      "evidenceIds": [],
+      "rationale": "The complete acceptance evidence described by the system design has not yet been produced for this profile."
+    },
+    {
+      "requirementId": "FOC-003",
+      "profileId": "compact-react-chromium-desktop",
+      "status": "verified",
+      "evidenceIds": [
+        "react-integration"
+      ],
+      "rationale": "Covered by repository-local automated evidence for this experimental profile."
+    },
+    {
+      "requirementId": "FOC-004",
+      "profileId": "compact-react-chromium-desktop",
+      "status": "verified",
+      "evidenceIds": [
+        "react-integration"
+      ],
+      "rationale": "Covered by repository-local automated evidence for this experimental profile."
+    },
+    {
+      "requirementId": "FOC-005",
+      "profileId": "compact-react-chromium-desktop",
+      "status": "unresolved",
+      "evidenceIds": [],
+      "rationale": "The complete acceptance evidence described by the system design has not yet been produced for this profile."
+    },
+    {
+      "requirementId": "FOC-006",
+      "profileId": "compact-react-chromium-desktop",
+      "status": "unresolved",
+      "evidenceIds": [],
+      "rationale": "The complete acceptance evidence described by the system design has not yet been produced for this profile."
+    },
+    {
+      "requirementId": "FWK-001",
+      "profileId": "compact-react-chromium-desktop",
+      "status": "unresolved",
+      "evidenceIds": [],
+      "rationale": "The complete acceptance evidence described by the system design has not yet been produced for this profile."
+    },
+    {
+      "requirementId": "FWK-002",
+      "profileId": "compact-react-chromium-desktop",
+      "status": "unresolved",
+      "evidenceIds": [],
+      "rationale": "The complete acceptance evidence described by the system design has not yet been produced for this profile."
+    },
+    {
+      "requirementId": "FWK-003",
+      "profileId": "compact-react-chromium-desktop",
+      "status": "unresolved",
+      "evidenceIds": [],
+      "rationale": "The complete acceptance evidence described by the system design has not yet been produced for this profile."
+    },
+    {
+      "requirementId": "FWK-004",
+      "profileId": "compact-react-chromium-desktop",
+      "status": "unresolved",
+      "evidenceIds": [],
+      "rationale": "The complete acceptance evidence described by the system design has not yet been produced for this profile."
+    },
+    {
+      "requirementId": "FWK-005",
+      "profileId": "compact-react-chromium-desktop",
+      "status": "unresolved",
+      "evidenceIds": [],
+      "rationale": "The complete acceptance evidence described by the system design has not yet been produced for this profile."
+    },
+    {
+      "requirementId": "FWK-006",
+      "profileId": "compact-react-chromium-desktop",
+      "status": "unresolved",
+      "evidenceIds": [],
+      "rationale": "The complete acceptance evidence described by the system design has not yet been produced for this profile."
+    },
+    {
+      "requirementId": "GOV-001",
+      "profileId": "compact-react-chromium-desktop",
+      "status": "unresolved",
+      "evidenceIds": [],
+      "rationale": "The complete acceptance evidence described by the system design has not yet been produced for this profile."
+    },
+    {
+      "requirementId": "GOV-002",
+      "profileId": "compact-react-chromium-desktop",
+      "status": "unresolved",
+      "evidenceIds": [],
+      "rationale": "The complete acceptance evidence described by the system design has not yet been produced for this profile."
+    },
+    {
+      "requirementId": "GOV-003",
+      "profileId": "compact-react-chromium-desktop",
+      "status": "not-applicable",
+      "evidenceIds": [],
+      "rationale": "The published profile is explicitly experimental; this stable-release requirement is not claimed."
+    },
+    {
+      "requirementId": "GOV-004",
+      "profileId": "compact-react-chromium-desktop",
+      "status": "unresolved",
+      "evidenceIds": [],
+      "rationale": "The complete acceptance evidence described by the system design has not yet been produced for this profile."
+    },
+    {
+      "requirementId": "GOV-005",
+      "profileId": "compact-react-chromium-desktop",
+      "status": "unresolved",
+      "evidenceIds": [],
+      "rationale": "The complete acceptance evidence described by the system design has not yet been produced for this profile."
+    },
+    {
+      "requirementId": "GOV-006",
+      "profileId": "compact-react-chromium-desktop",
+      "status": "unresolved",
+      "evidenceIds": [],
+      "rationale": "The complete acceptance evidence described by the system design has not yet been produced for this profile."
+    },
+    {
+      "requirementId": "I18N-001",
+      "profileId": "compact-react-chromium-desktop",
+      "status": "unresolved",
+      "evidenceIds": [],
+      "rationale": "The complete acceptance evidence described by the system design has not yet been produced for this profile."
+    },
+    {
+      "requirementId": "I18N-002",
+      "profileId": "compact-react-chromium-desktop",
+      "status": "unresolved",
+      "evidenceIds": [],
+      "rationale": "The complete acceptance evidence described by the system design has not yet been produced for this profile."
+    },
+    {
+      "requirementId": "I18N-003",
+      "profileId": "compact-react-chromium-desktop",
+      "status": "unresolved",
+      "evidenceIds": [],
+      "rationale": "The complete acceptance evidence described by the system design has not yet been produced for this profile."
+    },
+    {
+      "requirementId": "INT-001",
+      "profileId": "compact-react-chromium-desktop",
+      "status": "verified",
+      "evidenceIds": [
+        "motion-primitives"
+      ],
+      "rationale": "Covered by repository-local automated evidence for this experimental profile."
+    },
+    {
+      "requirementId": "INT-002",
+      "profileId": "compact-react-chromium-desktop",
+      "status": "unresolved",
+      "evidenceIds": [],
+      "rationale": "The complete acceptance evidence described by the system design has not yet been produced for this profile."
+    },
+    {
+      "requirementId": "INT-003",
+      "profileId": "compact-react-chromium-desktop",
+      "status": "verified",
+      "evidenceIds": [
+        "protocol-models"
+      ],
+      "rationale": "Covered by repository-local automated evidence for this experimental profile."
+    },
+    {
+      "requirementId": "INT-004",
+      "profileId": "compact-react-chromium-desktop",
+      "status": "unresolved",
+      "evidenceIds": [],
+      "rationale": "The complete acceptance evidence described by the system design has not yet been produced for this profile."
+    },
+    {
+      "requirementId": "INT-005",
+      "profileId": "compact-react-chromium-desktop",
+      "status": "unresolved",
+      "evidenceIds": [],
+      "rationale": "The complete acceptance evidence described by the system design has not yet been produced for this profile."
+    },
+    {
+      "requirementId": "INT-006",
+      "profileId": "compact-react-chromium-desktop",
+      "status": "unresolved",
+      "evidenceIds": [],
+      "rationale": "The complete acceptance evidence described by the system design has not yet been produced for this profile."
+    },
+    {
+      "requirementId": "INT-007",
+      "profileId": "compact-react-chromium-desktop",
+      "status": "unresolved",
+      "evidenceIds": [],
+      "rationale": "The complete acceptance evidence described by the system design has not yet been produced for this profile."
+    },
+    {
+      "requirementId": "LAY-001",
+      "profileId": "compact-react-chromium-desktop",
+      "status": "verified",
+      "evidenceIds": [
+        "kernel-laws"
+      ],
+      "rationale": "Covered by repository-local automated evidence for this experimental profile."
+    },
+    {
+      "requirementId": "LAY-002",
+      "profileId": "compact-react-chromium-desktop",
+      "status": "verified",
+      "evidenceIds": [
+        "geometry-solver"
+      ],
+      "rationale": "Covered by repository-local automated evidence for this experimental profile."
+    },
+    {
+      "requirementId": "LAY-003",
+      "profileId": "compact-react-chromium-desktop",
+      "status": "verified",
+      "evidenceIds": [
+        "geometry-solver"
+      ],
+      "rationale": "Covered by repository-local automated evidence for this experimental profile."
+    },
+    {
+      "requirementId": "LAY-004",
+      "profileId": "compact-react-chromium-desktop",
+      "status": "verified",
+      "evidenceIds": [
+        "geometry-solver"
+      ],
+      "rationale": "Covered by repository-local automated evidence for this experimental profile."
+    },
+    {
+      "requirementId": "LAY-005",
+      "profileId": "compact-react-chromium-desktop",
+      "status": "verified",
+      "evidenceIds": [
+        "geometry-solver"
+      ],
+      "rationale": "Covered by repository-local automated evidence for this experimental profile."
+    },
+    {
+      "requirementId": "LAY-006",
+      "profileId": "compact-react-chromium-desktop",
+      "status": "unresolved",
+      "evidenceIds": [],
+      "rationale": "The complete acceptance evidence described by the system design has not yet been produced for this profile."
+    },
+    {
+      "requirementId": "LAY-007",
+      "profileId": "compact-react-chromium-desktop",
+      "status": "verified",
+      "evidenceIds": [
+        "kernel-laws"
+      ],
+      "rationale": "Covered by repository-local automated evidence for this experimental profile."
+    },
+    {
+      "requirementId": "LIF-001",
+      "profileId": "compact-react-chromium-desktop",
+      "status": "verified",
+      "evidenceIds": [
+        "react-integration"
+      ],
+      "rationale": "Covered by repository-local automated evidence for this experimental profile."
+    },
+    {
+      "requirementId": "LIF-002",
+      "profileId": "compact-react-chromium-desktop",
+      "status": "unresolved",
+      "evidenceIds": [],
+      "rationale": "The complete acceptance evidence described by the system design has not yet been produced for this profile."
+    },
+    {
+      "requirementId": "LIF-003",
+      "profileId": "compact-react-chromium-desktop",
+      "status": "verified",
+      "evidenceIds": [
+        "react-integration"
+      ],
+      "rationale": "Covered by repository-local automated evidence for this experimental profile."
+    },
+    {
+      "requirementId": "LIF-004",
+      "profileId": "compact-react-chromium-desktop",
+      "status": "unresolved",
+      "evidenceIds": [],
+      "rationale": "The complete acceptance evidence described by the system design has not yet been produced for this profile."
+    },
+    {
+      "requirementId": "LIF-005",
+      "profileId": "compact-react-chromium-desktop",
+      "status": "verified",
+      "evidenceIds": [
+        "surface-ownership"
+      ],
+      "rationale": "Covered by repository-local automated evidence for this experimental profile."
+    },
+    {
+      "requirementId": "LIF-006",
+      "profileId": "compact-react-chromium-desktop",
+      "status": "verified",
+      "evidenceIds": [
+        "react-integration"
+      ],
+      "rationale": "Covered by repository-local automated evidence for this experimental profile."
+    },
+    {
+      "requirementId": "LIF-007",
+      "profileId": "compact-react-chromium-desktop",
+      "status": "unresolved",
+      "evidenceIds": [],
+      "rationale": "The complete acceptance evidence described by the system design has not yet been produced for this profile."
+    },
+    {
+      "requirementId": "MOD-001",
+      "profileId": "compact-react-chromium-desktop",
+      "status": "unresolved",
+      "evidenceIds": [],
+      "rationale": "The complete acceptance evidence described by the system design has not yet been produced for this profile."
+    },
+    {
+      "requirementId": "MOD-002",
+      "profileId": "compact-react-chromium-desktop",
+      "status": "unresolved",
+      "evidenceIds": [],
+      "rationale": "The complete acceptance evidence described by the system design has not yet been produced for this profile."
+    },
+    {
+      "requirementId": "MOD-003",
+      "profileId": "compact-react-chromium-desktop",
+      "status": "unresolved",
+      "evidenceIds": [],
+      "rationale": "The complete acceptance evidence described by the system design has not yet been produced for this profile."
+    },
+    {
+      "requirementId": "MOD-004",
+      "profileId": "compact-react-chromium-desktop",
+      "status": "unresolved",
+      "evidenceIds": [],
+      "rationale": "The complete acceptance evidence described by the system design has not yet been produced for this profile."
+    },
+    {
+      "requirementId": "MOD-005",
+      "profileId": "compact-react-chromium-desktop",
+      "status": "unresolved",
+      "evidenceIds": [],
+      "rationale": "The complete acceptance evidence described by the system design has not yet been produced for this profile."
+    },
+    {
+      "requirementId": "MOD-006",
+      "profileId": "compact-react-chromium-desktop",
+      "status": "unresolved",
+      "evidenceIds": [],
+      "rationale": "The complete acceptance evidence described by the system design has not yet been produced for this profile."
+    },
+    {
+      "requirementId": "MOT-001",
+      "profileId": "compact-react-chromium-desktop",
+      "status": "unresolved",
+      "evidenceIds": [],
+      "rationale": "The complete acceptance evidence described by the system design has not yet been produced for this profile."
+    },
+    {
+      "requirementId": "MOT-002",
+      "profileId": "compact-react-chromium-desktop",
+      "status": "verified",
+      "evidenceIds": [
+        "react-integration"
+      ],
+      "rationale": "Covered by repository-local automated evidence for this experimental profile."
+    },
+    {
+      "requirementId": "MOT-003",
+      "profileId": "compact-react-chromium-desktop",
+      "status": "verified",
+      "evidenceIds": [
+        "motion-primitives"
+      ],
+      "rationale": "Covered by repository-local automated evidence for this experimental profile."
+    },
+    {
+      "requirementId": "MOT-004",
+      "profileId": "compact-react-chromium-desktop",
+      "status": "verified",
+      "evidenceIds": [
+        "motion-primitives"
+      ],
+      "rationale": "Covered by repository-local automated evidence for this experimental profile."
+    },
+    {
+      "requirementId": "MOT-005",
+      "profileId": "compact-react-chromium-desktop",
+      "status": "unresolved",
+      "evidenceIds": [],
+      "rationale": "The complete acceptance evidence described by the system design has not yet been produced for this profile."
+    },
+    {
+      "requirementId": "MOT-006",
+      "profileId": "compact-react-chromium-desktop",
+      "status": "unresolved",
+      "evidenceIds": [],
+      "rationale": "The complete acceptance evidence described by the system design has not yet been produced for this profile."
+    },
+    {
+      "requirementId": "MOT-007",
+      "profileId": "compact-react-chromium-desktop",
+      "status": "unresolved",
+      "evidenceIds": [],
+      "rationale": "The complete acceptance evidence described by the system design has not yet been produced for this profile."
+    },
+    {
+      "requirementId": "MOT-008",
+      "profileId": "compact-react-chromium-desktop",
+      "status": "unresolved",
+      "evidenceIds": [],
+      "rationale": "The complete acceptance evidence described by the system design has not yet been produced for this profile."
+    },
+    {
+      "requirementId": "MOT-009",
+      "profileId": "compact-react-chromium-desktop",
+      "status": "verified",
+      "evidenceIds": [
+        "motion-primitives"
+      ],
+      "rationale": "Covered by repository-local automated evidence for this experimental profile."
+    },
+    {
+      "requirementId": "MOT-010",
+      "profileId": "compact-react-chromium-desktop",
+      "status": "unresolved",
+      "evidenceIds": [],
+      "rationale": "The complete acceptance evidence described by the system design has not yet been produced for this profile."
+    },
+    {
+      "requirementId": "OBS-001",
+      "profileId": "compact-react-chromium-desktop",
+      "status": "unresolved",
+      "evidenceIds": [],
+      "rationale": "The complete acceptance evidence described by the system design has not yet been produced for this profile."
+    },
+    {
+      "requirementId": "OBS-002",
+      "profileId": "compact-react-chromium-desktop",
+      "status": "verified",
+      "evidenceIds": [
+        "runtime-notification",
+        "ecosystem-primitives"
+      ],
+      "rationale": "Covered by repository-local automated evidence for this experimental profile."
+    },
+    {
+      "requirementId": "OBS-003",
+      "profileId": "compact-react-chromium-desktop",
+      "status": "unresolved",
+      "evidenceIds": [
+        "ecosystem-primitives"
+      ],
+      "rationale": "The complete acceptance evidence described by the system design has not yet been produced for this profile."
+    },
+    {
+      "requirementId": "OBS-004",
+      "profileId": "compact-react-chromium-desktop",
+      "status": "unresolved",
+      "evidenceIds": [],
+      "rationale": "The complete acceptance evidence described by the system design has not yet been produced for this profile."
+    },
+    {
+      "requirementId": "OBS-005",
+      "profileId": "compact-react-chromium-desktop",
+      "status": "unresolved",
+      "evidenceIds": [],
+      "rationale": "The complete acceptance evidence described by the system design has not yet been produced for this profile."
+    },
+    {
+      "requirementId": "OBS-006",
+      "profileId": "compact-react-chromium-desktop",
+      "status": "verified",
+      "evidenceIds": [
+        "conformance-harness"
+      ],
+      "rationale": "Covered by repository-local automated evidence for this experimental profile."
+    },
+    {
+      "requirementId": "PER-001",
+      "profileId": "compact-react-chromium-desktop",
+      "status": "verified",
+      "evidenceIds": [
+        "persistence-recovery"
+      ],
+      "rationale": "Covered by repository-local automated evidence for this experimental profile."
+    },
+    {
+      "requirementId": "PER-002",
+      "profileId": "compact-react-chromium-desktop",
+      "status": "verified",
+      "evidenceIds": [
+        "persistence-recovery"
+      ],
+      "rationale": "Covered by repository-local automated evidence for this experimental profile."
+    },
+    {
+      "requirementId": "PER-003",
+      "profileId": "compact-react-chromium-desktop",
+      "status": "verified",
+      "evidenceIds": [
+        "persistence-recovery",
+        "indexeddb-effect"
+      ],
+      "rationale": "Covered by repository-local automated evidence for this experimental profile."
+    },
+    {
+      "requirementId": "PER-004",
+      "profileId": "compact-react-chromium-desktop",
+      "status": "verified",
+      "evidenceIds": [
+        "persistence-recovery"
+      ],
+      "rationale": "Covered by repository-local automated evidence for this experimental profile."
+    },
+    {
+      "requirementId": "PER-005",
+      "profileId": "compact-react-chromium-desktop",
+      "status": "unresolved",
+      "evidenceIds": [],
+      "rationale": "The complete acceptance evidence described by the system design has not yet been produced for this profile."
+    },
+    {
+      "requirementId": "PER-006",
+      "profileId": "compact-react-chromium-desktop",
+      "status": "unresolved",
+      "evidenceIds": [],
+      "rationale": "The complete acceptance evidence described by the system design has not yet been produced for this profile."
+    },
+    {
+      "requirementId": "PER-007",
+      "profileId": "compact-react-chromium-desktop",
+      "status": "unresolved",
+      "evidenceIds": [],
+      "rationale": "The complete acceptance evidence described by the system design has not yet been produced for this profile."
+    },
+    {
+      "requirementId": "PER-008",
+      "profileId": "compact-react-chromium-desktop",
+      "status": "verified",
+      "evidenceIds": [
+        "patch-replay-oracle",
+        "persistence-recovery"
+      ],
+      "rationale": "Covered by repository-local automated evidence for this experimental profile."
+    },
+    {
+      "requirementId": "PKG-001",
+      "profileId": "compact-react-chromium-desktop",
+      "status": "unresolved",
+      "evidenceIds": [],
+      "rationale": "The complete acceptance evidence described by the system design has not yet been produced for this profile."
+    },
+    {
+      "requirementId": "PKG-002",
+      "profileId": "compact-react-chromium-desktop",
+      "status": "unresolved",
+      "evidenceIds": [],
+      "rationale": "The complete acceptance evidence described by the system design has not yet been produced for this profile."
+    },
+    {
+      "requirementId": "PKG-003",
+      "profileId": "compact-react-chromium-desktop",
+      "status": "unresolved",
+      "evidenceIds": [],
+      "rationale": "The complete acceptance evidence described by the system design has not yet been produced for this profile."
+    },
+    {
+      "requirementId": "PKG-004",
+      "profileId": "compact-react-chromium-desktop",
+      "status": "unresolved",
+      "evidenceIds": [],
+      "rationale": "The complete acceptance evidence described by the system design has not yet been produced for this profile."
+    },
+    {
+      "requirementId": "PKG-005",
+      "profileId": "compact-react-chromium-desktop",
+      "status": "unresolved",
+      "evidenceIds": [],
+      "rationale": "The complete acceptance evidence described by the system design has not yet been produced for this profile."
+    },
+    {
+      "requirementId": "PRF-001",
+      "profileId": "compact-react-chromium-desktop",
+      "status": "unresolved",
+      "evidenceIds": [],
+      "rationale": "The complete acceptance evidence described by the system design has not yet been produced for this profile."
+    },
+    {
+      "requirementId": "PRF-002",
+      "profileId": "compact-react-chromium-desktop",
+      "status": "unresolved",
+      "evidenceIds": [],
+      "rationale": "The complete acceptance evidence described by the system design has not yet been produced for this profile."
+    },
+    {
+      "requirementId": "PRF-003",
+      "profileId": "compact-react-chromium-desktop",
+      "status": "unresolved",
+      "evidenceIds": [],
+      "rationale": "The complete acceptance evidence described by the system design has not yet been produced for this profile."
+    },
+    {
+      "requirementId": "PRF-004",
+      "profileId": "compact-react-chromium-desktop",
+      "status": "unresolved",
+      "evidenceIds": [],
+      "rationale": "The complete acceptance evidence described by the system design has not yet been produced for this profile."
+    },
+    {
+      "requirementId": "PRF-005",
+      "profileId": "compact-react-chromium-desktop",
+      "status": "unresolved",
+      "evidenceIds": [],
+      "rationale": "The complete acceptance evidence described by the system design has not yet been produced for this profile."
+    },
+    {
+      "requirementId": "PRF-006",
+      "profileId": "compact-react-chromium-desktop",
+      "status": "unresolved",
+      "evidenceIds": [],
+      "rationale": "The complete acceptance evidence described by the system design has not yet been produced for this profile."
+    },
+    {
+      "requirementId": "PRF-007",
+      "profileId": "compact-react-chromium-desktop",
+      "status": "unresolved",
+      "evidenceIds": [],
+      "rationale": "The complete acceptance evidence described by the system design has not yet been produced for this profile."
+    },
+    {
+      "requirementId": "QLT-001",
+      "profileId": "compact-react-chromium-desktop",
+      "status": "unresolved",
+      "evidenceIds": [
+        "conformance-harness"
+      ],
+      "rationale": "The complete acceptance evidence described by the system design has not yet been produced for this profile."
+    },
+    {
+      "requirementId": "QLT-002",
+      "profileId": "compact-react-chromium-desktop",
+      "status": "unresolved",
+      "evidenceIds": [
+        "conformance-harness"
+      ],
+      "rationale": "The complete acceptance evidence described by the system design has not yet been produced for this profile."
+    },
+    {
+      "requirementId": "QLT-003",
+      "profileId": "compact-react-chromium-desktop",
+      "status": "unresolved",
+      "evidenceIds": [
+        "performance-smoke",
+        "physical-performance-certification"
+      ],
+      "rationale": "The complete acceptance evidence described by the system design has not yet been produced for this profile."
+    },
+    {
+      "requirementId": "QLT-004",
+      "profileId": "compact-react-chromium-desktop",
+      "status": "not-applicable",
+      "evidenceIds": [
+        "conformance-harness"
+      ],
+      "rationale": "The published profile is explicitly experimental; this stable-release requirement is not claimed."
+    },
+    {
+      "requirementId": "QLT-005",
+      "profileId": "compact-react-chromium-desktop",
+      "status": "unresolved",
+      "evidenceIds": [],
+      "rationale": "The complete acceptance evidence described by the system design has not yet been produced for this profile."
+    },
+    {
+      "requirementId": "REN-001",
+      "profileId": "compact-react-chromium-desktop",
+      "status": "verified",
+      "evidenceIds": [
+        "react-integration"
+      ],
+      "rationale": "Covered by repository-local automated evidence for this experimental profile."
+    },
+    {
+      "requirementId": "REN-002",
+      "profileId": "compact-react-chromium-desktop",
+      "status": "verified",
+      "evidenceIds": [
+        "react-integration"
+      ],
+      "rationale": "Covered by repository-local automated evidence for this experimental profile."
+    },
+    {
+      "requirementId": "REN-003",
+      "profileId": "compact-react-chromium-desktop",
+      "status": "unresolved",
+      "evidenceIds": [],
+      "rationale": "The complete acceptance evidence described by the system design has not yet been produced for this profile."
+    },
+    {
+      "requirementId": "REN-004",
+      "profileId": "compact-react-chromium-desktop",
+      "status": "unresolved",
+      "evidenceIds": [],
+      "rationale": "The complete acceptance evidence described by the system design has not yet been produced for this profile."
+    },
+    {
+      "requirementId": "REN-005",
+      "profileId": "compact-react-chromium-desktop",
+      "status": "verified",
+      "evidenceIds": [
+        "react-integration"
+      ],
+      "rationale": "Covered by repository-local automated evidence for this experimental profile."
+    },
+    {
+      "requirementId": "REN-006",
+      "profileId": "compact-react-chromium-desktop",
+      "status": "unresolved",
+      "evidenceIds": [],
+      "rationale": "The complete acceptance evidence described by the system design has not yet been produced for this profile."
+    },
+    {
+      "requirementId": "RSK-001",
+      "profileId": "compact-react-chromium-desktop",
+      "status": "unresolved",
+      "evidenceIds": [],
+      "rationale": "The complete acceptance evidence described by the system design has not yet been produced for this profile."
+    },
+    {
+      "requirementId": "RSK-002",
+      "profileId": "compact-react-chromium-desktop",
+      "status": "unresolved",
+      "evidenceIds": [],
+      "rationale": "The complete acceptance evidence described by the system design has not yet been produced for this profile."
+    },
+    {
+      "requirementId": "RSK-003",
+      "profileId": "compact-react-chromium-desktop",
+      "status": "unresolved",
+      "evidenceIds": [],
+      "rationale": "The complete acceptance evidence described by the system design has not yet been produced for this profile."
+    },
+    {
+      "requirementId": "RSK-004",
+      "profileId": "compact-react-chromium-desktop",
+      "status": "unresolved",
+      "evidenceIds": [],
+      "rationale": "The complete acceptance evidence described by the system design has not yet been produced for this profile."
+    },
+    {
+      "requirementId": "RSP-001",
+      "profileId": "compact-react-chromium-desktop",
+      "status": "unresolved",
+      "evidenceIds": [],
+      "rationale": "The complete acceptance evidence described by the system design has not yet been produced for this profile."
+    },
+    {
+      "requirementId": "RSP-002",
+      "profileId": "compact-react-chromium-desktop",
+      "status": "unresolved",
+      "evidenceIds": [],
+      "rationale": "The complete acceptance evidence described by the system design has not yet been produced for this profile."
+    },
+    {
+      "requirementId": "SCP-001",
+      "profileId": "compact-react-chromium-desktop",
+      "status": "unresolved",
+      "evidenceIds": [],
+      "rationale": "The complete acceptance evidence described by the system design has not yet been produced for this profile."
+    },
+    {
+      "requirementId": "SCP-002",
+      "profileId": "compact-react-chromium-desktop",
+      "status": "unresolved",
+      "evidenceIds": [],
+      "rationale": "The complete acceptance evidence described by the system design has not yet been produced for this profile."
+    },
+    {
+      "requirementId": "SCP-003",
+      "profileId": "compact-react-chromium-desktop",
+      "status": "unresolved",
+      "evidenceIds": [],
+      "rationale": "The complete acceptance evidence described by the system design has not yet been produced for this profile."
+    },
+    {
+      "requirementId": "SCP-004",
+      "profileId": "compact-react-chromium-desktop",
+      "status": "unresolved",
+      "evidenceIds": [],
+      "rationale": "The complete acceptance evidence described by the system design has not yet been produced for this profile."
+    },
+    {
+      "requirementId": "SEC-001",
+      "profileId": "compact-react-chromium-desktop",
+      "status": "unresolved",
+      "evidenceIds": [
+        "persistence-recovery"
+      ],
+      "rationale": "The complete acceptance evidence described by the system design has not yet been produced for this profile."
+    },
+    {
+      "requirementId": "SEC-002",
+      "profileId": "compact-react-chromium-desktop",
+      "status": "unresolved",
+      "evidenceIds": [
+        "independent-security-review"
+      ],
+      "rationale": "The complete acceptance evidence described by the system design has not yet been produced for this profile."
+    },
+    {
+      "requirementId": "SEC-003",
+      "profileId": "compact-react-chromium-desktop",
+      "status": "not-applicable",
+      "evidenceIds": [
+        "security-source-check",
+        "independent-security-review"
+      ],
+      "rationale": "The published profile is explicitly experimental; this stable-release requirement is not claimed."
+    },
+    {
+      "requirementId": "SEC-004",
+      "profileId": "compact-react-chromium-desktop",
+      "status": "unresolved",
+      "evidenceIds": [],
+      "rationale": "The complete acceptance evidence described by the system design has not yet been produced for this profile."
+    },
+    {
+      "requirementId": "SEC-005",
+      "profileId": "compact-react-chromium-desktop",
+      "status": "unresolved",
+      "evidenceIds": [],
+      "rationale": "The complete acceptance evidence described by the system design has not yet been produced for this profile."
+    },
+    {
+      "requirementId": "SEC-006",
+      "profileId": "compact-react-chromium-desktop",
+      "status": "unresolved",
+      "evidenceIds": [],
+      "rationale": "The complete acceptance evidence described by the system design has not yet been produced for this profile."
+    },
+    {
+      "requirementId": "SEC-007",
+      "profileId": "compact-react-chromium-desktop",
+      "status": "not-applicable",
+      "evidenceIds": [
+        "independent-security-review"
+      ],
+      "rationale": "The published profile is explicitly experimental; this stable-release requirement is not claimed."
+    },
+    {
+      "requirementId": "SEC-008",
+      "profileId": "compact-react-chromium-desktop",
+      "status": "unresolved",
+      "evidenceIds": [
+        "security-source-check"
+      ],
+      "rationale": "The complete acceptance evidence described by the system design has not yet been produced for this profile."
+    },
+    {
+      "requirementId": "SUR-001",
+      "profileId": "compact-react-chromium-desktop",
+      "status": "verified",
+      "evidenceIds": [
+        "surface-ownership"
+      ],
+      "rationale": "Covered by repository-local automated evidence for this experimental profile."
+    },
+    {
+      "requirementId": "SUR-002",
+      "profileId": "compact-react-chromium-desktop",
+      "status": "unresolved",
+      "evidenceIds": [],
+      "rationale": "The complete acceptance evidence described by the system design has not yet been produced for this profile."
+    },
+    {
+      "requirementId": "SUR-003",
+      "profileId": "compact-react-chromium-desktop",
+      "status": "unresolved",
+      "evidenceIds": [
+        "surface-ownership"
+      ],
+      "rationale": "The complete acceptance evidence described by the system design has not yet been produced for this profile."
+    },
+    {
+      "requirementId": "SUR-004",
+      "profileId": "compact-react-chromium-desktop",
+      "status": "unresolved",
+      "evidenceIds": [],
+      "rationale": "The complete acceptance evidence described by the system design has not yet been produced for this profile."
+    },
+    {
+      "requirementId": "SUR-005",
+      "profileId": "compact-react-chromium-desktop",
+      "status": "verified",
+      "evidenceIds": [
+        "surface-ownership"
+      ],
+      "rationale": "Covered by repository-local automated evidence for this experimental profile."
+    },
+    {
+      "requirementId": "SUR-006",
+      "profileId": "compact-react-chromium-desktop",
+      "status": "unresolved",
+      "evidenceIds": [],
+      "rationale": "The complete acceptance evidence described by the system design has not yet been produced for this profile."
+    },
+    {
+      "requirementId": "SUR-007",
+      "profileId": "compact-react-chromium-desktop",
+      "status": "verified",
+      "evidenceIds": [
+        "surface-ownership"
+      ],
+      "rationale": "Covered by repository-local automated evidence for this experimental profile."
+    },
+    {
+      "requirementId": "SYS-001",
+      "profileId": "compact-react-chromium-desktop",
+      "status": "unresolved",
+      "evidenceIds": [],
+      "rationale": "The complete acceptance evidence described by the system design has not yet been produced for this profile."
+    },
+    {
+      "requirementId": "SYS-002",
+      "profileId": "compact-react-chromium-desktop",
+      "status": "unresolved",
+      "evidenceIds": [],
+      "rationale": "The complete acceptance evidence described by the system design has not yet been produced for this profile."
+    },
+    {
+      "requirementId": "SYS-003",
+      "profileId": "compact-react-chromium-desktop",
+      "status": "unresolved",
+      "evidenceIds": [],
+      "rationale": "The complete acceptance evidence described by the system design has not yet been produced for this profile."
+    },
+    {
+      "requirementId": "SYS-004",
+      "profileId": "compact-react-chromium-desktop",
+      "status": "unresolved",
+      "evidenceIds": [],
+      "rationale": "The complete acceptance evidence described by the system design has not yet been produced for this profile."
+    },
+    {
+      "requirementId": "SYS-005",
+      "profileId": "compact-react-chromium-desktop",
+      "status": "unresolved",
+      "evidenceIds": [],
+      "rationale": "The complete acceptance evidence described by the system design has not yet been produced for this profile."
+    },
+    {
+      "requirementId": "THM-001",
+      "profileId": "compact-react-chromium-desktop",
+      "status": "unresolved",
+      "evidenceIds": [],
+      "rationale": "The complete acceptance evidence described by the system design has not yet been produced for this profile."
+    },
+    {
+      "requirementId": "THM-002",
+      "profileId": "compact-react-chromium-desktop",
+      "status": "unresolved",
+      "evidenceIds": [],
+      "rationale": "The complete acceptance evidence described by the system design has not yet been produced for this profile."
+    },
+    {
+      "requirementId": "TST-001",
+      "profileId": "compact-react-chromium-desktop",
+      "status": "not-applicable",
+      "evidenceIds": [
+        "bounded-exploration"
+      ],
+      "rationale": "The published profile is explicitly experimental; this stable-release requirement is not claimed."
+    },
+    {
+      "requirementId": "TST-002",
+      "profileId": "compact-react-chromium-desktop",
+      "status": "unresolved",
+      "evidenceIds": [
+        "bounded-exploration",
+        "patch-replay-oracle"
+      ],
+      "rationale": "The complete acceptance evidence described by the system design has not yet been produced for this profile."
+    },
+    {
+      "requirementId": "TST-003",
+      "profileId": "compact-react-chromium-desktop",
+      "status": "unresolved",
+      "evidenceIds": [
+        "protocol-models"
+      ],
+      "rationale": "The complete acceptance evidence described by the system design has not yet been produced for this profile."
+    },
+    {
+      "requirementId": "TST-004",
+      "profileId": "compact-react-chromium-desktop",
+      "status": "unresolved",
+      "evidenceIds": [
+        "surface-ownership"
+      ],
+      "rationale": "The complete acceptance evidence described by the system design has not yet been produced for this profile."
+    },
+    {
+      "requirementId": "TST-005",
+      "profileId": "compact-react-chromium-desktop",
+      "status": "unresolved",
+      "evidenceIds": [],
+      "rationale": "The complete acceptance evidence described by the system design has not yet been produced for this profile."
+    },
+    {
+      "requirementId": "TST-006",
+      "profileId": "compact-react-chromium-desktop",
+      "status": "unresolved",
+      "evidenceIds": [
+        "performance-smoke",
+        "physical-performance-certification"
+      ],
+      "rationale": "The complete acceptance evidence described by the system design has not yet been produced for this profile."
+    },
+    {
+      "requirementId": "TST-007",
+      "profileId": "compact-react-chromium-desktop",
+      "status": "not-applicable",
+      "evidenceIds": [
+        "manual-accessibility-certification"
+      ],
+      "rationale": "The published profile is explicitly experimental; this stable-release requirement is not claimed."
+    },
+    {
+      "requirementId": "TST-008",
+      "profileId": "compact-react-chromium-desktop",
+      "status": "unresolved",
+      "evidenceIds": [],
+      "rationale": "The complete acceptance evidence described by the system design has not yet been produced for this profile."
+    },
+    {
+      "requirementId": "TST-009",
+      "profileId": "compact-react-chromium-desktop",
+      "status": "unresolved",
+      "evidenceIds": [
+        "surface-ownership"
+      ],
+      "rationale": "The complete acceptance evidence described by the system design has not yet been produced for this profile."
+    },
+    {
+      "requirementId": "TXN-001",
+      "profileId": "compact-react-chromium-desktop",
+      "status": "verified",
+      "evidenceIds": [
+        "kernel-laws"
+      ],
+      "rationale": "Covered by repository-local automated evidence for this experimental profile."
+    },
+    {
+      "requirementId": "TXN-002",
+      "profileId": "compact-react-chromium-desktop",
+      "status": "unresolved",
+      "evidenceIds": [],
+      "rationale": "The complete acceptance evidence described by the system design has not yet been produced for this profile."
+    },
+    {
+      "requirementId": "TXN-003",
+      "profileId": "compact-react-chromium-desktop",
+      "status": "verified",
+      "evidenceIds": [
+        "kernel-laws"
+      ],
+      "rationale": "Covered by repository-local automated evidence for this experimental profile."
+    },
+    {
+      "requirementId": "TXN-004",
+      "profileId": "compact-react-chromium-desktop",
+      "status": "verified",
+      "evidenceIds": [
+        "kernel-laws"
+      ],
+      "rationale": "Covered by repository-local automated evidence for this experimental profile."
+    },
+    {
+      "requirementId": "TXN-005",
+      "profileId": "compact-react-chromium-desktop",
+      "status": "verified",
+      "evidenceIds": [
+        "kernel-laws"
+      ],
+      "rationale": "Covered by repository-local automated evidence for this experimental profile."
+    },
+    {
+      "requirementId": "TXN-006",
+      "profileId": "compact-react-chromium-desktop",
+      "status": "unresolved",
+      "evidenceIds": [],
+      "rationale": "The complete acceptance evidence described by the system design has not yet been produced for this profile."
+    },
+    {
+      "requirementId": "TXN-007",
+      "profileId": "compact-react-chromium-desktop",
+      "status": "unresolved",
+      "evidenceIds": [],
+      "rationale": "The complete acceptance evidence described by the system design has not yet been produced for this profile."
+    },
+    {
+      "requirementId": "TXN-008",
+      "profileId": "compact-react-chromium-desktop",
+      "status": "unresolved",
+      "evidenceIds": [],
+      "rationale": "The complete acceptance evidence described by the system design has not yet been produced for this profile."
+    },
+    {
+      "requirementId": "A11Y-001",
+      "profileId": "framework-adapter-contract-jsdom",
+      "status": "not-applicable",
+      "evidenceIds": [],
+      "rationale": "The published profile is explicitly experimental; this stable-release requirement is not claimed."
+    },
+    {
+      "requirementId": "A11Y-002",
+      "profileId": "framework-adapter-contract-jsdom",
+      "status": "not-applicable",
+      "evidenceIds": [],
+      "rationale": "The framework store/lifecycle contract profile does not publish rendering, interaction, surface, or persistence support."
+    },
+    {
+      "requirementId": "A11Y-003",
+      "profileId": "framework-adapter-contract-jsdom",
+      "status": "not-applicable",
+      "evidenceIds": [],
+      "rationale": "The framework store/lifecycle contract profile does not publish rendering, interaction, surface, or persistence support."
+    },
+    {
+      "requirementId": "A11Y-004",
+      "profileId": "framework-adapter-contract-jsdom",
+      "status": "not-applicable",
+      "evidenceIds": [],
+      "rationale": "The framework store/lifecycle contract profile does not publish rendering, interaction, surface, or persistence support."
+    },
+    {
+      "requirementId": "A11Y-005",
+      "profileId": "framework-adapter-contract-jsdom",
+      "status": "not-applicable",
+      "evidenceIds": [],
+      "rationale": "The framework store/lifecycle contract profile does not publish rendering, interaction, surface, or persistence support."
+    },
+    {
+      "requirementId": "A11Y-006",
+      "profileId": "framework-adapter-contract-jsdom",
+      "status": "not-applicable",
+      "evidenceIds": [],
+      "rationale": "The framework store/lifecycle contract profile does not publish rendering, interaction, surface, or persistence support."
+    },
+    {
+      "requirementId": "A11Y-007",
+      "profileId": "framework-adapter-contract-jsdom",
+      "status": "not-applicable",
+      "evidenceIds": [],
+      "rationale": "The framework store/lifecycle contract profile does not publish rendering, interaction, surface, or persistence support."
+    },
+    {
+      "requirementId": "A11Y-008",
+      "profileId": "framework-adapter-contract-jsdom",
+      "status": "not-applicable",
+      "evidenceIds": [],
+      "rationale": "The framework store/lifecycle contract profile does not publish rendering, interaction, surface, or persistence support."
+    },
+    {
+      "requirementId": "ACC-001",
+      "profileId": "framework-adapter-contract-jsdom",
+      "status": "not-applicable",
+      "evidenceIds": [
+        "conformance-harness"
+      ],
+      "rationale": "The published profile is explicitly experimental; this stable-release requirement is not claimed."
+    },
+    {
+      "requirementId": "ACC-002",
+      "profileId": "framework-adapter-contract-jsdom",
+      "status": "unresolved",
+      "evidenceIds": [],
+      "rationale": "The complete acceptance evidence described by the system design has not yet been produced for this profile."
+    },
+    {
+      "requirementId": "ACC-003",
+      "profileId": "framework-adapter-contract-jsdom",
+      "status": "unresolved",
+      "evidenceIds": [],
+      "rationale": "The complete acceptance evidence described by the system design has not yet been produced for this profile."
+    },
+    {
+      "requirementId": "API-001",
+      "profileId": "framework-adapter-contract-jsdom",
+      "status": "unresolved",
+      "evidenceIds": [],
+      "rationale": "The complete acceptance evidence described by the system design has not yet been produced for this profile."
+    },
+    {
+      "requirementId": "API-002",
+      "profileId": "framework-adapter-contract-jsdom",
+      "status": "unresolved",
+      "evidenceIds": [],
+      "rationale": "The complete acceptance evidence described by the system design has not yet been produced for this profile."
+    },
+    {
+      "requirementId": "API-003",
+      "profileId": "framework-adapter-contract-jsdom",
+      "status": "unresolved",
+      "evidenceIds": [],
+      "rationale": "The complete acceptance evidence described by the system design has not yet been produced for this profile."
+    },
+    {
+      "requirementId": "API-004",
+      "profileId": "framework-adapter-contract-jsdom",
+      "status": "unresolved",
+      "evidenceIds": [],
+      "rationale": "The complete acceptance evidence described by the system design has not yet been produced for this profile."
+    },
+    {
+      "requirementId": "API-005",
+      "profileId": "framework-adapter-contract-jsdom",
+      "status": "unresolved",
+      "evidenceIds": [],
+      "rationale": "The complete acceptance evidence described by the system design has not yet been produced for this profile."
+    },
+    {
+      "requirementId": "API-006",
+      "profileId": "framework-adapter-contract-jsdom",
+      "status": "unresolved",
+      "evidenceIds": [],
+      "rationale": "The complete acceptance evidence described by the system design has not yet been produced for this profile."
+    },
+    {
+      "requirementId": "API-007",
+      "profileId": "framework-adapter-contract-jsdom",
+      "status": "unresolved",
+      "evidenceIds": [],
+      "rationale": "The complete acceptance evidence described by the system design has not yet been produced for this profile."
+    },
+    {
+      "requirementId": "API-008",
+      "profileId": "framework-adapter-contract-jsdom",
+      "status": "unresolved",
+      "evidenceIds": [],
+      "rationale": "The complete acceptance evidence described by the system design has not yet been produced for this profile."
+    },
+    {
+      "requirementId": "ARC-001",
+      "profileId": "framework-adapter-contract-jsdom",
+      "status": "unresolved",
+      "evidenceIds": [],
+      "rationale": "The complete acceptance evidence described by the system design has not yet been produced for this profile."
+    },
+    {
+      "requirementId": "ARC-002",
+      "profileId": "framework-adapter-contract-jsdom",
+      "status": "unresolved",
+      "evidenceIds": [],
+      "rationale": "The complete acceptance evidence described by the system design has not yet been produced for this profile."
+    },
+    {
+      "requirementId": "ARC-003",
+      "profileId": "framework-adapter-contract-jsdom",
+      "status": "unresolved",
+      "evidenceIds": [],
+      "rationale": "The complete acceptance evidence described by the system design has not yet been produced for this profile."
+    },
+    {
+      "requirementId": "ARC-004",
+      "profileId": "framework-adapter-contract-jsdom",
+      "status": "unresolved",
+      "evidenceIds": [],
+      "rationale": "The complete acceptance evidence described by the system design has not yet been produced for this profile."
+    },
+    {
+      "requirementId": "ARC-005",
+      "profileId": "framework-adapter-contract-jsdom",
+      "status": "unresolved",
+      "evidenceIds": [],
+      "rationale": "The complete acceptance evidence described by the system design has not yet been produced for this profile."
+    },
+    {
+      "requirementId": "COL-001",
+      "profileId": "framework-adapter-contract-jsdom",
+      "status": "not-applicable",
+      "evidenceIds": [],
+      "rationale": "The framework store/lifecycle contract profile does not publish rendering, interaction, surface, or persistence support."
+    },
+    {
+      "requirementId": "COL-002",
+      "profileId": "framework-adapter-contract-jsdom",
+      "status": "not-applicable",
+      "evidenceIds": [],
+      "rationale": "The framework store/lifecycle contract profile does not publish rendering, interaction, surface, or persistence support."
+    },
+    {
+      "requirementId": "COL-003",
+      "profileId": "framework-adapter-contract-jsdom",
+      "status": "not-applicable",
+      "evidenceIds": [],
+      "rationale": "The framework store/lifecycle contract profile does not publish rendering, interaction, surface, or persistence support."
+    },
+    {
+      "requirementId": "COL-004",
+      "profileId": "framework-adapter-contract-jsdom",
+      "status": "not-applicable",
+      "evidenceIds": [],
+      "rationale": "The framework store/lifecycle contract profile does not publish rendering, interaction, surface, or persistence support."
+    },
+    {
+      "requirementId": "COL-005",
+      "profileId": "framework-adapter-contract-jsdom",
+      "status": "not-applicable",
+      "evidenceIds": [],
+      "rationale": "The framework store/lifecycle contract profile does not publish rendering, interaction, surface, or persistence support."
+    },
+    {
+      "requirementId": "COL-006",
+      "profileId": "framework-adapter-contract-jsdom",
+      "status": "not-applicable",
+      "evidenceIds": [],
+      "rationale": "The framework store/lifecycle contract profile does not publish rendering, interaction, surface, or persistence support."
+    },
+    {
+      "requirementId": "DOM-001",
+      "profileId": "framework-adapter-contract-jsdom",
+      "status": "not-applicable",
+      "evidenceIds": [],
+      "rationale": "The framework store/lifecycle contract profile does not publish rendering, interaction, surface, or persistence support."
+    },
+    {
+      "requirementId": "DOM-002",
+      "profileId": "framework-adapter-contract-jsdom",
+      "status": "not-applicable",
+      "evidenceIds": [],
+      "rationale": "The framework store/lifecycle contract profile does not publish rendering, interaction, surface, or persistence support."
+    },
+    {
+      "requirementId": "DOM-003",
+      "profileId": "framework-adapter-contract-jsdom",
+      "status": "not-applicable",
+      "evidenceIds": [],
+      "rationale": "The framework store/lifecycle contract profile does not publish rendering, interaction, surface, or persistence support."
+    },
+    {
+      "requirementId": "DOM-004",
+      "profileId": "framework-adapter-contract-jsdom",
+      "status": "not-applicable",
+      "evidenceIds": [],
+      "rationale": "The framework store/lifecycle contract profile does not publish rendering, interaction, surface, or persistence support."
+    },
+    {
+      "requirementId": "DOM-005",
+      "profileId": "framework-adapter-contract-jsdom",
+      "status": "not-applicable",
+      "evidenceIds": [],
+      "rationale": "The framework store/lifecycle contract profile does not publish rendering, interaction, surface, or persistence support."
+    },
+    {
+      "requirementId": "EXP-001",
+      "profileId": "framework-adapter-contract-jsdom",
+      "status": "not-applicable",
+      "evidenceIds": [],
+      "rationale": "The framework store/lifecycle contract profile does not publish rendering, interaction, surface, or persistence support."
+    },
+    {
+      "requirementId": "EXP-002",
+      "profileId": "framework-adapter-contract-jsdom",
+      "status": "not-applicable",
+      "evidenceIds": [],
+      "rationale": "The framework store/lifecycle contract profile does not publish rendering, interaction, surface, or persistence support."
+    },
+    {
+      "requirementId": "EXP-003",
+      "profileId": "framework-adapter-contract-jsdom",
+      "status": "not-applicable",
+      "evidenceIds": [],
+      "rationale": "The framework store/lifecycle contract profile does not publish rendering, interaction, surface, or persistence support."
+    },
+    {
+      "requirementId": "EXP-004",
+      "profileId": "framework-adapter-contract-jsdom",
+      "status": "not-applicable",
+      "evidenceIds": [],
+      "rationale": "The framework store/lifecycle contract profile does not publish rendering, interaction, surface, or persistence support."
+    },
+    {
+      "requirementId": "EXP-005",
+      "profileId": "framework-adapter-contract-jsdom",
+      "status": "not-applicable",
+      "evidenceIds": [],
+      "rationale": "The framework store/lifecycle contract profile does not publish rendering, interaction, surface, or persistence support."
+    },
+    {
+      "requirementId": "EXT-001",
+      "profileId": "framework-adapter-contract-jsdom",
+      "status": "unresolved",
+      "evidenceIds": [],
+      "rationale": "The complete acceptance evidence described by the system design has not yet been produced for this profile."
+    },
+    {
+      "requirementId": "EXT-002",
+      "profileId": "framework-adapter-contract-jsdom",
+      "status": "unresolved",
+      "evidenceIds": [],
+      "rationale": "The complete acceptance evidence described by the system design has not yet been produced for this profile."
+    },
+    {
+      "requirementId": "EXT-003",
+      "profileId": "framework-adapter-contract-jsdom",
+      "status": "unresolved",
+      "evidenceIds": [],
+      "rationale": "The complete acceptance evidence described by the system design has not yet been produced for this profile."
+    },
+    {
+      "requirementId": "EXT-004",
+      "profileId": "framework-adapter-contract-jsdom",
+      "status": "unresolved",
+      "evidenceIds": [],
+      "rationale": "The complete acceptance evidence described by the system design has not yet been produced for this profile."
+    },
+    {
+      "requirementId": "EXT-005",
+      "profileId": "framework-adapter-contract-jsdom",
+      "status": "unresolved",
+      "evidenceIds": [],
+      "rationale": "The complete acceptance evidence described by the system design has not yet been produced for this profile."
+    },
+    {
+      "requirementId": "EXT-006",
+      "profileId": "framework-adapter-contract-jsdom",
+      "status": "unresolved",
+      "evidenceIds": [
+        "third-party-pilots"
+      ],
+      "rationale": "The complete acceptance evidence described by the system design has not yet been produced for this profile."
+    },
+    {
+      "requirementId": "FOC-001",
+      "profileId": "framework-adapter-contract-jsdom",
+      "status": "not-applicable",
+      "evidenceIds": [],
+      "rationale": "The framework store/lifecycle contract profile does not publish rendering, interaction, surface, or persistence support."
+    },
+    {
+      "requirementId": "FOC-002",
+      "profileId": "framework-adapter-contract-jsdom",
+      "status": "not-applicable",
+      "evidenceIds": [],
+      "rationale": "The framework store/lifecycle contract profile does not publish rendering, interaction, surface, or persistence support."
+    },
+    {
+      "requirementId": "FOC-003",
+      "profileId": "framework-adapter-contract-jsdom",
+      "status": "not-applicable",
+      "evidenceIds": [],
+      "rationale": "The framework store/lifecycle contract profile does not publish rendering, interaction, surface, or persistence support."
+    },
+    {
+      "requirementId": "FOC-004",
+      "profileId": "framework-adapter-contract-jsdom",
+      "status": "not-applicable",
+      "evidenceIds": [],
+      "rationale": "The framework store/lifecycle contract profile does not publish rendering, interaction, surface, or persistence support."
+    },
+    {
+      "requirementId": "FOC-005",
+      "profileId": "framework-adapter-contract-jsdom",
+      "status": "not-applicable",
+      "evidenceIds": [],
+      "rationale": "The framework store/lifecycle contract profile does not publish rendering, interaction, surface, or persistence support."
+    },
+    {
+      "requirementId": "FOC-006",
+      "profileId": "framework-adapter-contract-jsdom",
+      "status": "not-applicable",
+      "evidenceIds": [],
+      "rationale": "The framework store/lifecycle contract profile does not publish rendering, interaction, surface, or persistence support."
+    },
+    {
+      "requirementId": "FWK-001",
+      "profileId": "framework-adapter-contract-jsdom",
+      "status": "verified",
+      "evidenceIds": [
+        "native-adapter-contract"
+      ],
+      "rationale": "Covered by repository-local automated evidence for this experimental profile."
+    },
+    {
+      "requirementId": "FWK-002",
+      "profileId": "framework-adapter-contract-jsdom",
+      "status": "unresolved",
+      "evidenceIds": [],
+      "rationale": "The complete acceptance evidence described by the system design has not yet been produced for this profile."
+    },
+    {
+      "requirementId": "FWK-003",
+      "profileId": "framework-adapter-contract-jsdom",
+      "status": "verified",
+      "evidenceIds": [
+        "native-adapter-contract"
+      ],
+      "rationale": "Covered by repository-local automated evidence for this experimental profile."
+    },
+    {
+      "requirementId": "FWK-004",
+      "profileId": "framework-adapter-contract-jsdom",
+      "status": "unresolved",
+      "evidenceIds": [
+        "web-component-ssr"
+      ],
+      "rationale": "The complete acceptance evidence described by the system design has not yet been produced for this profile."
+    },
+    {
+      "requirementId": "FWK-005",
+      "profileId": "framework-adapter-contract-jsdom",
+      "status": "unresolved",
+      "evidenceIds": [],
+      "rationale": "The complete acceptance evidence described by the system design has not yet been produced for this profile."
+    },
+    {
+      "requirementId": "FWK-006",
+      "profileId": "framework-adapter-contract-jsdom",
+      "status": "verified",
+      "evidenceIds": [
+        "native-adapter-contract"
+      ],
+      "rationale": "Covered by repository-local automated evidence for this experimental profile."
+    },
+    {
+      "requirementId": "GOV-001",
+      "profileId": "framework-adapter-contract-jsdom",
+      "status": "unresolved",
+      "evidenceIds": [],
+      "rationale": "The complete acceptance evidence described by the system design has not yet been produced for this profile."
+    },
+    {
+      "requirementId": "GOV-002",
+      "profileId": "framework-adapter-contract-jsdom",
+      "status": "unresolved",
+      "evidenceIds": [],
+      "rationale": "The complete acceptance evidence described by the system design has not yet been produced for this profile."
+    },
+    {
+      "requirementId": "GOV-003",
+      "profileId": "framework-adapter-contract-jsdom",
+      "status": "not-applicable",
+      "evidenceIds": [],
+      "rationale": "The published profile is explicitly experimental; this stable-release requirement is not claimed."
+    },
+    {
+      "requirementId": "GOV-004",
+      "profileId": "framework-adapter-contract-jsdom",
+      "status": "unresolved",
+      "evidenceIds": [],
+      "rationale": "The complete acceptance evidence described by the system design has not yet been produced for this profile."
+    },
+    {
+      "requirementId": "GOV-005",
+      "profileId": "framework-adapter-contract-jsdom",
+      "status": "unresolved",
+      "evidenceIds": [],
+      "rationale": "The complete acceptance evidence described by the system design has not yet been produced for this profile."
+    },
+    {
+      "requirementId": "GOV-006",
+      "profileId": "framework-adapter-contract-jsdom",
+      "status": "unresolved",
+      "evidenceIds": [],
+      "rationale": "The complete acceptance evidence described by the system design has not yet been produced for this profile."
+    },
+    {
+      "requirementId": "I18N-001",
+      "profileId": "framework-adapter-contract-jsdom",
+      "status": "not-applicable",
+      "evidenceIds": [],
+      "rationale": "The framework store/lifecycle contract profile does not publish rendering, interaction, surface, or persistence support."
+    },
+    {
+      "requirementId": "I18N-002",
+      "profileId": "framework-adapter-contract-jsdom",
+      "status": "not-applicable",
+      "evidenceIds": [],
+      "rationale": "The framework store/lifecycle contract profile does not publish rendering, interaction, surface, or persistence support."
+    },
+    {
+      "requirementId": "I18N-003",
+      "profileId": "framework-adapter-contract-jsdom",
+      "status": "not-applicable",
+      "evidenceIds": [],
+      "rationale": "The framework store/lifecycle contract profile does not publish rendering, interaction, surface, or persistence support."
+    },
+    {
+      "requirementId": "INT-001",
+      "profileId": "framework-adapter-contract-jsdom",
+      "status": "not-applicable",
+      "evidenceIds": [],
+      "rationale": "The framework store/lifecycle contract profile does not publish rendering, interaction, surface, or persistence support."
+    },
+    {
+      "requirementId": "INT-002",
+      "profileId": "framework-adapter-contract-jsdom",
+      "status": "not-applicable",
+      "evidenceIds": [],
+      "rationale": "The framework store/lifecycle contract profile does not publish rendering, interaction, surface, or persistence support."
+    },
+    {
+      "requirementId": "INT-003",
+      "profileId": "framework-adapter-contract-jsdom",
+      "status": "not-applicable",
+      "evidenceIds": [],
+      "rationale": "The framework store/lifecycle contract profile does not publish rendering, interaction, surface, or persistence support."
+    },
+    {
+      "requirementId": "INT-004",
+      "profileId": "framework-adapter-contract-jsdom",
+      "status": "not-applicable",
+      "evidenceIds": [],
+      "rationale": "The framework store/lifecycle contract profile does not publish rendering, interaction, surface, or persistence support."
+    },
+    {
+      "requirementId": "INT-005",
+      "profileId": "framework-adapter-contract-jsdom",
+      "status": "not-applicable",
+      "evidenceIds": [],
+      "rationale": "The framework store/lifecycle contract profile does not publish rendering, interaction, surface, or persistence support."
+    },
+    {
+      "requirementId": "INT-006",
+      "profileId": "framework-adapter-contract-jsdom",
+      "status": "not-applicable",
+      "evidenceIds": [],
+      "rationale": "The framework store/lifecycle contract profile does not publish rendering, interaction, surface, or persistence support."
+    },
+    {
+      "requirementId": "INT-007",
+      "profileId": "framework-adapter-contract-jsdom",
+      "status": "not-applicable",
+      "evidenceIds": [],
+      "rationale": "The framework store/lifecycle contract profile does not publish rendering, interaction, surface, or persistence support."
+    },
+    {
+      "requirementId": "LAY-001",
+      "profileId": "framework-adapter-contract-jsdom",
+      "status": "not-applicable",
+      "evidenceIds": [],
+      "rationale": "The framework store/lifecycle contract profile does not publish rendering, interaction, surface, or persistence support."
+    },
+    {
+      "requirementId": "LAY-002",
+      "profileId": "framework-adapter-contract-jsdom",
+      "status": "not-applicable",
+      "evidenceIds": [],
+      "rationale": "The framework store/lifecycle contract profile does not publish rendering, interaction, surface, or persistence support."
+    },
+    {
+      "requirementId": "LAY-003",
+      "profileId": "framework-adapter-contract-jsdom",
+      "status": "not-applicable",
+      "evidenceIds": [],
+      "rationale": "The framework store/lifecycle contract profile does not publish rendering, interaction, surface, or persistence support."
+    },
+    {
+      "requirementId": "LAY-004",
+      "profileId": "framework-adapter-contract-jsdom",
+      "status": "not-applicable",
+      "evidenceIds": [],
+      "rationale": "The framework store/lifecycle contract profile does not publish rendering, interaction, surface, or persistence support."
+    },
+    {
+      "requirementId": "LAY-005",
+      "profileId": "framework-adapter-contract-jsdom",
+      "status": "not-applicable",
+      "evidenceIds": [],
+      "rationale": "The framework store/lifecycle contract profile does not publish rendering, interaction, surface, or persistence support."
+    },
+    {
+      "requirementId": "LAY-006",
+      "profileId": "framework-adapter-contract-jsdom",
+      "status": "not-applicable",
+      "evidenceIds": [],
+      "rationale": "The framework store/lifecycle contract profile does not publish rendering, interaction, surface, or persistence support."
+    },
+    {
+      "requirementId": "LAY-007",
+      "profileId": "framework-adapter-contract-jsdom",
+      "status": "not-applicable",
+      "evidenceIds": [],
+      "rationale": "The framework store/lifecycle contract profile does not publish rendering, interaction, surface, or persistence support."
+    },
+    {
+      "requirementId": "LIF-001",
+      "profileId": "framework-adapter-contract-jsdom",
+      "status": "not-applicable",
+      "evidenceIds": [],
+      "rationale": "The framework store/lifecycle contract profile does not publish rendering, interaction, surface, or persistence support."
+    },
+    {
+      "requirementId": "LIF-002",
+      "profileId": "framework-adapter-contract-jsdom",
+      "status": "not-applicable",
+      "evidenceIds": [],
+      "rationale": "The framework store/lifecycle contract profile does not publish rendering, interaction, surface, or persistence support."
+    },
+    {
+      "requirementId": "LIF-003",
+      "profileId": "framework-adapter-contract-jsdom",
+      "status": "not-applicable",
+      "evidenceIds": [],
+      "rationale": "The framework store/lifecycle contract profile does not publish rendering, interaction, surface, or persistence support."
+    },
+    {
+      "requirementId": "LIF-004",
+      "profileId": "framework-adapter-contract-jsdom",
+      "status": "not-applicable",
+      "evidenceIds": [],
+      "rationale": "The framework store/lifecycle contract profile does not publish rendering, interaction, surface, or persistence support."
+    },
+    {
+      "requirementId": "LIF-005",
+      "profileId": "framework-adapter-contract-jsdom",
+      "status": "not-applicable",
+      "evidenceIds": [],
+      "rationale": "The framework store/lifecycle contract profile does not publish rendering, interaction, surface, or persistence support."
+    },
+    {
+      "requirementId": "LIF-006",
+      "profileId": "framework-adapter-contract-jsdom",
+      "status": "not-applicable",
+      "evidenceIds": [],
+      "rationale": "The framework store/lifecycle contract profile does not publish rendering, interaction, surface, or persistence support."
+    },
+    {
+      "requirementId": "LIF-007",
+      "profileId": "framework-adapter-contract-jsdom",
+      "status": "not-applicable",
+      "evidenceIds": [],
+      "rationale": "The framework store/lifecycle contract profile does not publish rendering, interaction, surface, or persistence support."
+    },
+    {
+      "requirementId": "MOD-001",
+      "profileId": "framework-adapter-contract-jsdom",
+      "status": "not-applicable",
+      "evidenceIds": [],
+      "rationale": "The framework store/lifecycle contract profile does not publish rendering, interaction, surface, or persistence support."
+    },
+    {
+      "requirementId": "MOD-002",
+      "profileId": "framework-adapter-contract-jsdom",
+      "status": "not-applicable",
+      "evidenceIds": [],
+      "rationale": "The framework store/lifecycle contract profile does not publish rendering, interaction, surface, or persistence support."
+    },
+    {
+      "requirementId": "MOD-003",
+      "profileId": "framework-adapter-contract-jsdom",
+      "status": "not-applicable",
+      "evidenceIds": [],
+      "rationale": "The framework store/lifecycle contract profile does not publish rendering, interaction, surface, or persistence support."
+    },
+    {
+      "requirementId": "MOD-004",
+      "profileId": "framework-adapter-contract-jsdom",
+      "status": "not-applicable",
+      "evidenceIds": [],
+      "rationale": "The framework store/lifecycle contract profile does not publish rendering, interaction, surface, or persistence support."
+    },
+    {
+      "requirementId": "MOD-005",
+      "profileId": "framework-adapter-contract-jsdom",
+      "status": "not-applicable",
+      "evidenceIds": [],
+      "rationale": "The framework store/lifecycle contract profile does not publish rendering, interaction, surface, or persistence support."
+    },
+    {
+      "requirementId": "MOD-006",
+      "profileId": "framework-adapter-contract-jsdom",
+      "status": "not-applicable",
+      "evidenceIds": [],
+      "rationale": "The framework store/lifecycle contract profile does not publish rendering, interaction, surface, or persistence support."
+    },
+    {
+      "requirementId": "MOT-001",
+      "profileId": "framework-adapter-contract-jsdom",
+      "status": "not-applicable",
+      "evidenceIds": [],
+      "rationale": "The framework store/lifecycle contract profile does not publish rendering, interaction, surface, or persistence support."
+    },
+    {
+      "requirementId": "MOT-002",
+      "profileId": "framework-adapter-contract-jsdom",
+      "status": "not-applicable",
+      "evidenceIds": [],
+      "rationale": "The framework store/lifecycle contract profile does not publish rendering, interaction, surface, or persistence support."
+    },
+    {
+      "requirementId": "MOT-003",
+      "profileId": "framework-adapter-contract-jsdom",
+      "status": "not-applicable",
+      "evidenceIds": [],
+      "rationale": "The framework store/lifecycle contract profile does not publish rendering, interaction, surface, or persistence support."
+    },
+    {
+      "requirementId": "MOT-004",
+      "profileId": "framework-adapter-contract-jsdom",
+      "status": "not-applicable",
+      "evidenceIds": [],
+      "rationale": "The framework store/lifecycle contract profile does not publish rendering, interaction, surface, or persistence support."
+    },
+    {
+      "requirementId": "MOT-005",
+      "profileId": "framework-adapter-contract-jsdom",
+      "status": "not-applicable",
+      "evidenceIds": [],
+      "rationale": "The framework store/lifecycle contract profile does not publish rendering, interaction, surface, or persistence support."
+    },
+    {
+      "requirementId": "MOT-006",
+      "profileId": "framework-adapter-contract-jsdom",
+      "status": "not-applicable",
+      "evidenceIds": [],
+      "rationale": "The framework store/lifecycle contract profile does not publish rendering, interaction, surface, or persistence support."
+    },
+    {
+      "requirementId": "MOT-007",
+      "profileId": "framework-adapter-contract-jsdom",
+      "status": "not-applicable",
+      "evidenceIds": [],
+      "rationale": "The framework store/lifecycle contract profile does not publish rendering, interaction, surface, or persistence support."
+    },
+    {
+      "requirementId": "MOT-008",
+      "profileId": "framework-adapter-contract-jsdom",
+      "status": "not-applicable",
+      "evidenceIds": [],
+      "rationale": "The framework store/lifecycle contract profile does not publish rendering, interaction, surface, or persistence support."
+    },
+    {
+      "requirementId": "MOT-009",
+      "profileId": "framework-adapter-contract-jsdom",
+      "status": "not-applicable",
+      "evidenceIds": [],
+      "rationale": "The framework store/lifecycle contract profile does not publish rendering, interaction, surface, or persistence support."
+    },
+    {
+      "requirementId": "MOT-010",
+      "profileId": "framework-adapter-contract-jsdom",
+      "status": "not-applicable",
+      "evidenceIds": [],
+      "rationale": "The framework store/lifecycle contract profile does not publish rendering, interaction, surface, or persistence support."
+    },
+    {
+      "requirementId": "OBS-001",
+      "profileId": "framework-adapter-contract-jsdom",
+      "status": "unresolved",
+      "evidenceIds": [],
+      "rationale": "The complete acceptance evidence described by the system design has not yet been produced for this profile."
+    },
+    {
+      "requirementId": "OBS-002",
+      "profileId": "framework-adapter-contract-jsdom",
+      "status": "unresolved",
+      "evidenceIds": [],
+      "rationale": "The complete acceptance evidence described by the system design has not yet been produced for this profile."
+    },
+    {
+      "requirementId": "OBS-003",
+      "profileId": "framework-adapter-contract-jsdom",
+      "status": "unresolved",
+      "evidenceIds": [],
+      "rationale": "The complete acceptance evidence described by the system design has not yet been produced for this profile."
+    },
+    {
+      "requirementId": "OBS-004",
+      "profileId": "framework-adapter-contract-jsdom",
+      "status": "unresolved",
+      "evidenceIds": [],
+      "rationale": "The complete acceptance evidence described by the system design has not yet been produced for this profile."
+    },
+    {
+      "requirementId": "OBS-005",
+      "profileId": "framework-adapter-contract-jsdom",
+      "status": "unresolved",
+      "evidenceIds": [],
+      "rationale": "The complete acceptance evidence described by the system design has not yet been produced for this profile."
+    },
+    {
+      "requirementId": "OBS-006",
+      "profileId": "framework-adapter-contract-jsdom",
+      "status": "unresolved",
+      "evidenceIds": [
+        "conformance-harness"
+      ],
+      "rationale": "The complete acceptance evidence described by the system design has not yet been produced for this profile."
+    },
+    {
+      "requirementId": "PER-001",
+      "profileId": "framework-adapter-contract-jsdom",
+      "status": "not-applicable",
+      "evidenceIds": [],
+      "rationale": "The framework store/lifecycle contract profile does not publish rendering, interaction, surface, or persistence support."
+    },
+    {
+      "requirementId": "PER-002",
+      "profileId": "framework-adapter-contract-jsdom",
+      "status": "not-applicable",
+      "evidenceIds": [],
+      "rationale": "The framework store/lifecycle contract profile does not publish rendering, interaction, surface, or persistence support."
+    },
+    {
+      "requirementId": "PER-003",
+      "profileId": "framework-adapter-contract-jsdom",
+      "status": "not-applicable",
+      "evidenceIds": [],
+      "rationale": "The framework store/lifecycle contract profile does not publish rendering, interaction, surface, or persistence support."
+    },
+    {
+      "requirementId": "PER-004",
+      "profileId": "framework-adapter-contract-jsdom",
+      "status": "not-applicable",
+      "evidenceIds": [],
+      "rationale": "The framework store/lifecycle contract profile does not publish rendering, interaction, surface, or persistence support."
+    },
+    {
+      "requirementId": "PER-005",
+      "profileId": "framework-adapter-contract-jsdom",
+      "status": "not-applicable",
+      "evidenceIds": [],
+      "rationale": "The framework store/lifecycle contract profile does not publish rendering, interaction, surface, or persistence support."
+    },
+    {
+      "requirementId": "PER-006",
+      "profileId": "framework-adapter-contract-jsdom",
+      "status": "not-applicable",
+      "evidenceIds": [],
+      "rationale": "The framework store/lifecycle contract profile does not publish rendering, interaction, surface, or persistence support."
+    },
+    {
+      "requirementId": "PER-007",
+      "profileId": "framework-adapter-contract-jsdom",
+      "status": "not-applicable",
+      "evidenceIds": [],
+      "rationale": "The framework store/lifecycle contract profile does not publish rendering, interaction, surface, or persistence support."
+    },
+    {
+      "requirementId": "PER-008",
+      "profileId": "framework-adapter-contract-jsdom",
+      "status": "not-applicable",
+      "evidenceIds": [],
+      "rationale": "The framework store/lifecycle contract profile does not publish rendering, interaction, surface, or persistence support."
+    },
+    {
+      "requirementId": "PKG-001",
+      "profileId": "framework-adapter-contract-jsdom",
+      "status": "not-applicable",
+      "evidenceIds": [],
+      "rationale": "The framework store/lifecycle contract profile does not publish rendering, interaction, surface, or persistence support."
+    },
+    {
+      "requirementId": "PKG-002",
+      "profileId": "framework-adapter-contract-jsdom",
+      "status": "not-applicable",
+      "evidenceIds": [],
+      "rationale": "The framework store/lifecycle contract profile does not publish rendering, interaction, surface, or persistence support."
+    },
+    {
+      "requirementId": "PKG-003",
+      "profileId": "framework-adapter-contract-jsdom",
+      "status": "not-applicable",
+      "evidenceIds": [],
+      "rationale": "The framework store/lifecycle contract profile does not publish rendering, interaction, surface, or persistence support."
+    },
+    {
+      "requirementId": "PKG-004",
+      "profileId": "framework-adapter-contract-jsdom",
+      "status": "not-applicable",
+      "evidenceIds": [],
+      "rationale": "The framework store/lifecycle contract profile does not publish rendering, interaction, surface, or persistence support."
+    },
+    {
+      "requirementId": "PKG-005",
+      "profileId": "framework-adapter-contract-jsdom",
+      "status": "not-applicable",
+      "evidenceIds": [],
+      "rationale": "The framework store/lifecycle contract profile does not publish rendering, interaction, surface, or persistence support."
+    },
+    {
+      "requirementId": "PRF-001",
+      "profileId": "framework-adapter-contract-jsdom",
+      "status": "not-applicable",
+      "evidenceIds": [],
+      "rationale": "The framework store/lifecycle contract profile does not publish rendering, interaction, surface, or persistence support."
+    },
+    {
+      "requirementId": "PRF-002",
+      "profileId": "framework-adapter-contract-jsdom",
+      "status": "not-applicable",
+      "evidenceIds": [],
+      "rationale": "The framework store/lifecycle contract profile does not publish rendering, interaction, surface, or persistence support."
+    },
+    {
+      "requirementId": "PRF-003",
+      "profileId": "framework-adapter-contract-jsdom",
+      "status": "not-applicable",
+      "evidenceIds": [],
+      "rationale": "The framework store/lifecycle contract profile does not publish rendering, interaction, surface, or persistence support."
+    },
+    {
+      "requirementId": "PRF-004",
+      "profileId": "framework-adapter-contract-jsdom",
+      "status": "not-applicable",
+      "evidenceIds": [],
+      "rationale": "The framework store/lifecycle contract profile does not publish rendering, interaction, surface, or persistence support."
+    },
+    {
+      "requirementId": "PRF-005",
+      "profileId": "framework-adapter-contract-jsdom",
+      "status": "not-applicable",
+      "evidenceIds": [],
+      "rationale": "The framework store/lifecycle contract profile does not publish rendering, interaction, surface, or persistence support."
+    },
+    {
+      "requirementId": "PRF-006",
+      "profileId": "framework-adapter-contract-jsdom",
+      "status": "not-applicable",
+      "evidenceIds": [],
+      "rationale": "The framework store/lifecycle contract profile does not publish rendering, interaction, surface, or persistence support."
+    },
+    {
+      "requirementId": "PRF-007",
+      "profileId": "framework-adapter-contract-jsdom",
+      "status": "not-applicable",
+      "evidenceIds": [],
+      "rationale": "The framework store/lifecycle contract profile does not publish rendering, interaction, surface, or persistence support."
+    },
+    {
+      "requirementId": "QLT-001",
+      "profileId": "framework-adapter-contract-jsdom",
+      "status": "unresolved",
+      "evidenceIds": [
+        "conformance-harness"
+      ],
+      "rationale": "The complete acceptance evidence described by the system design has not yet been produced for this profile."
+    },
+    {
+      "requirementId": "QLT-002",
+      "profileId": "framework-adapter-contract-jsdom",
+      "status": "unresolved",
+      "evidenceIds": [
+        "conformance-harness"
+      ],
+      "rationale": "The complete acceptance evidence described by the system design has not yet been produced for this profile."
+    },
+    {
+      "requirementId": "QLT-003",
+      "profileId": "framework-adapter-contract-jsdom",
+      "status": "unresolved",
+      "evidenceIds": [],
+      "rationale": "The complete acceptance evidence described by the system design has not yet been produced for this profile."
+    },
+    {
+      "requirementId": "QLT-004",
+      "profileId": "framework-adapter-contract-jsdom",
+      "status": "not-applicable",
+      "evidenceIds": [
+        "conformance-harness"
+      ],
+      "rationale": "The published profile is explicitly experimental; this stable-release requirement is not claimed."
+    },
+    {
+      "requirementId": "QLT-005",
+      "profileId": "framework-adapter-contract-jsdom",
+      "status": "unresolved",
+      "evidenceIds": [],
+      "rationale": "The complete acceptance evidence described by the system design has not yet been produced for this profile."
+    },
+    {
+      "requirementId": "REN-001",
+      "profileId": "framework-adapter-contract-jsdom",
+      "status": "not-applicable",
+      "evidenceIds": [],
+      "rationale": "The framework store/lifecycle contract profile does not publish rendering, interaction, surface, or persistence support."
+    },
+    {
+      "requirementId": "REN-002",
+      "profileId": "framework-adapter-contract-jsdom",
+      "status": "not-applicable",
+      "evidenceIds": [],
+      "rationale": "The framework store/lifecycle contract profile does not publish rendering, interaction, surface, or persistence support."
+    },
+    {
+      "requirementId": "REN-003",
+      "profileId": "framework-adapter-contract-jsdom",
+      "status": "not-applicable",
+      "evidenceIds": [],
+      "rationale": "The framework store/lifecycle contract profile does not publish rendering, interaction, surface, or persistence support."
+    },
+    {
+      "requirementId": "REN-004",
+      "profileId": "framework-adapter-contract-jsdom",
+      "status": "not-applicable",
+      "evidenceIds": [],
+      "rationale": "The framework store/lifecycle contract profile does not publish rendering, interaction, surface, or persistence support."
+    },
+    {
+      "requirementId": "REN-005",
+      "profileId": "framework-adapter-contract-jsdom",
+      "status": "not-applicable",
+      "evidenceIds": [],
+      "rationale": "The framework store/lifecycle contract profile does not publish rendering, interaction, surface, or persistence support."
+    },
+    {
+      "requirementId": "REN-006",
+      "profileId": "framework-adapter-contract-jsdom",
+      "status": "not-applicable",
+      "evidenceIds": [],
+      "rationale": "The framework store/lifecycle contract profile does not publish rendering, interaction, surface, or persistence support."
+    },
+    {
+      "requirementId": "RSK-001",
+      "profileId": "framework-adapter-contract-jsdom",
+      "status": "not-applicable",
+      "evidenceIds": [],
+      "rationale": "The framework store/lifecycle contract profile does not publish rendering, interaction, surface, or persistence support."
+    },
+    {
+      "requirementId": "RSK-002",
+      "profileId": "framework-adapter-contract-jsdom",
+      "status": "not-applicable",
+      "evidenceIds": [],
+      "rationale": "The framework store/lifecycle contract profile does not publish rendering, interaction, surface, or persistence support."
+    },
+    {
+      "requirementId": "RSK-003",
+      "profileId": "framework-adapter-contract-jsdom",
+      "status": "not-applicable",
+      "evidenceIds": [],
+      "rationale": "The framework store/lifecycle contract profile does not publish rendering, interaction, surface, or persistence support."
+    },
+    {
+      "requirementId": "RSK-004",
+      "profileId": "framework-adapter-contract-jsdom",
+      "status": "not-applicable",
+      "evidenceIds": [],
+      "rationale": "The framework store/lifecycle contract profile does not publish rendering, interaction, surface, or persistence support."
+    },
+    {
+      "requirementId": "RSP-001",
+      "profileId": "framework-adapter-contract-jsdom",
+      "status": "not-applicable",
+      "evidenceIds": [],
+      "rationale": "The framework store/lifecycle contract profile does not publish rendering, interaction, surface, or persistence support."
+    },
+    {
+      "requirementId": "RSP-002",
+      "profileId": "framework-adapter-contract-jsdom",
+      "status": "not-applicable",
+      "evidenceIds": [],
+      "rationale": "The framework store/lifecycle contract profile does not publish rendering, interaction, surface, or persistence support."
+    },
+    {
+      "requirementId": "SCP-001",
+      "profileId": "framework-adapter-contract-jsdom",
+      "status": "unresolved",
+      "evidenceIds": [],
+      "rationale": "The complete acceptance evidence described by the system design has not yet been produced for this profile."
+    },
+    {
+      "requirementId": "SCP-002",
+      "profileId": "framework-adapter-contract-jsdom",
+      "status": "unresolved",
+      "evidenceIds": [],
+      "rationale": "The complete acceptance evidence described by the system design has not yet been produced for this profile."
+    },
+    {
+      "requirementId": "SCP-003",
+      "profileId": "framework-adapter-contract-jsdom",
+      "status": "unresolved",
+      "evidenceIds": [],
+      "rationale": "The complete acceptance evidence described by the system design has not yet been produced for this profile."
+    },
+    {
+      "requirementId": "SCP-004",
+      "profileId": "framework-adapter-contract-jsdom",
+      "status": "unresolved",
+      "evidenceIds": [],
+      "rationale": "The complete acceptance evidence described by the system design has not yet been produced for this profile."
+    },
+    {
+      "requirementId": "SEC-001",
+      "profileId": "framework-adapter-contract-jsdom",
+      "status": "unresolved",
+      "evidenceIds": [],
+      "rationale": "The complete acceptance evidence described by the system design has not yet been produced for this profile."
+    },
+    {
+      "requirementId": "SEC-002",
+      "profileId": "framework-adapter-contract-jsdom",
+      "status": "unresolved",
+      "evidenceIds": [
+        "independent-security-review"
+      ],
+      "rationale": "The complete acceptance evidence described by the system design has not yet been produced for this profile."
+    },
+    {
+      "requirementId": "SEC-003",
+      "profileId": "framework-adapter-contract-jsdom",
+      "status": "not-applicable",
+      "evidenceIds": [
+        "independent-security-review"
+      ],
+      "rationale": "The published profile is explicitly experimental; this stable-release requirement is not claimed."
+    },
+    {
+      "requirementId": "SEC-004",
+      "profileId": "framework-adapter-contract-jsdom",
+      "status": "unresolved",
+      "evidenceIds": [],
+      "rationale": "The complete acceptance evidence described by the system design has not yet been produced for this profile."
+    },
+    {
+      "requirementId": "SEC-005",
+      "profileId": "framework-adapter-contract-jsdom",
+      "status": "unresolved",
+      "evidenceIds": [],
+      "rationale": "The complete acceptance evidence described by the system design has not yet been produced for this profile."
+    },
+    {
+      "requirementId": "SEC-006",
+      "profileId": "framework-adapter-contract-jsdom",
+      "status": "unresolved",
+      "evidenceIds": [],
+      "rationale": "The complete acceptance evidence described by the system design has not yet been produced for this profile."
+    },
+    {
+      "requirementId": "SEC-007",
+      "profileId": "framework-adapter-contract-jsdom",
+      "status": "not-applicable",
+      "evidenceIds": [
+        "independent-security-review"
+      ],
+      "rationale": "The published profile is explicitly experimental; this stable-release requirement is not claimed."
+    },
+    {
+      "requirementId": "SEC-008",
+      "profileId": "framework-adapter-contract-jsdom",
+      "status": "unresolved",
+      "evidenceIds": [],
+      "rationale": "The complete acceptance evidence described by the system design has not yet been produced for this profile."
+    },
+    {
+      "requirementId": "SUR-001",
+      "profileId": "framework-adapter-contract-jsdom",
+      "status": "not-applicable",
+      "evidenceIds": [],
+      "rationale": "The framework store/lifecycle contract profile does not publish rendering, interaction, surface, or persistence support."
+    },
+    {
+      "requirementId": "SUR-002",
+      "profileId": "framework-adapter-contract-jsdom",
+      "status": "not-applicable",
+      "evidenceIds": [],
+      "rationale": "The framework store/lifecycle contract profile does not publish rendering, interaction, surface, or persistence support."
+    },
+    {
+      "requirementId": "SUR-003",
+      "profileId": "framework-adapter-contract-jsdom",
+      "status": "not-applicable",
+      "evidenceIds": [],
+      "rationale": "The framework store/lifecycle contract profile does not publish rendering, interaction, surface, or persistence support."
+    },
+    {
+      "requirementId": "SUR-004",
+      "profileId": "framework-adapter-contract-jsdom",
+      "status": "not-applicable",
+      "evidenceIds": [],
+      "rationale": "The framework store/lifecycle contract profile does not publish rendering, interaction, surface, or persistence support."
+    },
+    {
+      "requirementId": "SUR-005",
+      "profileId": "framework-adapter-contract-jsdom",
+      "status": "not-applicable",
+      "evidenceIds": [],
+      "rationale": "The framework store/lifecycle contract profile does not publish rendering, interaction, surface, or persistence support."
+    },
+    {
+      "requirementId": "SUR-006",
+      "profileId": "framework-adapter-contract-jsdom",
+      "status": "not-applicable",
+      "evidenceIds": [],
+      "rationale": "The framework store/lifecycle contract profile does not publish rendering, interaction, surface, or persistence support."
+    },
+    {
+      "requirementId": "SUR-007",
+      "profileId": "framework-adapter-contract-jsdom",
+      "status": "not-applicable",
+      "evidenceIds": [],
+      "rationale": "The framework store/lifecycle contract profile does not publish rendering, interaction, surface, or persistence support."
+    },
+    {
+      "requirementId": "SYS-001",
+      "profileId": "framework-adapter-contract-jsdom",
+      "status": "not-applicable",
+      "evidenceIds": [],
+      "rationale": "The framework store/lifecycle contract profile does not publish rendering, interaction, surface, or persistence support."
+    },
+    {
+      "requirementId": "SYS-002",
+      "profileId": "framework-adapter-contract-jsdom",
+      "status": "not-applicable",
+      "evidenceIds": [],
+      "rationale": "The framework store/lifecycle contract profile does not publish rendering, interaction, surface, or persistence support."
+    },
+    {
+      "requirementId": "SYS-003",
+      "profileId": "framework-adapter-contract-jsdom",
+      "status": "not-applicable",
+      "evidenceIds": [],
+      "rationale": "The framework store/lifecycle contract profile does not publish rendering, interaction, surface, or persistence support."
+    },
+    {
+      "requirementId": "SYS-004",
+      "profileId": "framework-adapter-contract-jsdom",
+      "status": "not-applicable",
+      "evidenceIds": [],
+      "rationale": "The framework store/lifecycle contract profile does not publish rendering, interaction, surface, or persistence support."
+    },
+    {
+      "requirementId": "SYS-005",
+      "profileId": "framework-adapter-contract-jsdom",
+      "status": "not-applicable",
+      "evidenceIds": [],
+      "rationale": "The framework store/lifecycle contract profile does not publish rendering, interaction, surface, or persistence support."
+    },
+    {
+      "requirementId": "THM-001",
+      "profileId": "framework-adapter-contract-jsdom",
+      "status": "not-applicable",
+      "evidenceIds": [],
+      "rationale": "The framework store/lifecycle contract profile does not publish rendering, interaction, surface, or persistence support."
+    },
+    {
+      "requirementId": "THM-002",
+      "profileId": "framework-adapter-contract-jsdom",
+      "status": "not-applicable",
+      "evidenceIds": [],
+      "rationale": "The framework store/lifecycle contract profile does not publish rendering, interaction, surface, or persistence support."
+    },
+    {
+      "requirementId": "TST-001",
+      "profileId": "framework-adapter-contract-jsdom",
+      "status": "not-applicable",
+      "evidenceIds": [],
+      "rationale": "The published profile is explicitly experimental; this stable-release requirement is not claimed."
+    },
+    {
+      "requirementId": "TST-002",
+      "profileId": "framework-adapter-contract-jsdom",
+      "status": "unresolved",
+      "evidenceIds": [],
+      "rationale": "The complete acceptance evidence described by the system design has not yet been produced for this profile."
+    },
+    {
+      "requirementId": "TST-003",
+      "profileId": "framework-adapter-contract-jsdom",
+      "status": "unresolved",
+      "evidenceIds": [],
+      "rationale": "The complete acceptance evidence described by the system design has not yet been produced for this profile."
+    },
+    {
+      "requirementId": "TST-004",
+      "profileId": "framework-adapter-contract-jsdom",
+      "status": "unresolved",
+      "evidenceIds": [],
+      "rationale": "The complete acceptance evidence described by the system design has not yet been produced for this profile."
+    },
+    {
+      "requirementId": "TST-005",
+      "profileId": "framework-adapter-contract-jsdom",
+      "status": "unresolved",
+      "evidenceIds": [],
+      "rationale": "The complete acceptance evidence described by the system design has not yet been produced for this profile."
+    },
+    {
+      "requirementId": "TST-006",
+      "profileId": "framework-adapter-contract-jsdom",
+      "status": "unresolved",
+      "evidenceIds": [],
+      "rationale": "The complete acceptance evidence described by the system design has not yet been produced for this profile."
+    },
+    {
+      "requirementId": "TST-007",
+      "profileId": "framework-adapter-contract-jsdom",
+      "status": "not-applicable",
+      "evidenceIds": [],
+      "rationale": "The published profile is explicitly experimental; this stable-release requirement is not claimed."
+    },
+    {
+      "requirementId": "TST-008",
+      "profileId": "framework-adapter-contract-jsdom",
+      "status": "unresolved",
+      "evidenceIds": [],
+      "rationale": "The complete acceptance evidence described by the system design has not yet been produced for this profile."
+    },
+    {
+      "requirementId": "TST-009",
+      "profileId": "framework-adapter-contract-jsdom",
+      "status": "unresolved",
+      "evidenceIds": [],
+      "rationale": "The complete acceptance evidence described by the system design has not yet been produced for this profile."
+    },
+    {
+      "requirementId": "TXN-001",
+      "profileId": "framework-adapter-contract-jsdom",
+      "status": "not-applicable",
+      "evidenceIds": [],
+      "rationale": "The framework store/lifecycle contract profile does not publish rendering, interaction, surface, or persistence support."
+    },
+    {
+      "requirementId": "TXN-002",
+      "profileId": "framework-adapter-contract-jsdom",
+      "status": "not-applicable",
+      "evidenceIds": [],
+      "rationale": "The framework store/lifecycle contract profile does not publish rendering, interaction, surface, or persistence support."
+    },
+    {
+      "requirementId": "TXN-003",
+      "profileId": "framework-adapter-contract-jsdom",
+      "status": "not-applicable",
+      "evidenceIds": [],
+      "rationale": "The framework store/lifecycle contract profile does not publish rendering, interaction, surface, or persistence support."
+    },
+    {
+      "requirementId": "TXN-004",
+      "profileId": "framework-adapter-contract-jsdom",
+      "status": "not-applicable",
+      "evidenceIds": [],
+      "rationale": "The framework store/lifecycle contract profile does not publish rendering, interaction, surface, or persistence support."
+    },
+    {
+      "requirementId": "TXN-005",
+      "profileId": "framework-adapter-contract-jsdom",
+      "status": "not-applicable",
+      "evidenceIds": [],
+      "rationale": "The framework store/lifecycle contract profile does not publish rendering, interaction, surface, or persistence support."
+    },
+    {
+      "requirementId": "TXN-006",
+      "profileId": "framework-adapter-contract-jsdom",
+      "status": "not-applicable",
+      "evidenceIds": [],
+      "rationale": "The framework store/lifecycle contract profile does not publish rendering, interaction, surface, or persistence support."
+    },
+    {
+      "requirementId": "TXN-007",
+      "profileId": "framework-adapter-contract-jsdom",
+      "status": "not-applicable",
+      "evidenceIds": [],
+      "rationale": "The framework store/lifecycle contract profile does not publish rendering, interaction, surface, or persistence support."
+    },
+    {
+      "requirementId": "TXN-008",
+      "profileId": "framework-adapter-contract-jsdom",
+      "status": "not-applicable",
+      "evidenceIds": [],
+      "rationale": "The framework store/lifecycle contract profile does not publish rendering, interaction, surface, or persistence support."
+    }
+  ]
+}

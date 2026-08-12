@@ -51,7 +51,7 @@ describe("reference kernel", () => {
     const snapshot = fixtureSnapshot();
     expect(validateWorkspace(snapshot)).toEqual([]);
     expect(canonicalHash(snapshot)).toBe(canonicalHash(fixtureSnapshot()));
-    expect(canonicalSerialize(snapshot)).toContain('"schemaVersion":1');
+    expect(canonicalSerialize(snapshot)).toContain('"schemaVersion":2');
   });
 
   it("commits atomically with typed patches, revision, and inverse", () => {

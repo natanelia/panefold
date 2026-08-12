@@ -1,4 +1,5 @@
 import {
+  APPLIED_REMOTE_TRANSACTION_LIMIT,
   isJsonValue,
   type EntityTable,
   type GroupId,
@@ -171,11 +172,29 @@ export function validateWorkspace(snapshot: WorkspaceSnapshot): readonly Invaria
       );
     }
     if (group.panelIds.length === 0 && !group.persistent) {
+      if (group.placeholder !== true) {
+        violation(
+          violations,
+          "EMPTY_TRANSIENT_GROUP",
+          `groups.${groupId}`,
+          "A non-persistent group must contain a panel or be a recovery placeholder",
+        );
+      }
+    }
+    if (group.placeholder === true && group.panelIds.length > 0) {
       violation(
         violations,
-        "EMPTY_TRANSIENT_GROUP",
-        `groups.${groupId}`,
-        "A non-persistent group must contain a panel",
+        "NON_CANONICAL_PLACEHOLDER_GROUP",
+        `groups.${groupId}.placeholder`,
+        "A placeholder group must be empty",
+      );
+    }
+    if (group.placeholder === true && snapshot.recoverableClosedPanels.length === 0) {
+      violation(
+        violations,
+        "UNNECESSARY_PLACEHOLDER_GROUP",
+        `groups.${groupId}.placeholder`,
+        "A recovery placeholder requires at least one recoverable closed panel",
       );
     }
     if (group.panelIds.length > 0 && !group.panelIds.includes(group.selectedPanelId)) {
@@ -246,12 +265,15 @@ export function validateWorkspace(snapshot: WorkspaceSnapshot): readonly Invaria
       );
     }
     for (const [constraintName, value] of Object.entries(panel.constraints)) {
-      if (typeof value === "number" && !Number.isFinite(value)) {
+      if (
+        typeof value === "number" &&
+        (!Number.isFinite(value) || (constraintName !== "preferredAspectRatio" && value < 0))
+      ) {
         violation(
           violations,
           "INVALID_PANEL_CONSTRAINT",
           `panels.${panelId}.constraints.${constraintName}`,
-          "Numeric panel constraints must be finite",
+          "Numeric panel constraints must be finite and non-negative",
         );
       }
     }
@@ -264,6 +286,69 @@ export function validateWorkspace(snapshot: WorkspaceSnapshot): readonly Invaria
         "INVALID_PANEL_CONSTRAINT",
         `panels.${panelId}.constraints.preferredAspectRatio`,
         "Preferred aspect ratio must be greater than zero",
+      );
+    }
+    const hardMinInline = panel.constraints.hardMinInline ?? 0;
+    const hardMinBlock = panel.constraints.hardMinBlock ?? 0;
+    if (panel.constraints.maxInline !== undefined && panel.constraints.maxInline < hardMinInline) {
+      violation(
+        violations,
+        "INVALID_PANEL_CONSTRAINT_RANGE",
+        `panels.${panelId}.constraints.maxInline`,
+        "Inline maximum cannot be smaller than the hard minimum",
+      );
+    }
+    if (panel.constraints.maxBlock !== undefined && panel.constraints.maxBlock < hardMinBlock) {
+      violation(
+        violations,
+        "INVALID_PANEL_CONSTRAINT_RANGE",
+        `panels.${panelId}.constraints.maxBlock`,
+        "Block maximum cannot be smaller than the hard minimum",
+      );
+    }
+    if (
+      panel.constraints.resizeDelivery !== undefined &&
+      !["live", "throttled", "deferred", "adaptive"].includes(panel.constraints.resizeDelivery)
+    ) {
+      violation(
+        violations,
+        "INVALID_RESIZE_DELIVERY",
+        `panels.${panelId}.constraints.resizeDelivery`,
+        "Resize delivery must be a supported policy",
+      );
+    }
+    for (const [capability, enabled] of Object.entries(panel.capabilities)) {
+      if (typeof enabled !== "boolean") {
+        violation(
+          violations,
+          "INVALID_PANEL_CAPABILITY",
+          `panels.${panelId}.capabilities.${capability}`,
+          "Panel capabilities must be boolean",
+        );
+      }
+    }
+  }
+
+  const panelsByType = new Map<string, PanelId[]>();
+  for (const panelId of snapshot.panels.ids) {
+    const panel = snapshot.panels.byId[String(panelId)];
+    if (panel === undefined) continue;
+    const sameType = panelsByType.get(panel.type) ?? [];
+    sameType.push(panelId);
+    panelsByType.set(panel.type, sameType);
+  }
+  for (const [type, panelIds] of panelsByType) {
+    if (
+      panelIds.length > 1 &&
+      panelIds.some(
+        (panelId) => snapshot.panels.byId[String(panelId)]?.capabilities.singleton === true,
+      )
+    ) {
+      violation(
+        violations,
+        "DUPLICATE_SINGLETON_PANEL",
+        "panels",
+        `Singleton panel type "${type}" has ${panelIds.length} live instances`,
       );
     }
   }
@@ -382,6 +467,34 @@ export function validateWorkspace(snapshot: WorkspaceSnapshot): readonly Invaria
         "Surface maximized state must be boolean",
       );
     }
+    if (surface.minimized !== undefined && typeof surface.minimized !== "boolean") {
+      violation(
+        violations,
+        "INVALID_SURFACE_STATE",
+        `surfaces.${surfaceId}.minimized`,
+        "Surface minimized state must be boolean when present",
+      );
+    }
+    if (
+      !["main", "embedded", "floating", "browser-window", "document-pip"].includes(surface.kind)
+    ) {
+      violation(
+        violations,
+        "INVALID_SURFACE_KIND",
+        `surfaces.${surfaceId}.kind`,
+        "Surface kind is not supported by the model",
+      );
+    }
+    for (const [capability, enabled] of Object.entries(surface.capabilities)) {
+      if (typeof enabled !== "boolean") {
+        violation(
+          violations,
+          "INVALID_SURFACE_CAPABILITY",
+          `surfaces.${surfaceId}.capabilities.${capability}`,
+          "Surface capabilities must be boolean",
+        );
+      }
+    }
     if (surface.kind === "floating" && surface.bounds === undefined) {
       violation(
         violations,
@@ -415,6 +528,28 @@ export function validateWorkspace(snapshot: WorkspaceSnapshot): readonly Invaria
         "INVALID_OWNER_EPOCH",
         `surfaces.${surfaceId}.ownerEpoch`,
         "Owner epoch must be a non-negative safe integer",
+      );
+    }
+    if (
+      (surface.kind === "browser-window" || surface.kind === "document-pip") &&
+      surface.ownerEpoch === undefined
+    ) {
+      violation(
+        violations,
+        "MISSING_OWNER_EPOCH",
+        `surfaces.${surfaceId}.ownerEpoch`,
+        "Cross-document surfaces require an explicit ownership epoch",
+      );
+    }
+    if (
+      surface.kind === "document-pip" &&
+      snapshot.nodes.byId[String(surface.rootNodeId)]?.kind !== "group"
+    ) {
+      violation(
+        violations,
+        "INVALID_PIP_TOPOLOGY",
+        `surfaces.${surfaceId}.rootNodeId`,
+        "Document Picture-in-Picture supports exactly one group root",
       );
     }
   }
@@ -479,6 +614,42 @@ export function validateWorkspace(snapshot: WorkspaceSnapshot): readonly Invaria
       "Active surface must be live",
     );
   }
+  if (activePanelId !== undefined && activeSurfaceId !== undefined) {
+    const activeGroupId = panelMembership.get(activePanelId)?.[0];
+    const activeSurface = snapshot.surfaces.byId[String(activeSurfaceId)];
+    if (activeGroupId !== undefined && activeSurface !== undefined) {
+      if (activeSurface.minimized === true) {
+        violation(
+          violations,
+          "INELIGIBLE_ACTIVE_SURFACE",
+          "activation.activeSurfaceId",
+          "A minimized surface cannot be the active command target",
+        );
+      }
+      const stack = [activeSurface.rootNodeId];
+      const seen = new Set<NodeId>();
+      let containsActiveGroup = false;
+      while (stack.length > 0) {
+        const current = stack.pop();
+        if (current === undefined || seen.has(current)) continue;
+        seen.add(current);
+        const node = snapshot.nodes.byId[String(current)];
+        if (node?.kind === "group" && node.groupId === activeGroupId) {
+          containsActiveGroup = true;
+          break;
+        }
+        if (node?.kind === "split") stack.push(...node.children);
+      }
+      if (!containsActiveGroup) {
+        violation(
+          violations,
+          "ACTIVE_SURFACE_MISMATCH",
+          "activation.activeSurfaceId",
+          "Active surface must own the active panel",
+        );
+      }
+    }
+  }
   if (
     snapshot.focusMemory.panelId !== undefined &&
     snapshot.panels.byId[String(snapshot.focusMemory.panelId)] === undefined
@@ -501,8 +672,23 @@ export function validateWorkspace(snapshot: WorkspaceSnapshot): readonly Invaria
       "Focus-memory group must be live",
     );
   }
+  if (
+    snapshot.focusMemory.panelId !== undefined &&
+    snapshot.focusMemory.groupId !== undefined &&
+    !snapshot.groups.byId[String(snapshot.focusMemory.groupId)]?.panelIds.includes(
+      snapshot.focusMemory.panelId,
+    )
+  ) {
+    violation(
+      violations,
+      "FOCUS_MEMORY_MISMATCH",
+      "focusMemory",
+      "Focus-memory group must own the focus-memory panel",
+    );
+  }
 
   const closedIds = new Set<string>();
+  const closedPanelIds = new Set<string>();
   for (const record of snapshot.recoverableClosedPanels) {
     if (closedIds.has(record.id)) {
       violation(
@@ -513,6 +699,15 @@ export function validateWorkspace(snapshot: WorkspaceSnapshot): readonly Invaria
       );
     }
     closedIds.add(record.id);
+    if (closedPanelIds.has(record.panel.id)) {
+      violation(
+        violations,
+        "DUPLICATE_CLOSED_PANEL_IDENTITY",
+        "recoverableClosedPanels",
+        `Panel "${record.panel.id}" has more than one recoverable record`,
+      );
+    }
+    closedPanelIds.add(record.panel.id);
     if (record.id.trim().length === 0) {
       violation(
         violations,
@@ -535,6 +730,59 @@ export function validateWorkspace(snapshot: WorkspaceSnapshot): readonly Invaria
         "LIVE_AND_CLOSED_PANEL",
         "recoverableClosedPanels",
         `Panel "${record.panel.id}" is both live and recoverably closed`,
+      );
+    }
+  }
+
+  const canonicalClosedIds = [...snapshot.recoverableClosedPanels]
+    .map((record) => String(record.id))
+    .sort(compareCanonicalStrings);
+  if (
+    snapshot.recoverableClosedPanels.some(
+      (record, index) => String(record.id) !== canonicalClosedIds[index],
+    )
+  ) {
+    violation(
+      violations,
+      "NON_CANONICAL_CLOSED_PANEL_ORDER",
+      "recoverableClosedPanels",
+      "Recoverable closed panels must use canonical ID order",
+    );
+  }
+
+  const remoteTransactionIds = new Set<string>();
+  if (snapshot.appliedRemoteTransactions.length > APPLIED_REMOTE_TRANSACTION_LIMIT) {
+    violation(
+      violations,
+      "REMOTE_TRANSACTION_LEDGER_OVERFLOW",
+      "appliedRemoteTransactions",
+      `Remote transaction ledger cannot exceed ${APPLIED_REMOTE_TRANSACTION_LIMIT} receipts`,
+    );
+  }
+  for (const transaction of snapshot.appliedRemoteTransactions) {
+    if (transaction.id.trim().length === 0 || transaction.actorId.trim().length === 0) {
+      violation(
+        violations,
+        "INVALID_REMOTE_TRANSACTION",
+        "appliedRemoteTransactions",
+        "Remote transaction and actor IDs must be non-empty",
+      );
+    }
+    if (remoteTransactionIds.has(transaction.id)) {
+      violation(
+        violations,
+        "DUPLICATE_REMOTE_TRANSACTION",
+        "appliedRemoteTransactions",
+        `Remote transaction "${transaction.id}" appears more than once`,
+      );
+    }
+    remoteTransactionIds.add(transaction.id);
+    if (!Number.isSafeInteger(transaction.ownerEpoch) || transaction.ownerEpoch < 0) {
+      violation(
+        violations,
+        "INVALID_REMOTE_TRANSACTION_EPOCH",
+        `appliedRemoteTransactions.${transaction.id}.ownerEpoch`,
+        "Remote transaction owner epoch must be a non-negative safe integer",
       );
     }
   }

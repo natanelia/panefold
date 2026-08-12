@@ -27,7 +27,7 @@ const capabilities: PanelCapabilities = {
 };
 
 const lifecycle: PanelLifecyclePolicy = {
-  hidden: "keep-alive",
+  hidden: "suspend",
   sameDocumentMove: "preserve-host",
   crossDocumentMove: "unsupported",
 };
@@ -254,6 +254,7 @@ export function projectWorkspace(snapshot: WorkspaceSnapshot): WorkspaceProjecti
       closable: item.capabilities.closable,
       floatable: item.capabilities.floatable,
       parameters: item.parameters,
+      lifecyclePolicy: item.lifecycle,
     };
   }
 

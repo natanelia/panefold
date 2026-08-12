@@ -1,0 +1,21 @@
+{
+  "name": "@panefold/web-components",
+  "version": "0.1.0",
+  "type": "module",
+  "sideEffects": false,
+  "files": [
+    "dist"
+  ],
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "dependencies": {
+    "@panefold/adapter-contract": "workspace:*"
+  },
+  "scripts": {
+    "build": "tsup src/index.ts --format esm --dts --clean"
+  }
+}

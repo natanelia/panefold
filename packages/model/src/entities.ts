@@ -74,6 +74,12 @@ export interface GroupRecord {
   readonly selectedPanelId: PanelId;
   readonly region?: string;
   readonly persistent: boolean;
+  /**
+   * A temporary empty destination retained only when removing it would make
+   * recoverable panels impossible to reopen. Canonicalization clears this as
+   * soon as the group receives a panel.
+   */
+  readonly placeholder?: boolean;
 }
 
 export interface SplitNode {
@@ -127,6 +133,26 @@ export const FLOATING_SURFACE_CAPABILITIES: SurfaceCapabilities = Object.freeze(
   multiScreenPlacement: false,
 });
 
+export const BROWSER_WINDOW_SURFACE_CAPABILITIES: SurfaceCapabilities = Object.freeze({
+  nestedLayout: true,
+  floating: false,
+  popout: true,
+  alwaysOnTop: false,
+  freePositioning: true,
+  crossDocument: true,
+  multiScreenPlacement: true,
+});
+
+export const PICTURE_IN_PICTURE_SURFACE_CAPABILITIES: SurfaceCapabilities = Object.freeze({
+  nestedLayout: false,
+  floating: false,
+  popout: false,
+  alwaysOnTop: true,
+  freePositioning: false,
+  crossDocument: true,
+  multiScreenPlacement: false,
+});
+
 export interface SurfaceRecord {
   readonly id: SurfaceId;
   readonly kind: SurfaceKind;
@@ -135,8 +161,18 @@ export interface SurfaceRecord {
   readonly bounds?: Rect;
   readonly restoreBounds?: Rect;
   readonly maximized: boolean;
+  readonly minimized?: boolean;
   readonly ownerEpoch?: number;
 }
+
+export interface AppliedRemoteTransaction {
+  readonly id: string;
+  readonly actorId: string;
+  readonly surfaceId: SurfaceId;
+  readonly ownerEpoch: number;
+}
+
+export const APPLIED_REMOTE_TRANSACTION_LIMIT = 4_096;
 
 export interface TabPlacement {
   readonly groupId: GroupId;
@@ -171,14 +207,54 @@ export interface EntityTable<Id extends string, Entity extends { readonly id: Id
   readonly byId: Readonly<Record<string, Entity>>;
 }
 
+const CANONICAL_IMMUTABLES = new WeakSet<object>();
+
+function freezeGraph(value: object): void {
+  const stack = [value];
+  const seen = new WeakSet<object>();
+  while (stack.length > 0) {
+    const current = stack.pop();
+    if (current === undefined || seen.has(current)) continue;
+    seen.add(current);
+    for (const key of Reflect.ownKeys(current)) {
+      const descriptor = Object.getOwnPropertyDescriptor(current, key);
+      if (descriptor !== undefined && "value" in descriptor) {
+        const child = descriptor.value as unknown;
+        if ((typeof child === "object" && child !== null) || typeof child === "function") {
+          stack.push(child as object);
+        }
+      }
+    }
+    Object.freeze(current);
+    CANONICAL_IMMUTABLES.add(current);
+  }
+}
+
+/**
+ * Takes ownership of plain structured data without retaining any mutable
+ * caller reference. Values already produced by this function are returned as
+ * is, which preserves structural sharing across kernel revisions.
+ */
+export function cloneAndFreeze<T>(value: T): T {
+  if ((typeof value !== "object" || value === null) && typeof value !== "function") {
+    return value;
+  }
+  if (CANONICAL_IMMUTABLES.has(value as object)) return value;
+  const clone = structuredClone(value);
+  freezeGraph(clone as object);
+  return clone;
+}
+
 export function createEntityTable<Id extends string, Entity extends { readonly id: Id }>(
   entities: readonly Entity[] = [],
 ): EntityTable<Id, Entity> {
-  const sorted = [...entities].sort((left, right) => {
-    const leftId = String(left.id);
-    const rightId = String(right.id);
-    return leftId < rightId ? -1 : leftId > rightId ? 1 : 0;
-  });
+  const sorted = entities
+    .map((entity) => cloneAndFreeze(entity))
+    .sort((left, right) => {
+      const leftId = String(left.id);
+      const rightId = String(right.id);
+      return leftId < rightId ? -1 : leftId > rightId ? 1 : 0;
+    });
   const byId: Record<string, Entity> = Object.create(null) as Record<string, Entity>;
 
   for (const entity of sorted) {
@@ -190,7 +266,7 @@ export function createEntityTable<Id extends string, Entity extends { readonly i
   }
 
   return Object.freeze({
-    ids: Object.freeze(sorted.map((entity) => entity.id)),
+    ids: cloneAndFreeze(sorted.map((entity) => entity.id)),
     byId: Object.freeze(byId),
   });
 }
@@ -214,5 +290,6 @@ export interface WorkspaceSnapshot {
   readonly focusMemory: FocusMemoryDescriptor;
   readonly floatingOrder: readonly SurfaceId[];
   readonly recoverableClosedPanels: readonly ClosedPanelRecord[];
+  readonly appliedRemoteTransactions: readonly AppliedRemoteTransaction[];
   readonly metadata: JsonObject;
 }

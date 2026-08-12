@@ -2,28 +2,58 @@
   "schemaVersion": 1,
   "engineVersion": "0.1.0",
   "classification": "experimental",
-  "source": "packages/model/src/commands.ts#WorkspaceCommand",
+  "source": "packages/model/src/commands.ts#WORKSPACE_COMMAND_TYPES",
   "commands": [
+    {
+      "type": "batch",
+      "status": "experimental-implemented",
+      "execution": "executeCommand",
+      "limitations": [
+        "History and remote-wrapper commands cannot be nested",
+        "The complete batch rejects atomically"
+      ]
+    },
     {
       "type": "open-panel",
       "status": "experimental-implemented",
       "execution": "executeCommand",
+      "limitations": ["Requires an existing destination group"]
+    },
+    {
+      "type": "duplicate-panel",
+      "status": "experimental-implemented",
+      "execution": "executeCommand",
       "limitations": [
-        "Requires an existing destination group",
-        "Does not create the first group in an empty workspace"
+        "Caller supplies the new stable panel ID",
+        "Application-owned live state is not cloned by the kernel"
       ]
     },
     {
       "type": "close-panels",
       "status": "experimental-implemented",
       "execution": "executeCommand",
-      "limitations": ["No asynchronous close guard", "No application checkpoint preparation"]
+      "limitations": ["Async close guards and panel checkpoint preparation run before this command"]
+    },
+    {
+      "type": "close-other-panels",
+      "status": "experimental-implemented",
+      "execution": "executeCommand",
+      "limitations": [
+        "Caller supplies deterministic closed-panel IDs",
+        "Async guards run before this command"
+      ]
+    },
+    {
+      "type": "close-panels-to-right",
+      "status": "experimental-implemented",
+      "execution": "executeCommand",
+      "limitations": ["Uses current semantic tab order", "Async guards run before this command"]
     },
     {
       "type": "reopen-panel",
       "status": "experimental-implemented",
       "execution": "executeCommand",
-      "limitations": ["Requires at least one destination group"]
+      "limitations": ["Uses the former placement or a canonical placeholder fallback"]
     },
     {
       "type": "select-panel",
@@ -35,27 +65,38 @@
       "type": "activate-panel",
       "status": "experimental-implemented",
       "execution": "executeCommand",
-      "limitations": ["DOM focus policy is executed outside the headless kernel"]
+      "limitations": ["DOM focus policy is executed by the renderer"]
     },
     {
       "type": "reorder-panels",
       "status": "experimental-implemented",
       "execution": "executeCommand",
-      "limitations": ["Within one group only", "Anchor must be outside the moving subset"]
+      "limitations": ["Within one group", "The anchor must be outside the moving subset"]
     },
     {
       "type": "move-panel",
       "status": "experimental-implemented",
       "execution": "executeCommand",
-      "limitations": ["Requires an existing destination group"]
+      "limitations": [
+        "Requires an existing destination group",
+        "Cannot bypass a cross-document ownership boundary"
+      ]
+    },
+    {
+      "type": "move-group",
+      "status": "experimental-implemented",
+      "execution": "executeCommand",
+      "limitations": [
+        "Caller supplies split identity and ratio",
+        "Cross-document moves require prepared transfer"
+      ]
     },
     {
       "type": "split-group",
       "status": "experimental-implemented",
       "execution": "executeCommand",
       "limitations": [
-        "Moves a proper subset of the target group only",
-        "Cannot split the entire group",
+        "Moves a proper subset",
         "Same-axis canonicalization may remove the supplied split node"
       ]
     },
@@ -63,76 +104,147 @@
       "type": "merge-groups",
       "status": "experimental-implemented",
       "execution": "executeCommand",
-      "limitations": ["Does not merge a cross-surface root"]
+      "limitations": ["Cross-surface roots are rejected"]
+    },
+    {
+      "type": "swap-groups",
+      "status": "experimental-implemented",
+      "execution": "executeCommand",
+      "limitations": ["Cross-document ownership boundaries are rejected"]
     },
     {
       "type": "resize-split",
       "status": "experimental-implemented",
       "execution": "executeCommand",
-      "limitations": ["Constraint resolution occurs in the geometry package"]
+      "limitations": ["Constraint resolution and pixel rounding are derived by geometry"]
     },
     {
       "type": "equalize-split",
       "status": "experimental-implemented",
       "execution": "executeCommand",
-      "limitations": ["Equalizes all children; subset equalization is absent"]
+      "limitations": ["An optional child subset must contain distinct direct children"]
+    },
+    {
+      "type": "collapse-child",
+      "status": "experimental-implemented",
+      "execution": "executeCommand",
+      "limitations": ["Semantic collapse only; renderer affordances are profile-specific"]
+    },
+    {
+      "type": "restore-collapsed-child",
+      "status": "experimental-implemented",
+      "execution": "executeCommand",
+      "limitations": ["Semantic restore only; renderer affordances are profile-specific"]
     },
     {
       "type": "create-floating-surface",
       "status": "experimental-implemented",
       "execution": "executeCommand",
-      "limitations": ["In-page floating surfaces only", "The sole surface-root group cannot float"]
+      "limitations": ["In-page semantic surface only", "The sole root group cannot float"]
     },
     {
       "type": "move-floating-surface",
       "status": "experimental-implemented",
       "execution": "executeCommand",
-      "limitations": ["Does not clamp to viewport or apply snapping"]
+      "limitations": ["Viewport clamping and snapping are operational policies"]
     },
     {
       "type": "resize-floating-surface",
       "status": "experimental-implemented",
       "execution": "executeCommand",
-      "limitations": ["Does not apply panel constraints, viewport clamping, or snapping"]
+      "limitations": ["Panel constraints, clamping, and snapping are resolved before dispatch"]
+    },
+    {
+      "type": "raise-surface",
+      "status": "experimental-implemented",
+      "execution": "executeCommand",
+      "limitations": ["Updates canonical floating order; platform z-order remains adapter-owned"]
     },
     {
       "type": "maximize-surface",
       "status": "experimental-implemented",
       "execution": "executeCommand",
-      "limitations": ["Records semantic state but does not calculate visual viewport geometry"]
+      "limitations": ["Viewport geometry is adapter-owned"]
     },
     {
       "type": "restore-surface",
       "status": "experimental-implemented",
       "execution": "executeCommand",
-      "limitations": ["Requires saved restore bounds from maximize"]
+      "limitations": ["Requires a minimized state or saved maximize bounds"]
+    },
+    {
+      "type": "minimize-surface",
+      "status": "experimental-implemented",
+      "execution": "executeCommand",
+      "limitations": ["Platform minimize behavior is adapter-owned"]
+    },
+    {
+      "type": "transfer-to-browser-window",
+      "status": "experimental-implemented",
+      "execution": "executeCommand",
+      "limitations": [
+        "Accepts only an already-prepared destination token",
+        "Browser transport and authentication are not provided by the kernel"
+      ]
     },
     {
       "type": "redock-surface",
       "status": "experimental-implemented",
       "execution": "executeCommand",
-      "limitations": ["Supports a single-group in-page floating root only"]
+      "limitations": ["Cross-document surfaces require the expected owner epoch"]
+    },
+    {
+      "type": "move-to-picture-in-picture",
+      "status": "experimental-implemented",
+      "execution": "executeCommand",
+      "limitations": ["Move mode only", "Requires a prepared capability token"]
+    },
+    {
+      "type": "apply-workspace-preset",
+      "status": "experimental-implemented",
+      "execution": "executeCommand",
+      "limitations": ["Input must already be decoded, migrated, bounded, and valid"]
     },
     {
       "type": "restore-workspace",
       "status": "experimental-implemented",
       "execution": "executeCommand",
-      "limitations": [
-        "Accepts an already-decoded typed snapshot",
-        "Boundary schema migration and untrusted-data limits are external"
-      ]
+      "limitations": ["Input must already be decoded, migrated, bounded, and valid"]
+    },
+    {
+      "type": "import-workspace",
+      "status": "experimental-implemented",
+      "execution": "executeCommand",
+      "limitations": ["Input must cross the persistence codec boundary before dispatch"]
     },
     {
       "type": "undo-workspace-operation",
       "status": "experimental-implemented",
       "execution": "dispatchKernelState",
-      "limitations": ["In-memory bounded workspace history only"]
+      "limitations": ["Bounded workspace history is separate from panel-content undo"]
     },
     {
       "type": "redo-workspace-operation",
       "status": "experimental-implemented",
       "execution": "dispatchKernelState",
-      "limitations": ["In-memory bounded workspace history only"]
+      "limitations": ["A new semantic command invalidates redo history"]
+    },
+    {
+      "type": "apply-remote-transaction",
+      "status": "experimental-implemented",
+      "execution": "executeCommand",
+      "limitations": [
+        "Semantic intake and bounded deduplication only",
+        "No transport, authentication, coordinator, or conflict resolution"
+      ]
+    },
+    {
+      "type": "recover-orphaned-surface",
+      "status": "experimental-implemented",
+      "execution": "executeCommand",
+      "limitations": [
+        "Requires the expected owner epoch and an application-selected recovery target"
+      ]
     }
   ]
 }

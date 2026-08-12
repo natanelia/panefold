@@ -2,29 +2,57 @@
 
 Version: `0.1.0` (experimental)
 
-This table describes implemented and tested claims, not aspirations.
+This matrix separates implemented technical primitives from supported product profiles and external
+certification. Every package and declared profile remains experimental and workspace-local; no npm
+publication is claimed.
 
-| Area                                       | Status       | Current claim                                                                   |
-| ------------------------------------------ | ------------ | ------------------------------------------------------------------------------- |
-| Headless model and reference kernel        | Experimental | Node.js 22+, deterministic pure TypeScript                                      |
-| Geometry                                   | Experimental | Tested headless n-ary solver; not wired into the React demo                     |
-| React adapter                              | Experimental | React 19 compact fixture using CSS weight projection                            |
-| Browser                                    | Experimental | Current Chromium desktop reference profile                                      |
-| Main in-page surface                       | Experimental | Docked groups and splitters                                                     |
-| In-page floating surface                   | Experimental | Headless kernel commands only; no reference DOM surface renderer yet            |
-| Pointer                                    | Experimental | Tab and React-local splitter previews in the reference demo                     |
-| Keyboard                                   | Experimental | Tabs, splitters, toolbar/commands, close/undo/redo                              |
-| Accessibility                              | Experimental | Automated semantics plus documented keyboard smoke test; no certification claim |
-| Motion                                     | Experimental | Productive/reduced/off profiles; semantic state never waits for motion          |
-| RTL and localization                       | Experimental | Logical axes and an LTR/RTL demo toggle; UI strings are English-only            |
-| Persistence                                | Unsupported  | Driver contracts only; durable IndexedDB journal is planned                     |
-| Browser popouts / cross-document transfer  | Unsupported  | Planned prepared-transfer protocol                                              |
-| Document Picture-in-Picture / multi-screen | Unsupported  | Planned capability-gated surfaces                                               |
-| Collaboration / coordinator election       | Unsupported  | Planned after formal ownership verification                                     |
-| Dynamic untrusted plugins                  | Unsupported  | Static panel registry only                                                      |
-| Vue, Svelte, Angular, Web Components       | Unsupported  | Planned shared adapter contract                                                 |
-| Mobile/touch product profile               | Unsupported  | Responsive projection is illustrative only                                      |
-| Stable-host heavy-content certification    | Unsupported  | Architecture hook exists; torture evidence is pending                           |
+## Declared experimental profiles
 
-Unsupported capabilities are omitted or visibly disabled. They are never silently presented as
-best-effort behavior.
+| Profile                            | Automated scope                                                                                                                                                  | Explicit boundary                                                                                                                                           |
+| ---------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `compact-react-chromium-desktop`   | React 19.2.8 Atlas compact fixture in Chromium via Playwright on desktop Linux CI; main surface; mouse, keyboard, and programmatic input; axe and semantic tests | Not a stable browser matrix, manual assistive-technology assessment, physical performance profile, heavy-content certification, or external-surface product |
+| `framework-adapter-contract-jsdom` | Vue 3.5, Svelte 5, Angular 21, and Web Components immutable snapshot/dispatch/selection/disposal and SSR-import contracts in JSDOM                               | Not browser rendering, hydration, accessibility, performance, framework-version certification, or third-party adoption evidence                             |
+
+## Implemented technical primitives
+
+| Area                        | Status                 | Current experimental claim                                                                                                                                                   | Not claimed                                                                                                         |
+| --------------------------- | ---------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------- |
+| Model and reference kernel  | Experimental           | Schema-v2 immutable model, exhaustive 36-command catalog, deterministic reference reducer, patches, invariants, batching, and bounded history                                | Stable API/schema policy or ten-million-operation model certification                                               |
+| Optimized projection        | Experimental           | Persistent buckets, derived indexes, patch projection, bounded history, differential smoke runner, and microbenchmark                                                        | Independently reducing optimized kernel or complete differential oracle                                             |
+| Geometry                    | Experimental           | Logical-axis n-ary constraints, collapse, exact rounding/conservation, overflow diagnostics, splitters, hit tests, and drop targets                                          | Certification across all workloads, writing modes, browsers, and panel types                                        |
+| React main-surface renderer | Experimental           | External-store projection, solved geometry, tabs, splitters, keyboard menus/dialogs, focus recovery, resize protocols, and motion                                            | Stable React/browser support range or every system-design interaction                                               |
+| Stable hosts and lifecycle  | Experimental           | Same-document host preservation, explicit policies, abortable lifecycle leases, cooperative suspension, and synthetic heavy-content fixtures                                 | Real editor/WebGL/grid/media/iframe/microfrontend torture or cross-document lifecycle support                       |
+| Runtime                     | Experimental           | Bounded reentrant dispatch, typed overflow, subscriber isolation, policies, selectors, transactions, undo/redo, and diagnostics                                              | Stable concurrency/performance certification                                                                        |
+| Persistence                 | Experimental           | Bounded versioned codec, checksums, v1-to-v2 migration, atomic journal/checkpoint contracts, last-known-good recovery, durable policies, and injected IndexedDB/Effect tests | Certified real crash, quota, corruption, upgrade, application-layout, or panel-type recovery                        |
+| Protocol and motion         | Experimental           | Driver-neutral contracts; XState drag, resize, persistence, transfer, and election machines; FLIP/interruption/reduced-motion primitives                                     | Complete protocol-path certification or physical 60/120 Hz traces                                                   |
+| In-page floating semantics  | Experimental           | Kernel surface creation, movement, resizing, ordering, maximize/minimize/restore, and redock commands                                                                        | Declared floating DOM product profile, viewport/snap certification, or native-window behavior                       |
+| Prepared external surfaces  | Experimental primitive | Capability intersection, prepared transfer, owner tokens/epochs, rollback, compensation, and loss recovery in headless tests                                                 | Browser popout, Document PiP, multi-screen, origin-authentication, or real failure support                          |
+| Vue adapter                 | Experimental           | Native shallow-ref binding and effect-scope disposal tested through the shared JSDOM contract                                                                                | Real-browser Vue rendering or certification                                                                         |
+| Svelte adapter              | Experimental           | Native readable store and component disposal tested through the shared JSDOM contract                                                                                        | Real-browser Svelte rendering or certification                                                                      |
+| Angular adapter             | Experimental           | Native signal/provider/`DestroyRef` binding tested through the shared JSDOM contract                                                                                         | Real-browser Angular rendering or certification                                                                     |
+| Web Components adapter      | Experimental           | SSR-safe custom-element factory, connection lifecycle, and dispatch bridge                                                                                                   | Cross-browser custom-element rendering/accessibility certification                                                  |
+| Trusted plugin registry     | Experimental primitive | Trusted in-process manifests, capability checks, contribution registration, and disposal                                                                                     | Dynamic untrusted code, sandboxing, permissions, or isolation boundary                                              |
+| Observational devtools      | Experimental primitive | Bounded recorder with caller-provided redaction/projection                                                                                                                   | Production inspector, privacy certification, or unrestricted payload capture                                        |
+| Remote command intake       | Experimental primitive | Envelope validation, bounded deduplication, labeling, and semantic dispatch                                                                                                  | Transport, authentication, authorization, durable collaboration, election, or conflict resolution                   |
+| Mobile projection           | Experimental primitive | Reversible data projection for an active region with coarse-target metadata                                                                                                  | Touch UI, virtual-keyboard behavior, mobile browser/AT testing, or mobile product support                           |
+| RTL and localization        | Experimental           | Logical axes and an LTR/RTL demo toggle                                                                                                                                      | Complete localized message catalog, vertical-writing-mode UI, or internationalization certification                 |
+| Accessibility automation    | Experimental           | ARIA/keyboard/focus tests, axe checks, reduced-motion behavior, and automated reference tasks                                                                                | WCAG 2.2 AA certification or manual NVDA, JAWS, VoiceOver, TalkBack, zoom, forced-colors, or voice-control evidence |
+| Conformance harness         | Experimental           | Manifest/schema checks, command parity, capability/evidence validation, 190-requirement traceability, ten-gate accounting, deterministic reports                             | Stable conformance, signed approvals, or external certification                                                     |
+
+## Unsupported product or certification claims
+
+| Claim                                       | Status      | Reason                                                                                                    |
+| ------------------------------------------- | ----------- | --------------------------------------------------------------------------------------------------------- |
+| Browser popout product profile              | Unsupported | Prepared ownership primitives exist, but no browser adapter/failure matrix is published                   |
+| Document Picture-in-Picture product profile | Unsupported | Semantic/capability primitives exist, but no browser certification is published                           |
+| Multi-screen product profile                | Unsupported | No permission, placement, zoom/DPR, or monitor-removal browser evidence                                   |
+| Durable distributed collaboration           | Unsupported | Remote intake is not authenticated transport, coordination, conflict resolution, or durable collaboration |
+| Dynamic untrusted plugins                   | Unsupported | The registry is trusted and in process; it is not a sandbox                                               |
+| Heavy-content certification                 | Unsupported | Synthetic fixtures do not replace real editor, map, grid, media, iframe, and microfrontend torture        |
+| Mobile/touch certification                  | Unsupported | No physical coarse-pointer, virtual-keyboard, mobile browser, or mobile AT task evidence                  |
+| Stable conformance certification            | Unsupported | Applicable requirements and hard gates remain blocked or unresolved                                       |
+
+Unsupported product actions must be omitted or visibly disabled with a reason. Technical primitives
+must not be relabeled as best-effort product support. The machine-readable authority is
+[`conformance/manifest.json`](../conformance/manifest.json) plus
+[`conformance/capabilities.json`](../conformance/capabilities.json).

@@ -16,6 +16,9 @@
     "@panefold/runtime": "workspace:*",
     "effect": "catalog:"
   },
+  "devDependencies": {
+    "fake-indexeddb": "6.2.5"
+  },
   "scripts": {
     "build": "tsup src/index.ts --format esm --dts --clean"
   }

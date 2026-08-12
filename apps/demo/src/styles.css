@@ -449,6 +449,18 @@
     font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
   }
 
+  .demo-lifecycle-badge {
+    color: var(--demo-valid);
+  }
+
+  .demo-lifecycle-badge[data-state="visible"] {
+    color: var(--demo-accent);
+  }
+
+  .demo-lifecycle-badge[data-state="suspended"] {
+    color: var(--demo-muted);
+  }
+
   .demo-map {
     position: relative;
     inline-size: 100%;

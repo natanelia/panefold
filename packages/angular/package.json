@@ -1,0 +1,24 @@
+{
+  "name": "@panefold/angular",
+  "version": "0.1.0",
+  "type": "module",
+  "sideEffects": false,
+  "files": [
+    "dist"
+  ],
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "dependencies": {
+    "@panefold/adapter-contract": "workspace:*"
+  },
+  "peerDependencies": {
+    "@angular/core": ">=18 <23"
+  },
+  "scripts": {
+    "build": "tsup src/index.ts --format esm --dts --clean --external @angular/core"
+  }
+}
