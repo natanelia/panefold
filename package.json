@@ -11,24 +11,30 @@
   "bugs": {
     "url": "https://github.com/natanelia/panefold/issues"
   },
-  "homepage": "https://github.com/natanelia/panefold#readme",
+  "homepage": "https://natanelia.github.io/panefold/",
   "type": "module",
   "packageManager": "pnpm@11.16.0",
   "engines": {
     "node": ">=22"
   },
   "scripts": {
-    "build": "pnpm build:packages && pnpm --filter @panefold/demo run build",
+    "build": "pnpm build:packages && pnpm build:site",
     "build:packages": "pnpm -r --filter './packages/**' run build",
+    "build:site": "pnpm --filter '@panefold/demo^...' run build && PANEFOLD_DEMO_BASE=/panefold/atlas/ pnpm --filter @panefold/demo run build && pnpm --filter @panefold/site run build",
     "dev": "pnpm build:packages && pnpm --filter @panefold/demo run dev",
+    "dev:site": "pnpm build:packages && node scripts/dev-marketing-site.mjs",
     "preview": "pnpm --filter @panefold/demo run preview",
+    "preview:site": "pnpm --filter @panefold/site run preview",
     "typecheck": "pnpm build:packages && tsc --noEmit -p tsconfig.json",
     "test": "pnpm build:packages && vitest run",
     "test:watch": "pnpm build:packages && vitest",
     "test:e2e": "playwright test",
+    "test:site:e2e": "playwright test --config playwright.site.config.ts",
     "lint": "eslint . --max-warnings=0 && pnpm architecture:check",
     "security:check": "node scripts/security-check.mjs",
     "performance:smoke": "node scripts/performance-smoke.mjs",
+    "marketing:capture": "node scripts/capture-marketing-video.mjs",
+    "marketing:social": "node scripts/capture-social-card.mjs",
     "requirements:generate": "node scripts/generate-requirements.mjs",
     "requirements:check": "pnpm requirements:generate && git diff --exit-code -- conformance/requirements.json",
     "conformance:data:generate": "node scripts/generate-conformance-data.mjs",
@@ -37,7 +43,7 @@
     "architecture:check": "depcruise packages --config .dependency-cruiser.cjs",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
-    "check": "pnpm format:check && pnpm lint && pnpm security:check && pnpm requirements:check && pnpm conformance:data:check && pnpm build:packages && pnpm conformance:check && pnpm performance:smoke && tsc --noEmit -p tsconfig.json && vitest run && pnpm --filter @panefold/demo run build"
+    "check": "pnpm format:check && pnpm lint && pnpm security:check && pnpm requirements:check && pnpm conformance:data:check && pnpm build:packages && pnpm conformance:check && pnpm performance:smoke && tsc --noEmit -p tsconfig.json && vitest run && pnpm build:site"
   },
   "devDependencies": {
     "@eslint/js": "10.0.1",

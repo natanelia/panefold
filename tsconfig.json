@@ -3,6 +3,14 @@
   "compilerOptions": {
     "noEmit": true
   },
-  "include": ["packages/*/src", "packages/*/test", "apps/*/src", "apps/*/*.ts", "e2e", "*.ts"],
+  "include": [
+    "packages/*/src",
+    "packages/*/test",
+    "apps/*/src",
+    "apps/*/*.ts",
+    "e2e",
+    "site-e2e",
+    "*.ts"
+  ],
   "exclude": ["**/dist", "**/node_modules"]
 }

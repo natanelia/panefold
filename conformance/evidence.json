@@ -315,7 +315,7 @@
       "kind": "security-report",
       "status": "verified",
       "uri": "repo://scripts/security-check.mjs",
-      "sha256": "9752f50c8c42f9cae13f72761361860888a369d08aa6026295cbd732386c3e1f",
+      "sha256": "d3bfb79faca83779760d2288f63c77646e5de18f75b0386a155d5af18022d0b3",
       "producedAt": "2026-08-12T00:00:00Z",
       "requirementIds": [
         "SEC-003",

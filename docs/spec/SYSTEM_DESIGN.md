@@ -265,8 +265,9 @@ The entries below are internal links to the corresponding chapters and appendice
 
 # **Executive summary**
 
-> > *The system is a deterministic, recoverable, accessible workspace runtime for the web: a workspace operating kernel rather than a draggable component.***  
-> > Governing product definition**
+> *The system is a deterministic, recoverable, accessible workspace runtime for the web: a workspace operating kernel rather than a draggable component.*
+>
+> — Governing product definition
 
 This specification defines the complete architecture for a panel, docking, floating-window, browser-popout, and multi-surface workspace library intended to become the strongest general-purpose foundation in its category. It treats layout correctness, panel identity, lifecycle preservation, input parity, motion, persistence, recovery, security, and integration ergonomics as one system rather than disconnected features.
 
@@ -2299,8 +2300,9 @@ The implementation is accepted as the intended complete design only when every s
 >
 > **21.** Known limitations are explicit; unsupported behavior is never mislabeled as best effort support.
 >
-> > *Build a workspace operating kernel, not a draggable framework component. Keep state, protocol, geometry, motion, effects, and application content distinct; join them through typed, testable contracts.***  
-> > Final architectural directive**
+> *Build a workspace operating kernel, not a draggable framework component. Keep state, protocol, geometry, motion, effects, and application content distinct; join them through typed, testable contracts.*
+>
+> — Final architectural directive
 
 **Table 73.** Final acceptance requirements
 
