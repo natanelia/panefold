@@ -1,0 +1,77 @@
+name: Bug report
+description: Report a reproducible Panefold defect in the experimental source release.
+title: "[Bug]: "
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for helping improve Panefold. This project is experimental and unpublished. For a security issue, stop here and follow SECURITY.md instead.
+  - type: checkboxes
+    id: preflight
+    attributes:
+      label: Preflight
+      options:
+        - label: I searched existing issues and the support matrix for this behavior.
+          required: true
+        - label: This report contains no secrets, private workspace data, or vulnerability details.
+          required: true
+  - type: input
+    id: revision
+    attributes:
+      label: Panefold revision
+      description: Provide the exact commit SHA. There is no published npm version.
+      placeholder: e.g. e698872ef2c356f0c4d77a1e66c8db69a200ce01
+    validations:
+      required: true
+  - type: textarea
+    id: environment
+    attributes:
+      label: Environment
+      description: Include Node, pnpm, browser and OS, framework, input method, and relevant flags.
+      placeholder: Node 24; pnpm 11.16; Chromium 140; macOS; React; pointer
+    validations:
+      required: true
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Minimal reproduction
+      description: Link a minimal repository or provide precise steps starting from a clean checkout.
+      placeholder: |
+        1. Run ...
+        2. Open ...
+        3. Drag ...
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected behavior
+    validations:
+      required: true
+  - type: textarea
+    id: actual
+    attributes:
+      label: Observed behavior
+      description: Include deterministic error output, a sanitized snapshot, screenshot, or trace when useful.
+    validations:
+      required: true
+  - type: dropdown
+    id: area
+    attributes:
+      label: Primary area
+      options:
+        - Model or kernel
+        - Geometry, dragging, or splitters
+        - React workspace or accessibility
+        - Persistence or recovery
+        - External surfaces or protocols
+        - Framework adapter
+        - Demo, documentation, or tooling
+        - Other
+    validations:
+      required: true
+  - type: textarea
+    id: additional
+    attributes:
+      label: Additional context
+      description: Explain frequency, regression range, workarounds, and cleanup/recovery behavior if known.

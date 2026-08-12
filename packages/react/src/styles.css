@@ -119,6 +119,10 @@
     overflow: clip;
   }
 
+  .pf-split-child[data-empty-group-descendant="true"] {
+    overflow: visible;
+  }
+
   .pf-splitter {
     position: relative;
     z-index: 4;
@@ -174,6 +178,45 @@
     border-color: color-mix(in srgb, var(--pf-accent) 45%, transparent);
   }
 
+  .pf-group[data-empty="true"] {
+    position: absolute;
+    inset-inline-start: var(--pf-empty-group-inline-offset, 0);
+    inset-block-start: var(--pf-empty-group-block-offset, 0);
+    z-index: 3;
+    inline-size: var(--pf-empty-group-inline-size, 96px);
+    block-size: var(--pf-empty-group-block-size, 96px);
+    border: 1px dashed color-mix(in srgb, var(--pf-accent) 58%, var(--pf-border));
+    border-radius: 8px;
+    background: color-mix(in srgb, var(--pf-accent-soft) 46%, var(--pf-surface));
+    pointer-events: none;
+  }
+
+  .pf-empty-group-placeholder {
+    display: grid;
+    place-content: center;
+    gap: 5px;
+    inline-size: 100%;
+    block-size: 100%;
+    padding: 12px;
+    color: var(--pf-text-muted);
+    text-align: center;
+  }
+
+  .pf-empty-group-placeholder strong {
+    color: var(--pf-text);
+    font-size: 12px;
+  }
+
+  .pf-empty-group-placeholder span {
+    max-inline-size: 260px;
+    font-size: 10px;
+    line-height: 1.45;
+  }
+
+  .pf-group[data-empty="true"] :is(.pf-tab-strip, .pf-panel-slot) {
+    display: none;
+  }
+
   .pf-tab-strip {
     display: flex;
     flex: 0 0 var(--pf-tab-size);
@@ -216,6 +259,16 @@
 
   .pf-workspace[data-panel-drop-enabled="true"] .pf-tab {
     touch-action: none;
+  }
+
+  @media (hover: hover) and (pointer: fine) {
+    .pf-workspace[data-panel-drop-enabled="true"] .pf-tab {
+      cursor: grab;
+    }
+
+    .pf-workspace:is([data-panel-drag-state="armed"], [data-panel-drag-state="dragging"]) .pf-tab {
+      cursor: grabbing;
+    }
   }
 
   .pf-tab[aria-selected="true"] {

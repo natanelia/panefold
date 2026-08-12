@@ -1,0 +1,25 @@
+name: Private contact request
+description: Request a confidential maintainer channel without disclosing sensitive details publicly.
+title: "[Private contact]: "
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Use this form only to ask for a private contact channel. Do not include vulnerability details, conduct-report details, personal information, secrets, traces, affected code, or reproduction material. A maintainer will respond with the safest available private route.
+  - type: dropdown
+    id: subject
+    attributes:
+      label: Request type
+      options:
+        - Security vulnerability
+        - Conduct report
+        - Other confidential project matter
+    validations:
+      required: true
+  - type: checkboxes
+    id: disclosure
+    attributes:
+      label: Public-disclosure check
+      options:
+        - label: I have not included sensitive or report-specific details in this public request.
+          required: true

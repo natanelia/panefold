@@ -2,10 +2,10 @@
   "schemaVersion": 1,
   "kind": "browser-profile-result",
   "profile": "compact-react-chromium-desktop",
-  "producedAt": "2026-08-12T13:39:10Z",
+  "producedAt": "2026-08-12T14:51:49Z",
   "status": "passed",
   "runner": "Playwright 1.62.1",
-  "command": "playwright test --reporter=line",
+  "command": "pnpm test:e2e",
   "project": "chromium",
   "environment": {
     "operatingSystem": "Linux 6.18.35 x86_64",
@@ -14,10 +14,10 @@
     "viewport": "1280x720 plus 390x844 touch emulation"
   },
   "summary": {
-    "tests": 23,
-    "passed": 23,
+    "tests": 24,
+    "passed": 24,
     "failed": 0,
-    "durationMs": 12900
+    "durationMs": 24900
   },
   "coverage": [
     "accessible semantic command projection",
@@ -27,12 +27,13 @@
     "cooperative expensive-work suspension and resume",
     "direct center panel docking with state-preserving undo",
     "direct edge drop and four-way menu container creation in exactly one revision",
+    "visible pointer and keyboard acquisition for a retained group after its final tab moves away",
     "solver-derived drop preview and committed geometry parity within one CSS pixel",
     "logical vertical and icon-only tab presentation",
     "IndexedDB layout and view-preference restoration across reload with fresh post-restore identity allocation",
     "all 17 normative heavy-content fixture classes",
     "forced-colors automation",
-    "same-origin live-host popup prepare, ready, automated axe scan, redock, and intentional close",
+    "same-origin live-host popup prepare, ready, automated axe scan, redock, owner focus restoration, and intentional close",
     "blocked-popup rollback without a semantic commit",
     "unexpected popup loss recovery",
     "source reload closes the popup and restores the panel without reopening it",
@@ -41,19 +42,22 @@
     "raw splitter interaction frame capture and experimental guardrail"
   ],
   "sourceDigests": {
-    "e2e/demo.spec.ts": "8b3de8f9736cc19f6f70b82a4c61fbaa1da8fe4a4c83aaafddaa50958055c73f",
+    "e2e/demo.spec.ts": "2f341a8ead90079d7255a0c6a3a785b59b7db8be95d0968af9593d0dae9536d7",
     "e2e/performance.spec.ts": "2bbc7b6cb40fd2ad97ba33824b5b8a0a3cf43a82ce638e432f13d29c8db164f3",
     "e2e/performance-baseline.json": "128b4c7dc2c7fc03372224828417f675b279359ebbe9bab7408b172ad76b48a9",
     "playwright.config.ts": "1488b4ef7257ef5a6dc5505148550cbb6ed89e9488b2c9e39e874f15469cc245",
     "apps/demo/src/App.tsx": "5ccb681a53760a3d2be7b92c8b72d09e5e022da83cba51d6057bcde94e353e59",
-    "apps/demo/src/external-panels.ts": "b1526ed6c535a968ff62bf2e37b35f3dbed4da13d5014c6e5fcf4c5090232892",
+    "apps/demo/src/external-panels.ts": "47dd82d5ed9c23da2720bf7c2f70bfc3e3882e44d2e15aa4b0b45e4291b3c848",
     "apps/demo/src/runtime-session.ts": "3e19f31aae8b3c4b400de486df68d55018f620ff6fa2dd2a5e3b7e4eb8f130d2",
     "apps/demo/src/workspace-config.ts": "2dbc1dd742adc7bb64ec6de85c0126422c05f34965b3066531dfa261496458c4",
     "packages/geometry/src/hit-test.ts": "b3ab5349e44794d718bf1519b2e27a0dba1407c1baf2c67064d18f85cc43d029",
     "packages/kernel/src/plan-panel-drop.ts": "0e31fc1bacc61a5f3d7de20cffea99f746481e1c3c6be9c40549a75e1892bbe9",
-    "packages/react/src/WorkspaceSurface.tsx": "f5b92163cee2a89aa2050a15d00a37d967a08587bd60eb45a2120d5e0f61ee33",
+    "packages/react/src/WorkspaceSurface.tsx": "193954099cce7fa25902acac84266699e246cf8e7c7938b22f89216ed744fa4c",
     "packages/react/src/panel-drag.tsx": "da354574d3ffa175b784adb62a1681f97cda3660684304b121691edaee27d0ed",
-    "packages/react/src/panel-drop.ts": "ad6127c22f5532dc00533c502d60e5aacac49effbfb6b9d5eff4441db6bc9c22",
+    "packages/react/src/panel-drop.ts": "cb9b838f642373c1c35f0de5f18a22fbf47fe863a73ee95ea07c03c9f5f92fc7",
+    "packages/react/src/messages.ts": "c3577ea017fcebfa86409864b578e181b49208f196c99bd632df8181376bfb81",
+    "packages/react/src/styles.css": "d196751ecea33f14e463b92d1fbe13887baf9079de0dfabd8c57ac83f43dcb17",
+    "packages/react/src/types.ts": "ec2ecf19e49f2825ed2bec7869f87be8caf9bc15520933798c9d22ec152fb7be",
     "packages/runtime/src/durable-runtime.ts": "6ad6e629017a3c4089fdc22f2eef868e3f7873416e9353a2c29825730df63634",
     "packages/surfaces/src/browser-adapter.ts": "1e452c51b94eb96d640defb858d05f28bad3c76550982a20bbcc1ab379cc2d42",
     "packages/surfaces/src/transfer.ts": "148bd8940ebe93559491615d041f3820c4cfd3b4faa2c04b4d43c6426316c2ac"

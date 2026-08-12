@@ -16,7 +16,7 @@ import { siteAsset } from "../lib/router";
 
 export function HomePage({ navigate }: { readonly navigate: (path: string) => void }) {
   return (
-    <main>
+    <main id="main-content" tabIndex={-1}>
       <section className="relative overflow-hidden pb-24 pt-36 md:pb-32 md:pt-44">
         <div className="hero-grid pointer-events-none absolute inset-0 opacity-70" />
         <div className="pointer-events-none absolute left-1/2 top-[-180px] h-[680px] w-[900px] -translate-x-1/2 rounded-full bg-cyan-400/[0.055] blur-[120px]" />

@@ -24,6 +24,11 @@ test("presents the product story and live reference fixture", async ({ page }) =
 
 test("navigates the repository-backed documentation", async ({ page }) => {
   await page.goto("./docs");
+  const skipLink = page.getByRole("link", { name: "Skip to main content" });
+  await skipLink.focus();
+  await expect(skipLink).toBeVisible();
+  await skipLink.press("Enter");
+  await expect(page.locator("#main-content")).toBeFocused();
   await expect(page.getByRole("heading", { name: /Understand the boundaries/i })).toBeVisible();
   await page.locator('main a.group[href$="/docs/architecture"]').click();
   await expect(page.getByRole("heading", { name: "Architecture", exact: true })).toBeVisible();
@@ -40,6 +45,33 @@ test("normalizes static-host trailing-slash routes", async ({ page }) => {
       .frameLocator('iframe[title="Panefold Atlas live workspace demo"]')
       .getByLabel("Map operations workspace"),
   ).toBeVisible();
+});
+
+test("publishes complete route and social metadata", async ({ page }) => {
+  await page.goto("./docs/architecture/");
+
+  await expect(page).toHaveTitle("Architecture — Panefold documentation");
+  await expect(page.locator('link[rel="canonical"]')).toHaveAttribute(
+    "href",
+    "https://natanelia.github.io/panefold/docs/architecture/",
+  );
+  await expect(page.locator('meta[property="og:site_name"]')).toHaveAttribute(
+    "content",
+    "Panefold",
+  );
+  await expect(page.locator('meta[property="og:image:width"]')).toHaveAttribute("content", "1200");
+  await expect(page.locator('meta[property="og:image:height"]')).toHaveAttribute("content", "630");
+  await expect(page.locator('meta[name="twitter:image:alt"]')).toHaveAttribute(
+    "content",
+    "Panefold workspace runtime shown as a three-pane Atlas map workspace",
+  );
+  const structuredData = page.locator('script[type="application/ld+json"]');
+  await expect(structuredData).toHaveCount(1);
+  expect(JSON.parse((await structuredData.textContent()) ?? "{}")).toMatchObject({
+    "@type": "SoftwareSourceCode",
+    name: "Panefold",
+    codeRepository: "https://github.com/natanelia/panefold",
+  });
 });
 
 test("publishes the complete decision and marketing documentation", async ({ page }) => {
@@ -63,6 +95,26 @@ test("publishes the complete decision and marketing documentation", async ({ pag
 test("renders the complete system design with its original figures", async ({ page }) => {
   await page.goto("./docs/system-design/");
   await expect(page.getByRole("heading", { name: "System design", exact: true })).toBeVisible();
+  const article = page.locator("article");
+  await expect(article.locator("h1")).toHaveCount(1);
+  await expect(
+    page.getByRole("heading", { name: "Document control", exact: true }),
+  ).toHaveJSProperty("tagName", "H2");
+  await expect(
+    page.getByRole("heading", { name: "1. Scope, status, and normative language", exact: true }),
+  ).toHaveJSProperty("tagName", "H2");
+  await expect(page.getByRole("heading", { name: "1.1 In scope", exact: true })).toHaveJSProperty(
+    "tagName",
+    "H3",
+  );
+  const headingLevels = await article
+    .locator("h1, h2, h3, h4, h5, h6")
+    .evaluateAll((headings) => headings.map((heading) => Number(heading.tagName.slice(1))));
+  expect(
+    headingLevels.every(
+      (level, index) => index === 0 || level <= (headingLevels[index - 1] ?? 0) + 1,
+    ),
+  ).toBe(true);
   await expect(page.locator(".docs-figure img")).toHaveCount(14);
   const firstFigure = page.locator(".docs-figure img").first();
   await firstFigure.scrollIntoViewIfNeeded();

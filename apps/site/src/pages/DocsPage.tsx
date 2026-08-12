@@ -145,7 +145,7 @@ export function DocsPage({ slug, navigate }: DocsPageProps) {
   }, [query]);
 
   return (
-    <main className="min-h-screen bg-[#080c12] pt-[68px]">
+    <main id="main-content" tabIndex={-1} className="min-h-screen bg-[#080c12] pt-[68px]">
       <div className="border-b border-white/[0.07] bg-[#090e15] lg:hidden">
         <div className="flex h-12 items-center justify-between px-4">
           <span className="text-xs font-medium text-slate-300">Documentation</span>
@@ -375,8 +375,11 @@ function DocArticle({
   readonly source: string;
   readonly navigate: (path: string) => void;
 }) {
-  const headings = useMemo(() => headingsFor(source), [source]);
-  const body = preparedMarkdown(source.replace(/^#\s+.+\n+/, ""), page.slug);
+  const body = preparedMarkdown(
+    page.slug === "system-design" ? source : source.replace(/^#\s+.+\n+/, ""),
+    page.slug,
+  );
+  const headings = useMemo(() => headingsFor(body), [body]);
   const components = useMemo(() => markdownComponents(navigate), [navigate]);
 
   return (
@@ -522,6 +525,13 @@ function preparedMarkdown(source: string, slug: string): string {
     '![$3]($1 "$2")',
   );
   if (slug === "system-design") {
+    // The source preserves its Word-export chapter structure (H1 chapters,
+    // H2 subsections). The docs shell owns the single page H1, so shift that
+    // source hierarchy down exactly one level at render time.
+    result = result.replace(
+      /^(#{1,5})(\s+)/gm,
+      (_, marks: string, spacing: string) => `${marks}#${spacing}`,
+    );
     result = result.replace(/\(#appendix-([a-j])\.-/g, "(#appendix-$1-");
   }
   return result;

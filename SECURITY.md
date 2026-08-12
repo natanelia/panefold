@@ -12,6 +12,11 @@ flow. Include the affected commit/version, a minimal reproduction, expected impa
 deployment assumptions, and any proposed mitigation. Do not include production data, secrets,
 credentials, private checkpoints, or personal information.
 
+If GitHub does not show the private advisory form, use the dedicated
+[private contact request](https://github.com/natanelia/panefold/issues/new?template=private_contact.yml).
+Do not include vulnerability details, affected code, traces, or reproduction material in that
+public request.
+
 Please allow maintainers to reproduce and assess the report before public disclosure. Because this
 is an experimental project, no response-time or patch-SLA commitment is currently offered.
 

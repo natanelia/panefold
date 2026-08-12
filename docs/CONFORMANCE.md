@@ -6,19 +6,23 @@ conformance to the [Panefold system design](spec/SYSTEM_DESIGN.md).
 The current machine report is structurally valid and intentionally reports **blocked**: all 36
 commands, all 190 Appendix A requirements, and all ten hard gates are present, but stable-release
 evidence is incomplete. On the two published experimental profiles, the 380 trace cells currently
-contain 115 verified, 110 unresolved, 42 blocked, and 127 explicitly out-of-scope results. A missing
-result never becomes an implicit pass.
+contain 118 verified, 102 unresolved, 33 blocked, and 127 not applicable results. A missing result
+never becomes an implicit pass.
+
+The trace-cell taxonomy above is distinct from the aggregate validator report, which currently
+contains 42 blocked issues and 107 unresolved issues. Aggregate issues also include hard-gate and
+evidence findings, so those counts are not trace-cell totals.
 
 ## Evidence taxonomy
 
 Every trace and evidence record declares one proof class:
 
-| Class                      | Meaning                                                                                                | Current totals             |
-| -------------------------- | ------------------------------------------------------------------------------------------------------ | -------------------------- |
-| A — code-verifiable        | Repository implementation, model/property proof, source contract, or deterministic code result         | 93 verified, 51 unresolved |
-| B — environment-verifiable | Executed browser, framework, workload, recovery, or performance result with environment metadata       | 22 verified, 54 unresolved |
-| C — manual/external        | Manual AT/physical evidence, independent review, adoption record, usability result, or signed approval | 33 blocked                 |
-| D — future scope           | Capability the specific experimental profile does not publish                                          | 127 not applicable         |
+| Class                      | Meaning                                                                                                | Current totals                               |
+| -------------------------- | ------------------------------------------------------------------------------------------------------ | -------------------------------------------- |
+| A — code-verifiable        | Repository implementation, model/property proof, source contract, or deterministic code result         | 93 verified, 51 unresolved, 0 blocked, 0 N/A |
+| B — environment-verifiable | Executed browser, framework, workload, recovery, or performance result with environment metadata       | 25 verified, 51 unresolved, 0 blocked, 0 N/A |
+| C — manual/external        | Manual AT/physical evidence, independent review, adoption record, usability result, or signed approval | 0 verified, 0 unresolved, 33 blocked, 0 N/A  |
+| D — future scope           | Capability the specific experimental profile does not publish                                          | 0 verified, 0 unresolved, 0 blocked, 127 N/A |
 
 Evidence also distinguishes source, executed result, and attestation. A source hash proves exactly
 which artifact was reviewed; it does not pretend that the test passed. A result records a bounded
@@ -61,9 +65,9 @@ the command output.
   working pointer/keyboard splitters, logical and icon-only tab rails, exact IndexedDB
   save/reload/restore evidence, live same-origin popup transfer/redock/loss recovery, LTR/RTL resize,
   motion preference, stable-host lifecycle, all 17 panel classes, forced colors, touch projection,
-  and raw splitter-frame capture. The checked-in result records 23/23 passing browser tasks.
+  and raw splitter-frame capture. The checked-in result records 24/24 passing browser tasks.
 - The framework JSDOM contract passed 20/20 tests across Vue, Svelte, Angular, and Web Components.
-- Protocol/motion validation passed 49/49 focused tests plus 41/41 React integration tests. It
+- Protocol/motion validation passed 49/49 focused tests plus 43/43 React integration tests. It
   covers the twelve-actor catalog, cancellation/revision conflicts, disposable motion leases,
   progressive View Transition fallback, and deterministic load degradation.
 - The independent semantic reducer matched the complete reference result for all 36 curated command

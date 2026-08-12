@@ -9,7 +9,9 @@ interface PageMetadata {
 }
 
 export function installStructuredData(): void {
-  const structuredData = document.createElement("script");
+  const existing = document.getElementById("panefold-structured-data");
+  const structuredData =
+    existing instanceof HTMLScriptElement ? existing : document.createElement("script");
   structuredData.id = "panefold-structured-data";
   structuredData.type = "application/ld+json";
   structuredData.textContent = JSON.stringify({
@@ -22,7 +24,7 @@ export function installStructuredData(): void {
     programmingLanguage: "TypeScript",
     runtimePlatform: "Web browser",
   });
-  document.head.append(structuredData);
+  if (existing === null) document.head.append(structuredData);
 }
 
 export function updatePageMetadata(path: string): void {

@@ -47,6 +47,7 @@ import {
 } from "./panel-drag";
 import {
   createPanelDropRequest,
+  emptyGroupAcquisitionRect,
   groupForPanel,
   logicalEdgeLabel,
   nodeForGroup,
@@ -745,6 +746,17 @@ function SurfaceRenderer<TSnapshot, TCommand, TResult>({
           sourcePanels: invocation.sourcePanels,
           host,
           parkingElement,
+          notifyReturnedToOwner: (message) => {
+            finalizeExternalHostAccessibility(
+              host,
+              invocation.panel.title,
+              labelledBy,
+              surfaceDocument,
+            );
+            setPortalOwnershipRevision((current) => current + 1);
+            announce(message);
+            restorePanelTab(invocation.panel.id);
+          },
           origin: invocation.origin,
           position: invocation.position,
           ...(invocation.pointer === undefined ? {} : { pointer: invocation.pointer }),
@@ -795,7 +807,7 @@ function SurfaceRenderer<TSnapshot, TCommand, TResult>({
         },
       );
     },
-    [domIdPrefix, interactionMessages, onExternalPanelRequest],
+    [announce, domIdPrefix, interactionMessages, onExternalPanelRequest, restorePanelTab],
   );
 
   const panelDrag = usePanelDrag({
@@ -1197,6 +1209,7 @@ function SplitNode<TCommand, TResult>({
             ) : null}
             <div
               className="pf-split-child"
+              data-empty-group-descendant={String(subtreeHasEmptyGroup(props.projection, child.id))}
               data-inline-size={childRect.inlineSize}
               data-block-size={childRect.blockSize}
               style={
@@ -1526,6 +1539,7 @@ function PanelGroup<TCommand, TResult>({
   announce,
   interactionMessages,
   messages,
+  resolvedLayout,
 }: PanelGroupProps<TCommand, TResult>) {
   const pointerFocusPanelRef = useRef<string | undefined>(undefined);
   const groupRef = useRef<HTMLElement>(null);
@@ -1539,6 +1553,20 @@ function PanelGroup<TCommand, TResult>({
   const createDropPanelCommand = commands.planPanelDrop;
   const presentation = resolveTabPresentation(tabPresentation, group, projection);
   const orientation = tabOrientation(presentation);
+  const empty = groupPanels.length === 0;
+  const groupRect = resolvedLayout.groupRects[group.id] ?? ZERO_LOGICAL_RECT;
+  const rootRect = resolvedLayout.nodeRects[resolvedLayout.rootNodeId] ?? groupRect;
+  const acquisitionRect = emptyGroupAcquisitionRect(group, groupRect, rootRect);
+  const emptyGroupLabel = group.label ?? messages.panelGroupFallback();
+  const emptyGroupDescriptionId = `${groupLabelId}-empty`;
+  const emptyGroupStyle = empty
+    ? ({
+        "--pf-empty-group-inline-offset": `${acquisitionRect.inlineStart - groupRect.inlineStart}px`,
+        "--pf-empty-group-block-offset": `${acquisitionRect.blockStart - groupRect.blockStart}px`,
+        "--pf-empty-group-inline-size": `${acquisitionRect.inlineSize}px`,
+        "--pf-empty-group-block-size": `${acquisitionRect.blockSize}px`,
+      } as CSSProperties)
+    : undefined;
 
   const commitMenuDrop = (
     panel: WorkspacePanelView,
@@ -1636,11 +1664,25 @@ function PanelGroup<TCommand, TResult>({
       data-tab-placement={presentation.placement}
       data-tab-content={presentation.content}
       data-tab-orientation={orientation}
+      data-empty={String(empty)}
       aria-labelledby={groupLabelId}
+      aria-describedby={empty ? emptyGroupDescriptionId : undefined}
+      style={emptyGroupStyle}
     >
       <h2 id={groupLabelId} className="pf-visually-hidden">
-        {group.label ?? messages.panelGroupFallback()}
+        {emptyGroupLabel}
       </h2>
+      {empty ? (
+        <div
+          id={emptyGroupDescriptionId}
+          className="pf-empty-group-placeholder"
+          data-workspace-empty-group={group.id}
+          role="note"
+        >
+          <strong>{emptyGroupLabel}</strong>
+          <span>{messages.emptyPanelGroupInstructions({ group: emptyGroupLabel })}</span>
+        </div>
+      ) : null}
       <div className="pf-tab-strip">
         <div
           className="pf-tab-list"
@@ -1678,7 +1720,11 @@ function PanelGroup<TCommand, TResult>({
                 onFocus={() => {
                   const origin = pointerFocusPanelRef.current === panel.id ? "pointer" : "keyboard";
                   pointerFocusPanelRef.current = undefined;
-                  if (selected && projection.activePanelId !== panel.id) {
+                  // Pointer focus belongs to the still revision-bound
+                  // drag/click gesture. A normal click selects after
+                  // pointerup; activating here would cancel a drag before
+                  // its first movement sample by advancing the revision.
+                  if (origin === "keyboard" && selected && projection.activePanelId !== panel.id) {
                     dispatch(
                       commands.activatePanel(panel.id),
                       messages.activatedPanel({ title: panel.title }),
@@ -1765,7 +1811,10 @@ function PanelGroup<TCommand, TResult>({
                         const targetGroup = projection.groups[targetGroupId];
                         if (targetGroup === undefined) return;
                         if (createDropPanelCommand !== undefined) {
-                          commitMenuDrop(selectedPanel, targetGroup, { kind: "center", ratio: 1 });
+                          commitMenuDrop(selectedPanel, targetGroup, {
+                            kind: "center",
+                            ratio: 1,
+                          });
                         } else if (createMovePanelCommand !== undefined) {
                           dispatch(
                             createMovePanelCommand(selectedPanel.id, targetGroupId),
@@ -2377,6 +2426,19 @@ function sameLogicalRect(left: LogicalRect, right: LogicalRect): boolean {
     left.inlineSize === right.inlineSize &&
     left.blockSize === right.blockSize
   );
+}
+
+function subtreeHasEmptyGroup(
+  projection: WorkspaceProjection,
+  nodeId: string,
+  visited = new Set<string>(),
+): boolean {
+  if (visited.has(nodeId)) return false;
+  visited.add(nodeId);
+  const node = projection.nodes[nodeId];
+  if (node === undefined) return false;
+  if (node.kind === "group") return projection.groups[node.groupId]?.panelIds.length === 0;
+  return node.childIds.some((childId) => subtreeHasEmptyGroup(projection, childId, visited));
 }
 
 function logicalRectToPhysical(

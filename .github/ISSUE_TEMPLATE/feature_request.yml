@@ -1,0 +1,69 @@
+name: Feature request
+description: Propose a focused capability or improvement for experimental Panefold.
+title: "[Feature]: "
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Panefold protects a small deterministic core. Describe the product problem before prescribing an API or implementation.
+  - type: checkboxes
+    id: preflight
+    attributes:
+      label: Preflight
+      options:
+        - label: I checked the roadmap, support matrix, ADRs, and existing issues.
+          required: true
+        - label: I understand that a repository implementation does not create a stable support or certification claim.
+          required: true
+  - type: textarea
+    id: problem
+    attributes:
+      label: Product problem
+      description: Who needs this, in what workflow, and what fails today?
+    validations:
+      required: true
+  - type: textarea
+    id: outcome
+    attributes:
+      label: Desired outcome
+      description: Describe observable behavior and success criteria without assuming an implementation.
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed API or interaction
+      description: Optional sketch, including keyboard, focus, persistence, and failure behavior where relevant.
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives considered
+      description: Include current workarounds and why they are insufficient.
+    validations:
+      required: true
+  - type: dropdown
+    id: area
+    attributes:
+      label: Primary area
+      options:
+        - Model or kernel
+        - Geometry, dragging, or splitters
+        - React workspace or accessibility
+        - Persistence or recovery
+        - External surfaces or protocols
+        - Framework adapter
+        - Demo, documentation, or tooling
+        - Other
+    validations:
+      required: true
+  - type: textarea
+    id: boundaries
+    attributes:
+      label: Architecture and evidence impact
+      description: Note affected invariants, ownership, transactions, lifecycle, accessibility, security, performance, or support claims.
+  - type: checkboxes
+    id: contribution
+    attributes:
+      label: Contribution
+      options:
+        - label: I am willing to help design or implement this change.
