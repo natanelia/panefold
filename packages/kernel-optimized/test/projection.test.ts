@@ -55,6 +55,7 @@ describe("OptimizedKernelProjection", () => {
 
     const next = projection.applyTransaction(result.transaction);
     expect(next.groupForPanel(fixtureIds.panels[1])).toBe(fixtureIds.groups[1]);
+    expect(next.sharingFrom(projection).indexes.panelGroup).toBe(15);
     expect(canonicalHash(next.snapshot)).toBe(canonicalHash(result.next));
 
     const patchOnly = projection.applyPatches(result.patches, result.next.revision);
@@ -63,6 +64,44 @@ describe("OptimizedKernelProjection", () => {
     expect(() =>
       patchOnly.applyPatches(result.patches, revision(result.next.revision + 1n)),
     ).toThrow(/precondition/);
+  });
+
+  it("preserves every lookup-index bucket for selection and tab reorder", () => {
+    const initial = fixtureSnapshot();
+    const projection = OptimizedKernelProjection.create(initial, { bucketCount: 16 });
+    const selected = executeCommand(initial, {
+      id: commandId("optimized:selection-only"),
+      origin: "pointer",
+      label: "Select panel",
+      command: { type: "select-panel", panelId: fixtureIds.panels[1] },
+    });
+    if (!selected.ok) throw new Error(selected.error.message);
+    const afterSelection = projection.applyTransaction(selected.transaction);
+    expect(afterSelection.sharingFrom(projection).indexes).toEqual({
+      panelGroup: 16,
+      groupNode: 16,
+      nodeParent: 16,
+      surfaceByRoot: 16,
+      floatingRank: 16,
+      bucketCount: 16,
+    });
+
+    const reordered = executeCommand(afterSelection.snapshot, {
+      id: commandId("optimized:reorder-only"),
+      origin: "pointer",
+      label: "Reorder panel",
+      command: {
+        type: "reorder-panels",
+        groupId: fixtureIds.groups[0],
+        panelIds: [fixtureIds.panels[1]],
+        beforePanelId: fixtureIds.panels[0],
+      },
+    });
+    if (!reordered.ok) throw new Error(reordered.error.message);
+    const afterReorder = afterSelection.applyTransaction(reordered.transaction);
+    expect(afterReorder.sharingFrom(afterSelection).indexes.panelGroup).toBe(16);
+    expect(afterReorder.groupForPanel(fixtureIds.panels[1])).toBe(fixtureIds.groups[0]);
+    expect(canonicalHash(afterReorder.snapshot)).toBe(canonicalHash(reordered.next));
   });
 
   it("indexes the final state when one patch batch touches an entity repeatedly", () => {

@@ -323,6 +323,17 @@ export function createDemoCommands(
       splitNodeId: nodeId(id),
       weights,
     }),
+    reorderPanel: (id, targetGroupId, placement) => ({
+      type: "reorder-panels",
+      groupId: groupId(targetGroupId),
+      panelIds: [panelId(id)],
+      ...(placement.beforePanelId === undefined
+        ? {}
+        : { beforePanelId: panelId(placement.beforePanelId) }),
+      ...(placement.afterPanelId === undefined
+        ? {}
+        : { afterPanelId: panelId(placement.afterPanelId) }),
+    }),
     movePanel: (id, targetGroupId) => ({
       type: "move-panel",
       panelId: panelId(id),

@@ -447,6 +447,35 @@
     font-size: 12px;
   }
 
+  .demo-tool-loading,
+  .demo-panel-loading {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 14px;
+    color: var(--demo-text);
+    background: var(--demo-surface);
+  }
+
+  .demo-tool-loading {
+    min-block-size: 112px;
+  }
+
+  .demo-panel-loading {
+    min-block-size: 100%;
+    padding: 24px;
+  }
+
+  .demo-panel-loading > div {
+    display: grid;
+    gap: 4px;
+  }
+
+  .demo-panel-loading span:last-child {
+    color: var(--demo-text-muted);
+    font-size: 12px;
+  }
+
   .demo-recovery-failure {
     align-content: center;
     align-items: start;

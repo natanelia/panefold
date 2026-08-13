@@ -145,11 +145,13 @@ function groupAffectsConstraints(
   after: GroupRecord | undefined,
 ): boolean {
   if (before === undefined || after === undefined) return true;
-  return (
-    before.selectedPanelId !== after.selectedPanelId ||
-    before.panelIds.length !== after.panelIds.length ||
-    before.panelIds.some((panelId, index) => panelId !== after.panelIds[index])
-  );
+  // Tab order is semantic chrome, not a layout constraint. A pure reorder
+  // therefore keeps the resolved panel geometry and cached drop targets valid.
+  // Selection and membership can change the selected/all-panel constraints.
+  if (before.selectedPanelId !== after.selectedPanelId) return true;
+  if (before.panelIds.length !== after.panelIds.length) return true;
+  const previousMembers = new Set(before.panelIds);
+  return after.panelIds.some((panelId) => !previousMembers.has(panelId));
 }
 
 function nodeTopologyChanged(

@@ -138,6 +138,15 @@ retains the selected candidate's exact command and preview, revalidates the revi
 that command on release. Preview state is neither persisted nor entered into history; one accepted
 gesture publishes one transaction. Menu and keyboard routes use the same planner.
 
+Same-strip tab reorder uses relational `beforePanelId`/`afterPanelId` placement rather than pointer
+coordinates or array indexes. The adapter measures a horizontal LTR, horizontal RTL, or vertical
+strip once, performs logarithmic slot lookup, creates only the selected command at commit, and
+dispatches one transaction. Bounded overflow autoscroll translates cached geometry in constant time
+while raw pointer samples stay in a latest-value cell consumed once per animation frame. The visual
+marker and sibling shifts are disposable projection; pointer candidate changes are silent and only
+the final outcome is announced. Alt+logical-arrow, menu, and programmatic routes use the same
+relational command contract.
+
 External ownership transitions use an explicit history barrier. A browser window depends on
 transient activation and an imperative live-host lease, so semantic undo/redo cannot safely recreate
 it. A successful prepared transfer or recovery clears prior workspace undo/redo history and is not
@@ -202,11 +211,14 @@ The operational adapter is SSR-safe and receives its browser environment explici
 same-origin popup and capability-gated Document Picture-in-Picture preparation; transfers locale,
 direction, writing mode, theme tokens, nonce annotations, and allowlisted stylesheets; validates
 workspace/session/protocol context; mounts one lease; and observes intentional close or unexpected
-loss. The React adapter passes an explicit stable host and source-document parking element to the
-application handler while it is still inside pointer-up/user activation. Atlas uses that contract to
-move the same live panel host into a controlled same-origin popup, commit semantic surface ownership,
-redock on requested return, and recover on unexpected close. This is a portal-coupled reference
-profile, not a generic cross-origin renderer. The automated Chromium fixture covers popup
+loss. The React adapter passes an explicit stable host, source-document parking element, and
+`AbortSignal` to the application handler while it is still inside pointer-up/user activation. The
+request is bounded by a validated application-configurable deadline (15 seconds by default);
+timeout or renderer unmount aborts the request, ignores late settlement, and releases the
+interaction actor. Atlas forwards the signal into the prepared transfer coordinator and uses the
+contract to move the same live panel host into a controlled same-origin popup, commit semantic
+surface ownership, redock on requested return, and recover on unexpected close. This is a
+portal-coupled reference profile, not a generic cross-origin renderer. The automated Chromium fixture covers popup
 prepare/ready/live-state preservation/redock/loss recovery. Real
 permissioned PiP, cross-origin deployment, multi-screen placement, process crashes, and CSP
 deployment remain product evidence work.

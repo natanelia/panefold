@@ -2,7 +2,7 @@ import { createHash } from "node:crypto";
 import { readFile, writeFile } from "node:fs/promises";
 import process from "node:process";
 
-const producedAt = "2026-08-12T00:00:00Z";
+const producedAt = "2026-08-13T03:54:04Z";
 const requirementsDocument = JSON.parse(await readFile("conformance/requirements.json", "utf8"));
 const manifest = JSON.parse(await readFile("conformance/manifest.json", "utf8"));
 const requirements = requirementsDocument.requirements;
@@ -29,18 +29,7 @@ const sourceDefinitions = [
     "kernel-laws",
     "model-report",
     "packages/kernel/test/properties.test.ts",
-    [
-      "LAY-001",
-      "LAY-007",
-      "MOD-001",
-      "MOD-002",
-      "MOD-003",
-      "MOD-005",
-      "TXN-001",
-      "TXN-003",
-      "TXN-004",
-      "TXN-005",
-    ],
+    ["LAY-001", "LAY-007", "MOD-001", "MOD-002", "MOD-003", "MOD-005", "TXN-001", "TXN-003"],
     [compactProfile],
   ],
   [
@@ -75,7 +64,7 @@ const sourceDefinitions = [
     "panel-drop-planner",
     "automated-test",
     "packages/kernel/test/plan-panel-drop.test.ts",
-    ["EXP-002", "INT-005", "TXN-001", "TXN-004"],
+    ["EXP-002", "INT-005", "TXN-001"],
     [compactProfile],
   ],
   [
@@ -124,14 +113,24 @@ const sourceDefinitions = [
     "motion-lifecycle",
     "automated-test",
     "packages/motion/test/motion-lifecycle.test.ts",
-    ["MOT-003", "MOT-004", "MOT-005", "MOT-007", "MOT-009", "MOT-010", "SYS-003", "TST-008"],
+    [
+      "MOT-003",
+      "MOT-004",
+      "MOT-005",
+      "MOT-007",
+      "MOT-009",
+      "MOT-010",
+      "PRF-004",
+      "SYS-003",
+      "TST-008",
+    ],
     [compactProfile],
   ],
   [
     "surface-ownership",
     "model-report",
     "packages/surfaces/test/surfaces.test.ts",
-    ["COL-004", "LIF-005", "SUR-001", "SUR-003", "SUR-005", "SUR-007", "TST-004", "TST-009"],
+    ["COL-004", "LIF-005", "SUR-001", "SUR-003", "SUR-005", "SUR-007", "TST-004", "TXN-004"],
     [compactProfile],
   ],
   [
@@ -140,17 +139,27 @@ const sourceDefinitions = [
     "packages/react/test/WorkspaceSurface.test.tsx",
     [
       "A11Y-003",
+      "ARC-002",
       "FOC-001",
       "FOC-003",
       "FOC-004",
+      "INT-001",
       "LIF-001",
       "LIF-003",
       "LIF-006",
       "MOT-002",
+      "PRF-001",
       "REN-001",
       "REN-002",
       "REN-005",
     ],
+    [compactProfile],
+  ],
+  [
+    "react-tab-reorder",
+    "automated-test",
+    "packages/react/test/tab-reorder.test.ts",
+    ["A11Y-002", "EXP-001", "EXP-003", "INT-004", "PRF-001", "PRF-006"],
     [compactProfile],
   ],
   [
@@ -179,18 +188,15 @@ const sourceDefinitions = [
     "automated-test",
     "packages/testkit/test/testkit.test.ts",
     [
-      "A11Y-002",
       "COL-004",
       "COL-005",
       "EXP-001",
-      "INT-004",
       "PRF-002",
       "QLT-001",
       "QLT-003",
       "SUR-002",
       "SUR-003",
       "TST-004",
-      "TST-009",
     ],
     [compactProfile],
   ],
@@ -198,7 +204,7 @@ const sourceDefinitions = [
     "conformance-harness",
     "automated-test",
     "packages/conformance/test/report.test.ts",
-    ["ACC-001", "OBS-006", "QLT-001", "QLT-002", "QLT-004"],
+    ["ACC-001", "OBS-006", "QLT-001", "QLT-004"],
     profileIds,
   ],
   [
@@ -219,7 +225,7 @@ const sourceDefinitions = [
     "package-boundaries",
     "automated-test",
     "pnpm-lock.yaml",
-    ["ARC-005", "PKG-003", "PKG-004", "PKG-005", "SEC-008"],
+    ["ARC-005", "PKG-003", "PKG-005", "SEC-008"],
     profileIds,
   ],
   [
@@ -268,7 +274,7 @@ const sourceDefinitions = [
     "runtime-policy-contract",
     "automated-test",
     "packages/runtime/test/policy.test.ts",
-    ["API-004", "TXN-006", "TXN-007"],
+    ["API-004", "TXN-006"],
     [compactProfile],
   ],
   [
@@ -327,18 +333,7 @@ const sourceDefinitions = [
     "evidence-taxonomy",
     "architecture-decision",
     "docs/adr/0010-executable-evidence-taxonomy.md",
-    [
-      "GOV-001",
-      "GOV-002",
-      "GOV-004",
-      "QLT-001",
-      "QLT-002",
-      "QLT-004",
-      "SCP-001",
-      "SCP-002",
-      "SCP-003",
-      "SCP-004",
-    ],
+    ["GOV-001", "GOV-002", "GOV-004", "QLT-001", "QLT-004", "SCP-002", "SCP-003", "SCP-004"],
     profileIds,
   ],
   [
@@ -400,28 +395,28 @@ const resultDefinitions = [
   [
     "chromium-reference-result",
     "compatibility-report",
-    "conformance/results/chromium-reference-2026-08-12.json",
+    "conformance/results/chromium-reference-2026-08-13.json",
     [
+      "A11Y-002",
       "A11Y-003",
-      "A11Y-006",
+      "EXP-003",
       "EXP-002",
-      "FOC-002",
       "I18N-002",
+      "INT-004",
       "INT-005",
-      "LIF-003",
       "LIF-005",
       "LIF-007",
       "PER-007",
+      "PRF-001",
+      "PRF-006",
       "REN-001",
       "REN-003",
       "REN-004",
       "REN-005",
       "REN-006",
       "RSP-001",
-      "RSP-002",
       "SUR-002",
       "SUR-003",
-      "THM-002",
     ],
     [compactProfile],
     "environment-verifiable",
@@ -429,8 +424,8 @@ const resultDefinitions = [
   [
     "interaction-performance-result",
     "performance-report",
-    "conformance/results/interaction-performance-2026-08-12.json",
-    ["QLT-003", "TST-006"],
+    "conformance/results/interaction-performance-2026-08-13.json",
+    ["PRF-001", "PRF-006", "QLT-003", "TST-006"],
     [compactProfile],
     "environment-verifiable",
   ],
@@ -445,10 +440,13 @@ const resultDefinitions = [
   [
     "protocol-motion-result",
     "model-report",
-    "conformance/results/protocol-motion-2026-08-12.json",
+    "conformance/results/protocol-motion-2026-08-13.json",
     [
+      "A11Y-002",
       "ARC-002",
+      "EXP-003",
       "INT-003",
+      "INT-004",
       "INT-006",
       "MOT-003",
       "MOT-004",
@@ -456,6 +454,9 @@ const resultDefinitions = [
       "MOT-007",
       "MOT-009",
       "MOT-010",
+      "PRF-001",
+      "PRF-004",
+      "PRF-006",
       "SYS-003",
       "TST-003",
       "TST-008",
@@ -466,7 +467,7 @@ const resultDefinitions = [
   [
     "independent-semantic-oracle-result",
     "model-report",
-    "conformance/results/independent-semantic-oracle-2026-08-12.json",
+    "conformance/results/independent-semantic-oracle-2026-08-13.json",
     ["MOD-004", "PRF-003", "TST-002"],
     [compactProfile],
     "code-verifiable",
@@ -589,8 +590,6 @@ const verifiedByProfile = {
     "ARC-004",
     "ARC-005",
     "A11Y-003",
-    "A11Y-006",
-    "A11Y-002",
     "COL-004",
     "COL-005",
     "COL-003",
@@ -610,7 +609,6 @@ const verifiedByProfile = {
     "EXP-002",
     "INT-001",
     "INT-003",
-    "INT-004",
     "INT-005",
     "GOV-001",
     "GOV-002",
@@ -625,7 +623,6 @@ const verifiedByProfile = {
     "LAY-005",
     "LAY-007",
     "LIF-001",
-    "LIF-003",
     "LIF-005",
     "LIF-006",
     "MOT-002",
@@ -652,12 +649,10 @@ const verifiedByProfile = {
     "PKG-001",
     "PKG-002",
     "PKG-003",
-    "PKG-004",
     "PKG-005",
     "PRF-002",
     "PRF-003",
     "QLT-001",
-    "QLT-002",
     "QLT-004",
     "REN-001",
     "REN-002",
@@ -668,7 +663,6 @@ const verifiedByProfile = {
     "SUR-004",
     "SUR-005",
     "SUR-007",
-    "SCP-001",
     "SCP-002",
     "SCP-003",
     "SCP-004",
@@ -682,28 +676,80 @@ const verifiedByProfile = {
     "SYS-003",
     "SYS-004",
     "SYS-005",
-    "THM-002",
     "TXN-001",
     "TXN-002",
     "TXN-003",
     "TXN-004",
-    "TXN-005",
     "TXN-006",
-    "TXN-007",
     "TXN-008",
     "TST-004",
-    "TST-009",
     "TST-002",
-    "FOC-002",
     "LIF-007",
     "REN-003",
     "REN-004",
     "REN-006",
     "RSP-001",
-    "RSP-002",
   ]),
   [adapterProfile]: new Set(["FWK-001", "FWK-003", "FWK-006"]),
 };
+
+// These rows were previously marked verified by evidence that did not establish the complete
+// normative statement. Keep the exact mismatch machine-readable so a future evidence addition
+// cannot silently promote the row without addressing the audited gap.
+const correctedOverclaimRationales = new Map([
+  [
+    "A11Y-002",
+    "The narrowed action registry matches the renderer routes it declares, but it omits structural operations from the complete Appendix G action set and is not generated from route-specific behavior tests.",
+  ],
+  [
+    "A11Y-006",
+    "Pure motion adaptation removes transforms, but the recorded Chromium task checks preference projection rather than end-to-end removal of non-essential spatial movement.",
+  ],
+  [
+    "FOC-002",
+    "The renderer avoids intentionally stealing content focus, but no recorded browser task clicks interactive panel descendants and verifies their natural focus.",
+  ],
+  [
+    "INT-004",
+    "The narrowed action registry matches the renderer routes it declares, but it omits structural pointer actions from the complete Appendix G matrix and is not generated from route-specific keyboard, menu or command-palette, and programmatic tests.",
+  ],
+  [
+    "LIF-003",
+    "JSDOM checks hidden and inert projection, but no recorded browser or assistive-technology traversal establishes exclusion while preserving the declared lifecycle state.",
+  ],
+  [
+    "PKG-004",
+    "Package manifests publish export maps, but every package does not yet publish a documented compatibility policy backed by an exact manifest audit.",
+  ],
+  [
+    "QLT-002",
+    "The harness reports failed hard gates, but it does not compute a release-quality score that is forced to zero.",
+  ],
+  [
+    "RSP-002",
+    "The touch fixture checks a compact region and target size, but no recorded task establishes scrolling, safe-area, and no-hover behavior together.",
+  ],
+  [
+    "SCP-001",
+    "The capability registry is curated rather than generated and cross-checked against every public export, so classification completeness is not established.",
+  ],
+  [
+    "THM-002",
+    "Forced colors, reduced motion, and touch have bounded checks, but the recorded profile has no complete focus-visibility and large-text or zoom visual matrix.",
+  ],
+  [
+    "TST-009",
+    "Failure injection covers bounded persistence and surface cases, not the final authoritative location or recoverable placeholder for every panel across the complete recovery matrix.",
+  ],
+  [
+    "TXN-005",
+    "The runtime does not publish post-commit effect intents carrying transaction and revision identity, and duplicate-delivery idempotence is not tested.",
+  ],
+  [
+    "TXN-007",
+    "Prepared surface transfer rechecks base revision, but the final commit does not re-evaluate policy after asynchronous preparation.",
+  ],
+]);
 
 // A/B/C/D evidence taxonomy. Anything not explicitly environment-, manual-, or future-scoped is
 // repository-code work. New requirements cannot bypass classification because the generated trace
@@ -859,6 +905,8 @@ for (const profileId of profileIds) {
           "This requirement needs manual, physical-system, independent-review, adoption, usability, or signed-approval evidence that repository automation cannot manufacture.",
       });
     } else {
+      const correctedRationale =
+        profileId === compactProfile ? correctedOverclaimRationales.get(requirement.id) : undefined;
       traces.push({
         requirementId: requirement.id,
         profileId,
@@ -866,9 +914,10 @@ for (const profileId of profileIds) {
         verificationClass,
         evidenceIds: relevantEvidence,
         rationale:
-          verificationClass === "code-verifiable"
+          correctedRationale ??
+          (verificationClass === "code-verifiable"
             ? "The repository implementation or its requirement-specific static/model proof is incomplete for this profile."
-            : "A reproducible automated environment result with profile, workload, and execution metadata has not been recorded.",
+            : "A reproducible automated environment result with profile, workload, and execution metadata has not been recorded."),
       });
     }
   }

@@ -9,48 +9,26 @@ export interface StructuralActionParityEntry {
 }
 
 /**
- * Minimum reference-profile routes for every command exposed through direct
- * manipulation. Applications may add shortcuts but cannot remove these
- * non-pointer routes.
+ * Renderer-backed routes in the compact React reference profile. Core-only
+ * commands are deliberately omitted: this is evidence about exposed UI, not
+ * an aspirational copy of the command catalog. Applications may add routes,
+ * but a pointer route must retain at least one non-pointer UI equivalent.
  */
 export const STRUCTURAL_ACTION_PARITY: readonly StructuralActionParityEntry[] = Object.freeze([
   action("select-panel", "Select panel", ["pointer", "keyboard", "programmatic"]),
-  action("activate-panel", "Activate panel", ["pointer", "keyboard", "programmatic"]),
+  action("activate-panel", "Activate panel", ["keyboard", "programmatic"]),
   action("reorder-panels", "Reorder tab", ["pointer", "keyboard", "menu", "programmatic"]),
-  action("move-panel", "Move panel", [
-    "pointer",
-    "keyboard",
-    "menu",
-    "command-palette",
-    "programmatic",
-  ]),
-  action("split-group", "Split group", [
-    "pointer",
-    "keyboard",
-    "menu",
-    "command-palette",
-    "programmatic",
-  ]),
-  action("move-group", "Move group", ["pointer", "keyboard", "menu", "programmatic"]),
+  action("move-panel", "Move panel", ["pointer", "keyboard", "menu", "programmatic"]),
+  action("split-group", "Split group", ["pointer", "keyboard", "menu", "programmatic"]),
   action("resize-split", "Resize split", ["pointer", "keyboard", "programmatic"]),
-  action("close-panels", "Close panel", [
+  action("close-panels", "Close panel", ["pointer", "keyboard", "programmatic"]),
+  action("create-floating-surface", "Float panel", ["menu", "programmatic"]),
+  action("transfer-to-browser-window", "Open panel in new window", [
     "pointer",
     "keyboard",
     "menu",
-    "command-palette",
     "programmatic",
   ]),
-  action("create-floating-surface", "Float group", ["pointer", "keyboard", "menu", "programmatic"]),
-  action("move-floating-surface", "Move floating surface", ["pointer", "keyboard", "programmatic"]),
-  action("resize-floating-surface", "Resize floating surface", [
-    "pointer",
-    "keyboard",
-    "programmatic",
-  ]),
-  action("maximize-surface", "Maximize surface", ["pointer", "keyboard", "menu", "programmatic"]),
-  action("minimize-surface", "Minimize surface", ["pointer", "keyboard", "menu", "programmatic"]),
-  action("restore-surface", "Restore surface", ["pointer", "keyboard", "menu", "programmatic"]),
-  action("redock-surface", "Dock surface", ["pointer", "keyboard", "menu", "programmatic"]),
 ]);
 
 export function auditStructuralActionParity(

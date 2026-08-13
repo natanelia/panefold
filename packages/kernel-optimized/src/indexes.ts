@@ -50,34 +50,10 @@ function indexSet<Value>(key: string, value: Value | undefined): PersistentMapCh
   return value === undefined ? { type: "delete", key } : { type: "set", key, value };
 }
 
-function changedGroups(patches: readonly WorkspacePatch[]): readonly GroupRecord[] {
-  const final = new Map<string, GroupRecord>();
-  for (const patch of patches) {
-    if (patch.kind !== "group") continue;
-    if (patch.after === undefined) final.delete(String(patch.id));
-    else final.set(String(patch.id), patch.after);
-  }
-  return [...final.values()];
-}
-
-function changedNodes(patches: readonly WorkspacePatch[]): readonly LayoutNode[] {
-  const final = new Map<string, LayoutNode>();
-  for (const patch of patches) {
-    if (patch.kind !== "node") continue;
-    if (patch.after === undefined) final.delete(String(patch.id));
-    else final.set(String(patch.id), patch.after);
-  }
-  return [...final.values()];
-}
-
-function changedSurfaces(patches: readonly WorkspacePatch[]): readonly SurfaceRecord[] {
-  const final = new Map<string, SurfaceRecord>();
-  for (const patch of patches) {
-    if (patch.kind !== "surface") continue;
-    if (patch.after === undefined) final.delete(String(patch.id));
-    else final.set(String(patch.id), patch.after);
-  }
-  return [...final.values()];
+function sameMembers<Id extends string>(left: readonly Id[], right: readonly Id[]): boolean {
+  if (left.length !== right.length) return false;
+  const members = new Set(left);
+  return right.every((id) => members.has(id));
 }
 
 /** Incremental secondary indexes over the authoritative canonical snapshot. */
@@ -144,22 +120,48 @@ export class ProjectionIndexes {
 
     for (const patch of patches) {
       if (patch.kind === "group") {
-        for (const panelId of patch.before?.panelIds ?? []) affectedPanels.add(String(panelId));
-        for (const panelId of patch.after?.panelIds ?? []) affectedPanels.add(String(panelId));
+        const before = patch.before?.panelIds ?? [];
+        const after = patch.after?.panelIds ?? [];
+        // Selection and same-group tab ordering do not change membership.
+        // Compare as sets so those frequent operations preserve the complete
+        // panel-to-group index without copying any bucket.
+        if (!sameMembers(before, after)) {
+          const beforeMembers = new Set(before);
+          const afterMembers = new Set(after);
+          for (const panelId of before) {
+            if (!afterMembers.has(panelId)) affectedPanels.add(String(panelId));
+          }
+          for (const panelId of after) {
+            if (!beforeMembers.has(panelId)) affectedPanels.add(String(panelId));
+          }
+        }
       }
       if (patch.kind === "node") {
-        if (patch.before?.kind === "group") affectedGroups.add(String(patch.before.groupId));
-        if (patch.after?.kind === "group") affectedGroups.add(String(patch.after.groupId));
-        if (patch.before?.kind === "split") {
-          for (const childId of patch.before.children) affectedChildren.add(String(childId));
+        const beforeGroupId = patch.before?.kind === "group" ? patch.before.groupId : undefined;
+        const afterGroupId = patch.after?.kind === "group" ? patch.after.groupId : undefined;
+        if (beforeGroupId !== afterGroupId) {
+          if (beforeGroupId !== undefined) affectedGroups.add(String(beforeGroupId));
+          if (afterGroupId !== undefined) affectedGroups.add(String(afterGroupId));
         }
-        if (patch.after?.kind === "split") {
-          for (const childId of patch.after.children) affectedChildren.add(String(childId));
+        const beforeChildren = patch.before?.kind === "split" ? patch.before.children : [];
+        const afterChildren = patch.after?.kind === "split" ? patch.after.children : [];
+        // Weight/collapse-only split patches do not change ancestry.
+        if (!sameMembers(beforeChildren, afterChildren)) {
+          const beforeMembers = new Set(beforeChildren);
+          const afterMembers = new Set(afterChildren);
+          for (const childId of beforeChildren) {
+            if (!afterMembers.has(childId)) affectedChildren.add(String(childId));
+          }
+          for (const childId of afterChildren) {
+            if (!beforeMembers.has(childId)) affectedChildren.add(String(childId));
+          }
         }
       }
       if (patch.kind === "surface") {
-        if (patch.before !== undefined) affectedRoots.add(String(patch.before.rootNodeId));
-        if (patch.after !== undefined) affectedRoots.add(String(patch.after.rootNodeId));
+        if (patch.before?.rootNodeId !== patch.after?.rootNodeId) {
+          if (patch.before !== undefined) affectedRoots.add(String(patch.before.rootNodeId));
+          if (patch.after !== undefined) affectedRoots.add(String(patch.after.rootNodeId));
+        }
       }
       if (patch.kind === "floating-order") {
         for (const surfaceId of patch.before) affectedFloatingSurfaces.add(String(surfaceId));
@@ -172,34 +174,41 @@ export class ProjectionIndexes {
       return indexSet(id, rank < 0 ? undefined : rank);
     });
 
-    const afterGroups = changedGroups(patches);
     const panelGroupChanges = [...affectedPanels].map((id) => {
-      const group = afterGroups.find((candidate) =>
-        candidate.panelIds.some((panelId) => String(panelId) === id),
-      );
-      return indexSet(id, group?.id);
+      for (const groupId of next.groups.ids) {
+        const group = next.groups.byId[String(groupId)];
+        if (group?.panelIds.some((panelId) => String(panelId) === id) === true) {
+          return indexSet(id, group.id);
+        }
+      }
+      return indexSet<GroupId>(id, undefined);
     });
 
-    const afterNodes = changedNodes(patches);
     const groupNodeChanges = [...affectedGroups].map((id) => {
-      const node = afterNodes.find(
-        (candidate) => candidate.kind === "group" && String(candidate.groupId) === id,
-      );
-      return indexSet(id, node?.id);
+      for (const nodeId of next.nodes.ids) {
+        const node = next.nodes.byId[String(nodeId)];
+        if (node?.kind === "group" && String(node.groupId) === id) return indexSet(id, node.id);
+      }
+      return indexSet<NodeId>(id, undefined);
     });
     const nodeParentChanges = [...affectedChildren].map((id) => {
-      const parent = afterNodes.find(
-        (candidate) =>
-          candidate.kind === "split" &&
-          candidate.children.some((childId) => String(childId) === id),
-      );
-      return indexSet(id, parent?.id);
+      for (const nodeId of next.nodes.ids) {
+        const node = next.nodes.byId[String(nodeId)];
+        if (node?.kind === "split" && node.children.some((childId) => String(childId) === id)) {
+          return indexSet(id, node.id);
+        }
+      }
+      return indexSet<NodeId>(id, undefined);
     });
 
-    const afterSurfaces = changedSurfaces(patches);
     const rootSurfaceChanges = [...affectedRoots].map((id) => {
-      const surface = afterSurfaces.find((candidate) => String(candidate.rootNodeId) === id);
-      return indexSet(id, surface?.id);
+      for (const surfaceId of next.surfaces.ids) {
+        const surface = next.surfaces.byId[String(surfaceId)];
+        if (surface !== undefined && String(surface.rootNodeId) === id) {
+          return indexSet(id, surface.id);
+        }
+      }
+      return indexSet<SurfaceId>(id, undefined);
     });
 
     return new ProjectionIndexes(

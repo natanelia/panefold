@@ -14,8 +14,8 @@ stable compatibility or conformance claim.
 | `framework-adapter-contract-jsdom` | Vue 3.5, Svelte 5, Angular 21, and Web Components immutable snapshot, dispatch, selection, observer isolation, lifecycle disposal, and SSR-safe import contracts in JSDOM                                                                                                                                                                                                                                                           | Not browser rendering/hydration/accessibility/performance certification and not third-party adoption evidence                                                                                                  |
 
 The latest checked-in browser result is
-[`chromium-reference-2026-08-12.json`](../conformance/results/chromium-reference-2026-08-12.json).
-It records 24/24 passing browser tasks and the exact limitations. Results do not silently widen
+[`chromium-reference-2026-08-13.json`](../conformance/results/chromium-reference-2026-08-13.json).
+It records 26/26 passing browser tasks and the exact limitations. Results do not silently widen
 profile scope.
 The same result directory retains the framework contract, protocol/motion, independent semantic
 oracle, interaction-frame, and 50,000-attempt projection reports; each records its own environment,

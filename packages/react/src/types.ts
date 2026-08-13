@@ -157,6 +157,12 @@ export interface WorkspaceExternalPanelRequest {
   /** Safe source-document parking supplied explicitly for prepare/rollback workflows. */
   readonly parkingElement: HTMLElement;
   /**
+   * Cancels the in-flight handoff when the surface unmounts or its configured
+   * request deadline expires. Long-running transfer coordinators should
+   * forward this signal to every abort-aware operation they start.
+   */
+  readonly signal: AbortSignal;
+  /**
    * Notifies the owner surface after the application has semantically redocked
    * the panel and returned its stable host to the owner document. The surface
    * restores useful panel focus and publishes the application-localized
@@ -196,6 +202,12 @@ export interface WorkspaceCommandAdapter<TCommand> {
   readonly activatePanel: (panelId: string) => TCommand;
   readonly closePanel: (panelId: string) => TCommand;
   readonly resizeSplit: (splitId: string, weights: readonly number[]) => TCommand;
+  /** Creates one relational same-group tab reorder command. */
+  readonly reorderPanel?: (
+    panelId: string,
+    groupId: string,
+    placement: WorkspacePanelReorderPlacement,
+  ) => TCommand;
   readonly movePanel?: (panelId: string, groupId: string) => TCommand;
   readonly floatPanel?: (panelId: string) => TCommand;
   /**
@@ -218,6 +230,15 @@ export interface WorkspacePanelDropPlanContext {
 export interface WorkspacePanelDropPlan<TCommand> {
   readonly command: TCommand;
   readonly previewRect: LogicalRect;
+}
+
+/**
+ * Relational placement for one tab inside its current group. An empty value
+ * means append. Applications should reject values that provide both anchors.
+ */
+export interface WorkspacePanelReorderPlacement {
+  readonly beforePanelId?: string;
+  readonly afterPanelId?: string;
 }
 
 export interface WorkspaceRuntimeLike<TSnapshot, TCommand, TResult> {

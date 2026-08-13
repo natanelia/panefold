@@ -23,6 +23,22 @@ describe("logical hit testing", () => {
     expect(hitTestNodes(layout, { inline: 100, block: 100 })).toBeUndefined();
   });
 
+  it("uses stable IDs to resolve equal-area overlaps without mutating the layout", () => {
+    const first = { inlineStart: 0, blockStart: 0, inlineSize: 40, blockSize: 20 };
+    const second = { inlineStart: 10, blockStart: 0, inlineSize: 20, blockSize: 40 };
+    const equalAreaLayout: ResolvedLayout = {
+      rootNodeId: "z-node",
+      nodeRects: { "z-node": first, "a-node": second },
+      groupRects: {},
+      splitters: [],
+      collapsedNodeIds: [],
+      diagnostics: [],
+    };
+
+    expect(hitTestNodes(equalAreaLayout, { inline: 15, block: 10 })).toBe("a-node");
+    expect(equalAreaLayout.nodeRects).toEqual({ "z-node": first, "a-node": second });
+  });
+
   it("derives logical center and edge targets without physical directions", () => {
     const childRect = layout.nodeRects.child;
     if (childRect === undefined) throw new RangeError("Missing child test rectangle.");

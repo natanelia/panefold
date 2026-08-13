@@ -1,0 +1,90 @@
+{
+  "schemaVersion": 1,
+  "kind": "differential-model-result",
+  "profile": "compact-react-chromium-desktop",
+  "producedAt": "2026-08-13T04:07:15Z",
+  "status": "passed-with-thresholds-unmet",
+  "runner": "panefold-differential-campaign",
+  "commands": {
+    "prerequisite": "pnpm install --frozen-lockfile && pnpm build:packages",
+    "build": "pnpm exec tsup scripts/run-independent-semantic-campaign.ts --format esm --platform node --target node24 --out-dir /tmp/panefold-independent-evidence --clean",
+    "campaign": "node /tmp/panefold-independent-evidence/run-independent-semantic-campaign.js --seed 20260812 --steps 10000",
+    "suite": "pnpm exec vitest run packages/kernel-optimized/test/benchmark.test.ts packages/kernel-optimized/test/differential.test.ts packages/kernel-optimized/test/independent-reducer.test.ts packages/kernel-optimized/test/persistent-bucket-map.test.ts packages/kernel-optimized/test/projection.test.ts --reporter=json"
+  },
+  "environment": {
+    "operatingSystem": "Linux 6.18.35 x86_64",
+    "node": "24.14.0",
+    "pnpm": "11.16.0"
+  },
+  "campaign": {
+    "seed": 20260812,
+    "generatorId": "panefold.comprehensive-workspace.v1",
+    "randomAlgorithm": "xorshift32",
+    "randomState": 911047503,
+    "initialHash": "fnv1a64-v1:54ef6f603e9c95af",
+    "completedSteps": 10000,
+    "accepted": 7973,
+    "rejected": 2027,
+    "generatedCommandTypeCount": 36,
+    "missingCommandTypes": [],
+    "divergenceCount": 0,
+    "finalHash": "fnv1a64-v1:a1f58a1b0c635ad1",
+    "elapsedMs": 53373
+  },
+  "suite": {
+    "testFiles": 5,
+    "tests": 24,
+    "passed": 24,
+    "failed": 0,
+    "durationMs": 16019
+  },
+  "checks": {
+    "curatedCommandDiscriminants": 36,
+    "candidateComparison": "complete accepted and rejected result contract after every generated attempt",
+    "candidateComparisons": 10000,
+    "invariantValidation": "every attempt",
+    "committedPatchReplay": 7973,
+    "inversePatchReplay": 7973,
+    "optimizedProjectionReplay": 7973
+  },
+  "implementation": {
+    "reference": "@panefold/kernel.executeCommand",
+    "candidateId": "@panefold/kernel-optimized.independent-semantic-reducer.v1",
+    "independentSemanticDecisions": true,
+    "retainedStatefulOptimization": false,
+    "phaseOneDifferentialEligible": false
+  },
+  "thresholds": {
+    "generatedOperationTarget": 10000000,
+    "generatedOperationTargetMet": false
+  },
+  "sourceDigests": {
+    "package.json": "7aff1a8c4f22fe645e720a8612767e300796b82e463f286b3ca8c26ee8a77266",
+    "pnpm-lock.yaml": "dce38aee0e6e7d90983daba3fcc585995cd7e0013d2276e7978b409b450f6acf",
+    "tsconfig.json": "b80805434d59ff95a362cfbff728ceab0e6313f80ea3c23853cb564c1dfc9a65",
+    "scripts/run-independent-semantic-campaign.ts": "41cf49996dea1aa653b28c3060a910ed9da001782291fd6e76cd5925855f376f",
+    "packages/kernel-optimized/src/differential.ts": "b01c11753637f681cb5e38073a87bfcc9c18e2bc278914fc5337fdffcfda8a82",
+    "packages/kernel-optimized/src/independent-reducer.ts": "8406cb76feb757b6b14c0ddea5fa32a6492007c4b8fb33c523b989052e48b3be",
+    "packages/kernel-optimized/src/independent-workspace.ts": "c3c78ac416aae9f7899e6aac3aa3680be7d3668f3f4a063cccbb179be5ba4250",
+    "packages/kernel-optimized/src/projection.ts": "bdef3ec847f88b44d8dbbab789a161e6af0f291ffa410073aa053ffc6575e0ef",
+    "packages/kernel/src/execute.ts": "4628e761739ce2f7bf70a642e26b1b1fee80504d3b475125551b2519d702e81d",
+    "packages/kernel/src/reducer.ts": "210dc3c2521c50b877b401402cd09470e9659bab430e5ff49fb5088a7388a19f",
+    "packages/kernel/src/patches.ts": "73feade2f75ec6af347e5430821c4f6e627f31e1986030dd1c90ed285e12cd8b",
+    "packages/kernel/src/hash.ts": "2a84a392f95e694738839f8608474c2051ca3e3893c4c4ee01591344e9c93fca",
+    "packages/model/src/commands.ts": "e4d1dd8edd3fde607ae8f5640a2e9c9b7a4d571724b4847ab945d599d3fa32b7",
+    "packages/model/src/entities.ts": "2f8461c6ced824a4d99258dfc3f35e983161cef641779b0d4bcaa72e04d0fd2b",
+    "packages/model/src/factories.ts": "efb2d00d14f7f93fc249daae477a22e1b3dea8541d9cffc1cb2e1e04651c6b98",
+    "packages/model/src/results.ts": "57ee423eb7c08ae588a3750a2a067cd250993e20037af0b5aa91ade36fd2cc1a",
+    "packages/kernel-optimized/test/benchmark.test.ts": "1ed3acf97650eb802217931c29ec14021f14ffb7134873345975cf370ba6587c",
+    "packages/kernel-optimized/test/differential.test.ts": "5df1ac571356551d240449e5892c56c98574c7ca3d6e4c001bbd927963137d96",
+    "packages/kernel-optimized/test/independent-reducer.test.ts": "7f973d4bf85544465d374a0c9b9ff5405a81435a40e708542b1be71411cd3ea7",
+    "packages/kernel-optimized/test/persistent-bucket-map.test.ts": "6424a661d75a0edb6b000b6664b0a7ce1b6d60e7173291ddfa4883f7f52df3bf",
+    "packages/kernel-optimized/test/projection.test.ts": "2799540bb4f1e0dd92dfba6c7b52c74517fe9f335fa4315e637066bfd23ecc96"
+  },
+  "limitations": [
+    "The correctness-first candidate rebuilds Map and entity-table state for each command; it is an independent semantic oracle, not a retained performance-optimized production kernel.",
+    "Ten thousand generated attempts are far below the ten-million stable threshold.",
+    "The reproducible evidence runner bundles internal source imports because the independent candidate is intentionally not part of the public package API.",
+    "A clean clone must install dependencies and build workspace packages before bundling the campaign runner because it imports generated package declarations and runtime entry points."
+  ]
+}

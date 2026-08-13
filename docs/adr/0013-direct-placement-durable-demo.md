@@ -31,16 +31,32 @@ initial truths.
    the committed group rectangle. React never constructs the model command union or substitutes a
    generic half-split preview.
 4. Menu and keyboard split/move routes use the same request and planner as pointer interaction.
-5. Tab placement and icon/label treatment are view-only logical presentation. Applications decide
+5. Same-strip tab reorder is a direct-placement branch, not a second ownership protocol. The React
+   adapter measures the current strip, resolves logical insertion slots for horizontal LTR, RTL,
+   and vertical rails, and keeps pointer coordinates and array indexes out of canonical state. The
+   application supplies one immutable relational `beforePanelId` or `afterPanelId` command. Pointer,
+   neighboring-tab keyboard, menu, and programmatic routes share that command factory and
+   localized before/after labels. A completed drag creates the selected command exactly once and
+   dispatches at most once. Sibling transforms and the insertion indicator are speculative
+   projection. Strip geometry is measured once, slot lookup is logarithmic, same-slot autoscroll
+   translates cached geometry in constant time, and raw pointer samples are consumed once per
+   animation frame. Pointer hover remains silent; only the final outcome is announced. Overflow
+   autoscroll is bounded and direction-specific evidence is required before it is included in a
+   profile claim.
+6. Tab placement and icon/label treatment are view-only logical presentation. Applications decide
    whether to persist that preference separately from canonical topology.
-6. External release calls the application handler synchronously during pointer-up. React provides
-   the stable panel host and a source-document parking element explicitly. The handler returns a
-   committed/rejected outcome; popup preparation alone is never announced as semantic success.
-7. Atlas publishes only a controlled same-origin, portal-coupled browser-window policy. It uses
+7. External release calls the application handler synchronously during pointer-up. React provides
+   the stable panel host, a source-document parking element, and an `AbortSignal` explicitly. Every
+   handoff has a validated application-configurable deadline (15 seconds by default); timeout or
+   unmount aborts the signal, disposes the interaction actor, restores source focus where safe, and
+   ignores late settlement. The handler returns a committed/rejected outcome; popup preparation
+   alone is never announced as semantic success. Atlas forwards the signal into the prepared
+   surface coordinator.
+8. Atlas publishes only a controlled same-origin, portal-coupled browser-window policy. It uses
    prepared transfer plus exclusive ownership, moves the same live React host, redocks on requested
    return, and dispatches orphan recovery on unexpected loss. It does not claim cross-origin,
    Picture-in-Picture, crash, or multi-monitor support.
-8. `openDurableWorkspace` verifies and replays persisted data before constructing the runtime.
+9. `openDurableWorkspace` verifies and replays persisted data before constructing the runtime.
    Incomplete recovery fails closed without overwriting the journal. Status observers expose the
    exact last persisted revision and cannot influence writes.
 
@@ -50,6 +66,12 @@ initial truths.
   a batch. External ownership transitions are explicit barriers with no replayable history entry.
 - Preview geometry, pointer coordinates, DOM hosts, popup handles, and view preferences never become
   canonical workspace ownership.
+- Same-strip reorder stores stable relational intent and creates one semantic history entry; tab
+  measurements, drag samples, insertion indexes, and sibling transforms remain disposable view
+  state.
+- Interaction actors exist only while a bounded gesture or handoff is active. Consumer exceptions,
+  timeouts, cancellation, and late asynchronous results cannot pin an actor or publish a second
+  outcome.
 - Stable same-document identity can survive center/edge moves and the controlled popup round trip.
 - A blocked popup or stale revision keeps the source authoritative and leaves no partial topology.
 - Atlas can visibly prove canonical layout restoration while explicitly excluding panel-owned

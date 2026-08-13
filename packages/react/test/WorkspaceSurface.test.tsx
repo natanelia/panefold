@@ -1,9 +1,13 @@
 // @vitest-environment jsdom
 
 import { useEffect, useRef, useState } from "react";
-import { afterEach, describe, expect, it } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 import { act, cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
+import type {
+  createDragActor as CreateDragActor,
+  createResizeActor as CreateResizeActor,
+} from "@panefold/protocol-xstate";
 import {
   SurfaceFrameScheduler,
   type MotionDriver,
@@ -22,14 +26,95 @@ import {
   type WorkspacePanelDropRequest,
   type WorkspacePanelDropPlanContext,
   type WorkspaceExternalPanelHandler,
+  type WorkspaceExternalPanelOutcome,
   type WorkspacePanelRenderProps,
   type WorkspaceProjection,
+  type WorkspaceResultInterpreter,
   type WorkspaceRuntimeLike,
   type WorkspaceTabPresentationResolver,
   type WorkspaceLayoutSolver,
 } from "../src";
 
-afterEach(cleanup);
+const protocolActorInventory = vi.hoisted(() => ({
+  drag: { created: 0, started: 0, stopped: 0, active: 0, pointerMoves: 0 },
+  resize: { created: 0, started: 0, stopped: 0, active: 0, pointerMoves: 0 },
+}));
+
+vi.mock("@panefold/protocol-xstate", async (importOriginal) => {
+  const actual = await importOriginal<{
+    createDragActor: typeof CreateDragActor;
+    createResizeActor: typeof CreateResizeActor;
+  }>();
+  type ActorKind = keyof typeof protocolActorInventory;
+  interface InstrumentableActor {
+    start(): unknown;
+    stop(): void;
+    send(event: { readonly type?: unknown }): void;
+  }
+  const instrument = (kind: ActorKind, actor: InstrumentableActor) => {
+    const counters = protocolActorInventory[kind];
+    counters.created += 1;
+    const start = actor.start.bind(actor);
+    const stop = actor.stop.bind(actor);
+    const send = actor.send.bind(actor);
+    let active = false;
+    Object.defineProperties(actor, {
+      start: {
+        configurable: true,
+        value: () => {
+          if (!active) {
+            active = true;
+            counters.started += 1;
+            counters.active += 1;
+          }
+          return start();
+        },
+      },
+      stop: {
+        configurable: true,
+        value: () => {
+          if (active) {
+            active = false;
+            counters.stopped += 1;
+            counters.active -= 1;
+          }
+          stop();
+        },
+      },
+      send: {
+        configurable: true,
+        value: (event: { readonly type?: unknown }) => {
+          if (event.type === "POINTER_MOVE") counters.pointerMoves += 1;
+          send(event);
+        },
+      },
+    });
+  };
+  return {
+    ...actual,
+    createDragActor: (...args: Parameters<typeof actual.createDragActor>) => {
+      const actor = actual.createDragActor(...args);
+      instrument("drag", actor as unknown as InstrumentableActor);
+      return actor;
+    },
+    createResizeActor: (...args: Parameters<typeof actual.createResizeActor>) => {
+      const actor = actual.createResizeActor(...args);
+      instrument("resize", actor as unknown as InstrumentableActor);
+      return actor;
+    },
+  };
+});
+
+afterEach(() => {
+  cleanup();
+  for (const counters of Object.values(protocolActorInventory)) {
+    counters.created = 0;
+    counters.started = 0;
+    counters.stopped = 0;
+    counters.active = 0;
+    counters.pointerMoves = 0;
+  }
+});
 
 type FixtureCommand =
   | { readonly type: "select"; readonly panelId: string }
@@ -44,6 +129,13 @@ type FixtureCommand =
       readonly type: "move";
       readonly panelId: string;
       readonly groupId: string;
+    }
+  | {
+      readonly type: "reorder";
+      readonly panelId: string;
+      readonly groupId: string;
+      readonly beforePanelId?: string;
+      readonly afterPanelId?: string;
     }
   | { readonly type: "drop"; readonly request: WorkspacePanelDropRequest };
 
@@ -105,6 +197,12 @@ const commands: WorkspaceCommandAdapter<FixtureCommand> = {
   activatePanel: (panelId) => ({ type: "activate", panelId }),
   closePanel: (panelId) => ({ type: "close", panelId }),
   resizeSplit: (splitId, weights) => ({ type: "resize", splitId, weights }),
+  reorderPanel: (panelId, groupId, placement) => ({
+    type: "reorder",
+    panelId,
+    groupId,
+    ...placement,
+  }),
   movePanel: (panelId, groupId) => ({ type: "move", panelId, groupId }),
 };
 
@@ -276,7 +374,14 @@ describe("WorkspaceSurface", () => {
   it("uses one geometry projection for pointer preview and commit", async () => {
     const runtime = new FixtureRuntime(initialProjection);
     const frames = createManualFrameScheduler();
-    const view = renderWorkspace(runtime, { frameScheduler: frames.scheduler });
+    let workspaceProjectionRenders = 0;
+    const view = renderWorkspace(runtime, {
+      frameScheduler: frames.scheduler,
+      tabPresentation: () => {
+        workspaceProjectionRenders += 1;
+        return { placement: "block-start", content: "icon-and-label" };
+      },
+    });
     const splitter = await screen.findByRole("separator", { name: /resize adjacent/i });
     installPointerCapture(splitter);
     const firstChild = requiredElement(
@@ -285,15 +390,20 @@ describe("WorkspaceSurface", () => {
     expect(firstChild.dataset.inlineSize).toBe("497");
 
     fireEvent.pointerDown(splitter, { button: 0, pointerId: 7, clientX: 497, clientY: 0 });
+    const rendersAtPointerStart = workspaceProjectionRenders;
     fireEvent.pointerMove(splitter, { pointerId: 7, clientX: 550, clientY: 0 });
     fireEvent.pointerMove(splitter, { pointerId: 7, clientX: 597, clientY: 0 });
     expect(firstChild.dataset.inlineSize).toBe("497");
+    expect(protocolActorInventory.resize.pointerMoves).toBe(0);
+    expect(workspaceProjectionRenders).toBe(rendersAtPointerStart);
     act(() => {
       frames.flush();
     });
 
     const previewSize = firstChild.dataset.inlineSize;
     expect(previewSize).toBe("597");
+    expect(protocolActorInventory.resize.pointerMoves).toBe(1);
+    expect(workspaceProjectionRenders).toBe(rendersAtPointerStart);
     expect(runtime.getSnapshot().projection.revision).toBe("0");
 
     fireEvent.pointerUp(splitter, { pointerId: 7, clientX: 597, clientY: 0 });
@@ -301,7 +411,110 @@ describe("WorkspaceSurface", () => {
       expect(runtime.getSnapshot().projection.revision).toBe("1");
     });
     expect(firstChild.dataset.inlineSize).toBe(previewSize);
+    expect(protocolActorInventory.resize.pointerMoves).toBe(2);
+    expect(protocolActorInventory.resize.active).toBe(0);
     expect(runtime.transactions.at(-1)?.origin).toBe("pointer");
+  });
+
+  it("refreshes cached preview targets when a same-axis split gains a child", async () => {
+    const runtime = new FixtureRuntime(initialProjection);
+    const frames = createManualFrameScheduler();
+    const view = renderWorkspace(runtime, { frameScheduler: frames.scheduler });
+    const originalSplitter = await screen.findByRole("separator", {
+      name: /resize adjacent/i,
+    });
+    const originalRightChild = requiredElement(
+      view.container.querySelector('[data-workspace-split-child="right-node"]'),
+    );
+    installPointerCapture(originalSplitter);
+
+    fireEvent.pointerDown(originalSplitter, {
+      button: 0,
+      pointerId: 74,
+      clientX: 497,
+      clientY: 0,
+    });
+    fireEvent.pointerMove(originalSplitter, {
+      pointerId: 74,
+      clientX: 520,
+      clientY: 0,
+    });
+    act(() => {
+      frames.flush();
+    });
+    fireEvent.pointerCancel(originalSplitter, {
+      pointerId: 74,
+      clientX: 520,
+      clientY: 0,
+    });
+
+    const current = runtime.getSnapshot().projection;
+    const root = current.nodes.root;
+    if (root?.kind !== "split") throw new Error("Expected the fixture root split");
+    act(() => {
+      runtime.publishProjection({
+        ...current,
+        revision: "1",
+        nodes: {
+          ...current.nodes,
+          root: {
+            ...root,
+            childIds: ["left-node", "right-node", "middle-node"],
+            weights: [1, 1, 1],
+          },
+          "middle-node": { kind: "group", id: "middle-node", groupId: "middle" },
+        },
+        groups: {
+          ...current.groups,
+          middle: {
+            id: "middle",
+            panelIds: [],
+            selectedPanelId: "",
+            label: "Middle",
+          },
+        },
+      });
+    });
+
+    const splitters = screen.getAllByRole("separator", { name: /resize adjacent/i });
+    expect(splitters).toHaveLength(2);
+    expect(splitters[0]).toBe(originalSplitter);
+    expect(view.container.querySelector('[data-workspace-split-child="right-node"]')).toBe(
+      originalRightChild,
+    );
+    const newSplitter = requiredElement(splitters[1] ?? null);
+    const middleChild = requiredElement(
+      view.container.querySelector('[data-workspace-split-child="middle-node"]'),
+    );
+    installPointerCapture(newSplitter);
+    const start = Number(newSplitter.dataset.inlineStart);
+    const initialMiddleSize = middleChild.style.getPropertyValue("--pf-split-size");
+    const initialSplitterPosition = newSplitter.dataset.inlineStart;
+
+    fireEvent.pointerDown(newSplitter, {
+      button: 0,
+      pointerId: 75,
+      clientX: start,
+      clientY: 0,
+    });
+    fireEvent.pointerMove(newSplitter, {
+      pointerId: 75,
+      clientX: start + 80,
+      clientY: 0,
+    });
+    act(() => {
+      frames.flush();
+    });
+
+    expect(middleChild.style.getPropertyValue("--pf-split-size")).not.toBe(initialMiddleSize);
+    expect(newSplitter.dataset.inlineStart).not.toBe(initialSplitterPosition);
+    expect(runtime.transactions).toHaveLength(0);
+
+    fireEvent.pointerCancel(newSplitter, {
+      pointerId: 75,
+      clientX: start + 80,
+      clientY: 0,
+    });
   });
 
   it("commits constrained solved weights after a pointer overshoots a hard minimum", async () => {
@@ -418,6 +631,64 @@ describe("WorkspaceSurface", () => {
       expect(splitter.dataset.resizeState).toBe("idle");
     });
     expect(runtime.transactions).toHaveLength(0);
+  });
+
+  it("creates protocol actors only for active interactions and closes every owning scope", async () => {
+    const runtime = new FixtureRuntime(initialProjection);
+    const view = renderWorkspace(runtime);
+    const splitter = await screen.findByRole("separator", { name: /resize adjacent/i });
+    const alpha = screen.getByRole("tab", { name: "Alpha" });
+    installPointerCapture(splitter);
+    installPointerCapture(alpha);
+
+    expect(protocolActorInventory).toMatchObject({
+      drag: { created: 0, active: 0 },
+      resize: { created: 0, active: 0 },
+    });
+
+    fireEvent.pointerDown(splitter, { button: 0, pointerId: 81, clientX: 497, clientY: 0 });
+    expect(protocolActorInventory.resize).toMatchObject({ created: 1, started: 1, active: 1 });
+    fireEvent.pointerCancel(splitter, { pointerId: 81, clientX: 497, clientY: 0 });
+    expect(protocolActorInventory.resize).toMatchObject({ stopped: 1, active: 0 });
+
+    fireEvent.pointerDown(alpha, { button: 0, pointerId: 82, clientX: 100, clientY: 20 });
+    expect(protocolActorInventory.drag).toMatchObject({ created: 1, started: 1, active: 1 });
+    fireEvent.pointerCancel(alpha, { pointerId: 82, clientX: 100, clientY: 20 });
+    expect(protocolActorInventory.drag).toMatchObject({ stopped: 1, active: 0 });
+
+    splitter.focus();
+    fireEvent.keyDown(splitter, { key: "ArrowRight" });
+    expect(protocolActorInventory.resize).toMatchObject({
+      created: 2,
+      started: 2,
+      stopped: 2,
+      active: 0,
+    });
+
+    const currentAlpha = screen.getByRole("tab", { name: "Alpha" });
+    installPointerCapture(currentAlpha);
+    fireEvent.pointerDown(currentAlpha, {
+      button: 0,
+      pointerId: 83,
+      clientX: 100,
+      clientY: 20,
+    });
+    expect(protocolActorInventory.drag.active).toBe(1);
+    view.unmount();
+    expect(protocolActorInventory.drag).toMatchObject({ stopped: 2, active: 0 });
+
+    const secondView = renderWorkspace(new FixtureRuntime(initialProjection));
+    const secondSplitter = await screen.findByRole("separator", { name: /resize adjacent/i });
+    installPointerCapture(secondSplitter);
+    fireEvent.pointerDown(secondSplitter, {
+      button: 0,
+      pointerId: 84,
+      clientX: 497,
+      clientY: 0,
+    });
+    expect(protocolActorInventory.resize.active).toBe(1);
+    secondView.unmount();
+    expect(protocolActorInventory.resize).toMatchObject({ stopped: 3, active: 0 });
   });
 
   it("maps keyboard steps through logical axes in RTL", async () => {
@@ -699,7 +970,12 @@ describe("WorkspaceSurface", () => {
   it("uses a non-modal move dialog and restores its invoking trigger", async () => {
     const user = userEvent.setup();
     const runtime = new FixtureRuntime(initialProjection);
-    renderWorkspace(runtime);
+    const announcements: string[] = [];
+    renderWorkspace(runtime, {
+      commands: directManipulationCommands,
+      onExternalPanelRequest: () => ({ status: "rejected" }),
+      onAnnouncement: (message) => announcements.push(message),
+    });
     let trigger = await screen.findByRole("button", { name: "Actions for Alpha" });
 
     await user.click(trigger);
@@ -709,7 +985,46 @@ describe("WorkspaceSurface", () => {
     expect(dialog.getAttribute("aria-modal")).toBeNull();
     await waitFor(() => {
       expect(dialog).toBe(document.activeElement);
+      expect(announcements).toEqual(["Left"]);
     });
+
+    act(() => {
+      runtime.publishProjection(runtime.getSnapshot().projection);
+    });
+    expect(announcements).toEqual(["Left"]);
+    expect(runtime.transactions).toHaveLength(0);
+
+    await user.keyboard("{Tab}");
+    expect(announcements.at(-1)).toBe("Split left");
+    expect(dialog).toBe(document.activeElement);
+    expect(runtime.transactions).toHaveLength(0);
+
+    await user.keyboard("{Tab}");
+    expect(announcements.at(-1)).toBe("Open in new window");
+    expect(dialog).toBe(document.activeElement);
+    expect(runtime.transactions).toHaveLength(0);
+
+    await user.keyboard("{Tab}");
+    expect(announcements.at(-1)).toBe("Left");
+    expect(dialog).toBe(document.activeElement);
+
+    await user.keyboard("{Shift>}{Tab}{/Shift}");
+    expect(announcements.at(-1)).toBe("Open in new window");
+    expect(dialog).toBe(document.activeElement);
+    expect(runtime.transactions).toHaveLength(0);
+
+    await user.keyboard("{Shift>}{Tab}{/Shift}");
+    expect(announcements.at(-1)).toBe("Split left");
+    expect(dialog).toBe(document.activeElement);
+
+    await user.keyboard("{Shift>}{Tab}{/Shift}");
+    expect(announcements.at(-1)).toBe("Left");
+    expect(dialog).toBe(document.activeElement);
+    expect(runtime.transactions).toHaveLength(0);
+
+    await user.keyboard("{ArrowDown}");
+    expect(announcements.at(-1)).toBe("Right");
+    expect(runtime.transactions).toHaveLength(0);
 
     await user.keyboard("{Escape}");
     await waitFor(() => {
@@ -952,7 +1267,7 @@ describe("WorkspaceSurface", () => {
       screenY: 370,
     });
 
-    const overlay = requiredElement(view.container.querySelector("[data-workspace-panel-drag]"));
+    const overlay = await waitForElement(view.container, "[data-workspace-panel-drag]");
     expect(overlay.dataset.workspaceDropKind).toBe("center");
     expect(overlay.dataset.workspaceDropTarget).toBe("center:right-node");
 
@@ -969,6 +1284,42 @@ describe("WorkspaceSurface", () => {
     expect(runtime.transactions[0]?.type).toBe("drop");
     expect(runtime.getSnapshot().projection.groups.right?.panelIds).toContain("alpha");
     expect(view.container.querySelector("[data-workspace-panel-drag]")).toBeNull();
+  });
+
+  it("keeps pointer candidate hover silent and announces only the final drop result", async () => {
+    const announcements: string[] = [];
+    const frames = createManualFrameScheduler();
+    const runtime = new FixtureRuntime(initialProjection);
+    const view = renderWorkspace(runtime, {
+      commands: directManipulationCommands,
+      frameScheduler: frames.scheduler,
+      onAnnouncement: (message) => announcements.push(message),
+    });
+    const alpha = await screen.findByRole("tab", { name: "Alpha" });
+    installPointerCapture(alpha);
+
+    fireEvent.pointerDown(alpha, { button: 0, pointerId: 42, clientX: 100, clientY: 20 });
+    for (const position of [
+      { clientX: 750, clientY: 350, kind: "center" },
+      { clientX: 10, clientY: 350, kind: "edge" },
+      { clientX: 1100, clientY: 350, kind: "external" },
+      { clientX: 750, clientY: 350, kind: "center" },
+    ] as const) {
+      fireEvent.pointerMove(alpha, { pointerId: 42, ...position });
+      act(() => frames.flush());
+      expect(
+        requiredElement(view.container.querySelector("[data-workspace-panel-drag]")).dataset
+          .workspaceDropKind,
+      ).toBe(position.kind);
+      expect(announcements).toEqual([]);
+    }
+
+    fireEvent.pointerUp(alpha, { pointerId: 42, clientX: 750, clientY: 350 });
+
+    expect(announcements).toEqual(["Moved Alpha to Right"]);
+    expect(runtime.transactions).toEqual([
+      expect.objectContaining({ type: "drop", origin: "pointer" }),
+    ]);
   });
 
   it("does not invalidate a selected inactive tab drag when pointerdown moves focus", async () => {
@@ -996,7 +1347,7 @@ describe("WorkspaceSurface", () => {
       clientY: 350,
     });
     expect(
-      requiredElement(view.container.querySelector("[data-workspace-panel-drag]")).dataset
+      (await waitForElement(view.container, "[data-workspace-panel-drag]")).dataset
         .workspaceDropTarget,
     ).toBe("center:left-node");
     fireEvent.pointerUp(gamma, {
@@ -1008,6 +1359,637 @@ describe("WorkspaceSurface", () => {
 
     expect(runtime.transactions.map((transaction) => transaction.type)).toEqual(["drop"]);
     expect(runtime.getSnapshot().projection.groups.left?.panelIds).toContain("gamma");
+  });
+
+  it("reorders tabs in one command without remounting content and coalesces raw drag samples", async () => {
+    const renderCounts = new Map<string, number>();
+    const mounts = new Map<string, number>();
+    let reorderCommandCreations = 0;
+    let groupProjectionRenders = 0;
+    const ReorderStatePanel = ({ item }: { readonly item: WorkspacePanelRenderProps["panel"] }) => {
+      renderCounts.set(item.id, (renderCounts.get(item.id) ?? 0) + 1);
+      useEffect(() => {
+        mounts.set(item.id, (mounts.get(item.id) ?? 0) + 1);
+      }, [item.id]);
+      return <input aria-label={`${item.title} reorder state`} defaultValue={item.title} />;
+    };
+    const registry: WorkspacePanelRegistry = {
+      fixture: {
+        render: ({ panel: item }) => <ReorderStatePanel item={item} />,
+      },
+    };
+    const reorderCommands: WorkspaceCommandAdapter<FixtureCommand> = {
+      ...directManipulationCommands,
+      reorderPanel: (panelId, groupId, placement) => {
+        reorderCommandCreations += 1;
+        return { type: "reorder", panelId, groupId, ...placement };
+      },
+    };
+    const frames = createManualFrameScheduler();
+    const projectionWithValuePanels: WorkspaceProjection = {
+      ...initialProjection,
+      panels: Object.fromEntries(
+        Object.entries(initialProjection.panels).map(([panelId, panelView]) => [
+          panelId,
+          {
+            ...panelView,
+            parameters: Object.freeze({ panelId }),
+            lifecyclePolicy: {
+              hidden: "suspend" as const,
+              sameDocumentMove: "preserve-host" as const,
+              crossDocumentMove: "unsupported" as const,
+            },
+          },
+        ]),
+      ),
+    };
+    const runtime = new FixtureRuntime(projectionWithValuePanels, undefined, {
+      recreatePanelViews: true,
+    });
+    const popupDocument = document.implementation.createHTMLDocument("Reordered panel popup");
+    const view = renderWorkspace(runtime, {
+      registry,
+      commands: reorderCommands,
+      frameScheduler: frames.scheduler,
+      onExternalPanelRequest: (request) => {
+        popupDocument.body.append(request.host);
+        return { status: "committed" };
+      },
+      tabPresentation: () => {
+        groupProjectionRenders += 1;
+        return { placement: "block-start", content: "icon-and-label" };
+      },
+    });
+    const alpha = await screen.findByRole("tab", { name: "Alpha" });
+    const beta = screen.getByRole("tab", { name: "Beta" });
+    const tablist = screen.getByRole("tablist", { name: "Left" });
+    setElementRect(tablist, { left: 0, top: 0, width: 300, height: 34 });
+    setElementRect(alpha, { left: 0, top: 0, width: 120, height: 34 });
+    setElementRect(beta, { left: 120, top: 0, width: 180, height: 34 });
+    installPointerCapture(beta);
+    const alphaHost = requiredElement(
+      view.container.querySelector('[data-workspace-panel-host="alpha"]'),
+    );
+    const betaHost = requiredElement(
+      view.container.querySelector('[data-workspace-panel-host="beta"]'),
+    );
+    const gammaHost = requiredElement(
+      view.container.querySelector('[data-workspace-panel-host="gamma"]'),
+    );
+    const hostWriteTrackers = [alphaHost, betaHost, gammaHost].map(trackStableHostWrites);
+    const hostDestinations = new Set(
+      [alphaHost, betaHost, gammaHost].map((host) => {
+        if (host.parentElement === null) throw new Error("Expected a stable host destination");
+        return host.parentElement;
+      }),
+    );
+    const hostAppendSpies = Array.from(hostDestinations, (destination) =>
+      vi.spyOn(destination, "append"),
+    );
+    const stableHostWriteCount = () =>
+      hostWriteTrackers.reduce((total, tracker) => total + tracker.count(), 0);
+    const stableHostAppendCount = () =>
+      hostAppendSpies.reduce((total, spy) => total + spy.mock.calls.length, 0);
+    const hostsBeforeCommit = new Map(
+      ["alpha", "beta", "gamma"].map((panelId) => [
+        panelId,
+        view.container.querySelector(`[data-workspace-panel-host="${panelId}"]`),
+      ]),
+    );
+    const betaEditor = screen.getByLabelText<HTMLInputElement>("Beta reorder state");
+    betaEditor.value = "local state survives";
+    const projectionsBeforeDrag = groupProjectionRenders;
+
+    fireEvent.pointerDown(beta, {
+      button: 0,
+      pointerId: 47,
+      pointerType: "mouse",
+      clientX: 210,
+      clientY: 17,
+    });
+    fireEvent.pointerMove(beta, {
+      pointerId: 47,
+      pointerType: "mouse",
+      clientX: 20,
+      clientY: 17,
+    });
+    expect(view.container.querySelector("[data-workspace-panel-drag]")).toBeNull();
+    expect(frames.hasPending()).toBe(true);
+    expect(protocolActorInventory.drag.pointerMoves).toBe(0);
+    act(() => frames.flush());
+    expect(protocolActorInventory.drag.pointerMoves).toBe(1);
+    expect(groupProjectionRenders).toBe(projectionsBeforeDrag);
+    const overlay = requiredElement(view.container.querySelector("[data-workspace-panel-drag]"));
+    expect(overlay.dataset.workspaceDropKind).toBe("reorder");
+    expect(overlay.dataset.workspaceDropTarget).toBe("reorder:left:before:alpha");
+    expect(view.container.querySelector("[data-workspace-tab-reorder-indicator]")).toBeTruthy();
+    const rendersAfterOverlayMount = new Map(renderCounts);
+    const projectionsAfterOverlayMount = groupProjectionRenders;
+
+    for (let clientX = 21; clientX < 51; clientX += 1) {
+      fireEvent.pointerMove(beta, {
+        pointerId: 47,
+        pointerType: "mouse",
+        clientX,
+        clientY: 17,
+      });
+    }
+    expect(frames.hasPending()).toBe(true);
+    expect(protocolActorInventory.drag.pointerMoves).toBe(1);
+    act(() => frames.flush());
+    expect(protocolActorInventory.drag.pointerMoves).toBe(2);
+    expect(renderCounts).toEqual(rendersAfterOverlayMount);
+    expect(groupProjectionRenders).toBe(projectionsAfterOverlayMount);
+    expect(runtime.transactions).toHaveLength(0);
+    expect(reorderCommandCreations).toBe(0);
+    const rendersBeforeCommit = new Map(renderCounts);
+    const panelsBeforeCommit = runtime.getSnapshot().projection.panels;
+
+    fireEvent.pointerUp(beta, {
+      pointerId: 47,
+      pointerType: "mouse",
+      clientX: 20,
+      clientY: 17,
+    });
+
+    expect(runtime.transactions).toEqual([
+      expect.objectContaining({ type: "reorder", origin: "pointer" }),
+    ]);
+    expect(reorderCommandCreations).toBe(1);
+    expect(protocolActorInventory.drag.pointerMoves).toBe(3);
+    expect(protocolActorInventory.drag.active).toBe(0);
+    expect(runtime.getSnapshot().projection.revision).toBe("1");
+    expect(runtime.getSnapshot().projection.groups.left?.panelIds).toEqual(["beta", "alpha"]);
+    expect(runtime.getSnapshot().projection.panels).not.toBe(panelsBeforeCommit);
+    for (const panelId of Object.keys(panelsBeforeCommit)) {
+      const previousPanel = panelsBeforeCommit[panelId];
+      const nextPanel = runtime.getSnapshot().projection.panels[panelId];
+      expect(nextPanel).not.toBe(previousPanel);
+      expect(nextPanel?.parameters).toBe(previousPanel?.parameters);
+      expect(nextPanel?.lifecyclePolicy).not.toBe(previousPanel?.lifecyclePolicy);
+      expect(nextPanel?.lifecyclePolicy).toEqual(previousPanel?.lifecyclePolicy);
+    }
+    expect(view.container.querySelector('[data-workspace-panel-host="beta"]')).toBe(betaHost);
+    for (const [panelId, host] of hostsBeforeCommit) {
+      expect(view.container.querySelector(`[data-workspace-panel-host="${panelId}"]`)).toBe(host);
+    }
+    expect(screen.getByLabelText<HTMLInputElement>("Beta reorder state")).toBe(betaEditor);
+    expect(betaEditor.value).toBe("local state survives");
+    expect(renderCounts).toEqual(rendersBeforeCommit);
+    expect(stableHostAppendCount()).toBe(0);
+    expect(stableHostWriteCount()).toBe(0);
+    expect(mounts).toEqual(
+      new Map([
+        ["alpha", 1],
+        ["beta", 1],
+        ["gamma", 1],
+      ]),
+    );
+
+    for (const tracker of hostWriteTrackers) tracker.reset();
+    for (const spy of hostAppendSpies) spy.mockClear();
+    act(() => {
+      runtime.dispatch(
+        { type: "select", panelId: "beta" },
+        { origin: "application", label: "Select Beta" },
+      );
+    });
+    expect(alphaHost.hidden).toBe(true);
+    expect(betaHost.hidden).toBe(false);
+    expect(stableHostAppendCount()).toBeGreaterThan(0);
+    expect(stableHostWriteCount()).toBeGreaterThan(0);
+
+    for (const tracker of hostWriteTrackers) tracker.reset();
+    const user = userEvent.setup();
+    await user.click(screen.getByRole("button", { name: "Actions for Beta" }));
+    await user.click(screen.getByRole("menuitem", { name: "Open in new window" }));
+    await waitFor(() => {
+      expect(betaHost.ownerDocument).toBe(popupDocument);
+      expect(betaHost.getAttribute("aria-label")).toBe("Beta");
+      expect(betaHost.getAttribute("aria-labelledby")).toBeNull();
+    });
+    expect(stableHostWriteCount()).toBeGreaterThan(0);
+
+    const rendersBeforePanelChange = new Map(renderCounts);
+    const current = runtime.getSnapshot().projection;
+    const currentBeta = current.panels.beta;
+    if (currentBeta === undefined) throw new Error("Expected Beta panel view");
+    act(() => {
+      runtime.publishProjection({
+        ...current,
+        revision: "3",
+        panels: {
+          ...current.panels,
+          beta: {
+            ...currentBeta,
+            title: "Beta revised",
+            parameters: Object.freeze({ panelId: "beta", version: 2 }),
+          },
+        },
+      });
+    });
+    expect(renderCounts.get("beta")).toBe((rendersBeforePanelChange.get("beta") ?? 0) + 1);
+    expect(renderCounts.get("alpha")).toBe(rendersBeforePanelChange.get("alpha"));
+    expect(renderCounts.get("gamma")).toBe(rendersBeforePanelChange.get("gamma"));
+    expect(betaEditor.getAttribute("aria-label")).toBe("Beta revised reorder state");
+  });
+
+  it("keeps the fixed reorder marker in viewport coordinates for an offset workspace", async () => {
+    const frames = createManualFrameScheduler();
+    const runtime = new FixtureRuntime(initialProjection);
+    const view = renderWorkspace(runtime, {
+      commands: directManipulationCommands,
+      frameScheduler: frames.scheduler,
+    });
+    const workspace = screen.getByLabelText("Fixture workspace");
+    const alpha = await screen.findByRole("tab", { name: "Alpha" });
+    const beta = screen.getByRole("tab", { name: "Beta" });
+    const tablist = screen.getByRole("tablist", { name: "Left" });
+    setElementRect(workspace, { left: 240, top: 160, width: 1000, height: 700 });
+    setElementRect(tablist, { left: 240, top: 160, width: 300, height: 34 });
+    setElementRect(alpha, { left: 240, top: 160, width: 120, height: 34 });
+    setElementRect(beta, { left: 360, top: 160, width: 180, height: 34 });
+    installPointerCapture(beta);
+
+    fireEvent.pointerDown(beta, {
+      button: 0,
+      pointerId: 48,
+      pointerType: "mouse",
+      clientX: 450,
+      clientY: 177,
+    });
+    fireEvent.pointerMove(beta, {
+      pointerId: 48,
+      pointerType: "mouse",
+      clientX: 250,
+      clientY: 177,
+    });
+    act(() => frames.flush());
+
+    const indicator = requiredElement(
+      view.container.querySelector("[data-workspace-tab-reorder-indicator]"),
+    );
+    expect(indicator.hidden).toBe(false);
+    expect(indicator.style.getPropertyValue("--pf-drop-x")).toBe("238.5px");
+    expect(indicator.style.getPropertyValue("--pf-drop-y")).toBe("164px");
+    expect(indicator.style.getPropertyValue("--pf-drop-width")).toBe("3px");
+    expect(indicator.style.getPropertyValue("--pf-drop-height")).toBe("26px");
+
+    fireEvent.pointerCancel(beta, { pointerId: 48, pointerType: "mouse" });
+  });
+
+  it("autoscrolls only inside the tab strip and translates cached reorder geometry", async () => {
+    const frames = createManualFrameScheduler();
+    const runtime = new FixtureRuntime(initialProjection);
+    const view = renderWorkspace(runtime, {
+      commands: directManipulationCommands,
+      frameScheduler: frames.scheduler,
+    });
+    const alpha = await screen.findByRole("tab", { name: "Alpha" });
+    const beta = screen.getByRole("tab", { name: "Beta" });
+    const tablist = screen.getByRole("tablist", { name: "Left" });
+    const workspace = screen.getByLabelText("Fixture workspace");
+    setElementRect(workspace, { left: 0, top: 0, width: 1000, height: 700 });
+    setElementRect(tablist, { left: 0, top: 0, width: 200, height: 34 });
+    setElementRect(alpha, { left: 0, top: 0, width: 100, height: 34 });
+    setElementRect(beta, { left: 100, top: 0, width: 100, height: 34 });
+    Object.defineProperties(tablist, {
+      clientWidth: { configurable: true, value: 200 },
+      scrollWidth: { configurable: true, value: 500 },
+    });
+    tablist.scrollLeft = 0;
+    let alphaMeasurements = 0;
+    let betaMeasurements = 0;
+    let rootMeasurements = 0;
+    let stripMeasurements = 0;
+    const measureAlpha = alpha.getBoundingClientRect.bind(alpha);
+    const measureBeta = beta.getBoundingClientRect.bind(beta);
+    alpha.getBoundingClientRect = () => {
+      alphaMeasurements += 1;
+      return measureAlpha();
+    };
+    beta.getBoundingClientRect = () => {
+      betaMeasurements += 1;
+      return measureBeta();
+    };
+    const measureRoot = workspace.getBoundingClientRect.bind(workspace);
+    const measureStrip = tablist.getBoundingClientRect.bind(tablist);
+    workspace.getBoundingClientRect = () => {
+      rootMeasurements += 1;
+      return measureRoot();
+    };
+    tablist.getBoundingClientRect = () => {
+      stripMeasurements += 1;
+      return measureStrip();
+    };
+    installPointerCapture(alpha);
+
+    fireEvent.pointerDown(alpha, {
+      button: 0,
+      pointerId: 49,
+      pointerType: "mouse",
+      clientX: 50,
+      clientY: 17,
+    });
+    const measurementsAtDragStart = [
+      alphaMeasurements,
+      betaMeasurements,
+      rootMeasurements,
+      stripMeasurements,
+    ];
+    expect(measurementsAtDragStart).toEqual([1, 1, 1, 1]);
+    fireEvent.pointerMove(alpha, {
+      pointerId: 49,
+      pointerType: "mouse",
+      clientX: 195,
+      clientY: 80,
+    });
+    act(() => frames.flush());
+    expect(tablist.scrollLeft).toBe(0);
+
+    fireEvent.pointerMove(alpha, {
+      pointerId: 49,
+      pointerType: "mouse",
+      clientX: 160,
+      clientY: 17,
+    });
+    act(() => frames.flush());
+    const indicator = requiredElement(
+      view.container.querySelector("[data-workspace-tab-reorder-indicator]"),
+    );
+    const indicatorBeforeScroll = indicator.style.getPropertyValue("--pf-drop-x");
+
+    fireEvent.pointerMove(alpha, {
+      pointerId: 49,
+      pointerType: "mouse",
+      clientX: 195,
+      clientY: 17,
+    });
+    act(() => frames.flush());
+    expect(tablist.scrollLeft).toBeGreaterThan(0);
+    expect(indicator.style.getPropertyValue("--pf-drop-x")).not.toBe(indicatorBeforeScroll);
+    expect([alphaMeasurements, betaMeasurements, rootMeasurements, stripMeasurements]).toEqual(
+      measurementsAtDragStart,
+    );
+
+    fireEvent.pointerUp(alpha, {
+      pointerId: 49,
+      pointerType: "mouse",
+      clientX: 195,
+      clientY: 17,
+    });
+    expect(runtime.transactions).toEqual([
+      expect.objectContaining({ type: "reorder", origin: "pointer" }),
+    ]);
+    expect([alphaMeasurements, betaMeasurements, rootMeasurements, stripMeasurements]).toEqual([
+      2, 2, 1, 2,
+    ]);
+  });
+
+  it("repaints and commits the translated reorder target after manual tab-strip scroll", async () => {
+    const frames = createManualFrameScheduler();
+    const runtime = new FixtureRuntime(initialProjection);
+    const view = renderWorkspace(runtime, {
+      commands: directManipulationCommands,
+      frameScheduler: frames.scheduler,
+    });
+    const alpha = await screen.findByRole("tab", { name: "Alpha" });
+    const beta = screen.getByRole("tab", { name: "Beta" });
+    const tablist = screen.getByRole("tablist", { name: "Left" });
+    setElementRect(tablist, { left: 0, top: 0, width: 200, height: 34 });
+    setElementRect(alpha, { left: 0, top: 0, width: 100, height: 34 });
+    setElementRect(beta, { left: 100, top: 0, width: 100, height: 34 });
+    Object.defineProperties(tablist, {
+      clientWidth: { configurable: true, value: 200 },
+      scrollWidth: { configurable: true, value: 500 },
+    });
+    tablist.scrollLeft = 0;
+    installPointerCapture(alpha);
+
+    fireEvent.pointerDown(alpha, {
+      button: 0,
+      pointerId: 50,
+      pointerType: "mouse",
+      clientX: 50,
+      clientY: 17,
+    });
+    fireEvent.pointerMove(alpha, {
+      pointerId: 50,
+      pointerType: "mouse",
+      clientX: 100,
+      clientY: 17,
+    });
+    act(() => frames.flush());
+    const overlay = requiredElement(view.container.querySelector("[data-workspace-panel-drag]"));
+    const indicator = requiredElement(
+      view.container.querySelector("[data-workspace-tab-reorder-indicator]"),
+    );
+    expect(overlay.dataset.workspaceDropTarget).toBe("reorder:left:before:beta");
+    const indicatorBeforeScroll = indicator.style.getPropertyValue("--pf-drop-x");
+
+    tablist.scrollLeft = 20;
+    fireEvent.scroll(tablist);
+    expect(frames.hasPending()).toBe(true);
+    act(() => frames.flush());
+
+    expect(overlay.dataset.workspaceDropTarget).toBe("reorder:left:before:beta");
+    expect(indicator.style.getPropertyValue("--pf-drop-x")).not.toBe(indicatorBeforeScroll);
+    const indicatorAfterSameSlotScroll = indicator.style.getPropertyValue("--pf-drop-x");
+
+    tablist.scrollLeft = 80;
+    fireEvent.scroll(tablist);
+    act(() => frames.flush());
+
+    expect(overlay.dataset.workspaceDropTarget).toBe("reorder:left:append");
+    expect(indicator.style.getPropertyValue("--pf-drop-x")).not.toBe(indicatorAfterSameSlotScroll);
+    expect(runtime.transactions).toHaveLength(0);
+
+    fireEvent.pointerUp(alpha, {
+      pointerId: 50,
+      pointerType: "mouse",
+      clientX: 100,
+      clientY: 17,
+    });
+
+    expect(runtime.transactions).toEqual([
+      expect.objectContaining({ type: "reorder", origin: "pointer" }),
+    ]);
+    expect(runtime.getSnapshot().projection.groups.left?.panelIds).toEqual(["beta", "alpha"]);
+  });
+
+  it("cancels active reorder geometry when an observed inner tab resizes", async () => {
+    const resizeObservers = installControllableResizeObserver();
+    try {
+      const announcements: string[] = [];
+      const frames = createManualFrameScheduler();
+      const runtime = new FixtureRuntime(initialProjection);
+      const view = renderWorkspace(runtime, {
+        commands: directManipulationCommands,
+        frameScheduler: frames.scheduler,
+        onAnnouncement: (message) => announcements.push(message),
+      });
+      const alpha = await screen.findByRole("tab", { name: "Alpha" });
+      const beta = screen.getByRole("tab", { name: "Beta" });
+      const tablist = screen.getByRole("tablist", { name: "Left" });
+      setElementRect(tablist, { left: 0, top: 0, width: 300, height: 34 });
+      setElementRect(alpha, { left: 0, top: 0, width: 120, height: 34 });
+      setElementRect(beta, { left: 120, top: 0, width: 180, height: 34 });
+      installPointerCapture(beta);
+
+      fireEvent.pointerDown(beta, {
+        button: 0,
+        pointerId: 51,
+        pointerType: "mouse",
+        clientX: 210,
+        clientY: 17,
+      });
+      fireEvent.pointerMove(beta, {
+        pointerId: 51,
+        pointerType: "mouse",
+        clientX: 20,
+        clientY: 17,
+      });
+      act(() => frames.flush());
+      expect(view.container.querySelector("[data-workspace-panel-drag]")).toBeTruthy();
+      const tabObserver = resizeObservers.instances.find((observer) => observer.hasObserved(alpha));
+      if (tabObserver === undefined) throw new Error("Expected an active tab ResizeObserver");
+
+      setElementRect(alpha, { left: 0, top: 0, width: 180, height: 34 });
+      act(() => tabObserver.notify());
+      await act(async () => Promise.resolve());
+
+      expect(screen.getByLabelText("Fixture workspace").dataset.panelDragState).toBe("idle");
+      expect(protocolActorInventory.drag.active).toBe(0);
+      expect(runtime.transactions).toHaveLength(0);
+      expect(announcements).toEqual(["The workspace changed before the panel could be moved."]);
+      expect(document.activeElement).toBe(beta);
+    } finally {
+      resizeObservers.restore();
+    }
+  });
+
+  it("synchronously rejects stale inner tab geometry at pointer release", async () => {
+    const announcements: string[] = [];
+    const frames = createManualFrameScheduler();
+    const runtime = new FixtureRuntime(initialProjection);
+    const view = renderWorkspace(runtime, {
+      commands: directManipulationCommands,
+      frameScheduler: frames.scheduler,
+      onAnnouncement: (message) => announcements.push(message),
+    });
+    const alpha = await screen.findByRole("tab", { name: "Alpha" });
+    const beta = screen.getByRole("tab", { name: "Beta" });
+    const tablist = screen.getByRole("tablist", { name: "Left" });
+    setElementRect(tablist, { left: 0, top: 0, width: 300, height: 34 });
+    setElementRect(alpha, { left: 0, top: 0, width: 120, height: 34 });
+    setElementRect(beta, { left: 120, top: 0, width: 180, height: 34 });
+    installPointerCapture(beta);
+
+    fireEvent.pointerDown(beta, {
+      button: 0,
+      pointerId: 52,
+      pointerType: "mouse",
+      clientX: 210,
+      clientY: 17,
+    });
+    fireEvent.pointerMove(beta, {
+      pointerId: 52,
+      pointerType: "mouse",
+      clientX: 20,
+      clientY: 17,
+    });
+    act(() => frames.flush());
+    expect(view.container.querySelector("[data-workspace-panel-drag]")).toBeTruthy();
+
+    setElementRect(alpha, { left: 0, top: 0, width: 180, height: 34 });
+    fireEvent.pointerUp(beta, {
+      pointerId: 52,
+      pointerType: "mouse",
+      clientX: 20,
+      clientY: 17,
+    });
+    await act(async () => Promise.resolve());
+
+    expect(screen.getByLabelText("Fixture workspace").dataset.panelDragState).toBe("idle");
+    expect(protocolActorInventory.drag.active).toBe(0);
+    expect(runtime.transactions).toHaveLength(0);
+    expect(announcements).toEqual(["The workspace changed before the panel could be moved."]);
+    expect(document.activeElement).toBe(beta);
+  });
+
+  it("cancels cached physical drag geometry on an owner-window resize", async () => {
+    const announcements: string[] = [];
+    const runtime = new FixtureRuntime(initialProjection);
+    const view = renderWorkspace(runtime, {
+      commands: directManipulationCommands,
+      onAnnouncement: (message) => announcements.push(message),
+    });
+    const alpha = await screen.findByRole("tab", { name: "Alpha" });
+    installPointerCapture(alpha);
+    fireEvent.pointerDown(alpha, { button: 0, pointerId: 50, clientX: 100, clientY: 20 });
+    fireEvent.pointerMove(alpha, { pointerId: 50, clientX: 750, clientY: 350 });
+    await waitForElement(view.container, "[data-workspace-panel-drag]");
+
+    fireEvent(window, new Event("resize"));
+
+    await waitFor(() => {
+      expect(screen.getByLabelText("Fixture workspace").dataset.panelDragState).toBe("idle");
+      expect(protocolActorInventory.drag.active).toBe(0);
+    });
+    expect(announcements).toEqual(["The workspace changed before the panel could be moved."]);
+    expect(runtime.transactions).toHaveLength(0);
+  });
+
+  it("offers neighbor tab reorder through keyboard and menu routes", async () => {
+    const runtime = new FixtureRuntime(initialProjection);
+    renderWorkspace(runtime, { commands: directManipulationCommands });
+    const alpha = await screen.findByRole("tab", { name: "Alpha" });
+    alpha.focus();
+    await userEvent.keyboard("{Alt>}{ArrowRight}{/Alt}");
+    expect(runtime.getSnapshot().projection.groups.left?.panelIds).toEqual(["beta", "alpha"]);
+    expect(runtime.transactions.at(-1)).toMatchObject({ type: "reorder", origin: "keyboard" });
+
+    await userEvent.click(screen.getByRole("button", { name: "Actions for Alpha" }));
+    await userEvent.click(screen.getByRole("menuitem", { name: "Move Alpha tab before Beta" }));
+    expect(runtime.getSnapshot().projection.groups.left?.panelIds).toEqual(["alpha", "beta"]);
+    expect(runtime.transactions.at(-1)).toMatchObject({ type: "reorder", origin: "menu" });
+  });
+
+  it("keeps inactive-group menu reorder to one history entry while restoring tab focus", async () => {
+    const delta = panel("delta", "Delta");
+    const projection: WorkspaceProjection = {
+      ...initialProjection,
+      groups: {
+        ...initialProjection.groups,
+        right: {
+          id: "right",
+          panelIds: ["gamma", "delta"],
+          selectedPanelId: "gamma",
+          label: "Right",
+        },
+      },
+      panels: { ...initialProjection.panels, delta },
+      activePanelId: "alpha",
+    };
+    const announcements: string[] = [];
+    const runtime = new FixtureRuntime(projection);
+    renderWorkspace(runtime, {
+      commands: directManipulationCommands,
+      onAnnouncement: (message) => announcements.push(message),
+    });
+    const user = userEvent.setup();
+
+    await user.click(await screen.findByRole("button", { name: "Actions for Gamma" }));
+    await user.click(screen.getByRole("menuitem", { name: "Move Gamma tab after Delta" }));
+    await act(async () => Promise.resolve());
+
+    expect(runtime.getSnapshot().projection.groups.right?.panelIds).toEqual(["delta", "gamma"]);
+    expect(runtime.getSnapshot().projection.activePanelId).toBe("alpha");
+    expect(runtime.transactions).toEqual([
+      expect.objectContaining({ type: "reorder", origin: "menu" }),
+    ]);
+    expect(announcements).toEqual(["Moved Gamma tab after Delta"]);
+    expect(screen.getByRole("tab", { name: "Gamma" })).toBe(document.activeElement);
   });
 
   it("keeps a retained empty group visible, accessible, and available to pointer and keyboard moves", async () => {
@@ -1060,7 +2042,7 @@ describe("WorkspaceSurface", () => {
       clientX: 950,
       clientY: 350,
     });
-    const overlay = requiredElement(view.container.querySelector("[data-workspace-panel-drag]"));
+    const overlay = await waitForElement(view.container, "[data-workspace-panel-drag]");
     expect(overlay.dataset.workspaceDropKind).toBe("center");
     expect(overlay.dataset.workspaceDropTarget).toBe("center:right-node");
     fireEvent.pointerUp(alpha, {
@@ -1094,7 +2076,9 @@ describe("WorkspaceSurface", () => {
     expect(view.container.querySelector("[data-workspace-panel-drag]")).toBeNull();
 
     fireEvent.pointerMove(alpha, { pointerId: 51, clientX: 750, clientY: 350 });
-    expect(view.container.querySelector("[data-workspace-panel-drag]")).toBeTruthy();
+    await waitFor(() => {
+      expect(view.container.querySelector("[data-workspace-panel-drag]")).toBeTruthy();
+    });
     fireEvent.pointerCancel(alpha, { pointerId: 51, clientX: 750, clientY: 350 });
 
     await waitFor(() => {
@@ -1115,7 +2099,9 @@ describe("WorkspaceSurface", () => {
     installPointerCapture(alpha);
     fireEvent.pointerDown(alpha, { button: 0, pointerId: 55, clientX: 100, clientY: 20 });
     fireEvent.pointerMove(alpha, { pointerId: 55, clientX: 750, clientY: 350 });
-    expect(view.container.querySelector("[data-workspace-panel-drag]")).toBeTruthy();
+    await waitFor(() => {
+      expect(view.container.querySelector("[data-workspace-panel-drag]")).toBeTruthy();
+    });
 
     act(() => {
       runtime.dispatch(
@@ -1156,7 +2142,9 @@ describe("WorkspaceSurface", () => {
 
     fireEvent.pointerDown(alpha, { button: 0, pointerId: 56, clientX: 100, clientY: 20 });
     fireEvent.pointerMove(alpha, { pointerId: 56, clientX: 750, clientY: 350 });
-    expect(view.container.querySelector("[data-workspace-panel-drag]")).toBeTruthy();
+    await waitFor(() => {
+      expect(view.container.querySelector("[data-workspace-panel-drag]")).toBeTruthy();
+    });
     view.rerender(surface("rtl", 1000));
     await waitFor(() => {
       expect(view.container.querySelector("[data-workspace-panel-drag]")).toBeNull();
@@ -1166,7 +2154,9 @@ describe("WorkspaceSurface", () => {
 
     fireEvent.pointerDown(alpha, { button: 0, pointerId: 57, clientX: 100, clientY: 20 });
     fireEvent.pointerMove(alpha, { pointerId: 57, clientX: 700, clientY: 350 });
-    expect(view.container.querySelector("[data-workspace-panel-drag]")).toBeTruthy();
+    await waitFor(() => {
+      expect(view.container.querySelector("[data-workspace-panel-drag]")).toBeTruthy();
+    });
     view.rerender(surface("rtl", 900));
     await waitFor(() => {
       expect(view.container.querySelector("[data-workspace-panel-drag]")).toBeNull();
@@ -1185,10 +2175,10 @@ describe("WorkspaceSurface", () => {
 
     fireEvent.pointerDown(alpha, { button: 0, pointerId: 61, clientX: 100, clientY: 20 });
     fireEvent.pointerMove(alpha, { pointerId: 61, clientX: 10, clientY: 350 });
-    const overlay = requiredElement(view.container.querySelector("[data-workspace-panel-drag]"));
+    const overlay = await waitForElement(view.container, "[data-workspace-panel-drag]");
     expect(overlay.dataset.workspaceDropKind).toBe("edge");
     expect(overlay.dataset.workspaceDropEdge).toBe("inline-start");
-    expect(view.container.querySelector(".pf-panel-drop-preview")).toBeTruthy();
+    expect(view.container.querySelector(".pf-panel-drop-preview:not([hidden])")).toBeTruthy();
 
     fireEvent.pointerUp(alpha, { pointerId: 61, clientX: 10, clientY: 350 });
     expect(runtime.transactions).toHaveLength(1);
@@ -1238,6 +2228,9 @@ describe("WorkspaceSurface", () => {
     fireEvent.pointerDown(alpha, { button: 0, pointerId: 63, clientX: 100, clientY: 20 });
     fireEvent.pointerMove(alpha, { pointerId: 63, clientX: 10, clientY: 350 });
     const preview = requiredElement(view.container.querySelector(".pf-panel-drop-preview"));
+    await waitFor(() => {
+      expect(preview.style.getPropertyValue("--pf-drop-width")).toBe("240px");
+    });
     expect(preview.style.getPropertyValue("--pf-drop-width")).toBe("240px");
     fireEvent.pointerUp(alpha, { pointerId: 63, clientX: 10, clientY: 350 });
 
@@ -1267,6 +2260,104 @@ describe("WorkspaceSurface", () => {
     });
     expect(runtime.transactions).toHaveLength(0);
     expect(announcements.at(-1)).toMatch(/no destination/i);
+  });
+
+  it("recovers from a throwing reorder command factory and permits the next drag", async () => {
+    const announcements: string[] = [];
+    const throwingCommands: WorkspaceCommandAdapter<FixtureCommand> = {
+      ...directManipulationCommands,
+      reorderPanel: () => {
+        throw new Error("reorder factory exploded");
+      },
+    };
+    const runtime = new FixtureRuntime(initialProjection);
+    renderWorkspace(runtime, {
+      commands: throwingCommands,
+      onAnnouncement: (message) => announcements.push(message),
+    });
+    const alpha = await screen.findByRole("tab", { name: "Alpha" });
+    const beta = screen.getByRole("tab", { name: "Beta" });
+    const tablist = screen.getByRole("tablist", { name: "Left" });
+    setElementRect(tablist, { left: 0, top: 0, width: 300, height: 34 });
+    setElementRect(alpha, { left: 0, top: 0, width: 120, height: 34 });
+    setElementRect(beta, { left: 120, top: 0, width: 180, height: 34 });
+    installPointerCapture(beta);
+
+    fireEvent.pointerDown(beta, { button: 0, pointerId: 64, clientX: 210, clientY: 17 });
+    fireEvent.pointerUp(beta, { pointerId: 64, clientX: 20, clientY: 17 });
+    await act(async () => Promise.resolve());
+
+    expect(protocolActorInventory.drag).toMatchObject({ active: 0, stopped: 1 });
+    expect(screen.getByLabelText("Fixture workspace").dataset.panelDragState).toBe("idle");
+    expect(document.activeElement).toBe(beta);
+    expect(announcements).toEqual(["The panel placement is no longer available."]);
+    expect(runtime.transactions).toHaveLength(0);
+
+    fireEvent.pointerDown(beta, { button: 0, pointerId: 65, clientX: 210, clientY: 17 });
+    expect(protocolActorInventory.drag.active).toBe(1);
+    fireEvent.pointerCancel(beta, { pointerId: 65, clientX: 210, clientY: 17 });
+    expect(protocolActorInventory.drag.active).toBe(0);
+  });
+
+  it("bounds dispatch failures, restores focus, and disposes before the next drag", async () => {
+    const announcements: string[] = [];
+    const runtime = new FixtureRuntime(initialProjection);
+    runtime.dispatch = () => {
+      throw new Error(`dispatch exploded ${"x".repeat(1_000)}`);
+    };
+    renderWorkspace(runtime, {
+      commands: directManipulationCommands,
+      onAnnouncement: (message) => announcements.push(message),
+    });
+    const alpha = await screen.findByRole("tab", { name: "Alpha" });
+    const focus = vi.spyOn(alpha, "focus");
+    installPointerCapture(alpha);
+
+    fireEvent.pointerDown(alpha, { button: 0, pointerId: 66, clientX: 100, clientY: 20 });
+    fireEvent.pointerUp(alpha, { pointerId: 66, clientX: 750, clientY: 350 });
+    await act(async () => Promise.resolve());
+
+    expect(protocolActorInventory.drag).toMatchObject({ active: 0, stopped: 1 });
+    expect(screen.getByLabelText("Fixture workspace").dataset.panelDragState).toBe("idle");
+    expect(focus).toHaveBeenCalledTimes(1);
+    expect(document.activeElement).toBe(alpha);
+    expect(announcements).toHaveLength(1);
+    expect(announcements[0]).toMatch(/^dispatch exploded/);
+    expect(announcements[0]?.length).toBe(512);
+
+    fireEvent.pointerDown(alpha, { button: 0, pointerId: 67, clientX: 100, clientY: 20 });
+    expect(protocolActorInventory.drag.active).toBe(1);
+    fireEvent.pointerCancel(alpha, { pointerId: 67, clientX: 100, clientY: 20 });
+    expect(protocolActorInventory.drag.active).toBe(0);
+  });
+
+  it("disposes a committing actor when result interpretation throws", async () => {
+    const announcements: string[] = [];
+    const runtime = new FixtureRuntime(initialProjection);
+    renderWorkspace(runtime, {
+      commands: directManipulationCommands,
+      interpretResult: () => {
+        throw new Error("result interpretation exploded");
+      },
+      onAnnouncement: (message) => announcements.push(message),
+    });
+    let alpha = await screen.findByRole("tab", { name: "Alpha" });
+    installPointerCapture(alpha);
+
+    fireEvent.pointerDown(alpha, { button: 0, pointerId: 68, clientX: 100, clientY: 20 });
+    fireEvent.pointerUp(alpha, { pointerId: 68, clientX: 750, clientY: 350 });
+    await act(async () => Promise.resolve());
+
+    expect(protocolActorInventory.drag).toMatchObject({ active: 0, stopped: 1 });
+    expect(screen.getByLabelText("Fixture workspace").dataset.panelDragState).toBe("idle");
+    expect(announcements).toEqual(["result interpretation exploded"]);
+
+    alpha = screen.getByRole("tab", { name: "Alpha" });
+    installPointerCapture(alpha);
+    fireEvent.pointerDown(alpha, { button: 0, pointerId: 69, clientX: 750, clientY: 20 });
+    expect(protocolActorInventory.drag.active).toBe(1);
+    fireEvent.pointerCancel(alpha, { pointerId: 69, clientX: 750, clientY: 20 });
+    expect(protocolActorInventory.drag.active).toBe(0);
   });
 
   it("invokes external detach synchronously with stable host, parking, and pointer coordinates", async () => {
@@ -1300,7 +2391,7 @@ describe("WorkspaceSurface", () => {
       screenY: 390,
     });
     expect(
-      requiredElement(view.container.querySelector("[data-workspace-panel-drag]")).dataset
+      (await waitForElement(view.container, "[data-workspace-panel-drag]")).dataset
         .workspaceDropKind,
     ).toBe("external");
     fireEvent.pointerUp(alpha, {
@@ -1323,6 +2414,8 @@ describe("WorkspaceSurface", () => {
       screenY: 390,
     });
     expect(received?.pointer).toEqual({ pointerId: 71, pointerType: "pen" });
+    expect(received?.signal).toBeInstanceOf(AbortSignal);
+    expect(received?.signal.aborted).toBe(false);
     expect(received?.host.ownerDocument).toBe(popupDocument);
     expect(received?.host.getAttribute("aria-labelledby")).toBeNull();
     expect(received?.host.getAttribute("aria-label")).toBe("Alpha");
@@ -1360,6 +2453,197 @@ describe("WorkspaceSurface", () => {
         "Alpha returned to the main window.",
       );
     });
+  });
+
+  it("owns an async external transfer actor until resolve or reject and then disposes it", async () => {
+    const exercise = async (settlement: "resolve" | "reject", pointerId: number) => {
+      let resolve: ((outcome: WorkspaceExternalPanelOutcome) => void) | undefined;
+      let reject: ((cause: unknown) => void) | undefined;
+      const pending = new Promise<WorkspaceExternalPanelOutcome>(
+        (resolvePromise, rejectPromise) => {
+          resolve = resolvePromise;
+          reject = rejectPromise;
+        },
+      );
+      const view = renderWorkspace(new FixtureRuntime(initialProjection), {
+        onExternalPanelRequest: () => pending,
+      });
+      const alpha = await screen.findByRole("tab", { name: "Alpha" });
+      installPointerCapture(alpha);
+
+      fireEvent.pointerDown(alpha, {
+        button: 0,
+        pointerId,
+        pointerType: "mouse",
+        clientX: 100,
+        clientY: 20,
+      });
+      fireEvent.pointerUp(alpha, {
+        pointerId,
+        pointerType: "mouse",
+        clientX: 1100,
+        clientY: 350,
+      });
+
+      expect(protocolActorInventory.drag.active).toBe(1);
+      await act(async () => {
+        if (settlement === "resolve") resolve?.({ status: "committed" });
+        else reject?.(new Error("popup transfer failed"));
+        await pending.catch(() => undefined);
+      });
+      await waitFor(() => {
+        expect(protocolActorInventory.drag.active).toBe(0);
+      });
+      view.unmount();
+    };
+
+    await exercise("resolve", 72);
+    await exercise("reject", 73);
+    expect(protocolActorInventory.drag).toMatchObject({
+      created: 2,
+      started: 2,
+      stopped: 2,
+      active: 0,
+    });
+  });
+
+  it("times out a pending pointer handoff, aborts it, and ignores late settlement", async () => {
+    let resolvePending: ((outcome: WorkspaceExternalPanelOutcome) => void) | undefined;
+    let receivedSignal: AbortSignal | undefined;
+    const pending = new Promise<WorkspaceExternalPanelOutcome>((resolve) => {
+      resolvePending = resolve;
+    });
+    const announcements: string[] = [];
+    const view = renderWorkspace(new FixtureRuntime(initialProjection), {
+      externalPanelRequestTimeoutMs: 25,
+      onAnnouncement: (message) => announcements.push(message),
+      onExternalPanelRequest: (request) => {
+        receivedSignal = request.signal;
+        return pending;
+      },
+    });
+    const alpha = await screen.findByRole("tab", { name: "Alpha" });
+    const focus = vi.spyOn(alpha, "focus");
+    installPointerCapture(alpha);
+
+    vi.useFakeTimers();
+    try {
+      fireEvent.pointerDown(alpha, { button: 0, pointerId: 74, clientX: 100, clientY: 20 });
+      fireEvent.pointerUp(alpha, { pointerId: 74, clientX: 1100, clientY: 350 });
+
+      expect(receivedSignal?.aborted).toBe(false);
+      expect(protocolActorInventory.drag.active).toBe(1);
+      await act(async () => {
+        vi.advanceTimersByTime(25);
+        await Promise.resolve();
+        await Promise.resolve();
+      });
+
+      expect(receivedSignal?.aborted).toBe(true);
+      expect(receivedSignal?.reason).toBe("timeout");
+      expect(protocolActorInventory.drag).toMatchObject({ active: 0, stopped: 1 });
+      expect(screen.getByLabelText("Fixture workspace").dataset.panelDragState).toBe("idle");
+      expect(focus).toHaveBeenCalledTimes(1);
+      expect(document.activeElement).toBe(alpha);
+      expect(announcements).toEqual(["Could not open Alpha in a new window"]);
+
+      resolvePending?.({ status: "committed", message: "late success must be ignored" });
+      await act(async () => {
+        await Promise.resolve();
+        await Promise.resolve();
+      });
+      expect(protocolActorInventory.drag).toMatchObject({ active: 0, stopped: 1 });
+      expect(focus).toHaveBeenCalledTimes(1);
+      expect(announcements).toEqual(["Could not open Alpha in a new window"]);
+    } finally {
+      vi.useRealTimers();
+      view.unmount();
+    }
+  });
+
+  it("aborts pending menu handoffs on unmount and suppresses their late outcome", async () => {
+    let resolvePending: ((outcome: WorkspaceExternalPanelOutcome) => void) | undefined;
+    let receivedSignal: AbortSignal | undefined;
+    const pending = new Promise<WorkspaceExternalPanelOutcome>((resolve) => {
+      resolvePending = resolve;
+    });
+    const announcements: string[] = [];
+    const view = renderWorkspace(new FixtureRuntime(initialProjection), {
+      onAnnouncement: (message) => announcements.push(message),
+      onExternalPanelRequest: (request) => {
+        receivedSignal = request.signal;
+        return pending;
+      },
+    });
+    const user = userEvent.setup();
+    await user.click(await screen.findByRole("button", { name: "Actions for Alpha" }));
+    await user.click(screen.getByRole("menuitem", { name: "Open in new window" }));
+    expect(receivedSignal?.aborted).toBe(false);
+
+    view.unmount();
+
+    expect(receivedSignal?.aborted).toBe(true);
+    expect(receivedSignal?.reason).toBe("surface-unmounted");
+    resolvePending?.({ status: "committed", message: "late menu success" });
+    await act(async () => {
+      await Promise.resolve();
+      await Promise.resolve();
+    });
+    expect(announcements).toEqual([]);
+  });
+
+  it("ignores a retained return callback after a synchronous handoff surface unmounts", async () => {
+    const popupDocument = document.implementation.createHTMLDocument("Detached panel");
+    let notifyReturned: ((message: string) => void) | undefined;
+    let externalHost: HTMLElement | undefined;
+    const announcements: string[] = [];
+    const view = renderWorkspace(new FixtureRuntime(initialProjection), {
+      onAnnouncement: (message) => announcements.push(message),
+      onExternalPanelRequest: (request) => {
+        externalHost = request.host;
+        notifyReturned = request.notifyReturnedToOwner;
+        popupDocument.body.append(request.host);
+        return { status: "committed" };
+      },
+    });
+    const user = userEvent.setup();
+    await user.click(await screen.findByRole("button", { name: "Actions for Alpha" }));
+    await user.click(screen.getByRole("menuitem", { name: "Open in new window" }));
+    if (externalHost === undefined || notifyReturned === undefined) {
+      throw new Error("Expected a synchronous external handoff");
+    }
+    expect(externalHost.ownerDocument).toBe(popupDocument);
+    const writes = trackStableHostWrites(externalHost);
+    const announcementsBeforeUnmount = [...announcements];
+
+    view.unmount();
+    writes.reset();
+    act(() => {
+      notifyReturned?.("Late return must be ignored");
+    });
+    await act(async () => Promise.resolve());
+
+    expect(writes.count()).toBe(0);
+    expect(externalHost.ownerDocument).toBe(popupDocument);
+    expect(announcements).toEqual(announcementsBeforeUnmount);
+  });
+
+  it("rejects invalid external request deadlines", () => {
+    const consoleError = vi.spyOn(console, "error").mockImplementation(() => undefined);
+    try {
+      expect(() =>
+        renderWorkspace(new FixtureRuntime(initialProjection), {
+          externalPanelRequestTimeoutMs: -1,
+        }),
+      ).toThrow(/externalPanelRequestTimeoutMs must be a non-negative safe integer/);
+      expect(() =>
+        renderWorkspace(new FixtureRuntime(initialProjection), {
+          externalPanelRequestTimeoutMs: 1.5,
+        }),
+      ).toThrow(/externalPanelRequestTimeoutMs must be a non-negative safe integer/);
+    } finally {
+      consoleError.mockRestore();
+    }
   });
 
   it("projects an adopted portal host as visible without inventing active semantics", async () => {
@@ -1553,13 +2837,16 @@ class FixtureRuntime implements WorkspaceRuntimeLike<
   public readonly transactions: FixtureReceipt[] = [];
   public lastCommand: FixtureCommand | undefined;
   readonly #rejectedCommandType: FixtureCommand["type"] | undefined;
+  readonly #recreatePanelViews: boolean;
 
   public constructor(
     projection: WorkspaceProjection,
     rejectedCommandType?: FixtureCommand["type"],
+    options: { readonly recreatePanelViews?: boolean } = {},
   ) {
     this.#snapshot = { projection: cloneProjection(projection) };
     this.#rejectedCommandType = rejectedCommandType;
+    this.#recreatePanelViews = options.recreatePanelViews ?? false;
   }
 
   public getSnapshot = () => this.#snapshot;
@@ -1577,7 +2864,10 @@ class FixtureRuntime implements WorkspaceRuntimeLike<
   public getTransactions = () => this.transactions;
 
   public publishProjection(projection: WorkspaceProjection): void {
-    this.#snapshot = { projection: cloneProjection(projection) };
+    const cloned = cloneProjection(projection);
+    this.#snapshot = {
+      projection: this.#recreatePanelViews ? recreatePanelViews(cloned) : cloned,
+    };
     for (const listener of this.#listeners) listener();
   }
 
@@ -1598,8 +2888,9 @@ class FixtureRuntime implements WorkspaceRuntimeLike<
         result: { error: { message: "Denied by fixture policy" } },
       } as const;
     }
+    const projection = reduceProjection(this.#snapshot.projection, command);
     this.#snapshot = {
-      projection: reduceProjection(this.#snapshot.projection, command),
+      projection: this.#recreatePanelViews ? recreatePanelViews(projection) : projection,
     };
     const receipt = { status: "committed", origin, type: command.type } as const;
     this.transactions.push(receipt);
@@ -1677,6 +2968,33 @@ function reduceProjection(
       },
     };
   }
+  if (command.type === "reorder") {
+    const group = projection.groups[command.groupId];
+    if (group === undefined || !group.panelIds.includes(command.panelId)) return projection;
+    const remaining = group.panelIds.filter((panelId) => panelId !== command.panelId);
+    let insertionIndex = remaining.length;
+    if (command.beforePanelId !== undefined) {
+      insertionIndex = remaining.indexOf(command.beforePanelId);
+    } else if (command.afterPanelId !== undefined) {
+      insertionIndex = remaining.indexOf(command.afterPanelId) + 1;
+    }
+    if (insertionIndex < 0) return projection;
+    return {
+      ...projection,
+      revision: nextRevision,
+      groups: {
+        ...projection.groups,
+        [group.id]: {
+          ...group,
+          panelIds: [
+            ...remaining.slice(0, insertionIndex),
+            command.panelId,
+            ...remaining.slice(insertionIndex),
+          ],
+        },
+      },
+    };
+  }
   if (command.type === "drop") {
     if (command.request.target.kind === "center") {
       return reduceProjection(projection, {
@@ -1736,7 +3054,9 @@ function renderWorkspace(
         }
       | WorkspaceTabPresentationResolver;
     readonly onExternalPanelRequest?: WorkspaceExternalPanelHandler;
+    readonly externalPanelRequestTimeoutMs?: number;
     readonly onAnnouncement?: (message: string) => void;
+    readonly interpretResult?: WorkspaceResultInterpreter<FixtureCommand, FixtureReceipt>;
   } = {},
 ) {
   return render(
@@ -1754,9 +3074,15 @@ function renderWorkspace(
           {...(options.onExternalPanelRequest === undefined
             ? {}
             : { onExternalPanelRequest: options.onExternalPanelRequest })}
+          {...(options.externalPanelRequestTimeoutMs === undefined
+            ? {}
+            : { externalPanelRequestTimeoutMs: options.externalPanelRequestTimeoutMs })}
           {...(options.onAnnouncement === undefined
             ? {}
             : { onAnnouncement: options.onAnnouncement })}
+          {...(options.interpretResult === undefined
+            ? {}
+            : { interpretResult: options.interpretResult })}
           {...(options.direction === undefined ? {} : { direction: options.direction })}
           {...(options.frameScheduler === undefined
             ? {}
@@ -1805,6 +3131,23 @@ function cloneProjection(projection: WorkspaceProjection): WorkspaceProjection {
   };
 }
 
+function recreatePanelViews(projection: WorkspaceProjection): WorkspaceProjection {
+  return {
+    ...projection,
+    panels: Object.fromEntries(
+      Object.entries(projection.panels).map(([panelId, panelView]) => [
+        panelId,
+        {
+          ...panelView,
+          ...(panelView.lifecyclePolicy === undefined
+            ? {}
+            : { lifecyclePolicy: { ...panelView.lifecyclePolicy } }),
+        },
+      ]),
+    ),
+  };
+}
+
 function createManualFrameScheduler() {
   let pending: FrameRequestCallback | undefined;
   let nextHandle = 0;
@@ -1827,6 +3170,62 @@ function createManualFrameScheduler() {
     },
     hasPending() {
       return pending !== undefined;
+    },
+  };
+}
+
+class ControllableResizeObserver implements ResizeObserver {
+  private readonly observed = new Set<Element>();
+  private disconnected = false;
+
+  public constructor(private readonly callback: ResizeObserverCallback) {}
+
+  public observe(target: Element) {
+    this.disconnected = false;
+    this.observed.add(target);
+  }
+
+  public unobserve(target: Element) {
+    this.observed.delete(target);
+  }
+
+  public disconnect() {
+    this.disconnected = true;
+    this.observed.clear();
+  }
+
+  public takeRecords(): ResizeObserverEntry[] {
+    return [];
+  }
+
+  public hasObserved(target: Element) {
+    return this.observed.has(target);
+  }
+
+  public notify() {
+    if (!this.disconnected) this.callback([], this);
+  }
+}
+
+function installControllableResizeObserver() {
+  const instances: ControllableResizeObserver[] = [];
+  const original = Object.getOwnPropertyDescriptor(window, "ResizeObserver");
+  class InstalledResizeObserver extends ControllableResizeObserver {
+    public constructor(callback: ResizeObserverCallback) {
+      super(callback);
+      instances.push(this);
+    }
+  }
+  Object.defineProperty(window, "ResizeObserver", {
+    configurable: true,
+    writable: true,
+    value: InstalledResizeObserver,
+  });
+  return {
+    instances,
+    restore() {
+      if (original === undefined) Reflect.deleteProperty(window, "ResizeObserver");
+      else Object.defineProperty(window, "ResizeObserver", original);
     },
   };
 }
@@ -1869,9 +3268,90 @@ function installPointerCapture(element: HTMLElement) {
   };
 }
 
+function trackStableHostWrites(element: HTMLElement) {
+  const setAttribute = vi.spyOn(element, "setAttribute");
+  const removeAttribute = vi.spyOn(element, "removeAttribute");
+  const hidden = trackBooleanPropertyWrites(element, "hidden");
+  const inert = trackBooleanPropertyWrites(element, "inert");
+  return {
+    count: () =>
+      setAttribute.mock.calls.length +
+      removeAttribute.mock.calls.length +
+      hidden.count() +
+      inert.count(),
+    reset: () => {
+      setAttribute.mockClear();
+      removeAttribute.mockClear();
+      hidden.reset();
+      inert.reset();
+    },
+  };
+}
+
+function trackBooleanPropertyWrites(element: HTMLElement, property: "hidden" | "inert") {
+  const descriptor = findPropertyDescriptor(element, property);
+  let fallbackValue = element[property];
+  let writes = 0;
+  Object.defineProperty(element, property, {
+    configurable: true,
+    enumerable: descriptor?.enumerable ?? true,
+    get: () => descriptor?.get?.call(element) ?? fallbackValue,
+    set: (value: boolean) => {
+      writes += 1;
+      if (descriptor?.set === undefined) fallbackValue = value;
+      else descriptor.set.call(element, value);
+    },
+  });
+  return {
+    count: () => writes,
+    reset: () => {
+      writes = 0;
+    },
+  };
+}
+
+function findPropertyDescriptor(target: object, property: PropertyKey) {
+  let current: object | null = target;
+  while (current !== null) {
+    const descriptor = Object.getOwnPropertyDescriptor(current, property);
+    if (descriptor !== undefined) return descriptor;
+    current = Object.getPrototypeOf(current) as object | null;
+  }
+  return undefined;
+}
+
+function setElementRect(
+  element: Element,
+  rect: {
+    readonly left: number;
+    readonly top: number;
+    readonly width: number;
+    readonly height: number;
+  },
+) {
+  element.getBoundingClientRect = () =>
+    ({
+      ...rect,
+      x: rect.left,
+      y: rect.top,
+      right: rect.left + rect.width,
+      bottom: rect.top + rect.height,
+      toJSON: () => rect,
+    }) as DOMRect;
+}
+
 function requiredElement(element: Element | null): HTMLElement {
   if (!(element instanceof HTMLElement)) throw new Error("Expected fixture element");
   return element;
+}
+
+async function waitForElement(container: HTMLElement, selector: string): Promise<HTMLElement> {
+  let element: Element | null = null;
+  await waitFor(() => {
+    element = container.querySelector(selector);
+    expect(element).toBeTruthy();
+  });
+  return requiredElement(element);
 }
 
 class RecordingMotionDriver implements MotionDriver {

@@ -17,12 +17,34 @@ export function containsPoint(rect: LogicalRect, point: LogicalPoint): boolean {
 
 /** Returns the smallest resolved node under the point, with stable ID ties. */
 export function hitTestNodes(layout: ResolvedLayout, point: LogicalPoint): string | undefined {
-  return Object.entries(layout.nodeRects)
-    .filter(([, rect]) => rect.inlineSize > 0 && rect.blockSize > 0 && containsPoint(rect, point))
-    .sort(([leftId, left], [rightId, right]) => {
-      const areaDifference = left.inlineSize * left.blockSize - right.inlineSize * right.blockSize;
-      return areaDifference || (leftId < rightId ? -1 : leftId > rightId ? 1 : 0);
-    })[0]?.[0];
+  let winnerId: string | undefined;
+  let winnerArea = Number.POSITIVE_INFINITY;
+
+  // A drag frame only needs the best match. Sorting every containing node
+  // allocated two intermediate arrays and performed O(m log m) work, where m
+  // is the number of overlapping ancestors. A single scan keeps the exact
+  // area/ID ordering while doing O(n) work with no per-candidate allocations.
+  for (const nodeId in layout.nodeRects) {
+    if (!Object.hasOwn(layout.nodeRects, nodeId)) continue;
+    const rect = layout.nodeRects[nodeId];
+    if (
+      rect === undefined ||
+      rect.inlineSize <= 0 ||
+      rect.blockSize <= 0 ||
+      !containsPoint(rect, point)
+    ) {
+      continue;
+    }
+    const area = rect.inlineSize * rect.blockSize;
+    if (
+      area < winnerArea ||
+      (area === winnerArea && (winnerId === undefined || nodeId < winnerId))
+    ) {
+      winnerId = nodeId;
+      winnerArea = area;
+    }
+  }
+  return winnerId;
 }
 
 function edgeRect(rect: LogicalRect, edge: LogicalEdge, depth: number): LogicalRect {

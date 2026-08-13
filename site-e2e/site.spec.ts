@@ -74,7 +74,36 @@ test("publishes complete route and social metadata", async ({ page }) => {
   });
 });
 
+test("publishes every documentation route in the sitemap", async ({ page, request }) => {
+  await page.goto("./docs/");
+  const documentationLinks = page
+    // The same source-backed sidebar is intentionally CSS-hidden behind the
+    // mobile Browse button. Query its routes directly so this synchronization
+    // assertion has identical coverage in both Playwright projects.
+    .locator('nav[aria-label="Documentation"] a[href]');
+  await expect.poll(() => documentationLinks.count()).toBeGreaterThan(1);
+  const documentationPaths = await documentationLinks.evaluateAll((links) =>
+    Array.from(new Set(links.map((link) => new URL((link as HTMLAnchorElement).href).pathname))),
+  );
+  expect(documentationPaths.length).toBeGreaterThan(1);
+
+  const response = await request.get("./sitemap.xml");
+  expect(response.ok()).toBe(true);
+  const sitemap = await response.text();
+  const locations = new Set([...sitemap.matchAll(/<loc>([^<]+)<\/loc>/g)].map((match) => match[1]));
+  for (const path of documentationPaths) {
+    const canonicalPath = path.endsWith("/") ? path : `${path}/`;
+    expect(locations, canonicalPath).toContain(`https://natanelia.github.io${canonicalPath}`);
+  }
+});
+
 test("publishes the complete decision and marketing documentation", async ({ page }) => {
+  await page.goto("./docs/design-audit/");
+  await expect(
+    page.getByRole("heading", { name: "System-design audit", exact: true }),
+  ).toBeVisible();
+  await expect(page.getByText("Both profiles", { exact: true })).toBeVisible();
+
   await page.goto("./docs/adr-independent-oracle/");
   await expect(
     page.getByRole("heading", { name: "Independent semantic oracle", exact: true }),

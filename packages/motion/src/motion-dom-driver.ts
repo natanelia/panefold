@@ -1,4 +1,7 @@
-import { animate } from "motion";
+// Panefold drives plain DOM keyframes and supplies its own interruption,
+// sampling, and lifecycle coordinator. The mini DOM entry keeps that exact
+// contract without pulling the React/sequence parts of Motion into consumers.
+import { animate } from "motion/mini";
 
 import type { MotionDriver, MotionHandle, MotionPlan } from "./types";
 

@@ -75,8 +75,9 @@ conformance, product certification, npm availability, or unrestricted browser-wi
 - A machine-checkable 190-requirement register, 36-command parity check, capability/evidence
   inventories, trace matrix, and explicit accounting for all ten hard release gates.
 
-Read [Command support](docs/COMMANDS.md), [Support matrix](docs/SUPPORT.md), and
-[Conformance status](docs/CONFORMANCE.md) before adopting any package.
+Read [Command support](docs/COMMANDS.md), [Support matrix](docs/SUPPORT.md),
+[Conformance status](docs/CONFORMANCE.md), and the requirement-by-requirement
+[system-design audit](docs/DESIGN_AUDIT.md) before adopting any package.
 
 ## Architecture
 
@@ -154,12 +155,15 @@ support for every browser, input, framework, workload, or deployment.
 ### Direct-interaction proof in Atlas
 
 1. Drag **Notes** onto the center of **Inspector** to dock it in that tab group.
-2. Drag a tab onto a group edge—or use **Actions → Split left/right/above/below**—to create a new
+2. Drag **Notes** before or after **Map Canvas** in the same tab strip. The insertion marker,
+   sibling preview, and final order use one relational reorder command; **Alt+Arrow** and the
+   Actions menu expose the same operation.
+3. Drag a tab onto a group edge—or use **Actions → Split left/right/above/below**—to create a new
    container in one undoable transaction.
-3. Drag a popout-capable tab beyond the workspace, or choose **Open in new window**, to move the live
+4. Drag a popout-capable tab beyond the workspace, or choose **Open in new window**, to move the live
    host into a same-origin popup. Edit Notes there, then return or close the popup to see recovery.
-4. Open **Workspace appearance** to select a logical tab rail and icon/label treatment.
-5. Wait for **Saved revision _n_ in IndexedDB**, reload, and inspect **Restored revision _n_** plus
+5. Open **Workspace appearance** to select a logical tab rail and icon/label treatment.
+6. Wait for **Saved revision _n_ in IndexedDB**, reload, and inspect **Restored revision _n_** plus
    the recovered layout.
 
 ## Verify the repository

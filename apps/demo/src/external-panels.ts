@@ -169,51 +169,54 @@ export class DemoExternalPanelController {
 
     const bounds = suggestedBounds(request);
     this.#options.onStatus(`Preparing ${request.panel.title} in a new window…`);
-    const result = await coordinator.transfer({
-      panelId: panel.id,
-      sourceSurfaceId: sourceSurface.id,
-      destination: {
-        destinationSurfaceId,
-        kind: "browser-window",
-        bounds,
-        security: {
-          protocolVersion: 1,
-          workspaceId: "atlas-demo",
-          sessionNonce: "atlas-demo-session",
-          allowedOrigins: [window.location.origin],
-        },
-        presentation: {
-          locale: document.documentElement.lang || "en-SG",
-          direction: this.#options.getDirection(),
-          writingMode: "horizontal-tb",
-          stylesheets: collectStylesheets(document),
-          themeTokens: {
-            "demo-accent": "#58a6ff",
-            "demo-background": "#08101d",
+    const result = await coordinator.transfer(
+      {
+        panelId: panel.id,
+        sourceSurfaceId: sourceSurface.id,
+        destination: {
+          destinationSurfaceId,
+          kind: "browser-window",
+          bounds,
+          security: {
+            protocolVersion: 1,
+            workspaceId: "atlas-demo",
+            sessionNonce: "atlas-demo-session",
+            allowedOrigins: [window.location.origin],
           },
+          presentation: {
+            locale: document.documentElement.lang || "en-SG",
+            direction: this.#options.getDirection(),
+            writingMode: "horizontal-tb",
+            stylesheets: collectStylesheets(document),
+            themeTokens: {
+              "demo-accent": "#58a6ff",
+              "demo-background": "#08101d",
+            },
+          },
+          userActivation: navigator.userActivation?.isActive ?? true,
         },
-        userActivation: navigator.userActivation?.isActive ?? true,
+        sourcePolicy: {
+          allowBrowserWindow: true,
+          allowDocumentPictureInPicture: false,
+        },
+        destinationCapabilities:
+          capabilities["browser-window"] ?? BROWSER_WINDOW_SURFACE_CAPABILITIES,
+        panelCapabilities: {
+          popout: panel.capabilities.popout,
+          pictureInPicture: panel.capabilities.pictureInPicture,
+        },
+        baseRevision: start.revision,
+        coordinatorEpoch: ownerEpoch,
+        checkpoint: async () => ({
+          panelId: String(panel.id),
+          title: panel.title ?? panel.type,
+          revision: start.revision.toString(),
+          stableHostId: request.host.id,
+        }),
+        restorationToken: `panel:${String(panel.id)}:surface:${String(destinationSurfaceId)}`,
       },
-      sourcePolicy: {
-        allowBrowserWindow: true,
-        allowDocumentPictureInPicture: false,
-      },
-      destinationCapabilities:
-        capabilities["browser-window"] ?? BROWSER_WINDOW_SURFACE_CAPABILITIES,
-      panelCapabilities: {
-        popout: panel.capabilities.popout,
-        pictureInPicture: panel.capabilities.pictureInPicture,
-      },
-      baseRevision: start.revision,
-      coordinatorEpoch: ownerEpoch,
-      checkpoint: async () => ({
-        panelId: String(panel.id),
-        title: panel.title ?? panel.type,
-        revision: start.revision.toString(),
-        stableHostId: request.host.id,
-      }),
-      restorationToken: `panel:${String(panel.id)}:surface:${String(destinationSurfaceId)}`,
-    });
+      request.signal,
+    );
 
     if (!result.ok) {
       if (shouldRetainExternalLease(result.safeSurfaceId, destinationSurfaceId)) {

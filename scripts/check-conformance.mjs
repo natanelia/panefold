@@ -1,6 +1,4 @@
-import { createHash } from "node:crypto";
-import { readFile, realpath } from "node:fs/promises";
-import { isAbsolute, relative, resolve, sep } from "node:path";
+import { readFile } from "node:fs/promises";
 import process from "node:process";
 import { isDeepStrictEqual } from "node:util";
 
@@ -9,6 +7,7 @@ import {
   serializeConformanceReport,
 } from "../packages/conformance/dist/index.js";
 import { WORKSPACE_COMMAND_TYPES } from "../packages/model/dist/index.js";
+import { verifyRepositoryEvidence } from "./verify-repository-evidence.mjs";
 
 const readJson = async (path) => JSON.parse(await readFile(path, "utf8"));
 
@@ -69,7 +68,11 @@ process.stdout.write(
   ].join(" ") + "\n",
 );
 
-const artifactFailures = await verifyRepositoryEvidence(report.evidence);
+const artifactFailures = await verifyRepositoryEvidence(report.evidence, {
+  // The historical projection result records that exact source provenance was not retained.
+  // Every other currently referenced result must bind the source tree it executed.
+  allowMissingResultSourceDigestIds: ["model-campaign-50000-result"],
+});
 artifactFailures.forEach((failure) => process.stderr.write(`${failure}\n`));
 
 if (report.status === "invalid" || artifactFailures.length > 0) {
@@ -93,38 +96,4 @@ if (process.argv.includes("--require-verified") && report.status !== "verified")
 
 function formatTraceCounts(counts) {
   return `${String(counts.verified)} verified/${String(counts.unresolved)} unresolved/${String(counts.blocked)} blocked/${String(counts.notApplicable)} n/a`;
-}
-
-async function verifyRepositoryEvidence(evidence) {
-  const failures = [];
-  const root = await realpath(process.cwd());
-  for (const record of evidence) {
-    if (record.status !== "verified" || !record.uri?.startsWith("repo://")) continue;
-    const repositoryPath = record.uri.slice("repo://".length);
-    const candidate = resolve(root, repositoryPath);
-    let target;
-    try {
-      target = await realpath(candidate);
-    } catch (error) {
-      failures.push(
-        `Evidence artifact missing for ${record.id}: ${repositoryPath} (${error instanceof Error ? error.message : String(error)}).`,
-      );
-      continue;
-    }
-    const pathFromRoot = relative(root, target);
-    if (pathFromRoot === ".." || pathFromRoot.startsWith(`..${sep}`) || isAbsolute(pathFromRoot)) {
-      failures.push(
-        `Evidence artifact escapes the repository for ${record.id}: ${repositoryPath}.`,
-      );
-      continue;
-    }
-    const bytes = await readFile(target);
-    const actual = createHash("sha256").update(bytes).digest("hex");
-    if (actual !== record.sha256) {
-      failures.push(
-        `Evidence digest mismatch for ${record.id}: expected ${record.sha256}, received ${actual}.`,
-      );
-    }
-  }
-  return failures;
 }
