@@ -1,7 +1,10 @@
-import { useEffect, useId, useRef, useState, type ReactNode } from "react";
+import { lazy, Suspense, useEffect, useId, useRef, useState, type ReactNode } from "react";
 import type { WorkspacePanelRegistry, WorkspacePanelRenderProps } from "@panefold/react";
 
-import { HeavyContentFixturePanel } from "./heavy-content-fixture";
+const LazyHeavyContentFixturePanel = lazy(async () => {
+  const module = await import("./heavy-content-fixture");
+  return { default: module.HeavyContentFixturePanel };
+});
 
 type GlyphName =
   "route" | "layers" | "map" | "notes" | "inspect" | "validate" | "problems" | "timeline";
@@ -89,6 +92,32 @@ function PanelFrame({
       <div className="demo-panel-body">{children}</div>
       {status === undefined ? null : <div className="demo-panel-status">{status}</div>}
     </div>
+  );
+}
+
+function HeavyContentFixtureBoundary(props: WorkspacePanelRenderProps) {
+  return (
+    <Suspense
+      fallback={
+        <div
+          className="demo-panel-loading"
+          aria-busy="true"
+          aria-label="Loading browser lifecycle fixture"
+        >
+          <span className="demo-brand-mark" aria-hidden="true">
+            <i />
+            <i />
+            <i />
+          </span>
+          <div>
+            <strong>Loading fixture lab</strong>
+            <span>Preparing the browser lifecycle probes…</span>
+          </div>
+        </div>
+      }
+    >
+      <LazyHeavyContentFixturePanel {...props} />
+    </Suspense>
   );
 }
 
@@ -741,5 +770,5 @@ export const demoPanelRegistry: WorkspacePanelRegistry = {
 
 export const heavyContentDemoPanelRegistry: WorkspacePanelRegistry = {
   ...demoPanelRegistry,
-  "map.canvas": { render: HeavyContentFixturePanel, icon: <Glyph name="map" /> },
+  "map.canvas": { render: HeavyContentFixtureBoundary, icon: <Glyph name="map" /> },
 };

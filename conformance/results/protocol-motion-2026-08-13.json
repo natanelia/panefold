@@ -1,0 +1,66 @@
+{
+  "schemaVersion": 1,
+  "kind": "protocol-motion-result",
+  "profile": "compact-react-chromium-desktop",
+  "producedAt": "2026-08-13T04:04:16.133Z",
+  "status": "passed",
+  "runner": "Vitest 4.1.10",
+  "command": "vitest run packages/protocol/test/protocol.test.ts packages/protocol-xstate/test/catalog-machines.test.ts packages/protocol-xstate/test/drag-machine.test.ts packages/protocol-xstate/test/protocol-machines.test.ts packages/motion/test/motion-lifecycle.test.ts packages/motion/test/motion.test.ts packages/react/test/WorkspaceSurface.test.tsx packages/react/test/panel-drop.test.ts packages/react/test/tab-reorder.test.ts",
+  "environment": {
+    "operatingSystem": "Linux 6.18.35 x86_64",
+    "node": "24.14.0",
+    "pnpm": "11.16.0"
+  },
+  "summary": {
+    "protocolMotionTestFiles": 6,
+    "protocolMotionTests": 53,
+    "protocolMotionPassed": 53,
+    "reactIntegrationTestFiles": 3,
+    "reactIntegrationTests": 68,
+    "reactIntegrationPassed": 68,
+    "failed": 0,
+    "durationMs": 4829
+  },
+  "coverage": [
+    "all 12 public protocol descriptors have an XState implementation with the catalog principal states",
+    "scope abort is exactly-once, stale actor identities are rejected, and injected-clock traces are bounded",
+    "drag and resize actors exist only for active protocols and stop after completion, cancellation, unmount, revision conflict, exception, or timeout",
+    "raw pointer samples stay in latest-value cells and one frame consumes the newest drag or resize sample",
+    "same-strip reorder uses relational anchors across horizontal LTR, horizontal RTL, and vertical rails, with one command creation and one dispatch",
+    "manual and automatic strip scrolling translate cached reorder geometry without a tab walk; inner geometry changes cancel before a stale commit",
+    "pointer candidates remain silent while final outcomes, keyboard destinations, and failure recovery are announced",
+    "external panel handoff is synchronously invoked, deadline-bounded, abortable on timeout or unmount, and ignores late settlement",
+    "stable panel hosts avoid broad renderer and DOM mutation work for a pure reorder",
+    "resize delivery switches between live, throttled, deferred, and adaptive policies",
+    "motion leases finish, cancel, skip, and dispose queued or running driver resources exactly once",
+    "motion queue overflow cannot allow an older animation to overwrite the newest canonical visual state",
+    "replace and retarget interruption policies sample current visual properties before continuing",
+    "unsupported, skipped, failed, and disposed View Transitions commit semantic state once and fall back progressively",
+    "load planning drops decoration before spatial continuity and never degrades direct input tracking"
+  ],
+  "sourceDigests": {
+    "packages/protocol/src/catalog.ts": "8f9a79fa206045cf16903e6727892517796a16dee4e13998dd828c1d36b1121a",
+    "packages/protocol/test/protocol.test.ts": "dd118363496c22c9df3110c3a3ab05e7b1bee643fe0c613c75503c2f2262fd4f",
+    "packages/protocol-xstate/test/catalog-machines.test.ts": "3d33e4ca3ea49b32e0a98e7749184d73ad5d93fd20b4ceff749c16156407142d",
+    "packages/protocol-xstate/test/drag-machine.test.ts": "8f7fb758af84a1970141cc7b82d593551ea94164b9153e9d9a6a50ff61a691e5",
+    "packages/protocol-xstate/test/protocol-machines.test.ts": "b473558c7f1a64c17e58e0d1ebb1503f05734f4ba7e194d53b9b8b780c7d23ce",
+    "packages/motion/src/coordinator.ts": "b34a5428e17f0c715b50b45706fa078f77a4841eddf2ff6d357f181afea91715",
+    "packages/motion/src/motion-dom-driver.ts": "57092ac380b7d666ed807c31d2f691fea906d63d9cdff9095f5c2bc32260323b",
+    "packages/motion/test/motion-lifecycle.test.ts": "1cedfcdecfc3ba2ae9bd55b650ba2b69992efc0626c5a7a7d1addebe61b74964",
+    "packages/motion/test/motion.test.ts": "02b6068c1abaa54b4433da29c0a7bb430254b24082385541e5617abfccc22ed8",
+    "packages/react/src/WorkspaceSurface.tsx": "be9b4dbb7be3d6daea6dbd80c7a2106689216183699b090f17b61662271fa1c3",
+    "packages/react/src/panel-drag.tsx": "b856959070689054a28c51e3e79b21b9e981a703762f0b52f14aeef8d8e6b23d",
+    "packages/react/src/panel-drop.ts": "b82ddb1686408e3a08073dba2e336dae9d5ed19a84988578ca7ee352b6780788",
+    "packages/react/src/tab-reorder.ts": "c139803bc37c5f2c6fc6a17eb836784ff8d203b7bae8acebedcbf290cdabc599",
+    "packages/react/src/messages.ts": "3edcc3388a98806f8ff473cffbbfa9efb8638b91ca9b870aa04026cdc771b008",
+    "packages/react/src/types.ts": "502f8cf6b475324bb3ad50f687fc49d1e3931a59f480901def8a9c52de71ca9a",
+    "packages/react/test/WorkspaceSurface.test.tsx": "780445f35413e6d3c56948ce2aacca02eea7c230f87b0f20bae314583cbf9e49",
+    "packages/react/test/panel-drop.test.ts": "fffd4ee07c0e4216f10b1d809372a039850181b33f4c88cd2458b614d6108780",
+    "packages/react/test/tab-reorder.test.ts": "da6e97901c25a0e5b32480ffd0450e058bb1f6070eef5df5d3e062067282dae2"
+  },
+  "limitations": [
+    "The catalog and state checks do not constitute exhaustive generated transition, timeout, and recovery-path coverage.",
+    "JSDOM and deterministic driver tests do not replace real-browser geometry, animation, focus, or accessibility evidence.",
+    "The run contains no physical 60 Hz or 120 Hz latency, heap, resource, or assistive-technology evidence."
+  ]
+}

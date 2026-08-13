@@ -144,4 +144,26 @@ describe("planLayoutInvalidation", () => {
       surfaceIndexIds: [],
     });
   });
+
+  it("keeps solved geometry and target indexes for a pure tab reorder", () => {
+    const before = fixture();
+    const group = entity<GroupRecord>(before, "groups", ids.groupA);
+    const reordered: GroupRecord = {
+      ...group,
+      panelIds: [ids.panelB, ids.panelA],
+    };
+    const patch = {
+      kind: "group",
+      id: group.id,
+      before: group,
+      after: reordered,
+    } as const;
+
+    expect(planLayoutInvalidation(before, before, [patch])).toEqual({
+      constraintNodeIds: [],
+      geometryNodeIds: [],
+      surfaceIds: [],
+      surfaceIndexIds: [],
+    });
+  });
 });

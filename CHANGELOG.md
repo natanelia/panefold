@@ -3,6 +3,22 @@
 Notable source changes are recorded here. Panefold follows semantic version labels for repository
 milestones, but no stable package-compatibility promise exists yet.
 
+## Unreleased
+
+### Added
+
+- Same-strip pointer tab reordering with relational insertion anchors, exact visual markers,
+  horizontal LTR/RTL and vertical-rail support, bounded overflow autoscroll, plus equivalent
+  keyboard and menu routes.
+
+### Changed
+
+- Drag and splitter actors now exist only for active interactions; raw pointer samples, preview
+  writes, tab-strip geometry, host updates, hit testing, and motion queues are bounded and
+  frame-coalesced.
+- Browser, protocol, React, and performance evidence now records the direct-interaction suite and
+  keeps unverified system-design requirements explicitly unresolved or blocked.
+
 ## 0.1.0 - 2026-08-12 — Experimental source release
 
 ### Added

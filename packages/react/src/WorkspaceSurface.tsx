@@ -1,6 +1,7 @@
 import {
   Component,
   Fragment,
+  memo,
   useCallback,
   useEffect,
   useEffectEvent,
@@ -58,7 +59,6 @@ import {
 import { useWorkspaceRuntime, useWorkspaceSnapshot } from "./runtime-context";
 import { resolveTabPresentation, tabOrientation } from "./tab-presentation";
 import type {
-  WorkspaceAnnouncement,
   WorkspaceCommandAdapter,
   WorkspaceCommandOrigin,
   WorkspaceDirection,
@@ -124,6 +124,8 @@ export interface WorkspaceSurfaceProps<TSnapshot, TCommand, TResult> {
    * from pointerup so popup creation can use browser transient activation.
    */
   readonly onExternalPanelRequest?: WorkspaceExternalPanelHandler;
+  /** Deadline for promise-returning external handoffs. Defaults to 15 seconds. */
+  readonly externalPanelRequestTimeoutMs?: number;
 }
 
 interface PanelBoundaryProps {
@@ -170,6 +172,19 @@ class PanelBoundary extends Component<PanelBoundaryProps, PanelBoundaryState> {
 interface HostRecord {
   readonly element: HTMLDivElement;
   readonly panelId: string;
+  readonly cache: {
+    destination: Element | null;
+    state: StableHostState | undefined;
+  };
+}
+
+interface StableHostState {
+  readonly active: boolean;
+  readonly lifecycle: WorkspacePanelLifecycle;
+  readonly labelledBy: string | undefined;
+  readonly label: string | undefined;
+  readonly panelType: string | undefined;
+  readonly selected: boolean;
 }
 
 interface DispatchExecution<TResult> {
@@ -217,7 +232,9 @@ function SurfaceRenderer<TSnapshot, TCommand, TResult>({
   interpretResult,
   tabPresentation,
   onExternalPanelRequest,
+  externalPanelRequestTimeoutMs = 15_000,
 }: SurfaceRendererProps<TSnapshot, TCommand, TResult>) {
+  assertNonNegativeSafeInteger(externalPanelRequestTimeoutMs, "externalPanelRequestTimeoutMs");
   const messages = messageCatalog;
   const interactionMessages = useMemo(
     () => resolveWorkspaceInteractionMessages(messages),
@@ -238,22 +255,20 @@ function SurfaceRenderer<TSnapshot, TCommand, TResult>({
   const [portalHosts, setPortalHosts] = useState<ReadonlyMap<string, HostRecord>>(() => new Map());
   const [portalOwnershipRevision, setPortalOwnershipRevision] = useState(0);
   const [surfaceDocument, setSurfaceDocument] = useState<Document>();
-  const [announcement, setAnnouncement] = useState<WorkspaceAnnouncement>({
-    id: 0,
-    message: "",
-  });
+  const liveRegionRef = useRef<HTMLDivElement>(null);
+  const announcementIdRef = useRef(0);
   const announcementTimerRef = useRef<
     { readonly handle: number; readonly ownerWindow: Window } | undefined
   >(undefined);
+  const pendingExternalControllersRef = useRef(new Set<AbortController>());
+  const surfaceMountedRef = useRef(true);
   const [movePanelId, setMovePanelId] = useState<string>();
   const [systemReducedMotion, setSystemReducedMotion] = useState(false);
   const [coarsePointer, setCoarsePointer] = useState(false);
   const [internalCompactGroupId, setInternalCompactGroupId] = useState<string>();
   const [measuredBounds, setMeasuredBounds] = useState<LogicalRect>(ZERO_LOGICAL_RECT);
-  const [splitOverrides, setSplitOverrides] = useState<
-    Readonly<Record<string, SplitLayoutOverride>>
-  >({});
-  const splitOverridesRef = useRef(splitOverrides);
+  const splitOverridesRef = useRef<Readonly<Record<string, SplitLayoutOverride>>>({});
+  const splitPreviewRevisionRef = useRef(projection.revision);
   const effectiveMotion = motion === "productive" && systemReducedMotion ? "reduced" : motion;
   const logicalBounds = layoutBounds ?? measuredBounds;
   const compact =
@@ -313,8 +328,8 @@ function SurfaceRenderer<TSnapshot, TCommand, TResult>({
     [layoutSolver, logicalBounds, renderedProjection, snapshot, splitterSize],
   );
   const resolvedLayout = useMemo(
-    () => solveResolvedLayout(splitOverrides),
-    [solveResolvedLayout, splitOverrides],
+    () => solveResolvedLayout(EMPTY_SPLIT_OVERRIDES),
+    [solveResolvedLayout],
   );
 
   const previewSplit = useCallback(
@@ -324,23 +339,45 @@ function SurfaceRenderer<TSnapshot, TCommand, TResult>({
         [splitId]: { weights },
       };
       splitOverridesRef.current = nextOverrides;
-      setSplitOverrides(nextOverrides);
-      return solveResolvedLayout(nextOverrides);
+      splitPreviewRevisionRef.current = projectionRef.current.revision;
+      const preview = solveResolvedLayout(nextOverrides);
+      applyResolvedLayoutPreview(rootRef.current, preview);
+      return preview;
     },
     [solveResolvedLayout],
   );
 
-  const clearSplitPreview = useCallback((splitId: string) => {
-    if (splitOverridesRef.current[splitId] === undefined) return;
-    const nextOverrides = { ...splitOverridesRef.current };
-    delete nextOverrides[splitId];
-    splitOverridesRef.current = nextOverrides;
-    setSplitOverrides(nextOverrides);
-  }, []);
+  const clearSplitPreview = useCallback(
+    (splitId: string, restore = true) => {
+      if (splitOverridesRef.current[splitId] === undefined) return;
+      const nextOverrides = { ...splitOverridesRef.current };
+      delete nextOverrides[splitId];
+      splitOverridesRef.current = nextOverrides;
+      if (restore) {
+        applyResolvedLayoutPreview(rootRef.current, solveResolvedLayout(nextOverrides));
+      }
+    },
+    [solveResolvedLayout],
+  );
+
+  useLayoutEffect(() => {
+    if (
+      splitPreviewRevisionRef.current !== projection.revision ||
+      Object.keys(splitOverridesRef.current).length === 0
+    ) {
+      return;
+    }
+    applyResolvedLayoutPreview(rootRef.current, solveResolvedLayout(splitOverridesRef.current));
+  });
 
   const publishAnnouncement = useCallback(
     (message: string) => {
-      setAnnouncement((current) => ({ id: current.id + 1, message }));
+      announcementIdRef.current += 1;
+      const liveRegion = liveRegionRef.current;
+      if (liveRegion !== null) {
+        liveRegion.dataset.announcementId = String(announcementIdRef.current);
+        liveRegion.textContent = message;
+      }
       onAnnouncement?.(message);
     },
     [onAnnouncement],
@@ -376,6 +413,18 @@ function SurfaceRenderer<TSnapshot, TCommand, TResult>({
     },
     [],
   );
+
+  useEffect(() => {
+    surfaceMountedRef.current = true;
+    const pendingExternalControllers = pendingExternalControllersRef.current;
+    return () => {
+      surfaceMountedRef.current = false;
+      for (const controller of pendingExternalControllers) {
+        controller.abort("surface-unmounted");
+      }
+      pendingExternalControllers.clear();
+    };
+  }, []);
 
   useEffect(() => {
     const ownerWindow = rootRef.current?.ownerDocument.defaultView;
@@ -501,7 +550,6 @@ function SurfaceRenderer<TSnapshot, TCommand, TResult>({
   useEffect(() => {
     if (Object.keys(splitOverridesRef.current).length === 0) return;
     splitOverridesRef.current = {};
-    setSplitOverrides({});
     scheduler.cancel(surfaceScheduleKey);
   }, [projection.revision, scheduler, surfaceScheduleKey]);
 
@@ -519,8 +567,15 @@ function SurfaceRenderer<TSnapshot, TCommand, TResult>({
       element.dataset.workspacePanelHost = panelId;
       element.id = panelContentId(domIdPrefix, panelId);
       element.setAttribute("role", "tabpanel");
-      hostsRef.current.set(panelId, { element, panelId });
       parkingRef.current?.append(element);
+      hostsRef.current.set(panelId, {
+        element,
+        panelId,
+        cache: {
+          destination: element.parentElement,
+          state: undefined,
+        },
+      });
       changed = true;
     }
 
@@ -535,33 +590,39 @@ function SurfaceRenderer<TSnapshot, TCommand, TResult>({
   }, [domIdPrefix, projection.panels]);
 
   useLayoutEffect(() => {
+    void portalHosts;
     void portalOwnershipRevision;
-    const selectedPanelIds = new Set(
-      Object.values(projection.groups).map((group) => group.selectedPanelId),
-    );
+    const selectedGroupByPanelId = new Map<string, WorkspaceGroupView>();
+    for (const group of Object.values(projection.groups)) {
+      if (group.selectedPanelId !== "") {
+        selectedGroupByPanelId.set(group.selectedPanelId, group);
+      }
+    }
     const surfaceDocument = rootRef.current?.ownerDocument;
 
-    for (const [panelId, host] of portalHosts) {
+    for (const [panelId, host] of hostsRef.current) {
       const panel = projection.panels[panelId];
-      const selectedGroup = Object.values(projection.groups).find(
-        (group) => group.selectedPanelId === panelId,
-      );
+      const selectedGroup = selectedGroupByPanelId.get(panelId);
       const localSlot =
         selectedGroup === undefined ? undefined : slotsRef.current.get(selectedGroup.id);
       const wasInExternalDocument =
         surfaceDocument !== undefined && host.element.ownerDocument !== surfaceDocument;
-      if (localSlot !== undefined && !wasInExternalDocument) {
-        localSlot.append(host.element);
-      } else if (!wasInExternalDocument && parkingRef.current !== null) {
-        parkingRef.current.append(host.element);
+      const destination = wasInExternalDocument
+        ? host.element.parentElement
+        : (localSlot ?? parkingRef.current);
+      if (host.cache.destination !== destination || host.element.parentElement !== destination) {
+        if (destination !== null && host.element.parentElement !== destination) {
+          destination.append(host.element);
+        }
+        updateHostDestinationCache(host, destination);
       }
 
       const inExternalDocument =
         surfaceDocument !== undefined && host.element.ownerDocument !== surfaceDocument;
 
-      const selected = selectedPanelIds.has(panelId);
+      const selected = selectedGroup !== undefined;
       const policy = panelLifecyclePolicy(panel);
-      updateStableHost(host.element, {
+      updateStableHost(host, {
         active: projection.activePanelId === panelId,
         lifecycle: panelLifecycle(
           inExternalDocument ? true : selected,
@@ -602,7 +663,10 @@ function SurfaceRenderer<TSnapshot, TCommand, TResult>({
         messages.resizedWorkspacePanes(),
         origin,
       );
-      clearSplitPreview(splitId);
+      clearSplitPreview(
+        splitId,
+        execution.outcome.status !== "committed" && execution.outcome.status !== "queued",
+      );
       return execution;
     },
     [clearSplitPreview, commands, dispatch, messages],
@@ -727,7 +791,7 @@ function SurfaceRenderer<TSnapshot, TCommand, TResult>({
       if (handler === undefined) {
         return { status: "rejected", message: interactionMessages.newWindowUnavailable() };
       }
-      const host = hostsRef.current.get(invocation.panel.id)?.element;
+      const host = hostsRef.current.get(invocation.panel.id);
       const parkingElement = parkingRef.current;
       if (host === undefined || parkingElement === null) {
         return {
@@ -735,18 +799,40 @@ function SurfaceRenderer<TSnapshot, TCommand, TResult>({
           message: interactionMessages.panelNotReadyForNewWindow(),
         };
       }
+      const controller = invocation.controller;
+      const signal = controller.signal;
+      pendingExternalControllersRef.current.add(controller);
       const surfaceDocument = rootRef.current?.ownerDocument;
       const labelledBy = panelTabId(domIdPrefix, invocation.panel.id);
       prepareHostForExternalAccessibility(host, invocation.panel.title);
+      let finalized = false;
+      const finalize = () => {
+        if (finalized) return;
+        finalized = true;
+        signal.removeEventListener("abort", finalize);
+        pendingExternalControllersRef.current.delete(controller);
+        finalizeExternalHostAccessibility(
+          host,
+          invocation.panel.title,
+          labelledBy,
+          surfaceDocument,
+        );
+        if (signal.reason !== "surface-unmounted") {
+          setPortalOwnershipRevision((current) => current + 1);
+        }
+      };
+      signal.addEventListener("abort", finalize, { once: true });
       let outcome: WorkspaceExternalPanelOutcome | Promise<WorkspaceExternalPanelOutcome>;
       try {
         outcome = handler({
           panel: invocation.panel,
           sourceGroup: invocation.sourceGroup,
           sourcePanels: invocation.sourcePanels,
-          host,
+          host: host.element,
           parkingElement,
+          signal,
           notifyReturnedToOwner: (message) => {
+            if (!surfaceMountedRef.current) return;
             finalizeExternalHostAccessibility(
               host,
               invocation.panel.title,
@@ -766,48 +852,33 @@ function SurfaceRenderer<TSnapshot, TCommand, TResult>({
         // when the application has not published its semantic transfer yet.
         setPortalOwnershipRevision((current) => current + 1);
       } catch (error) {
-        finalizeExternalHostAccessibility(
-          host,
-          invocation.panel.title,
-          labelledBy,
-          surfaceDocument,
-        );
-        setPortalOwnershipRevision((current) => current + 1);
+        finalize();
         throw error;
       }
-      if (!isPromiseLike(outcome)) {
-        finalizeExternalHostAccessibility(
-          host,
-          invocation.panel.title,
-          labelledBy,
-          surfaceDocument,
+      try {
+        if (!isPromiseLike(outcome)) {
+          finalize();
+          return outcome;
+        }
+        return boundedExternalOutcome(
+          Promise.resolve(outcome),
+          controller,
+          externalPanelRequestTimeoutMs,
+          finalize,
         );
-        return outcome;
+      } catch (error) {
+        finalize();
+        throw error;
       }
-      return outcome.then(
-        (result) => {
-          finalizeExternalHostAccessibility(
-            host,
-            invocation.panel.title,
-            labelledBy,
-            surfaceDocument,
-          );
-          setPortalOwnershipRevision((current) => current + 1);
-          return result;
-        },
-        (error: unknown) => {
-          finalizeExternalHostAccessibility(
-            host,
-            invocation.panel.title,
-            labelledBy,
-            surfaceDocument,
-          );
-          setPortalOwnershipRevision((current) => current + 1);
-          throw error;
-        },
-      );
     },
-    [announce, domIdPrefix, interactionMessages, onExternalPanelRequest, restorePanelTab],
+    [
+      announce,
+      domIdPrefix,
+      externalPanelRequestTimeoutMs,
+      interactionMessages,
+      onExternalPanelRequest,
+      restorePanelTab,
+    ],
   );
 
   const panelDrag = usePanelDrag({
@@ -816,14 +887,21 @@ function SurfaceRenderer<TSnapshot, TCommand, TResult>({
     logicalBounds,
     direction,
     messages: interactionMessages,
-    enabled: commands.planPanelDrop !== undefined || onExternalPanelRequest !== undefined,
+    enabled:
+      commands.planPanelDrop !== undefined ||
+      commands.reorderPanel !== undefined ||
+      onExternalPanelRequest !== undefined,
     internalEnabled: commands.planPanelDrop !== undefined,
     externalAvailable: onExternalPanelRequest !== undefined,
     splitterSize,
     planDrop: commands.planPanelDrop,
+    createReorderCommand: commands.reorderPanel,
+    frameScheduler: scheduler,
+    scheduleKey: `${domIdPrefix}:panel-drag`,
     getRoot: () => rootRef.current,
     announce,
     commitDrop: commitPanelDrop,
+    commitReorder: (command, label, origin) => dispatch(command, label, origin).outcome,
     requestExternal: requestExternalPanel,
     restoreFocus: restorePanelTab,
   });
@@ -840,9 +918,11 @@ function SurfaceRenderer<TSnapshot, TCommand, TResult>({
       data-geometry-diagnostics={resolvedLayout.diagnostics.length}
       data-geometry-mode={layoutSolver === undefined ? "projection" : "model"}
       data-responsive-projection={compact ? "single-region" : "full-layout"}
-      data-panel-drag-state={panelDrag.state}
+      data-panel-drag-state="idle"
       data-panel-drop-enabled={String(
-        commands.planPanelDrop !== undefined || onExternalPanelRequest !== undefined,
+        commands.planPanelDrop !== undefined ||
+          commands.reorderPanel !== undefined ||
+          onExternalPanelRequest !== undefined,
       )}
       dir={direction}
       aria-label={workspaceLabel ?? messages.workspaceLabel()}
@@ -886,7 +966,7 @@ function SurfaceRenderer<TSnapshot, TCommand, TResult>({
             direction={direction}
             domIdPrefix={domIdPrefix}
             resolvedLayout={resolvedLayout}
-            splitOverrides={splitOverrides}
+            splitOverrides={EMPTY_SPLIT_OVERRIDES}
             projectionRevision={projection.revision}
             scheduler={scheduler}
             scheduleKey={surfaceScheduleKey}
@@ -921,13 +1001,14 @@ function SurfaceRenderer<TSnapshot, TCommand, TResult>({
       />
 
       <div className="pf-overlay-layer" data-workspace-layer="overlay">
-        {panelDrag.view === undefined ? null : <PanelDragOverlay view={panelDrag.view} />}
+        <PanelDragOverlay overlayRef={panelDrag.overlayRef} />
         {movePanelId !== undefined ? (
           <KeyboardMoveOverlay
             panel={projection.panels[movePanelId]}
             groups={Object.values(projection.groups)}
             messages={messages}
             direction={direction}
+            announce={announce}
             onMove={(groupId) => {
               const panelId = movePanelId;
               const panel = projection.panels[movePanelId];
@@ -1024,12 +1105,14 @@ function SurfaceRenderer<TSnapshot, TCommand, TResult>({
                       const ownerWindow = rootRef.current?.ownerDocument.defaultView;
                       let outcome:
                         WorkspaceExternalPanelOutcome | Promise<WorkspaceExternalPanelOutcome>;
+                      const controller = new AbortController();
                       try {
                         outcome = requestExternalPanel({
                           panel,
                           sourceGroup,
                           sourcePanels: panelsForGroup(projection, sourceGroup),
                           origin: "keyboard",
+                          controller,
                           position: {
                             clientX,
                             clientY,
@@ -1038,6 +1121,7 @@ function SurfaceRenderer<TSnapshot, TCommand, TResult>({
                           },
                         });
                         const handle = (result: WorkspaceExternalPanelOutcome) => {
+                          if (controller.signal.reason === "surface-unmounted") return;
                           announce(
                             result.message ??
                               (result.status === "committed"
@@ -1086,14 +1170,12 @@ function SurfaceRenderer<TSnapshot, TCommand, TResult>({
       />
 
       <div
-        key={announcement.id}
+        ref={liveRegionRef}
         className="pf-live-region"
         role="status"
         aria-live="polite"
         aria-atomic="true"
-      >
-        {announcement.message}
-      </div>
+      />
     </div>
   );
 }
@@ -1209,6 +1291,7 @@ function SplitNode<TCommand, TResult>({
             ) : null}
             <div
               className="pf-split-child"
+              data-workspace-split-child={childId}
               data-empty-group-descendant={String(subtreeHasEmptyGroup(props.projection, child.id))}
               data-inline-size={childRect.inlineSize}
               data-block-size={childRect.blockSize}
@@ -1266,8 +1349,8 @@ function Splitter({
   messages,
 }: SplitterProps) {
   const splitterRef = useRef<HTMLDivElement>(null);
-  const [actor] = useState(createResizeActor);
-  const [resizeState, setResizeState] = useState("idle");
+  const resizeStateRef = useRef("idle");
+  const actorRef = useRef<ResizeActor | null>(null);
   const sessionRef = useRef<PointerResizeSession | null>(null);
   const handledRevisionRef = useRef(projectionRevision);
   const beforeSize = axisSize(resolvedLayout.nodeRects[splitter.beforeNodeId], split.axis);
@@ -1275,38 +1358,70 @@ function Splitter({
   const pairSize = beforeSize + afterSize;
   const value = pairSize === 0 ? 50 : (beforeSize / pairSize) * 100;
 
-  useEffect(() => {
-    const subscription = actor.subscribe((state) => {
-      setResizeState(String(state.value));
-    });
-    actor.start();
-    return () => {
-      subscription.unsubscribe();
-      actor.stop();
-    };
-  }, [actor]);
+  const publishResizeState = useCallback((next: string) => {
+    if (resizeStateRef.current === next) return;
+    resizeStateRef.current = next;
+    const element = splitterRef.current;
+    if (element !== null) element.dataset.resizeState = next;
+  }, []);
+
+  useLayoutEffect(() => {
+    const element = splitterRef.current;
+    if (element !== null) element.dataset.resizeState = resizeStateRef.current;
+  });
 
   const send = useCallback(
-    (event: ResizeEvent) => {
+    (actor: ResizeActor, event: ResizeEvent) => {
       actor.send(event);
       const state = String(actor.getSnapshot().value);
-      setResizeState(state);
+      publishResizeState(state);
       return state;
     },
-    [actor],
+    [publishResizeState],
+  );
+
+  const disposeActor = useCallback(
+    (actor: ResizeActor) => {
+      if (actorRef.current !== actor) return;
+      actorRef.current = null;
+      actor.stop();
+      publishResizeState("idle");
+    },
+    [publishResizeState],
+  );
+
+  useEffect(
+    () => () => {
+      scheduler.cancel(scheduleKey);
+      const session = sessionRef.current;
+      if (session?.captureElement.hasPointerCapture?.(session.pointerId)) {
+        session.captureElement.releasePointerCapture?.(session.pointerId);
+      }
+      sessionRef.current = null;
+      const actor = actorRef.current;
+      actorRef.current = null;
+      actor?.stop();
+    },
+    [scheduleKey, scheduler],
   );
 
   useEffect(() => {
     if (handledRevisionRef.current === projectionRevision) return;
     handledRevisionRef.current = projectionRevision;
-    if (String(actor.getSnapshot().value) === "idle") return;
+    const actor = actorRef.current;
+    if (actor === null) return;
     scheduler.cancel(scheduleKey);
+    const session = sessionRef.current;
+    if (session !== null) session.pending = undefined;
     sessionRef.current = null;
-    actor.send({ type: "CANCEL" });
-    const state = String(actor.getSnapshot().value);
+    const state = send(actor, { type: "CANCEL" });
     onCancel();
-    if (state === "cancelling") actor.send({ type: "RETURNED" });
-  }, [actor, onCancel, projectionRevision, scheduleKey, scheduler]);
+    if (session?.captureElement.hasPointerCapture?.(session.pointerId)) {
+      session.captureElement.releasePointerCapture?.(session.pointerId);
+    }
+    if (state === "cancelling") send(actor, { type: "RETURNED" });
+    disposeActor(actor);
+  }, [disposeActor, onCancel, projectionRevision, scheduleKey, scheduler, send]);
 
   const updatePair = useCallback(
     (
@@ -1334,18 +1449,24 @@ function Splitter({
   );
 
   const onPointerDown = (event: ReactPointerEvent<HTMLDivElement>) => {
-    if (event.button !== 0 || sessionRef.current !== null) return;
+    if (event.button !== 0 || sessionRef.current !== null || actorRef.current !== null) return;
     const coordinate = split.axis === "inline" ? event.clientX : event.clientY;
-    sessionRef.current = {
+    const actor = createResizeActor();
+    actor.start();
+    actorRef.current = actor;
+    const session: PointerResizeSession = {
+      actor,
       pointerId: event.pointerId,
       startCoordinate: coordinate,
       beforeSize,
       afterSize,
       weights: [...weights],
       latest: [...weights],
+      pending: undefined,
       captureElement: event.currentTarget,
     };
-    send({
+    sessionRef.current = session;
+    send(actor, {
       type: "POINTER_START",
       pointerId: event.pointerId,
       position: pointerSample(event),
@@ -1355,11 +1476,7 @@ function Splitter({
     event.preventDefault();
   };
 
-  const requestedPointerWeights = (
-    session: PointerResizeSession,
-    event: ReactPointerEvent<HTMLDivElement>,
-  ) => {
-    const coordinate = split.axis === "inline" ? event.clientX : event.clientY;
+  const requestedPointerWeights = (session: PointerResizeSession, coordinate: number) => {
     const physicalDelta = coordinate - session.startCoordinate;
     const logicalDelta =
       split.axis === "inline" && direction === "rtl" ? -physicalDelta : physicalDelta;
@@ -1372,23 +1489,40 @@ function Splitter({
   ) => {
     const preview = onPreview(requestedWeights);
     const position = splitterPosition(preview, splitter.id);
-    if (position !== undefined && String(actor.getSnapshot().value) === "resizing") {
+    if (position !== undefined && String(session.actor.getSnapshot().value) === "resizing") {
       session.latest = solvedPairWeights(split, requestedWeights, preview, beforeIndex, afterIndex);
-      send({ type: "CONSTRAINT_RESULT", position });
+      send(session.actor, { type: "CONSTRAINT_RESULT", position });
     }
+  };
+
+  const consumeLatestPointer = (session: PointerResizeSession) => {
+    const sample = session.pending;
+    if (
+      sample === undefined ||
+      sessionRef.current !== session ||
+      actorRef.current !== session.actor
+    ) {
+      return;
+    }
+    session.pending = undefined;
+    const state = send(session.actor, {
+      type: "POINTER_MOVE",
+      pointerId: session.pointerId,
+      position: sample.position,
+    });
+    if (state !== "resizing") return;
+    applyPointerPreview(session, requestedPointerWeights(session, sample.coordinate));
   };
 
   const onPointerMove = (event: ReactPointerEvent<HTMLDivElement>) => {
     const session = sessionRef.current;
     if (session === null || session.pointerId !== event.pointerId) return;
-    send({
-      type: "POINTER_MOVE",
-      pointerId: event.pointerId,
+    session.pending = {
+      coordinate: split.axis === "inline" ? event.clientX : event.clientY,
       position: pointerSample(event),
-    });
-    const next = requestedPointerWeights(session, event);
-    const applyPreview = () => applyPointerPreview(session, next);
-    if (!scheduler.schedule(scheduleKey, applyPreview)) applyPreview();
+    };
+    scheduler.schedule(scheduleKey, () => consumeLatestPointer(session));
+    event.preventDefault();
   };
 
   const finishPointer = (event: ReactPointerEvent<HTMLDivElement>) => {
@@ -1399,35 +1533,45 @@ function Splitter({
     // arrives. Resolve the release sample synchronously through the same
     // constraint solver so the visible final preview and committed weights
     // describe one exact geometry result.
-    send({
-      type: "POINTER_MOVE",
-      pointerId: event.pointerId,
+    session.pending = {
+      coordinate: split.axis === "inline" ? event.clientX : event.clientY,
       position: pointerSample(event),
-    });
-    applyPointerPreview(session, requestedPointerWeights(session, event));
-    const state = send({ type: "POINTER_END", pointerId: event.pointerId });
+    };
+    consumeLatestPointer(session);
+    const state = send(session.actor, { type: "POINTER_END", pointerId: event.pointerId });
     sessionRef.current = null;
     if (event.currentTarget.hasPointerCapture?.(event.pointerId)) {
       event.currentTarget.releasePointerCapture?.(event.pointerId);
     }
     if (state !== "committing") {
       onCancel();
+      disposeActor(session.actor);
       return;
     }
-    settleCommit(onCommit(session.latest, "pointer").outcome, send, messages);
+    try {
+      settleCommit(
+        onCommit(session.latest, "pointer").outcome,
+        (event) => send(session.actor, event),
+        messages,
+      );
+    } finally {
+      disposeActor(session.actor);
+    }
   };
 
   const cancelPointer = (event: ReactPointerEvent<HTMLDivElement>) => {
     const session = sessionRef.current;
     if (session === null || session.pointerId !== event.pointerId) return;
     scheduler.cancel(scheduleKey);
+    session.pending = undefined;
     sessionRef.current = null;
-    const state = send({
+    const state = send(session.actor, {
       type: event.type === "lostpointercapture" ? "CAPTURE_LOST" : "POINTER_CANCEL",
       pointerId: event.pointerId,
     });
     onCancel();
-    if (state === "cancelling") send({ type: "RETURNED" });
+    if (state === "cancelling") send(session.actor, { type: "RETURNED" });
+    disposeActor(session.actor);
   };
 
   const onKeyDown = (event: KeyboardEvent<HTMLDivElement>) => {
@@ -1435,16 +1579,18 @@ function Splitter({
       event.preventDefault();
       const session = sessionRef.current;
       scheduler.cancel(scheduleKey);
+      session.pending = undefined;
       sessionRef.current = null;
-      const state = send({ type: "CANCEL" });
+      const state = send(session.actor, { type: "CANCEL" });
       onCancel();
       if (session.captureElement.hasPointerCapture?.(session.pointerId)) {
         session.captureElement.releasePointerCapture?.(session.pointerId);
       }
-      if (state === "cancelling") send({ type: "RETURNED" });
+      if (state === "cancelling") send(session.actor, { type: "RETURNED" });
+      disposeActor(session.actor);
       return;
     }
-    if (String(actor.getSnapshot().value) !== "idle") return;
+    if (actorRef.current !== null) return;
     const negativeKeys = split.axis === "inline" ? ["ArrowLeft"] : ["ArrowUp"];
     const positiveKeys = split.axis === "inline" ? ["ArrowRight"] : ["ArrowDown"];
     let delta = 0;
@@ -1458,23 +1604,35 @@ function Splitter({
       inline: splitter.rect.inlineStart,
       block: splitter.rect.blockStart,
     };
-    send({
-      type: "KEYBOARD_START",
-      position: currentPosition,
-      baseRevision: safeRevision(projectionRevision),
-    });
-    const nextPosition =
-      split.axis === "inline"
-        ? { ...currentPosition, inline: currentPosition.inline + step }
-        : { ...currentPosition, block: currentPosition.block + step };
-    send({ type: "KEYBOARD_STEP", position: nextPosition });
-    const next = updatePair(step, weights, beforeSize, afterSize);
-    const preview = onPreview(next);
-    const constrained = splitterPosition(preview, splitter.id);
-    if (constrained !== undefined) send({ type: "CONSTRAINT_RESULT", position: constrained });
-    const committedWeights = solvedPairWeights(split, next, preview, beforeIndex, afterIndex);
-    send({ type: "COMMIT" });
-    settleCommit(onCommit(committedWeights, "keyboard").outcome, send, messages);
+    const actor = createResizeActor();
+    actor.start();
+    actorRef.current = actor;
+    try {
+      send(actor, {
+        type: "KEYBOARD_START",
+        position: currentPosition,
+        baseRevision: safeRevision(projectionRevision),
+      });
+      const nextPosition =
+        split.axis === "inline"
+          ? { ...currentPosition, inline: currentPosition.inline + step }
+          : { ...currentPosition, block: currentPosition.block + step };
+      send(actor, { type: "KEYBOARD_STEP", position: nextPosition });
+      const next = updatePair(step, weights, beforeSize, afterSize);
+      const preview = onPreview(next);
+      const constrained = splitterPosition(preview, splitter.id);
+      if (constrained !== undefined)
+        send(actor, { type: "CONSTRAINT_RESULT", position: constrained });
+      const committedWeights = solvedPairWeights(split, next, preview, beforeIndex, afterIndex);
+      send(actor, { type: "COMMIT" });
+      settleCommit(
+        onCommit(committedWeights, "keyboard").outcome,
+        (event) => send(actor, event),
+        messages,
+      );
+    } finally {
+      disposeActor(actor);
+    }
   };
 
   return (
@@ -1489,7 +1647,7 @@ function Splitter({
       aria-valuemax={100}
       aria-valuenow={Math.round(value)}
       aria-valuetext={messages.primaryPanePercent({ percent: Math.round(value) })}
-      data-resize-state={resizeState}
+      data-resize-state="idle"
       data-workspace-splitter={splitter.id}
       data-inline-start={splitter.rect.inlineStart}
       data-block-start={splitter.rect.blockStart}
@@ -1542,6 +1700,7 @@ function PanelGroup<TCommand, TResult>({
   resolvedLayout,
 }: PanelGroupProps<TCommand, TResult>) {
   const pointerFocusPanelRef = useRef<string | undefined>(undefined);
+  const reorderFocusPanelRef = useRef<string | undefined>(undefined);
   const groupRef = useRef<HTMLElement>(null);
   const groupLabelId = useId();
   const groupPanels = group.panelIds
@@ -1549,6 +1708,7 @@ function PanelGroup<TCommand, TResult>({
     .filter((panel): panel is WorkspacePanelView => panel !== undefined);
   const selectedPanel = groupPanels.find((panel) => panel.id === group.selectedPanelId);
   const createMovePanelCommand = commands.movePanel;
+  const createReorderPanelCommand = commands.reorderPanel;
   const createFloatPanelCommand = commands.floatPanel;
   const createDropPanelCommand = commands.planPanelDrop;
   const presentation = resolveTabPresentation(tabPresentation, group, projection);
@@ -1609,12 +1769,14 @@ function PanelGroup<TCommand, TResult>({
       screenY: (ownerWindow?.screenY ?? 0) + clientY,
     };
     let outcome: WorkspaceExternalPanelOutcome | Promise<WorkspaceExternalPanelOutcome>;
+    const controller = new AbortController();
     try {
       outcome = requestExternalPanel({
         panel,
         sourceGroup,
         sourcePanels: panelsForGroup(projection, sourceGroup),
         origin,
+        controller,
         position,
       });
     } catch (error) {
@@ -1626,6 +1788,7 @@ function PanelGroup<TCommand, TResult>({
       return;
     }
     const handle = (result: WorkspaceExternalPanelOutcome) => {
+      if (controller.signal.reason === "surface-unmounted") return;
       announce(
         result.message ??
           (result.status === "committed"
@@ -1652,6 +1815,39 @@ function PanelGroup<TCommand, TResult>({
     const wrapped = (nextIndex + groupPanels.length) % groupPanels.length;
     const panel = groupPanels[wrapped];
     if (panel !== undefined) selectPanel(panel, true, "keyboard");
+  };
+
+  const reorderNeighbor = (
+    panel: WorkspacePanelView,
+    currentIndex: number,
+    delta: -1 | 1,
+    origin: Extract<WorkspaceCommandOrigin, "keyboard" | "menu">,
+  ) => {
+    if (createReorderPanelCommand === undefined) return;
+    const targetIndex = currentIndex + delta;
+    if (targetIndex < 0 || targetIndex >= groupPanels.length) return;
+    const anchor = groupPanels[targetIndex];
+    if (anchor === undefined) return;
+    const placement = delta < 0 ? { beforePanelId: anchor.id } : { afterPanelId: anchor.id };
+    const label =
+      delta < 0
+        ? interactionMessages.movedTabBefore({ title: panel.title, anchor: anchor.title })
+        : interactionMessages.movedTabAfter({ title: panel.title, anchor: anchor.title });
+    const outcome = dispatch(
+      createReorderPanelCommand(panel.id, group.id, placement),
+      label,
+      origin,
+    ).outcome;
+    if (outcome.status === "committed" || outcome.status === "queued") {
+      queueMicrotask(() => {
+        const tab = groupRef.current?.ownerDocument.getElementById(
+          panelTabId(domIdPrefix, panel.id),
+        );
+        if (tab === null || tab === undefined) return;
+        reorderFocusPanelRef.current = panel.id;
+        tab.focus();
+      });
+    }
   };
 
   return (
@@ -1718,6 +1914,10 @@ function PanelGroup<TCommand, TResult>({
                 onPointerCancel={panelDrag.cancel}
                 onLostPointerCapture={panelDrag.cancel}
                 onFocus={() => {
+                  if (reorderFocusPanelRef.current === panel.id) {
+                    reorderFocusPanelRef.current = undefined;
+                    return;
+                  }
                   const origin = pointerFocusPanelRef.current === panel.id ? "pointer" : "keyboard";
                   pointerFocusPanelRef.current = undefined;
                   // Pointer focus belongs to the still revision-bound
@@ -1733,6 +1933,36 @@ function PanelGroup<TCommand, TResult>({
                   }
                 }}
                 onKeyDown={(event) => {
+                  if (
+                    !event.nativeEvent.isComposing &&
+                    event.altKey &&
+                    !event.ctrlKey &&
+                    !event.metaKey &&
+                    !event.shiftKey
+                  ) {
+                    const visualPrevious =
+                      orientation === "vertical"
+                        ? "ArrowUp"
+                        : direction === "rtl"
+                          ? "ArrowRight"
+                          : "ArrowLeft";
+                    const visualNext =
+                      orientation === "vertical"
+                        ? "ArrowDown"
+                        : direction === "rtl"
+                          ? "ArrowLeft"
+                          : "ArrowRight";
+                    if (event.key === visualPrevious || event.key === visualNext) {
+                      event.preventDefault();
+                      reorderNeighbor(
+                        panel,
+                        index,
+                        event.key === visualPrevious ? -1 : 1,
+                        "keyboard",
+                      );
+                      return;
+                    }
+                  }
                   navigateTabs(event, index);
                   panelDrag.keyDown(event);
                   if (event.key === "Delete" && panel.closable !== false) {
@@ -1766,6 +1996,7 @@ function PanelGroup<TCommand, TResult>({
         {selectedPanel === undefined ||
         (selectedPanel.closable === false &&
           createMovePanelCommand === undefined &&
+          createReorderPanelCommand === undefined &&
           createFloatPanelCommand === undefined &&
           createDropPanelCommand === undefined &&
           !externalPanelAvailable) ? null : (
@@ -1788,6 +2019,7 @@ function PanelGroup<TCommand, TResult>({
               </button>
             )}
             {createMovePanelCommand === undefined &&
+            createReorderPanelCommand === undefined &&
             createFloatPanelCommand === undefined &&
             createDropPanelCommand === undefined &&
             !externalPanelAvailable ? null : (
@@ -1797,6 +2029,46 @@ function PanelGroup<TCommand, TResult>({
                 messages={messages}
                 interactionMessages={interactionMessages}
                 triggerId={panelActionsId(domIdPrefix, selectedPanel.id)}
+                onReorderPrevious={
+                  createReorderPanelCommand === undefined ||
+                  groupPanels.indexOf(selectedPanel) === 0
+                    ? undefined
+                    : {
+                        label: interactionMessages.moveTabBefore({
+                          title: selectedPanel.title,
+                          anchor:
+                            groupPanels[groupPanels.indexOf(selectedPanel) - 1]?.title ??
+                            selectedPanel.title,
+                        }),
+                        select: () =>
+                          reorderNeighbor(
+                            selectedPanel,
+                            groupPanels.indexOf(selectedPanel),
+                            -1,
+                            "menu",
+                          ),
+                      }
+                }
+                onReorderNext={
+                  createReorderPanelCommand === undefined ||
+                  groupPanels.indexOf(selectedPanel) === groupPanels.length - 1
+                    ? undefined
+                    : {
+                        label: interactionMessages.moveTabAfter({
+                          title: selectedPanel.title,
+                          anchor:
+                            groupPanels[groupPanels.indexOf(selectedPanel) + 1]?.title ??
+                            selectedPanel.title,
+                        }),
+                        select: () =>
+                          reorderNeighbor(
+                            selectedPanel,
+                            groupPanels.indexOf(selectedPanel),
+                            1,
+                            "menu",
+                          ),
+                      }
+                }
                 onStartKeyboardMove={
                   createMovePanelCommand === undefined && createDropPanelCommand === undefined
                     ? undefined
@@ -1874,6 +2146,8 @@ interface TabActionsProps {
   readonly messages: WorkspaceMessageCatalog;
   readonly interactionMessages: ResolvedWorkspaceInteractionMessages;
   readonly triggerId: string;
+  readonly onReorderPrevious: TabReorderMenuAction | undefined;
+  readonly onReorderNext: TabReorderMenuAction | undefined;
   readonly onStartKeyboardMove: (() => void) | undefined;
   readonly onMove: ((groupId: string) => void) | undefined;
   readonly onFloat: (() => void) | undefined;
@@ -1882,12 +2156,19 @@ interface TabActionsProps {
   readonly onExternal: ((origin: "keyboard" | "menu") => void) | undefined;
 }
 
+interface TabReorderMenuAction {
+  readonly label: string;
+  readonly select: () => void;
+}
+
 function TabActions({
   panel,
   groups,
   messages,
   interactionMessages,
   triggerId,
+  onReorderPrevious,
+  onReorderNext,
   onStartKeyboardMove,
   onMove,
   onFloat,
@@ -1986,6 +2267,30 @@ function TabActions({
             items[(nextIndex + items.length) % items.length]?.focus();
           }}
         >
+          {onReorderPrevious === undefined ? null : (
+            <button
+              role="menuitem"
+              type="button"
+              onClick={() => {
+                setOpen(false);
+                onReorderPrevious.select();
+              }}
+            >
+              {onReorderPrevious.label}
+            </button>
+          )}
+          {onReorderNext === undefined ? null : (
+            <button
+              role="menuitem"
+              type="button"
+              onClick={() => {
+                setOpen(false);
+                onReorderNext.select();
+              }}
+            >
+              {onReorderNext.label}
+            </button>
+          )}
           {onStartKeyboardMove === undefined || onMove === undefined ? null : (
             <button
               role="menuitem"
@@ -2075,6 +2380,7 @@ interface KeyboardMoveOverlayProps {
   readonly groups: readonly WorkspaceGroupView[];
   readonly messages: WorkspaceMessageCatalog;
   readonly direction: WorkspaceDirection;
+  readonly announce: (message: string) => void;
   readonly onMove: (groupId: string) => void;
   readonly onSplit: ((edge: WorkspaceLogicalEdge) => void) | undefined;
   readonly onExternal: (() => void) | undefined;
@@ -2086,6 +2392,7 @@ function KeyboardMoveOverlay({
   groups,
   messages,
   direction,
+  announce,
   onMove,
   onSplit,
   onExternal,
@@ -2093,6 +2400,7 @@ function KeyboardMoveOverlay({
 }: KeyboardMoveOverlayProps) {
   const [index, setIndex] = useState(0);
   const overlayRef = useRef<HTMLDivElement>(null);
+  const announcedDestinationIdRef = useRef<string | undefined>(undefined);
   const interactionMessages = resolveWorkspaceInteractionMessages(messages);
 
   useEffect(() => {
@@ -2103,6 +2411,7 @@ function KeyboardMoveOverlay({
   const destinations: readonly KeyboardPanelDestination[] = [
     ...groups.map((group) => ({
       id: `group:${group.id}`,
+      kind: "group" as const,
       label: group.label ?? messages.groupFallback(),
       commit: () => onMove(group.id),
     })),
@@ -2110,14 +2419,36 @@ function KeyboardMoveOverlay({
       ? []
       : (["inline-start", "inline-end", "block-start", "block-end"] as const).map((edge) => ({
           id: `edge:${edge}`,
+          kind: "edge" as const,
           label: interactionMessages.splitEdge({ edge: logicalEdgeLabel(edge, direction) }),
           commit: () => onSplit(edge),
         }))),
     ...(onExternal === undefined
       ? []
-      : [{ id: "external", label: interactionMessages.openInNewWindow(), commit: onExternal }]),
+      : [
+          {
+            id: "external",
+            kind: "external" as const,
+            label: interactionMessages.openInNewWindow(),
+            commit: onExternal,
+          },
+        ]),
   ];
   const selectedDestination = destinations[index];
+  const selectedDestinationId = selectedDestination?.id;
+  const selectedDestinationLabel = selectedDestination?.label;
+  useEffect(() => {
+    if (
+      selectedDestinationId === undefined ||
+      selectedDestinationLabel === undefined ||
+      announcedDestinationIdRef.current === selectedDestinationId
+    ) {
+      return;
+    }
+    announcedDestinationIdRef.current = selectedDestinationId;
+    announce(selectedDestinationLabel);
+  }, [announce, selectedDestinationId, selectedDestinationLabel]);
+
   return (
     <div
       ref={overlayRef}
@@ -2151,6 +2482,12 @@ function KeyboardMoveOverlay({
           event.preventDefault();
           setIndex(destinations.length - 1);
         }
+        if (event.key === "Tab" && destinations.length > 0) {
+          event.preventDefault();
+          setIndex((value) =>
+            nextKeyboardDestinationClassIndex(destinations, value, event.shiftKey ? -1 : 1),
+          );
+        }
         if (event.key === "Enter" && selectedDestination !== undefined) {
           event.preventDefault();
           selectedDestination.commit();
@@ -2171,8 +2508,32 @@ function KeyboardMoveOverlay({
 
 interface KeyboardPanelDestination {
   readonly id: string;
+  readonly kind: "group" | "edge" | "external";
   readonly label: string;
   readonly commit: () => void;
+}
+
+const KEYBOARD_DESTINATION_CLASS_ORDER: readonly KeyboardPanelDestination["kind"][] = [
+  "group",
+  "edge",
+  "external",
+];
+
+function nextKeyboardDestinationClassIndex(
+  destinations: readonly KeyboardPanelDestination[],
+  currentIndex: number,
+  delta: -1 | 1,
+): number {
+  const availableKinds = KEYBOARD_DESTINATION_CLASS_ORDER.filter((kind) =>
+    destinations.some((destination) => destination.kind === kind),
+  );
+  if (availableKinds.length <= 1) return currentIndex;
+  const currentKind = destinations[currentIndex]?.kind ?? availableKinds[0];
+  const classIndex = currentKind === undefined ? 0 : availableKinds.indexOf(currentKind);
+  const nextKind =
+    availableKinds[(classIndex + delta + availableKinds.length) % availableKinds.length];
+  const nextIndex = destinations.findIndex((destination) => destination.kind === nextKind);
+  return nextIndex < 0 ? currentIndex : nextIndex;
 }
 
 interface PanelPortalsProps {
@@ -2195,15 +2556,20 @@ function PanelPortals({
   // The revision is deliberately read here: adopting an existing portal host
   // does not itself participate in React reconciliation.
   void ownershipRevision;
+  const groupByPanelId = useMemo(() => {
+    const result = new Map<string, WorkspaceGroupView>();
+    for (const group of Object.values(projection.groups)) {
+      for (const panelId of group.panelIds) result.set(panelId, group);
+    }
+    return result;
+  }, [projection.groups]);
   return (
     <>
       {Object.values(projection.panels).map((panel) => {
         const host = hosts.get(panel.id)?.element;
         const definition = registry[panel.type];
         if (host === undefined) return null;
-        const group = Object.values(projection.groups).find((candidate) =>
-          candidate.panelIds.includes(panel.id),
-        );
+        const group = groupByPanelId.get(panel.id);
         const inExternalDocument =
           surfaceDocument !== undefined && host.ownerDocument !== surfaceDocument;
         const selected = inExternalDocument || group?.selectedPanelId === panel.id;
@@ -2215,10 +2581,11 @@ function PanelPortals({
           definition === undefined ? (
             <MissingPanel panel={panel} messages={messages} />
           ) : (
-            <PanelContent
+            <StablePanelContent
               definition={definition}
               panel={panel}
               revision={projection.revision}
+              ownershipRevision={ownershipRevision}
               groupId={group?.id}
               selected={selected}
               active={active}
@@ -2247,6 +2614,7 @@ interface PanelContentProps {
   readonly panel: WorkspacePanelView;
   readonly policy: WorkspacePanelLifecyclePolicy;
   readonly revision: string;
+  readonly ownershipRevision: number;
   readonly selected: boolean;
 }
 
@@ -2258,8 +2626,10 @@ function PanelContent({
   panel,
   policy,
   revision,
+  ownershipRevision,
   selected,
 }: PanelContentProps) {
+  void ownershipRevision;
   const previousLease = useRef<PanelLifecycleLeaseState | undefined>(undefined);
   const leaseIdentity = [
     active,
@@ -2331,6 +2701,64 @@ function PanelContent({
   );
 }
 
+/**
+ * A pure tab reorder changes projection revision and tab order, but none of a
+ * panel renderer's inputs. Keep heavy portal content out of that reconciliation
+ * path while allowing lifecycle, registry, or panel changes through normally.
+ */
+const StablePanelContent = memo(
+  PanelContent,
+  (previous, next) =>
+    previous.active === next.active &&
+    previous.definition === next.definition &&
+    previous.groupId === next.groupId &&
+    previous.lifecycle === next.lifecycle &&
+    previous.ownershipRevision === next.ownershipRevision &&
+    samePanelView(previous.panel, next.panel) &&
+    samePanelLifecyclePolicy(previous.policy, next.policy) &&
+    previous.selected === next.selected,
+);
+
+/**
+ * Projection adapters commonly recreate their small panel view objects for
+ * every runtime snapshot. Treat the declared scalar fields and lifecycle
+ * policy as values, while retaining reference semantics for application-owned
+ * `parameters`: an arbitrary parameter object may carry identity that is
+ * meaningful to its renderer.
+ */
+function samePanelView(previous: WorkspacePanelView, next: WorkspacePanelView): boolean {
+  return (
+    previous === next ||
+    (previous.id === next.id &&
+      previous.type === next.type &&
+      previous.title === next.title &&
+      previous.closable === next.closable &&
+      previous.floatable === next.floatable &&
+      Object.is(previous.parameters, next.parameters) &&
+      sameOptionalPanelLifecyclePolicy(previous.lifecyclePolicy, next.lifecyclePolicy))
+  );
+}
+
+function sameOptionalPanelLifecyclePolicy(
+  previous: WorkspacePanelLifecyclePolicy | undefined,
+  next: WorkspacePanelLifecyclePolicy | undefined,
+): boolean {
+  if (previous === undefined || next === undefined) return previous === next;
+  return samePanelLifecyclePolicy(previous, next);
+}
+
+function samePanelLifecyclePolicy(
+  previous: WorkspacePanelLifecyclePolicy,
+  next: WorkspacePanelLifecyclePolicy,
+): boolean {
+  return (
+    previous === next ||
+    (previous.hidden === next.hidden &&
+      previous.sameDocumentMove === next.sameDocumentMove &&
+      previous.crossDocumentMove === next.crossDocumentMove)
+  );
+}
+
 function MissingPanel({
   panel,
   messages,
@@ -2384,7 +2812,15 @@ function encodeDomId(value: string) {
   return encoded || "empty";
 }
 
+type ResizeActor = ReturnType<typeof createResizeActor>;
+
+interface PointerResizeSample {
+  readonly coordinate: number;
+  readonly position: { readonly inline: number; readonly block: number };
+}
+
 interface PointerResizeSession {
+  readonly actor: ResizeActor;
   readonly pointerId: number;
   readonly startCoordinate: number;
   readonly beforeSize: number;
@@ -2392,6 +2828,7 @@ interface PointerResizeSession {
   readonly weights: readonly number[];
   readonly captureElement: HTMLDivElement;
   latest: readonly number[];
+  pending: PointerResizeSample | undefined;
 }
 
 const ZERO_LOGICAL_RECT: LogicalRect = Object.freeze({
@@ -2400,6 +2837,8 @@ const ZERO_LOGICAL_RECT: LogicalRect = Object.freeze({
   inlineSize: 0,
   blockSize: 0,
 });
+
+const EMPTY_SPLIT_OVERRIDES: Readonly<Record<string, SplitLayoutOverride>> = Object.freeze({});
 
 function createBrowserFrameScheduler(): SurfaceFrameScheduler {
   return new SurfaceFrameScheduler({
@@ -2426,6 +2865,51 @@ function sameLogicalRect(left: LogicalRect, right: LogicalRect): boolean {
     left.inlineSize === right.inlineSize &&
     left.blockSize === right.blockSize
   );
+}
+
+interface ResolvedLayoutPreviewTargets {
+  readonly splitChildren: readonly HTMLElement[];
+  readonly splitters: readonly HTMLElement[];
+}
+
+const RESOLVED_LAYOUT_PREVIEW_TARGETS = new WeakMap<HTMLElement, ResolvedLayoutPreviewTargets>();
+
+function applyResolvedLayoutPreview(root: HTMLElement | null, layout: ResolvedLayout): void {
+  if (root === null) return;
+  let targets = RESOLVED_LAYOUT_PREVIEW_TARGETS.get(root);
+  if (
+    targets === undefined ||
+    targets.splitters.length !== layout.splitters.length ||
+    targets.splitChildren.some((element) => !root.contains(element)) ||
+    targets.splitters.some((element) => !root.contains(element))
+  ) {
+    targets = {
+      splitChildren: Array.from(root.querySelectorAll<HTMLElement>("[data-workspace-split-child]")),
+      splitters: Array.from(root.querySelectorAll<HTMLElement>("[data-workspace-splitter]")),
+    };
+    RESOLVED_LAYOUT_PREVIEW_TARGETS.set(root, targets);
+  }
+
+  for (const element of targets.splitChildren) {
+    const nodeId = element.dataset.workspaceSplitChild;
+    const axis = element.parentElement?.dataset.axis;
+    const rect = nodeId === undefined ? undefined : layout.nodeRects[nodeId];
+    if (rect === undefined || (axis !== "inline" && axis !== "block")) continue;
+    element.dataset.inlineSize = String(rect.inlineSize);
+    element.dataset.blockSize = String(rect.blockSize);
+    element.style.setProperty("--pf-split-size", `${axisSize(rect, axis)}px`);
+  }
+
+  const splitters = new Map(layout.splitters.map((item) => [item.id, item] as const));
+  for (const element of targets.splitters) {
+    const splitterId = element.dataset.workspaceSplitter;
+    const resolved = splitterId === undefined ? undefined : splitters.get(splitterId);
+    const axis = element.getAttribute("aria-orientation") === "vertical" ? "inline" : "block";
+    if (resolved === undefined) continue;
+    element.dataset.inlineStart = String(resolved.rect.inlineStart);
+    element.dataset.blockStart = String(resolved.rect.blockStart);
+    element.style.setProperty("--pf-splitter-size", `${axisSize(resolved.rect, axis)}px`);
+  }
 }
 
 function subtreeHasEmptyGroup(
@@ -2527,7 +3011,7 @@ function settleCommit(
   send: (event: ResizeEvent) => string,
   messages: WorkspaceMessageCatalog,
 ): void {
-  if (outcome.status === "committed") {
+  if (outcome.status === "committed" || outcome.status === "queued") {
     send({ type: "COMMIT_OK" });
     send({ type: "SETTLED" });
     return;
@@ -2544,7 +3028,7 @@ function clamp(value: number, minimum: number, maximum: number) {
 }
 
 function updateStableHost(
-  element: HTMLDivElement,
+  host: HostRecord,
   options: {
     readonly active: boolean;
     readonly lifecycle: WorkspacePanelLifecycle;
@@ -2554,6 +3038,17 @@ function updateStableHost(
     readonly selected: boolean;
   },
 ) {
+  const nextState: StableHostState = {
+    active: options.active,
+    lifecycle: options.lifecycle,
+    labelledBy: options.labelledBy,
+    label: options.label,
+    panelType: options.panelType,
+    selected: options.selected,
+  };
+  if (stableHostStatesEqual(host.cache.state, nextState)) return;
+
+  const { element } = host;
   element.hidden = !options.selected;
   element.inert = !options.selected;
   element.setAttribute("aria-hidden", options.selected ? "false" : "true");
@@ -2565,29 +3060,52 @@ function updateStableHost(
   element.dataset.lifecycle = options.lifecycle;
   if (options.panelType === undefined) delete element.dataset.panelType;
   else element.dataset.panelType = options.panelType;
+  host.cache.state = nextState;
 }
 
-function prepareHostForExternalAccessibility(host: HTMLElement, panelTitle: string) {
-  host.removeAttribute("aria-labelledby");
-  host.setAttribute("aria-label", panelTitle);
+function updateHostDestinationCache(host: HostRecord, destination: Element | null): void {
+  host.cache.destination = destination;
+}
+
+function stableHostStatesEqual(
+  previous: StableHostState | undefined,
+  next: StableHostState,
+): boolean {
+  return (
+    previous !== undefined &&
+    previous.active === next.active &&
+    previous.lifecycle === next.lifecycle &&
+    previous.labelledBy === next.labelledBy &&
+    previous.label === next.label &&
+    previous.panelType === next.panelType &&
+    previous.selected === next.selected
+  );
+}
+
+function prepareHostForExternalAccessibility(host: HostRecord, panelTitle: string) {
+  host.cache.state = undefined;
+  host.element.removeAttribute("aria-labelledby");
+  host.element.setAttribute("aria-label", panelTitle);
 }
 
 function finalizeExternalHostAccessibility(
-  host: HTMLElement,
+  host: HostRecord,
   panelTitle: string,
   labelledBy: string,
   surfaceDocument: Document | undefined,
 ) {
-  if (surfaceDocument !== undefined && host.ownerDocument === surfaceDocument) {
-    host.setAttribute("aria-labelledby", labelledBy);
-    host.removeAttribute("aria-label");
+  host.cache.destination = host.element.parentElement;
+  host.cache.state = undefined;
+  if (surfaceDocument !== undefined && host.element.ownerDocument === surfaceDocument) {
+    host.element.setAttribute("aria-labelledby", labelledBy);
+    host.element.removeAttribute("aria-label");
     return;
   }
-  host.removeAttribute("aria-labelledby");
-  host.setAttribute("aria-label", panelTitle);
-  host.hidden = false;
-  host.inert = false;
-  host.setAttribute("aria-hidden", "false");
+  host.element.removeAttribute("aria-labelledby");
+  host.element.setAttribute("aria-label", panelTitle);
+  host.element.hidden = false;
+  host.element.inert = false;
+  host.element.setAttribute("aria-hidden", "false");
 }
 
 interface PanelLifecycleLeaseState {
@@ -2742,4 +3260,45 @@ function isRecord(value: unknown): value is Readonly<Record<string, unknown>> {
 
 function isPromiseLike<T>(value: T | Promise<T>): value is Promise<T> {
   return typeof (value as Promise<T>).then === "function";
+}
+
+function boundedExternalOutcome(
+  outcome: Promise<WorkspaceExternalPanelOutcome>,
+  controller: AbortController,
+  timeoutMs: number,
+  finalize: () => void,
+): Promise<WorkspaceExternalPanelOutcome> {
+  return new Promise((resolve, reject) => {
+    let settled = false;
+    const timerRef: { current?: ReturnType<typeof globalThis.setTimeout> } = {};
+    const cleanup = () => {
+      if (timerRef.current !== undefined) globalThis.clearTimeout(timerRef.current);
+      controller.signal.removeEventListener("abort", handleAbort);
+      finalize();
+    };
+    const complete = (action: () => void) => {
+      if (settled) return;
+      settled = true;
+      cleanup();
+      action();
+    };
+    const handleAbort = () => complete(() => reject(controller.signal.reason));
+
+    controller.signal.addEventListener("abort", handleAbort, { once: true });
+    if (controller.signal.aborted) {
+      handleAbort();
+      return;
+    }
+    timerRef.current = globalThis.setTimeout(() => controller.abort("timeout"), timeoutMs);
+    void outcome.then(
+      (result) => complete(() => resolve(result)),
+      (error: unknown) => complete(() => reject(error)),
+    );
+  });
+}
+
+function assertNonNegativeSafeInteger(value: number, name: string): void {
+  if (!Number.isSafeInteger(value) || value < 0) {
+    throw new RangeError(`${name} must be a non-negative safe integer`);
+  }
 }

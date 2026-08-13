@@ -14,12 +14,14 @@
     {
       "requirementId": "A11Y-002",
       "profileId": "compact-react-chromium-desktop",
-      "status": "verified",
+      "status": "unresolved",
       "verificationClass": "code-verifiable",
       "evidenceIds": [
-        "testkit-contract"
+        "react-tab-reorder",
+        "chromium-reference-result",
+        "protocol-motion-result"
       ],
-      "rationale": "Covered by repository-local automated evidence for this experimental profile."
+      "rationale": "The narrowed action registry matches the renderer routes it declares, but it omits structural operations from the complete Appendix G action set and is not generated from route-specific behavior tests."
     },
     {
       "requirementId": "A11Y-003",
@@ -52,12 +54,12 @@
     {
       "requirementId": "A11Y-006",
       "profileId": "compact-react-chromium-desktop",
-      "status": "verified",
+      "status": "unresolved",
       "verificationClass": "environment-verifiable",
       "evidenceIds": [
-        "chromium-reference-result"
+        "motion-primitives"
       ],
-      "rationale": "Covered by repository-local automated evidence for this experimental profile."
+      "rationale": "Pure motion adaptation removes transforms, but the recorded Chromium task checks preference projection rather than end-to-end removal of non-essential spatial movement."
     },
     {
       "requirementId": "A11Y-007",
@@ -197,6 +199,7 @@
       "evidenceIds": [
         "protocol-models",
         "protocol-actor-catalog",
+        "react-integration",
         "protocol-motion-decision"
       ],
       "rationale": "Covered by repository-local automated evidence for this experimental profile."
@@ -345,6 +348,7 @@
       "status": "blocked",
       "verificationClass": "manual-external",
       "evidenceIds": [
+        "react-tab-reorder",
         "testkit-contract"
       ],
       "rationale": "This requirement needs manual, physical-system, independent-review, adoption, usability, or signed-approval evidence that repository automation cannot manufacture."
@@ -364,7 +368,11 @@
       "profileId": "compact-react-chromium-desktop",
       "status": "unresolved",
       "verificationClass": "environment-verifiable",
-      "evidenceIds": [],
+      "evidenceIds": [
+        "react-tab-reorder",
+        "chromium-reference-result",
+        "protocol-motion-result"
+      ],
       "rationale": "A reproducible automated environment result with profile, workload, and execution metadata has not been recorded."
     },
     {
@@ -461,12 +469,10 @@
     {
       "requirementId": "FOC-002",
       "profileId": "compact-react-chromium-desktop",
-      "status": "verified",
+      "status": "unresolved",
       "verificationClass": "environment-verifiable",
-      "evidenceIds": [
-        "chromium-reference-result"
-      ],
-      "rationale": "Covered by repository-local automated evidence for this experimental profile."
+      "evidenceIds": [],
+      "rationale": "The renderer avoids intentionally stealing content focus, but no recorded browser task clicks interactive panel descendants and verifies their natural focus."
     },
     {
       "requirementId": "FOC-003",
@@ -646,7 +652,8 @@
       "status": "unresolved",
       "verificationClass": "environment-verifiable",
       "evidenceIds": [
-        "motion-primitives"
+        "motion-primitives",
+        "react-integration"
       ],
       "rationale": "A reproducible automated environment result with profile, workload, and execution metadata has not been recorded."
     },
@@ -671,12 +678,14 @@
     {
       "requirementId": "INT-004",
       "profileId": "compact-react-chromium-desktop",
-      "status": "verified",
+      "status": "unresolved",
       "verificationClass": "code-verifiable",
       "evidenceIds": [
-        "testkit-contract"
+        "react-tab-reorder",
+        "chromium-reference-result",
+        "protocol-motion-result"
       ],
-      "rationale": "Covered by repository-local automated evidence for this experimental profile."
+      "rationale": "The narrowed action registry matches the renderer routes it declares, but it omits structural pointer actions from the complete Appendix G matrix and is not generated from route-specific keyboard, menu or command-palette, and programmatic tests."
     },
     {
       "requirementId": "INT-005",
@@ -799,12 +808,12 @@
     {
       "requirementId": "LIF-003",
       "profileId": "compact-react-chromium-desktop",
-      "status": "verified",
+      "status": "unresolved",
       "verificationClass": "environment-verifiable",
       "evidenceIds": [
-        "chromium-reference-result"
+        "react-integration"
       ],
-      "rationale": "Covered by repository-local automated evidence for this experimental profile."
+      "rationale": "JSDOM checks hidden and inert projection, but no recorded browser or assistive-technology traversal establishes exclusion while preserving the declared lifecycle state."
     },
     {
       "requirementId": "LIF-004",
@@ -1184,12 +1193,10 @@
     {
       "requirementId": "PKG-004",
       "profileId": "compact-react-chromium-desktop",
-      "status": "verified",
+      "status": "unresolved",
       "verificationClass": "code-verifiable",
-      "evidenceIds": [
-        "package-boundaries"
-      ],
-      "rationale": "Covered by repository-local automated evidence for this experimental profile."
+      "evidenceIds": [],
+      "rationale": "Package manifests publish export maps, but every package does not yet publish a documented compatibility policy backed by an exact manifest audit."
     },
     {
       "requirementId": "PKG-005",
@@ -1206,7 +1213,13 @@
       "profileId": "compact-react-chromium-desktop",
       "status": "unresolved",
       "verificationClass": "environment-verifiable",
-      "evidenceIds": [],
+      "evidenceIds": [
+        "react-integration",
+        "react-tab-reorder",
+        "chromium-reference-result",
+        "interaction-performance-result",
+        "protocol-motion-result"
+      ],
       "rationale": "A reproducible automated environment result with profile, workload, and execution metadata has not been recorded."
     },
     {
@@ -1239,7 +1252,9 @@
       "status": "unresolved",
       "verificationClass": "environment-verifiable",
       "evidenceIds": [
-        "authenticated-coordination"
+        "motion-lifecycle",
+        "authenticated-coordination",
+        "protocol-motion-result"
       ],
       "rationale": "A reproducible automated environment result with profile, workload, and execution metadata has not been recorded."
     },
@@ -1257,7 +1272,11 @@
       "status": "unresolved",
       "verificationClass": "environment-verifiable",
       "evidenceIds": [
-        "geometry-invalidation"
+        "react-tab-reorder",
+        "geometry-invalidation",
+        "chromium-reference-result",
+        "interaction-performance-result",
+        "protocol-motion-result"
       ],
       "rationale": "A reproducible automated environment result with profile, workload, and execution metadata has not been recorded."
     },
@@ -1284,13 +1303,10 @@
     {
       "requirementId": "QLT-002",
       "profileId": "compact-react-chromium-desktop",
-      "status": "verified",
+      "status": "unresolved",
       "verificationClass": "code-verifiable",
-      "evidenceIds": [
-        "conformance-harness",
-        "evidence-taxonomy"
-      ],
-      "rationale": "Covered by repository-local automated evidence for this experimental profile."
+      "evidenceIds": [],
+      "rationale": "The harness reports failed hard gates, but it does not compute a release-quality score that is forced to zero."
     },
     {
       "requirementId": "QLT-003",
@@ -1429,22 +1445,18 @@
     {
       "requirementId": "RSP-002",
       "profileId": "compact-react-chromium-desktop",
-      "status": "verified",
+      "status": "unresolved",
       "verificationClass": "environment-verifiable",
-      "evidenceIds": [
-        "chromium-reference-result"
-      ],
-      "rationale": "Covered by repository-local automated evidence for this experimental profile."
+      "evidenceIds": [],
+      "rationale": "The touch fixture checks a compact region and target size, but no recorded task establishes scrolling, safe-area, and no-hover behavior together."
     },
     {
       "requirementId": "SCP-001",
       "profileId": "compact-react-chromium-desktop",
-      "status": "verified",
+      "status": "unresolved",
       "verificationClass": "code-verifiable",
-      "evidenceIds": [
-        "evidence-taxonomy"
-      ],
-      "rationale": "Covered by repository-local automated evidence for this experimental profile."
+      "evidenceIds": [],
+      "rationale": "The capability registry is curated rather than generated and cross-checked against every public export, so classification completeness is not established."
     },
     {
       "requirementId": "SCP-002",
@@ -1694,12 +1706,10 @@
     {
       "requirementId": "THM-002",
       "profileId": "compact-react-chromium-desktop",
-      "status": "verified",
+      "status": "unresolved",
       "verificationClass": "environment-verifiable",
-      "evidenceIds": [
-        "chromium-reference-result"
-      ],
-      "rationale": "Covered by repository-local automated evidence for this experimental profile."
+      "evidenceIds": [],
+      "rationale": "Forced colors, reduced motion, and touch have bounded checks, but the recorded profile has no complete focus-visibility and large-text or zoom visual matrix."
     },
     {
       "requirementId": "TST-001",
@@ -1797,13 +1807,10 @@
     {
       "requirementId": "TST-009",
       "profileId": "compact-react-chromium-desktop",
-      "status": "verified",
+      "status": "unresolved",
       "verificationClass": "code-verifiable",
-      "evidenceIds": [
-        "surface-ownership",
-        "testkit-contract"
-      ],
-      "rationale": "Covered by repository-local automated evidence for this experimental profile."
+      "evidenceIds": [],
+      "rationale": "Failure injection covers bounded persistence and surface cases, not the final authoritative location or recoverable placeholder for every panel across the complete recovery matrix."
     },
     {
       "requirementId": "TXN-001",
@@ -1843,20 +1850,17 @@
       "status": "verified",
       "verificationClass": "code-verifiable",
       "evidenceIds": [
-        "kernel-laws",
-        "panel-drop-planner"
+        "surface-ownership"
       ],
       "rationale": "Covered by repository-local automated evidence for this experimental profile."
     },
     {
       "requirementId": "TXN-005",
       "profileId": "compact-react-chromium-desktop",
-      "status": "verified",
+      "status": "unresolved",
       "verificationClass": "code-verifiable",
-      "evidenceIds": [
-        "kernel-laws"
-      ],
-      "rationale": "Covered by repository-local automated evidence for this experimental profile."
+      "evidenceIds": [],
+      "rationale": "The runtime does not publish post-commit effect intents carrying transaction and revision identity, and duplicate-delivery idempotence is not tested."
     },
     {
       "requirementId": "TXN-006",
@@ -1871,12 +1875,10 @@
     {
       "requirementId": "TXN-007",
       "profileId": "compact-react-chromium-desktop",
-      "status": "verified",
+      "status": "unresolved",
       "verificationClass": "code-verifiable",
-      "evidenceIds": [
-        "runtime-policy-contract"
-      ],
-      "rationale": "Covered by repository-local automated evidence for this experimental profile."
+      "evidenceIds": [],
+      "rationale": "Prepared surface transfer rechecks base revision, but the final commit does not re-evaluate policy after asynchronous preparation."
     },
     {
       "requirementId": "TXN-008",
@@ -2979,10 +2981,7 @@
       "profileId": "framework-adapter-contract-jsdom",
       "status": "unresolved",
       "verificationClass": "code-verifiable",
-      "evidenceIds": [
-        "conformance-harness",
-        "evidence-taxonomy"
-      ],
+      "evidenceIds": [],
       "rationale": "The repository implementation or its requirement-specific static/model proof is incomplete for this profile."
     },
     {
@@ -3113,9 +3112,7 @@
       "profileId": "framework-adapter-contract-jsdom",
       "status": "unresolved",
       "verificationClass": "code-verifiable",
-      "evidenceIds": [
-        "evidence-taxonomy"
-      ],
+      "evidenceIds": [],
       "rationale": "The repository implementation or its requirement-specific static/model proof is incomplete for this profile."
     },
     {

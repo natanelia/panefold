@@ -264,24 +264,40 @@ export function hitTestPanelDropCandidates<TCommand>(
   candidates: readonly PanelDropCandidate<TCommand>[],
   point: LogicalPoint,
 ): PanelDropCandidate<TCommand> | undefined {
-  const containing = candidates.filter((candidate) => containsPoint(candidate.hitRect, point));
-  const center = containing
-    .filter((candidate) => candidate.request.target.kind === "center")
-    .sort(
-      (left, right) =>
-        right.acquisitionPriority - left.acquisitionPriority ||
-        left.hitRect.inlineSize * left.hitRect.blockSize -
-          right.hitRect.inlineSize * right.hitRect.blockSize ||
-        compareCodeUnits(left.id, right.id),
-    )[0];
-  if (center !== undefined) return center;
+  let center: PanelDropCandidate<TCommand> | undefined;
+  let edge: PanelDropCandidate<TCommand> | undefined;
+  let edgeCandidateDistance = Number.POSITIVE_INFINITY;
+  for (const candidate of candidates) {
+    if (!containsPoint(candidate.hitRect, point)) continue;
+    if (candidate.request.target.kind === "center") {
+      if (center === undefined || compareCenterCandidate(candidate, center) < 0) {
+        center = candidate;
+      }
+      continue;
+    }
+    const distance = edgeDistance(candidate, point);
+    if (
+      edge === undefined ||
+      distance < edgeCandidateDistance ||
+      (distance === edgeCandidateDistance && compareCodeUnits(candidate.id, edge.id) < 0)
+    ) {
+      edge = candidate;
+      edgeCandidateDistance = distance;
+    }
+  }
+  return center ?? edge;
+}
 
-  return containing
-    .map((candidate) => ({ candidate, distance: edgeDistance(candidate, point) }))
-    .sort(
-      (left, right) =>
-        left.distance - right.distance || compareCodeUnits(left.candidate.id, right.candidate.id),
-    )[0]?.candidate;
+function compareCenterCandidate<TCommand>(
+  left: PanelDropCandidate<TCommand>,
+  right: PanelDropCandidate<TCommand>,
+): number {
+  return (
+    right.acquisitionPriority - left.acquisitionPriority ||
+    left.hitRect.inlineSize * left.hitRect.blockSize -
+      right.hitRect.inlineSize * right.hitRect.blockSize ||
+    compareCodeUnits(left.id, right.id)
+  );
 }
 
 export function groupForPanel(

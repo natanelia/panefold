@@ -41,6 +41,7 @@ export type {
   WorkspacePanelLifecyclePolicy,
   WorkspacePanelLifecycleReason,
   WorkspacePanelRegistry,
+  WorkspacePanelReorderPlacement,
   WorkspacePanelRenderProps,
   WorkspacePanelView,
   WorkspaceProjection,

@@ -63,11 +63,74 @@ async function splitNotesFromMenu(page: Page, menuLabel: string) {
   await page.getByRole("menuitem", { name: menuLabel }).click();
 }
 
+async function dragTabRelative(
+  page: Page,
+  sourcePanelId: string,
+  anchorPanelId: string,
+  relation: "before" | "after",
+  orientation: "horizontal" | "vertical",
+  direction: "ltr" | "rtl" = "ltr",
+) {
+  const source = page.locator(`[data-workspace-panel-tab="${sourcePanelId}"]`);
+  const anchor = page.locator(`[data-workspace-panel-tab="${anchorPanelId}"]`);
+  await waitForRectToSettle(source);
+  await waitForRectToSettle(anchor);
+  const sourceBox = await requiredBox(source);
+  const anchorBox = await requiredBox(anchor);
+  const beforeAtPhysicalStart = orientation === "vertical" || direction === "ltr";
+  const usePhysicalStart = relation === "before" ? beforeAtPhysicalStart : !beforeAtPhysicalStart;
+  const target =
+    orientation === "vertical"
+      ? {
+          x: anchorBox.x + anchorBox.width / 2,
+          y: usePhysicalStart ? anchorBox.y + 3 : anchorBox.y + anchorBox.height - 3,
+        }
+      : {
+          x: usePhysicalStart ? anchorBox.x + 3 : anchorBox.x + anchorBox.width - 3,
+          y: anchorBox.y + anchorBox.height / 2,
+        };
+  await page.mouse.move(sourceBox.x + sourceBox.width / 2, sourceBox.y + sourceBox.height / 2);
+  await page.mouse.down();
+  await page.mouse.move(target.x, target.y, { steps: 10 });
+  const overlay = page.locator("[data-workspace-panel-drag]");
+  await expect(overlay).toHaveAttribute("data-workspace-drop-kind", "reorder");
+  await expect(overlay.locator("[data-workspace-tab-reorder-indicator]")).toBeVisible();
+  await page.mouse.up();
+}
+
 async function requiredBox(locator: Locator) {
   const box = await locator.boundingBox();
   expect(box).not.toBeNull();
   if (box === null) throw new Error("Expected a rendered drag target");
   return box;
+}
+
+async function waitForRectToSettle(locator: Locator) {
+  let previous: Awaited<ReturnType<Locator["boundingBox"]>>;
+  let stableSamples = 0;
+  await expect
+    .poll(
+      async () => {
+        const current = await locator.boundingBox();
+        if (current === null) return 0;
+        if (
+          previous !== null &&
+          previous !== undefined &&
+          Math.abs(current.x - previous.x) <= 0.5 &&
+          Math.abs(current.y - previous.y) <= 0.5 &&
+          Math.abs(current.width - previous.width) <= 0.5 &&
+          Math.abs(current.height - previous.height) <= 0.5
+        ) {
+          stableSamples += 1;
+        } else {
+          stableSamples = 0;
+        }
+        previous = current;
+        return stableSamples;
+      },
+      { timeout: 3_000, intervals: [50] },
+    )
+    .toBeGreaterThanOrEqual(2);
 }
 
 async function waitForGroupToFillWorkspaceBlock(page: Page, groupId: string) {
@@ -241,6 +304,147 @@ test("drags a stateful panel into another container and undoes it atomically", a
     page.locator('[data-workspace-group="primary"]').locator('[data-workspace-panel-tab="notes"]'),
   ).toBeVisible();
   await expect(editor).toHaveValue("State survives a direct panel drop.");
+});
+
+test("reorders tabs by drag in horizontal LTR, RTL, and vertical rails without remounting", async ({
+  page,
+}) => {
+  await page.goto("/");
+  const primary = page.locator('[data-workspace-group="primary"]');
+  const notesHost = page.locator('[data-workspace-panel-host="notes"]');
+  const hostId = await notesHost.getAttribute("id");
+  const editor = notesHost.getByRole("textbox", { name: "Workspace review notes" });
+  await page.getByRole("tab", { name: "Notes" }).click();
+  await editor.fill("Tab reorder keeps this live editor.");
+  const initialRevision = await revisionOf(page);
+
+  await dragTabRelative(page, "notes", "map-canvas", "before", "horizontal");
+  await expect.poll(() => revisionOf(page)).toBe(initialRevision + 1);
+  await expect
+    .poll(() =>
+      primary
+        .getByRole("tab")
+        .evaluateAll((tabs) => tabs.map((tab) => tab.getAttribute("data-workspace-panel-tab"))),
+    )
+    .toEqual(["notes", "map-canvas"]);
+  await expect(notesHost).toHaveAttribute("id", hostId ?? "");
+  await expect(editor).toHaveValue("Tab reorder keeps this live editor.");
+
+  await dragTabRelative(page, "notes", "map-canvas", "after", "horizontal");
+  await expect.poll(() => revisionOf(page)).toBe(initialRevision + 2);
+  await expect
+    .poll(() =>
+      primary
+        .getByRole("tab")
+        .evaluateAll((tabs) => tabs.map((tab) => tab.getAttribute("data-workspace-panel-tab"))),
+    )
+    .toEqual(["map-canvas", "notes"]);
+
+  await page.getByRole("button", { name: "Workspace appearance" }).click();
+  await page
+    .getByRole("dialog", { name: "Workspace appearance" })
+    .getByRole("combobox", { name: "Direction" })
+    .selectOption("rtl");
+  await dragTabRelative(page, "notes", "map-canvas", "before", "horizontal", "rtl");
+  await expect
+    .poll(() =>
+      primary
+        .getByRole("tab")
+        .evaluateAll((tabs) => tabs.map((tab) => tab.getAttribute("data-workspace-panel-tab"))),
+    )
+    .toEqual(["notes", "map-canvas"]);
+
+  await page.getByRole("button", { name: "Workspace appearance" }).click();
+  await page
+    .getByRole("dialog", { name: "Workspace appearance" })
+    .getByRole("combobox", { name: "Tab rail" })
+    .selectOption("inline-start");
+  await dragTabRelative(page, "notes", "map-canvas", "after", "vertical", "rtl");
+  await expect(primary.getByRole("tablist")).toHaveAttribute("aria-orientation", "vertical");
+  await expect
+    .poll(() =>
+      primary
+        .getByRole("tab")
+        .evaluateAll((tabs) => tabs.map((tab) => tab.getAttribute("data-workspace-panel-tab"))),
+    )
+    .toEqual(["map-canvas", "notes"]);
+  await expect(notesHost).toHaveAttribute("id", hostId ?? "");
+  await expect(editor).toHaveValue("Tab reorder keeps this live editor.");
+});
+
+test("autoscrolls an overflowing tab strip and retains the final insertion target", async ({
+  page,
+}) => {
+  await page.goto("/");
+  await page.addStyleTag({
+    content: `
+      [data-workspace-group="primary"] .pf-tab-list {
+        flex: 0 0 260px;
+        max-inline-size: 260px;
+      }
+      [data-workspace-group="primary"] .pf-tab {
+        flex: 0 0 220px;
+        min-inline-size: 220px;
+      }
+    `,
+  });
+  const primary = page.locator('[data-workspace-group="primary"]');
+  const tablist = primary.getByRole("tablist");
+  const dragFirstTabToLogicalEnd = async (direction: "ltr" | "rtl") => {
+    await tablist.evaluate((element) => {
+      element.scrollLeft = 0;
+    });
+    const source = primary.locator('[data-workspace-panel-tab="map-canvas"]');
+    const sourceBox = await requiredBox(source);
+    const stripBox = await requiredBox(tablist);
+    await page.mouse.move(sourceBox.x + sourceBox.width / 2, sourceBox.y + sourceBox.height / 2);
+    await page.mouse.down();
+    const targetX = direction === "rtl" ? stripBox.x + 4 : stripBox.x + stripBox.width - 4;
+    await page.mouse.move(targetX, stripBox.y + stripBox.height / 2, { steps: 12 });
+    await expect
+      .poll(() => tablist.evaluate((element) => element.scrollLeft))
+      [direction === "rtl" ? "toBeLessThan" : "toBeGreaterThan"](0);
+    await expect(page.locator("[data-workspace-panel-drag]")).toHaveAttribute(
+      "data-workspace-drop-target",
+      "reorder:primary:append",
+    );
+    await page.mouse.up();
+  };
+
+  const firstRevision = await revisionOf(page);
+  await dragFirstTabToLogicalEnd("ltr");
+  await expect.poll(() => revisionOf(page)).toBe(firstRevision + 1);
+  await expect
+    .poll(() =>
+      primary
+        .getByRole("tab")
+        .evaluateAll((tabs) => tabs.map((tab) => tab.getAttribute("data-workspace-panel-tab"))),
+    )
+    .toEqual(["notes", "map-canvas"]);
+
+  await page.getByRole("button", { name: "Undo layout change" }).click();
+  await expect
+    .poll(() =>
+      primary
+        .getByRole("tab")
+        .evaluateAll((tabs) => tabs.map((tab) => tab.getAttribute("data-workspace-panel-tab"))),
+    )
+    .toEqual(["map-canvas", "notes"]);
+  await page.getByRole("button", { name: "Workspace appearance" }).click();
+  await page
+    .getByRole("dialog", { name: "Workspace appearance" })
+    .getByRole("combobox", { name: "Direction" })
+    .selectOption("rtl");
+  const rtlRevision = await revisionOf(page);
+  await dragFirstTabToLogicalEnd("rtl");
+  await expect.poll(() => revisionOf(page)).toBe(rtlRevision + 1);
+  await expect
+    .poll(() =>
+      primary
+        .getByRole("tab")
+        .evaluateAll((tabs) => tabs.map((tab) => tab.getAttribute("data-workspace-panel-tab"))),
+    )
+    .toEqual(["notes", "map-canvas"]);
 });
 
 test("creates new containers on all four logical sides through the shared drop planner", async ({
@@ -623,6 +827,7 @@ test("drags a live panel beyond the workspace into a popup and redocks it", asyn
   await editor.fill("The same React host is interactive across documents.");
 
   const notesTab = page.locator('[data-workspace-panel-tab="notes"]');
+  await waitForRectToSettle(notesTab);
   const tabBox = await requiredBox(notesTab);
   const workspaceBox = await requiredBox(page.getByLabel("Map operations workspace"));
   const popupPromise = page.waitForEvent("popup");

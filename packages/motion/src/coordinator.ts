@@ -13,11 +13,17 @@ interface MotionEntry {
   readonly element: Element;
   readonly plan: MotionPlan;
   readonly lease: ManagedMotionLease;
+  /** Monotonic admission order for deterministic global queue eviction. */
+  readonly queueOrder?: number;
 }
 
 export interface MotionCoordinatorOptions {
+  /** Maximum deliberate queued motions across every target/channel. */
+  readonly queueLimit?: number;
   readonly onMotionError?: (input: { readonly plan: MotionPlan; readonly cause: unknown }) => void;
 }
+
+const DEFAULT_QUEUE_LIMIT = 256;
 
 export class MotionCoordinator {
   readonly #driver: MotionDriver;
@@ -25,7 +31,9 @@ export class MotionCoordinator {
   readonly #queues = new Map<string, MotionEntry[]>();
   readonly #onMotionError:
     ((input: { readonly plan: MotionPlan; readonly cause: unknown }) => void) | undefined;
+  readonly #queueLimit: number;
   #profile: MotionProfile;
+  #nextQueueOrder = 0;
 
   public constructor(
     driver: MotionDriver,
@@ -35,6 +43,11 @@ export class MotionCoordinator {
     this.#driver = driver;
     this.#profile = profile;
     this.#onMotionError = options.onMotionError;
+    const queueLimit = options.queueLimit ?? DEFAULT_QUEUE_LIMIT;
+    if (!Number.isSafeInteger(queueLimit) || queueLimit < 0) {
+      throw new RangeError("queueLimit must be a non-negative safe integer");
+    }
+    this.#queueLimit = queueLimit;
   }
 
   public setProfile(profile: MotionProfile): void {
@@ -113,11 +126,41 @@ export class MotionCoordinator {
   }
 
   #enqueue(key: string, element: Element, plan: MotionPlan): MotionLease {
+    if (this.#queueLimit === 0) {
+      // A zero-capacity queue still preserves the newest semantic projection:
+      // replace the running animation instead of applying a final keyframe
+      // that the older animation could subsequently overwrite.
+      this.#running.get(key)?.lease.cancel();
+      const entry = this.#createEntry(key, element, plan, "running");
+      this.#start(key, entry);
+      return entry.lease;
+    }
+    if (this.queuedCount >= this.#queueLimit) this.#evictOldestQueued();
     const entry = this.#createEntry(key, element, plan, "queued");
     const queue = this.#queues.get(key) ?? [];
     queue.push(entry);
     this.#queues.set(key, queue);
     return entry.lease;
+  }
+
+  #evictOldestQueued(): void {
+    let oldest: MotionEntry | undefined;
+    for (const queue of this.#queues.values()) {
+      for (const entry of queue) {
+        if (
+          entry.lease.status === "queued" &&
+          (oldest === undefined ||
+            (entry.queueOrder ?? Number.POSITIVE_INFINITY) <
+              (oldest.queueOrder ?? Number.POSITIVE_INFINITY))
+        ) {
+          oldest = entry;
+        }
+      }
+    }
+    // A cancelled queued lease never applies visual state. The newly admitted
+    // plan therefore remains ordered after the running animation and owns the
+    // final projection when it eventually completes.
+    oldest?.lease.cancel();
   }
 
   #createEntry(
@@ -132,7 +175,12 @@ export class MotionCoordinator {
       (terminalLease) => this.#settled(key, terminalLease),
       (cause) => this.#reportError(plan, cause),
     );
-    return { element, plan, lease };
+    return {
+      element,
+      plan,
+      lease,
+      ...(status === "queued" ? { queueOrder: this.#nextQueueOrder++ } : {}),
+    };
   }
 
   #start(key: string, entry: MotionEntry): void {

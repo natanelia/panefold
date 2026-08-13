@@ -58,6 +58,11 @@ export interface WorkspaceMessageCatalog {
   workspaceChangedBeforePanelMove?(): string;
   directPanelPlacementUnsupported?(): string;
   panelPlacementUnavailable?(): string;
+  moveTabBefore?(values: { readonly title: string; readonly anchor: string }): string;
+  moveTabAfter?(values: { readonly title: string; readonly anchor: string }): string;
+  movedTabBefore?(values: { readonly title: string; readonly anchor: string }): string;
+  movedTabAfter?(values: { readonly title: string; readonly anchor: string }): string;
+  keptTabPosition?(values: { readonly title: string }): string;
 }
 
 export const ENGLISH_WORKSPACE_MESSAGES = Object.freeze<WorkspaceMessageCatalog>({
@@ -114,6 +119,11 @@ export const ENGLISH_WORKSPACE_MESSAGES = Object.freeze<WorkspaceMessageCatalog>
   workspaceChangedBeforePanelMove: () => "The workspace changed before the panel could be moved.",
   directPanelPlacementUnsupported: () => "This workspace does not support direct panel placement.",
   panelPlacementUnavailable: () => "The panel placement is no longer available.",
+  moveTabBefore: ({ title, anchor }) => `Move ${title} tab before ${anchor}`,
+  moveTabAfter: ({ title, anchor }) => `Move ${title} tab after ${anchor}`,
+  movedTabBefore: ({ title, anchor }) => `Moved ${title} tab before ${anchor}`,
+  movedTabAfter: ({ title, anchor }) => `Moved ${title} tab after ${anchor}`,
+  keptTabPosition: ({ title }) => `${title} tab kept in place`,
 });
 
 export interface ResolvedWorkspaceInteractionMessages {
@@ -136,6 +146,11 @@ export interface ResolvedWorkspaceInteractionMessages {
   readonly workspaceChangedBeforePanelMove: () => string;
   readonly directPanelPlacementUnsupported: () => string;
   readonly panelPlacementUnavailable: () => string;
+  readonly moveTabBefore: (values: { readonly title: string; readonly anchor: string }) => string;
+  readonly moveTabAfter: (values: { readonly title: string; readonly anchor: string }) => string;
+  readonly movedTabBefore: (values: { readonly title: string; readonly anchor: string }) => string;
+  readonly movedTabAfter: (values: { readonly title: string; readonly anchor: string }) => string;
+  readonly keptTabPosition: (values: { readonly title: string }) => string;
 }
 
 export function resolveWorkspaceInteractionMessages(
@@ -172,5 +187,14 @@ export function resolveWorkspaceInteractionMessages(
       (() => "This workspace does not support direct panel placement."),
     panelPlacementUnavailable:
       catalog.panelPlacementUnavailable ?? (() => "The panel placement is no longer available."),
+    moveTabBefore:
+      catalog.moveTabBefore ?? (({ title, anchor }) => `Move ${title} tab before ${anchor}`),
+    moveTabAfter:
+      catalog.moveTabAfter ?? (({ title, anchor }) => `Move ${title} tab after ${anchor}`),
+    movedTabBefore:
+      catalog.movedTabBefore ?? (({ title, anchor }) => `Moved ${title} tab before ${anchor}`),
+    movedTabAfter:
+      catalog.movedTabAfter ?? (({ title, anchor }) => `Moved ${title} tab after ${anchor}`),
+    keptTabPosition: catalog.keptTabPosition ?? (({ title }) => `${title} tab kept in place`),
   };
 }

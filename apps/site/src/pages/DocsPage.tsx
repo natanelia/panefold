@@ -39,6 +39,8 @@ const markdownRouteMap: Readonly<Record<string, string>> = {
   "SUPPORT.md": "/docs/support",
   "docs/CONFORMANCE.md": "/docs/conformance",
   "CONFORMANCE.md": "/docs/conformance",
+  "docs/DESIGN_AUDIT.md": "/docs/design-audit",
+  "DESIGN_AUDIT.md": "/docs/design-audit",
   "docs/ROADMAP.md": "/docs/roadmap",
   "ROADMAP.md": "/docs/roadmap",
   "docs/MARKETING.md": "/docs/marketing",

@@ -84,6 +84,112 @@ describe("managed motion lifecycle", () => {
     expect(coordinator.queuedCount).toBe(0);
   });
 
+  it("bounds deliberate motion queues while preserving the newest final state", async () => {
+    const completions: (() => void)[] = [];
+    const driver: MotionDriver = {
+      animate: (target, plan) => {
+        let complete = () => undefined;
+        const finished = new Promise<void>((resolve) => {
+          complete = () => {
+            for (const [property, values] of Object.entries(plan.keyframes)) {
+              const value = Array.isArray(values) ? values.at(-1) : values;
+              if (value !== undefined)
+                (target as HTMLElement).style.setProperty(property, String(value));
+            }
+            resolve();
+          };
+        });
+        completions.push(complete);
+        return { finished, cancel: vi.fn(), finish: complete };
+      },
+    };
+    const coordinator = new MotionCoordinator(driver, "productive", { queueLimit: 1 });
+    const element = document.createElement("div");
+    const running = coordinator.play(element, basePlan);
+    const admitted = coordinator.play(element, { ...basePlan, interruption: "queue" });
+    const newest = coordinator.play(element, {
+      ...basePlan,
+      interruption: "queue",
+      keyframes: { opacity: [0, 0.5] },
+    });
+
+    expect(admitted.status).toBe("cancelled");
+    expect(newest.status).toBe("queued");
+    expect(coordinator.queuedCount).toBe(1);
+    completions[0]?.();
+    await running.finished;
+    expect(newest.status).toBe("running");
+    expect(element.style.opacity).toBe("1");
+    completions[1]?.();
+    await newest.finished;
+    expect(element.style.opacity).toBe("0.5");
+    expect(coordinator.queuedCount).toBe(0);
+    expect(coordinator.runningCount).toBe(0);
+  });
+
+  it("replaces running motion with the newest intent when queue capacity is zero", async () => {
+    const driver: MotionDriver = {
+      animate: () => ({
+        finished: new Promise<void>(() => undefined),
+        cancel: vi.fn(),
+        finish: vi.fn(),
+      }),
+    };
+    const coordinator = new MotionCoordinator(driver, "productive", { queueLimit: 0 });
+    const element = document.createElement("div");
+    const first = coordinator.play(element, basePlan);
+    const newest = coordinator.play(element, { ...basePlan, interruption: "queue" });
+
+    expect(first.status).toBe("cancelled");
+    expect(newest.status).toBe("running");
+    expect(coordinator.runningCount).toBe(1);
+    expect(coordinator.queuedCount).toBe(0);
+    coordinator.dispose();
+    await newest.finished;
+  });
+
+  it("validates the motion queue limit", () => {
+    const driver: MotionDriver = {
+      animate: () => ({
+        finished: Promise.resolve(),
+        cancel: vi.fn(),
+        finish: vi.fn(),
+      }),
+    };
+    expect(() => new MotionCoordinator(driver, "productive", { queueLimit: -1 })).toThrow(
+      /queueLimit/,
+    );
+  });
+
+  it("keeps queued counts exact through repeated queued cancellation races", () => {
+    const driver: MotionDriver = {
+      animate: () => ({
+        finished: new Promise<void>(() => undefined),
+        cancel: vi.fn(),
+        finish: vi.fn(),
+      }),
+    };
+    const coordinator = new MotionCoordinator(driver, "productive", { queueLimit: 3 });
+    const element = document.createElement("div");
+    coordinator.play(element, basePlan);
+    const queued = Array.from({ length: 3 }, (_, index) =>
+      coordinator.play(element, {
+        ...basePlan,
+        scopeId: `queued:${String(index)}`,
+        interruption: "queue",
+      }),
+    );
+
+    expect(coordinator.queuedCount).toBe(3);
+    queued[1]?.cancel();
+    queued[1]?.dispose();
+    expect(coordinator.queuedCount).toBe(2);
+    coordinator.cancelAll();
+    coordinator.cancelAll();
+    expect(coordinator.queuedCount).toBe(0);
+    expect(coordinator.runningCount).toBe(0);
+  });
+
   it("reveals final committed projection when a driver starts or finishes with failure", async () => {
     const failures: unknown[] = [];
     const driver: MotionDriver = {

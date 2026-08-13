@@ -6,12 +6,15 @@ conformance to the [Panefold system design](spec/SYSTEM_DESIGN.md).
 The current machine report is structurally valid and intentionally reports **blocked**: all 36
 commands, all 190 Appendix A requirements, and all ten hard gates are present, but stable-release
 evidence is incomplete. On the two published experimental profiles, the 380 trace cells currently
-contain 118 verified, 102 unresolved, 33 blocked, and 127 not applicable results. A missing result
+contain 105 verified, 115 unresolved, 33 blocked, and 127 not applicable results. A missing result
 never becomes an implicit pass.
 
 The trace-cell taxonomy above is distinct from the aggregate validator report, which currently
-contains 42 blocked issues and 107 unresolved issues. Aggregate issues also include hard-gate and
+contains 42 blocked issues and 120 unresolved issues. Aggregate issues also include hard-gate and
 evidence findings, so those counts are not trace-cell totals.
+
+The requirement-by-requirement review, corrected overclaims, action-parity findings, and remaining
+gaps are recorded in the [design audit](DESIGN_AUDIT.md).
 
 ## Evidence taxonomy
 
@@ -19,8 +22,8 @@ Every trace and evidence record declares one proof class:
 
 | Class                      | Meaning                                                                                                | Current totals                               |
 | -------------------------- | ------------------------------------------------------------------------------------------------------ | -------------------------------------------- |
-| A — code-verifiable        | Repository implementation, model/property proof, source contract, or deterministic code result         | 93 verified, 51 unresolved, 0 blocked, 0 N/A |
-| B — environment-verifiable | Executed browser, framework, workload, recovery, or performance result with environment metadata       | 25 verified, 51 unresolved, 0 blocked, 0 N/A |
+| A — code-verifiable        | Repository implementation, model/property proof, source contract, or deterministic code result         | 85 verified, 59 unresolved, 0 blocked, 0 N/A |
+| B — environment-verifiable | Executed browser, framework, workload, recovery, or performance result with environment metadata       | 20 verified, 56 unresolved, 0 blocked, 0 N/A |
 | C — manual/external        | Manual AT/physical evidence, independent review, adoption record, usability result, or signed approval | 0 verified, 0 unresolved, 33 blocked, 0 N/A  |
 | D — future scope           | Capability the specific experimental profile does not publish                                          | 0 verified, 0 unresolved, 0 blocked, 127 N/A |
 
@@ -65,9 +68,11 @@ the command output.
   working pointer/keyboard splitters, logical and icon-only tab rails, exact IndexedDB
   save/reload/restore evidence, live same-origin popup transfer/redock/loss recovery, LTR/RTL resize,
   motion preference, stable-host lifecycle, all 17 panel classes, forced colors, touch projection,
-  and raw splitter-frame capture. The checked-in result records 24/24 passing browser tasks.
+  same-strip reorder in horizontal LTR, horizontal RTL, and vertical rails, bounded LTR/RTL
+  overflow autoscroll, and raw splitter-frame capture. The checked-in result records 26/26 passing
+  browser tasks.
 - The framework JSDOM contract passed 20/20 tests across Vue, Svelte, Angular, and Web Components.
-- Protocol/motion validation passed 49/49 focused tests plus 43/43 React integration tests. It
+- Protocol/motion validation passed 53/53 focused tests plus 68/68 React integration tests. It
   covers the twelve-actor catalog, cancellation/revision conflicts, disposable motion leases,
   progressive View Transition fallback, and deterministic load degradation.
 - The independent semantic reducer matched the complete reference result for all 36 curated command
@@ -76,8 +81,10 @@ the command output.
   state per command, not the retained optimized production kernel.
 - The earlier 50,000-attempt projection campaign completed with zero replay/projection divergence.
   It is below the ten-million stable threshold and its checked-in summary records the missing seed.
-- The container interaction capture retained 179 frame deltas, including its long task, as an
-  experimental regression guard—not a physical performance certification.
+- The container interaction capture retained 179 frame deltas at 16.7 ms p95 and 16.8 ms p99 with
+  no observed long task. The paired Node smoke run kept 50-panel reorder at 0.366 ms p95 and
+  500-panel reorder at 2.840 ms p95 on that machine. These are experimental regression guards—not
+  physical performance certification.
 
 ## Hard release gates
 

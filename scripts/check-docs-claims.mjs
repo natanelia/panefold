@@ -195,7 +195,7 @@ function validatePublishedClaims(markdown, claims) {
   compareClaim(
     captureSingle(
       markdown,
-      /checked-in result records\s+(\d+)\/(\d+) passing browser tasks/gi,
+      /checked-in result records\s+(\d+)\/(\d+) passing\s+browser tasks/gi,
       "Chromium result",
       failures,
     ),
