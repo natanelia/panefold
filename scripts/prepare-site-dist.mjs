@@ -125,6 +125,12 @@ const siteRoutes = [
       "Revision-bound docking, controlled live popouts, tab presentation, and restore-before-render persistence.",
   },
   {
+    path: "docs/adr-post-commit-effects",
+    title: "Post-commit effect delivery — Panefold documentation",
+    description:
+      "Deterministic effect identity, bounded duplicate suppression, and honest retry guarantees.",
+  },
+  {
     path: "docs/system-design",
     title: "System design — Panefold documentation",
     description: "The complete normative design and 190-requirement register source.",

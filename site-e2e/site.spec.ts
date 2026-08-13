@@ -139,6 +139,12 @@ test("publishes the complete decision and marketing documentation", async ({ pag
     page.getByRole("heading", { name: "Protocol and motion lifecycles", exact: true }),
   ).toBeVisible();
 
+  await page.goto("./docs/adr-post-commit-effects/");
+  await expect(
+    page.getByRole("heading", { name: "Post-commit effect delivery", exact: true }),
+  ).toBeVisible();
+  await expect(page.getByText("ADR 0014", { exact: true })).toBeVisible();
+
   await page.goto("./docs/marketing/");
   await expect(
     page.getByRole("heading", { name: "Marketing and launch", exact: true }),

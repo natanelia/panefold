@@ -144,6 +144,22 @@ function expectAcceptedParity(
 }
 
 describe("independent optimized semantic reducer", () => {
+  it("matches the reference post-commit effect envelope exactly", () => {
+    const snapshot = fixture();
+    const input = envelope(snapshot, { type: "select-panel", panelId: ids.panelB }, 905);
+    const reference = executeCommand(snapshot, input);
+    const candidate = executeIndependentCommand(snapshot, input);
+    expect(reference.ok).toBe(true);
+    expect(candidate.ok).toBe(true);
+    if (!reference.ok || !candidate.ok) return;
+
+    expect(candidate.effects).toEqual(reference.effects);
+    expect(candidate.effects).toBe(candidate.transaction.effects);
+    expect(candidate.effects[0]?.id).toBe(reference.effects[0]?.id);
+    expect(Object.isFrozen(candidate.effects)).toBe(true);
+    expect(Object.isFrozen(candidate.effects[0])).toBe(true);
+  });
+
   it("has full-result parity across a stateful accepted/rejected trace", () => {
     let snapshot = fixture();
     const commands: readonly WorkspaceCommand[] = [

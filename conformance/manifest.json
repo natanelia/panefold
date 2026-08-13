@@ -30,6 +30,7 @@
         "react-responsive-projection",
         "react-stable-host-adapter",
         "testkit-fixtures",
+        "transaction-correlated-post-commit-effects",
         "trusted-plugin-registry"
       ]
     },

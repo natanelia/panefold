@@ -4,6 +4,7 @@ declare const nodeIdBrand: unique symbol;
 declare const surfaceIdBrand: unique symbol;
 declare const closedPanelIdBrand: unique symbol;
 declare const commandIdBrand: unique symbol;
+declare const effectIntentIdBrand: unique symbol;
 declare const revisionBrand: unique symbol;
 
 export type PanelId = string & { readonly [panelIdBrand]: "PanelId" };
@@ -14,6 +15,9 @@ export type ClosedPanelId = string & {
   readonly [closedPanelIdBrand]: "ClosedPanelId";
 };
 export type CommandId = string & { readonly [commandIdBrand]: "CommandId" };
+export type EffectIntentId = string & {
+  readonly [effectIntentIdBrand]: "EffectIntentId";
+};
 export type Revision = bigint & { readonly [revisionBrand]: "Revision" };
 
 export type EntityId = PanelId | GroupId | NodeId | SurfaceId;
@@ -32,6 +36,8 @@ export const surfaceId = (value: string): SurfaceId => nonEmptyId<SurfaceId>(val
 export const closedPanelId = (value: string): ClosedPanelId =>
   nonEmptyId<ClosedPanelId>(value, "ClosedPanelId");
 export const commandId = (value: string): CommandId => nonEmptyId<CommandId>(value, "CommandId");
+export const effectIntentId = (value: string): EffectIntentId =>
+  nonEmptyId<EffectIntentId>(value, "EffectIntentId");
 
 export function revision(value: bigint | number | string): Revision {
   const parsed = BigInt(value);

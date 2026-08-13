@@ -2,7 +2,7 @@ import { createHash } from "node:crypto";
 import { readFile, writeFile } from "node:fs/promises";
 import process from "node:process";
 
-const producedAt = "2026-08-13T11:12:10Z";
+const producedAt = "2026-08-13T11:49:00Z";
 const requirementsDocument = JSON.parse(await readFile("conformance/requirements.json", "utf8"));
 const manifest = JSON.parse(await readFile("conformance/manifest.json", "utf8"));
 const requirements = requirementsDocument.requirements;
@@ -72,6 +72,20 @@ const sourceDefinitions = [
     "automated-test",
     "packages/runtime/test/runtime.test.ts",
     ["API-005", "OBS-002"],
+    [compactProfile],
+  ],
+  [
+    "kernel-post-commit-effects",
+    "automated-test",
+    "packages/kernel/test/effects.test.ts",
+    ["TXN-005"],
+    [compactProfile],
+  ],
+  [
+    "runtime-post-commit-effects",
+    "automated-test",
+    "packages/runtime/test/post-commit-effects.test.ts",
+    ["TXN-005"],
     [compactProfile],
   ],
   [
@@ -385,6 +399,13 @@ const sourceDefinitions = [
     [compactProfile],
   ],
   [
+    "post-commit-effects-decision",
+    "architecture-decision",
+    "docs/adr/0014-post-commit-effect-delivery.md",
+    ["GOV-004", "TXN-005"],
+    [compactProfile],
+  ],
+  [
     "third-party-certification-contract",
     "automated-test",
     "packages/conformance/test/certification.test.ts",
@@ -691,6 +712,7 @@ const verifiedByProfile = {
     "TXN-002",
     "TXN-003",
     "TXN-004",
+    "TXN-005",
     "TXN-006",
     "TXN-007",
     "TXN-008",
@@ -748,10 +770,6 @@ const correctedOverclaimRationales = new Map([
   [
     "TST-009",
     "Failure injection covers bounded persistence and surface cases, not the final authoritative location or recoverable placeholder for every panel across the complete recovery matrix.",
-  ],
-  [
-    "TXN-005",
-    "The runtime does not publish post-commit effect intents carrying transaction and revision identity, and duplicate-delivery idempotence is not tested.",
   ],
 ]);
 
@@ -1106,6 +1124,15 @@ const capabilities = [
     ["Fixture definitions and one browser run do not certify third-party workloads"],
   ),
   capability(
+    "transaction-correlated-post-commit-effects",
+    "experimental",
+    [compactProfile],
+    ["kernel-post-commit-effects", "runtime-post-commit-effects", "post-commit-effects-decision"],
+    [
+      "Duplicate suppression uses a bounded per-workspace in-process receipt window; durable or distributed sinks must namespace and persist effect IDs",
+    ],
+  ),
+  capability(
     "conformance-evidence-system",
     "experimental",
     [compactProfile],
@@ -1162,6 +1189,9 @@ const hardGates = [
       "patch-replay-oracle",
       "independent-semantic-oracle",
       "independent-semantic-oracle-result",
+      "kernel-post-commit-effects",
+      "runtime-post-commit-effects",
+      "post-commit-effects-decision",
     ],
     "The independent semantic oracle agrees with the reference in a bounded generated run, but it is not yet the retained optimized production kernel and the ten-million-command report is absent.",
   ),
@@ -1180,7 +1210,14 @@ const hardGates = [
     ],
     [compactProfile],
     ["code-verifiable", "environment-verifiable"],
-    ["kernel-laws", "persistence-recovery", "surface-ownership"],
+    [
+      "kernel-laws",
+      "persistence-recovery",
+      "surface-ownership",
+      "kernel-post-commit-effects",
+      "runtime-post-commit-effects",
+      "post-commit-effects-decision",
+    ],
     "Kernel atomicity passes locally; the complete fallible operational matrix is not certified.",
   ),
   blockedGate(

@@ -1,11 +1,13 @@
 import type { CommandEnvelope, WorkspaceCommand } from "./commands";
-import type {
-  ActivationState,
-  GroupRecord,
-  LayoutNode,
-  PanelRecord,
-  SurfaceRecord,
-  WorkspaceSnapshot,
+import type { EffectIntent } from "./effects";
+import {
+  cloneAndFreeze,
+  type ActivationState,
+  type GroupRecord,
+  type LayoutNode,
+  type PanelRecord,
+  type SurfaceRecord,
+  type WorkspaceSnapshot,
 } from "./entities";
 import type { CommandId, GroupId, NodeId, PanelId, Revision, SurfaceId } from "./ids";
 import type { JsonObject } from "./json";
@@ -101,13 +103,48 @@ export type WorkspacePatch =
       readonly after: WorkspaceSnapshot["metadata"];
     };
 
-export type EffectIntentClass =
-  "prepare" | "post-commit-idempotent" | "compensatable" | "observational";
-
-export interface EffectIntent {
-  readonly kind: string;
-  readonly class: EffectIntentClass;
-  readonly payload: JsonObject;
+/**
+ * Takes immutable ownership of patch records while retaining payloads already
+ * owned by model factories. Non-canonical caller payloads are cloned once.
+ */
+export function freezeWorkspacePatches(
+  patches: readonly WorkspacePatch[],
+): readonly WorkspacePatch[] {
+  return Object.freeze(
+    patches.map((patch): WorkspacePatch => {
+      switch (patch.kind) {
+        case "versions":
+          return Object.freeze({
+            kind: patch.kind,
+            before: Object.freeze({ ...patch.before }),
+            after: Object.freeze({ ...patch.after }),
+          });
+        case "panel":
+        case "group":
+        case "node":
+        case "surface":
+          return Object.freeze({
+            kind: patch.kind,
+            id: patch.id as never,
+            ...(patch.before === undefined
+              ? {}
+              : { before: cloneAndFreeze(patch.before) as never }),
+            ...(patch.after === undefined ? {} : { after: cloneAndFreeze(patch.after) as never }),
+          }) as WorkspacePatch;
+        case "activation":
+        case "focus-memory":
+        case "floating-order":
+        case "closed-panels":
+        case "remote-transactions":
+        case "metadata":
+          return Object.freeze({
+            kind: patch.kind,
+            before: cloneAndFreeze(patch.before),
+            after: cloneAndFreeze(patch.after),
+          }) as WorkspacePatch;
+      }
+    }),
+  );
 }
 
 export interface CommittedTransaction {
@@ -118,6 +155,7 @@ export interface CommittedTransaction {
   readonly revision: Revision;
   readonly command: WorkspaceCommand;
   readonly patches: readonly WorkspacePatch[];
+  readonly effects: readonly EffectIntent[];
 }
 
 export type KernelResult =
@@ -152,6 +190,7 @@ export type KernelStateResult =
       readonly ok: true;
       readonly state: WorkspaceKernelState;
       readonly transaction: CommittedTransaction;
+      readonly effects: readonly EffectIntent[];
       readonly diagnostics: readonly Diagnostic[];
     }
   | {

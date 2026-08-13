@@ -3,6 +3,7 @@ import { Effect } from "effect";
 
 export * from "./indexeddb";
 export * from "./journal";
+export * from "./post-commit-effects";
 
 export class PersistenceFailure {
   readonly _tag = "PersistenceFailure";

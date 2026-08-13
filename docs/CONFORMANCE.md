@@ -6,11 +6,11 @@ conformance to the [Panefold system design](spec/SYSTEM_DESIGN.md).
 The current machine report is structurally valid and intentionally reports **blocked**: all 36
 commands, all 190 Appendix A requirements, and all ten hard gates are present, but stable-release
 evidence is incomplete. On the two published experimental profiles, the 380 trace cells currently
-contain 107 verified, 113 unresolved, 33 blocked, and 127 not applicable results. A missing result
+contain 108 verified, 112 unresolved, 33 blocked, and 127 not applicable results. A missing result
 never becomes an implicit pass.
 
 The trace-cell taxonomy above is distinct from the aggregate validator report, which currently
-contains 42 blocked issues and 118 unresolved issues. Aggregate issues also include hard-gate and
+contains 42 blocked issues and 117 unresolved issues. Aggregate issues also include hard-gate and
 evidence findings, so those counts are not trace-cell totals.
 
 Because at least one hard gate remains open, the machine report applies a hard-gate multiplier of
@@ -26,7 +26,7 @@ Every trace and evidence record declares one proof class:
 
 | Class                      | Meaning                                                                                                | Current totals                               |
 | -------------------------- | ------------------------------------------------------------------------------------------------------ | -------------------------------------------- |
-| A — code-verifiable        | Repository implementation, model/property proof, source contract, or deterministic code result         | 87 verified, 57 unresolved, 0 blocked, 0 N/A |
+| A — code-verifiable        | Repository implementation, model/property proof, source contract, or deterministic code result         | 88 verified, 56 unresolved, 0 blocked, 0 N/A |
 | B — environment-verifiable | Executed browser, framework, workload, recovery, or performance result with environment metadata       | 20 verified, 56 unresolved, 0 blocked, 0 N/A |
 | C — manual/external        | Manual AT/physical evidence, independent review, adoption record, usability result, or signed approval | 0 verified, 0 unresolved, 33 blocked, 0 N/A  |
 | D — future scope           | Capability the specific experimental profile does not publish                                          | 0 verified, 0 unresolved, 0 blocked, 127 N/A |

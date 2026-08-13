@@ -1,5 +1,6 @@
 import {
   cloneAndFreeze,
+  createTransactionCommittedEffectIntent,
   createEntityTable,
   type CommittedTransaction,
   type EntityTable,
@@ -175,6 +176,32 @@ export function applyTransaction(
   }
   if (transaction.revision !== transaction.previousRevision + 1n) {
     throw new RangeError("Committed transaction revision must advance exactly once");
+  }
+  if (!Array.isArray(transaction.effects) || transaction.effects.length === 0) {
+    throw new RangeError("Committed transaction must carry at least one effect intent");
+  }
+  for (const [ordinal, effect] of transaction.effects.entries()) {
+    const expected = createTransactionCommittedEffectIntent({
+      transactionId: transaction.id,
+      previousRevision: transaction.previousRevision,
+      revision: transaction.revision,
+      ordinal,
+      commandType: transaction.command.type,
+      origin: transaction.origin,
+    });
+    if (
+      effect.id !== expected.id ||
+      effect.kind !== expected.kind ||
+      effect.class !== expected.class ||
+      effect.transactionId !== expected.transactionId ||
+      effect.previousRevision !== expected.previousRevision ||
+      effect.revision !== expected.revision ||
+      effect.ordinal !== expected.ordinal ||
+      effect.payload.commandType !== expected.payload.commandType ||
+      effect.payload.origin !== expected.payload.origin
+    ) {
+      throw new RangeError(`Transaction effect intent ${String(ordinal)} has invalid identity`);
+    }
   }
   return applyPatches(snapshot, transaction.patches, transaction.revision);
 }
