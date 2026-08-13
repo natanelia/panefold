@@ -141,6 +141,19 @@ export class DemoExternalPanelController {
       sessionNonce: "atlas-demo-session",
       hooks: {
         currentRevision: () => this.#options.runtime.getSnapshot().revision,
+        revalidatePolicy: () => {
+          const current = this.#options.runtime.getSnapshot();
+          const currentPanel = getEntity(current.panels, panel.id);
+          const currentGroup = getEntity(current.groups, sourceGroup.id);
+          const currentSurface = findSurfaceForGroup(current, currentGroup?.id);
+          return (
+            currentPanel?.capabilities.popout === true &&
+            currentPanel.lifecycle.crossDocumentMove === "portal-coupled" &&
+            currentGroup?.panelIds.includes(panel.id) === true &&
+            currentSurface?.id === sourceSurface.id &&
+            currentSurface.capabilities.crossDocument === false
+          );
+        },
         commitOwnership: (ownership) => {
           const current = this.#options.runtime.getSnapshot();
           const command = planExternalTransfer(

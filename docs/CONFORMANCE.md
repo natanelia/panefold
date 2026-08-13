@@ -6,12 +6,16 @@ conformance to the [Panefold system design](spec/SYSTEM_DESIGN.md).
 The current machine report is structurally valid and intentionally reports **blocked**: all 36
 commands, all 190 Appendix A requirements, and all ten hard gates are present, but stable-release
 evidence is incomplete. On the two published experimental profiles, the 380 trace cells currently
-contain 105 verified, 115 unresolved, 33 blocked, and 127 not applicable results. A missing result
+contain 107 verified, 113 unresolved, 33 blocked, and 127 not applicable results. A missing result
 never becomes an implicit pass.
 
 The trace-cell taxonomy above is distinct from the aggregate validator report, which currently
-contains 42 blocked issues and 120 unresolved issues. Aggregate issues also include hard-gate and
+contains 42 blocked issues and 118 unresolved issues. Aggregate issues also include hard-gate and
 evidence findings, so those counts are not trace-cell totals.
+
+Because at least one hard gate remains open, the machine report applies a hard-gate multiplier of
+zero and publishes a release-quality score of `0`. A strong isolated benchmark cannot compensate
+for a failed release gate.
 
 The requirement-by-requirement review, corrected overclaims, action-parity findings, and remaining
 gaps are recorded in the [design audit](DESIGN_AUDIT.md).
@@ -22,7 +26,7 @@ Every trace and evidence record declares one proof class:
 
 | Class                      | Meaning                                                                                                | Current totals                               |
 | -------------------------- | ------------------------------------------------------------------------------------------------------ | -------------------------------------------- |
-| A — code-verifiable        | Repository implementation, model/property proof, source contract, or deterministic code result         | 85 verified, 59 unresolved, 0 blocked, 0 N/A |
+| A — code-verifiable        | Repository implementation, model/property proof, source contract, or deterministic code result         | 87 verified, 57 unresolved, 0 blocked, 0 N/A |
 | B — environment-verifiable | Executed browser, framework, workload, recovery, or performance result with environment metadata       | 20 verified, 56 unresolved, 0 blocked, 0 N/A |
 | C — manual/external        | Manual AT/physical evidence, independent review, adoption record, usability result, or signed approval | 0 verified, 0 unresolved, 33 blocked, 0 N/A  |
 | D — future scope           | Capability the specific experimental profile does not publish                                          | 0 verified, 0 unresolved, 0 blocked, 127 N/A |
@@ -77,7 +81,7 @@ the command output.
   progressive View Transition fallback, and deterministic load degradation.
 - The independent semantic reducer matched the complete reference result for all 36 curated command
   variants, 6,000 generated test attempts, and a separate reproducible 10,000-attempt campaign
-  (8,895 accepted, 1,105 typed rejections, zero divergence). It remains an oracle that rebuilds
+  (7,973 accepted, 2,027 typed rejections, zero divergence). It remains an oracle that rebuilds
   state per command, not the retained optimized production kernel.
 - The earlier 50,000-attempt projection campaign completed with zero replay/projection divergence.
   It is below the ten-million stable threshold and its checked-in summary records the missing seed.

@@ -84,6 +84,22 @@ export function generateConformanceReport(input: ConformanceReportInput): Confor
     ...traceability.issues,
     ...hardGates.issues,
   ];
+  const suppliedQualityScore = input.ungatedQualityScore;
+  const validQualityScore =
+    suppliedQualityScore === undefined ||
+    (Number.isFinite(suppliedQualityScore) &&
+      suppliedQualityScore >= 0 &&
+      suppliedQualityScore <= 1);
+  if (!validQualityScore) {
+    reportIssues.push(
+      issue(
+        "INVALID_QUALITY_SCORE",
+        "invalid",
+        "/ungatedQualityScore",
+        "The ungated quality score must be a finite number from zero through one.",
+      ),
+    );
+  }
   if (!isRfc3339(input.generatedAt)) {
     reportIssues.push(
       issue(
@@ -96,6 +112,15 @@ export function generateConformanceReport(input: ConformanceReportInput): Confor
   }
   const issues = sortIssues(reportIssues);
   const dispositionCounts = countByDisposition(issues);
+  const everyHardGatePassed =
+    hardGates.missingGateIds.length === 0 &&
+    hardGates.unknownGateIds.length === 0 &&
+    hardGates.gates.length === hardGates.expectedGateIds.length &&
+    hardGates.gates.every((gate) => gate.status === "verified") &&
+    hardGates.issues.every((entry) => entry.disposition === "warning");
+  const hardGateMultiplier = everyHardGatePassed ? 1 : 0;
+  const ungatedScore = validQualityScore ? (suppliedQualityScore ?? null) : null;
+  const releaseScore = hardGateMultiplier === 0 ? 0 : ungatedScore === null ? null : ungatedScore;
 
   return {
     schemaVersion: 1,
@@ -114,6 +139,11 @@ export function generateConformanceReport(input: ConformanceReportInput): Confor
       definedRequirements: traceability.definedRequirementIds.length,
       expectedHardGates: hardGates.expectedGateIds.length,
       definedHardGates: hardGates.gates.length,
+      releaseQuality: {
+        ungatedScore,
+        hardGateMultiplier,
+        releaseScore,
+      },
       evidence: evidenceCounts(evidence),
     },
     commandParity,

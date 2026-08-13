@@ -25,13 +25,11 @@ const correctedOverclaims = [
   "INT-004",
   "LIF-003",
   "PKG-004",
-  "QLT-002",
   "RSP-002",
   "SCP-001",
   "THM-002",
   "TST-009",
   "TXN-005",
-  "TXN-007",
 ] as const;
 const actionParityRationales = {
   "A11Y-002":

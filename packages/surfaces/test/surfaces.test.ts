@@ -20,6 +20,8 @@ import {
   type PreparedSurfaceHandle,
   type OwnershipToken,
   type PrepareSurfaceRequest,
+  type SurfaceOwnershipRegistryPort,
+  type SurfaceTransferPolicyContext,
   type SurfaceTransferStage,
 } from "../src";
 
@@ -96,7 +98,12 @@ class FakeAdapter implements ExternalSurfaceAdapter {
   }
 }
 
-function fixture(failAt?: SurfaceTransferStage, failCompensation = false) {
+function fixture(
+  failAt?: SurfaceTransferStage,
+  failCompensation = false,
+  revalidatePolicy: (context: SurfaceTransferPolicyContext) => boolean = () => true,
+  currentRevision: () => ReturnType<typeof revision> = () => revision(7),
+) {
   const adapter = new FakeAdapter(failAt);
   const ownership = new SurfaceOwnershipRegistry();
   const events: string[] = [];
@@ -107,7 +114,8 @@ function fixture(failAt?: SurfaceTransferStage, failCompensation = false) {
     timeoutMs: 1_000,
     createToken: () => "transfer:1",
     hooks: {
-      currentRevision: () => revision(7),
+      currentRevision,
+      revalidatePolicy,
       commitOwnership: () => {
         events.push("commit");
         return true;
@@ -289,6 +297,515 @@ describe("prepared external surface transfer", () => {
     });
   });
 
+  it("revalidates application policy after asynchronous preparation and before commit", async () => {
+    let policyAllowed = true;
+    const observed: SurfaceTransferPolicyContext[] = [];
+    const { coordinator, ownership, adapter, events } = fixture(undefined, false, (context) => {
+      observed.push(context);
+      return policyAllowed;
+    });
+    const request = {
+      ...transferRequest(),
+      checkpoint: async (): Promise<JsonValue> => {
+        policyAllowed = false;
+        return { camera: [1, 2, 3] };
+      },
+    };
+
+    await expect(coordinator.transfer(request)).resolves.toMatchObject({
+      ok: false,
+      safeSurfaceId: sourceSurfaceId,
+      error: { code: "CAPABILITY_DENIED", stage: "revalidate" },
+    });
+    expect(observed).toHaveLength(1);
+    expect(observed[0]).toMatchObject({
+      panelId: mapPanelId,
+      sourceSurfaceId,
+      destinationSurfaceId,
+      destinationKind: "browser-window",
+      baseRevision: revision(7),
+    });
+    expect(Object.isFrozen(observed[0])).toBe(true);
+    expect(Object.isFrozen(observed[0]?.sourcePolicy)).toBe(true);
+    expect(Object.isFrozen(observed[0]?.destinationCapabilities)).toBe(true);
+    expect(events).toEqual([]);
+    expect(adapter.events).toEqual(["prepare", "bootstrap", "close"]);
+    expect(ownership.ownerOf(mapPanelId)).toMatchObject({
+      surfaceId: sourceSurfaceId,
+      state: "owned",
+    });
+  });
+
+  it("revalidates the base revision after policy callbacks and before commit", async () => {
+    let current = revision(7);
+    const { coordinator, ownership, adapter, events } = fixture(
+      undefined,
+      false,
+      () => {
+        current = revision(8);
+        return true;
+      },
+      () => current,
+    );
+
+    await expect(coordinator.transfer(transferRequest())).resolves.toMatchObject({
+      ok: false,
+      safeSurfaceId: sourceSurfaceId,
+      error: { code: "REVISION_CONFLICT", stage: "revalidate" },
+    });
+    expect(events).toEqual([]);
+    expect(adapter.events).toEqual(["prepare", "bootstrap", "close"]);
+    expect(ownership.ownerOf(mapPanelId)).toMatchObject({
+      surfaceId: sourceSurfaceId,
+      state: "owned",
+    });
+  });
+
+  it("runs every extensibility point before the final policy and revision checks", async () => {
+    const order: string[] = [];
+    const adapter = new FakeAdapter();
+    const registry = new SurfaceOwnershipRegistry();
+    const ownership: SurfaceOwnershipRegistryPort = {
+      register: (...arguments_) => registry.register(...arguments_),
+      begin: (token) => {
+        order.push("registry-begin");
+        return registry.begin(token);
+      },
+      commit: (token) => {
+        order.push("registry-commit");
+        return registry.commit(token);
+      },
+      ready: (token) => registry.ready(token),
+      rollback: (token) => registry.rollback(token),
+      recoverSurface: (...arguments_) => registry.recoverSurface(...arguments_),
+      ownerOf: (id) => registry.ownerOf(id),
+      snapshot: () => registry.snapshot(),
+    };
+    const coordinator = new SurfaceTransferCoordinator({
+      adapter,
+      ownership,
+      sessionNonce: "session:test",
+      createToken: () => {
+        order.push("create-token");
+        return "transfer:ordered";
+      },
+      hooks: {
+        revalidatePolicy: () => {
+          order.push("policy");
+          return true;
+        },
+        currentRevision: () => {
+          order.push("current-revision");
+          return revision(7);
+        },
+        commitOwnership: () => {
+          order.push("semantic-commit");
+          return true;
+        },
+        releaseSource: async () => undefined,
+        compensateOwnership: async () => undefined,
+      },
+    });
+
+    await expect(
+      coordinator.transfer({
+        ...transferRequest(),
+        checkpoint: async () => {
+          order.push("checkpoint");
+          return { camera: [] };
+        },
+      }),
+    ).resolves.toMatchObject({ ok: true });
+    expect(order).toEqual([
+      "checkpoint",
+      "create-token",
+      "registry-begin",
+      "policy",
+      "current-revision",
+      "semantic-commit",
+      "registry-commit",
+    ]);
+  });
+
+  it("detects a revision change caused by token creation before semantic commit", async () => {
+    let current = revision(7);
+    const adapter = new FakeAdapter();
+    const ownership = new SurfaceOwnershipRegistry();
+    const events: string[] = [];
+    const coordinator = new SurfaceTransferCoordinator({
+      adapter,
+      ownership,
+      sessionNonce: "session:test",
+      createToken: () => {
+        current = revision(8);
+        return "transfer:revision-race";
+      },
+      hooks: {
+        revalidatePolicy: () => true,
+        currentRevision: () => current,
+        commitOwnership: () => {
+          events.push("commit");
+          return true;
+        },
+        releaseSource: async () => undefined,
+        compensateOwnership: async () => {
+          events.push("compensate");
+        },
+      },
+    });
+
+    await expect(coordinator.transfer(transferRequest())).resolves.toMatchObject({
+      ok: false,
+      safeSurfaceId: sourceSurfaceId,
+      error: { code: "REVISION_CONFLICT", stage: "revalidate" },
+    });
+    expect(events).toEqual([]);
+    expect(adapter.events).toEqual(["prepare", "bootstrap", "close"]);
+    expect(ownership.ownerOf(mapPanelId)).toMatchObject({
+      surfaceId: sourceSurfaceId,
+      state: "owned",
+    });
+  });
+
+  it("detects policy revocation caused by the ownership reservation", async () => {
+    let policyAllowed = true;
+    const adapter = new FakeAdapter();
+    const registry = new SurfaceOwnershipRegistry();
+    const ownership: SurfaceOwnershipRegistryPort = {
+      register: (...arguments_) => registry.register(...arguments_),
+      begin: (token) => {
+        const begun = registry.begin(token);
+        policyAllowed = false;
+        return begun;
+      },
+      commit: (token) => registry.commit(token),
+      ready: (token) => registry.ready(token),
+      rollback: (token) => registry.rollback(token),
+      recoverSurface: (...arguments_) => registry.recoverSurface(...arguments_),
+      ownerOf: (id) => registry.ownerOf(id),
+      snapshot: () => registry.snapshot(),
+    };
+    const events: string[] = [];
+    const coordinator = new SurfaceTransferCoordinator({
+      adapter,
+      ownership,
+      sessionNonce: "session:test",
+      createToken: () => "transfer:policy-race",
+      hooks: {
+        revalidatePolicy: () => policyAllowed,
+        currentRevision: () => revision(7),
+        commitOwnership: () => {
+          events.push("commit");
+          return true;
+        },
+        releaseSource: async () => undefined,
+        compensateOwnership: async () => {
+          events.push("compensate");
+        },
+      },
+    });
+
+    await expect(coordinator.transfer(transferRequest())).resolves.toMatchObject({
+      ok: false,
+      safeSurfaceId: sourceSurfaceId,
+      error: { code: "CAPABILITY_DENIED", stage: "revalidate" },
+    });
+    expect(events).toEqual([]);
+    expect(adapter.events).toEqual(["prepare", "bootstrap", "close"]);
+    expect(registry.ownerOf(mapPanelId)).toMatchObject({
+      surfaceId: sourceSurfaceId,
+      state: "owned",
+    });
+  });
+
+  it("rejects a non-boolean policy decision at the JavaScript boundary", async () => {
+    const adapter = new FakeAdapter();
+    const ownership = new SurfaceOwnershipRegistry();
+    const events: string[] = [];
+    const coordinator = new SurfaceTransferCoordinator({
+      adapter,
+      ownership,
+      sessionNonce: "session:test",
+      createToken: () => "transfer:async-policy",
+      hooks: {
+        revalidatePolicy: (async () => false) as unknown as (
+          context: SurfaceTransferPolicyContext,
+        ) => boolean,
+        currentRevision: () => revision(7),
+        commitOwnership: () => {
+          events.push("commit");
+          return true;
+        },
+        releaseSource: async () => undefined,
+        compensateOwnership: async () => {
+          events.push("compensate");
+        },
+      },
+    });
+
+    await expect(coordinator.transfer(transferRequest())).resolves.toMatchObject({
+      ok: false,
+      safeSurfaceId: sourceSurfaceId,
+      error: { code: "CAPABILITY_DENIED", stage: "revalidate" },
+    });
+    expect(events).toEqual([]);
+    expect(adapter.events).toEqual(["prepare", "bootstrap", "close"]);
+    expect(ownership.ownerOf(mapPanelId)).toMatchObject({
+      surfaceId: sourceSurfaceId,
+      state: "owned",
+    });
+  });
+
+  it("contains a rejected asynchronous policy decision", async () => {
+    const adapter = new FakeAdapter();
+    const ownership = new SurfaceOwnershipRegistry();
+    const rejection = Promise.reject(new Error("async policy failed"));
+    const coordinator = new SurfaceTransferCoordinator({
+      adapter,
+      ownership,
+      sessionNonce: "session:test",
+      createToken: () => "transfer:rejected-policy",
+      hooks: {
+        revalidatePolicy: (() => rejection) as unknown as (
+          context: SurfaceTransferPolicyContext,
+        ) => boolean,
+        currentRevision: () => revision(7),
+        commitOwnership: () => true,
+        releaseSource: async () => undefined,
+        compensateOwnership: async () => undefined,
+      },
+    });
+
+    await expect(coordinator.transfer(transferRequest())).resolves.toMatchObject({
+      ok: false,
+      safeSurfaceId: sourceSurfaceId,
+      error: { code: "CAPABILITY_DENIED", stage: "revalidate" },
+    });
+    await expect(rejection).rejects.toThrow("async policy failed");
+  });
+
+  it("compensates an indeterminate asynchronous semantic commit acknowledgement", async () => {
+    const adapter = new FakeAdapter();
+    const ownership = new SurfaceOwnershipRegistry();
+    const events: string[] = [];
+    let semanticCommitted = false;
+    const coordinator = new SurfaceTransferCoordinator({
+      adapter,
+      ownership,
+      sessionNonce: "session:test",
+      createToken: () => "transfer:async-commit",
+      hooks: {
+        revalidatePolicy: () => true,
+        currentRevision: () => revision(7),
+        commitOwnership: (() => {
+          semanticCommitted = true;
+          return Promise.resolve(true);
+        }) as unknown as (token: OwnershipToken) => boolean,
+        releaseSource: async () => {
+          events.push("release");
+        },
+        compensateOwnership: async () => {
+          events.push("compensate");
+          semanticCommitted = false;
+        },
+      },
+    });
+
+    await expect(coordinator.transfer(transferRequest())).resolves.toMatchObject({
+      ok: false,
+      safeSurfaceId: sourceSurfaceId,
+      error: { code: "OWNERSHIP_CONFLICT", stage: "ownership-commit" },
+    });
+    expect(events).toEqual(["compensate"]);
+    expect(semanticCommitted).toBe(false);
+    expect(adapter.events).toEqual(["prepare", "bootstrap", "close"]);
+    expect(ownership.ownerOf(mapPanelId)).toMatchObject({
+      surfaceId: sourceSurfaceId,
+      state: "owned",
+    });
+  });
+
+  it("contains a rejected asynchronous semantic commit acknowledgement", async () => {
+    const adapter = new FakeAdapter();
+    const ownership = new SurfaceOwnershipRegistry();
+    const rejection = Promise.reject(new Error("async commit failed"));
+    const coordinator = new SurfaceTransferCoordinator({
+      adapter,
+      ownership,
+      sessionNonce: "session:test",
+      createToken: () => "transfer:rejected-commit",
+      hooks: {
+        revalidatePolicy: () => true,
+        currentRevision: () => revision(7),
+        commitOwnership: (() => rejection) as unknown as (token: OwnershipToken) => boolean,
+        releaseSource: async () => undefined,
+        compensateOwnership: async () => undefined,
+      },
+    });
+
+    await expect(coordinator.transfer(transferRequest())).resolves.toMatchObject({
+      ok: false,
+      safeSurfaceId: sourceSurfaceId,
+      error: { code: "OWNERSHIP_CONFLICT", stage: "ownership-commit" },
+    });
+    await expect(rejection).rejects.toThrow("async commit failed");
+  });
+
+  it.each(["begin", "commit", "ready"] as const)(
+    "contains a rejected asynchronous registry %s acknowledgement without misreporting ownership",
+    async (stage) => {
+      const adapter = new FakeAdapter();
+      const registry = new SurfaceOwnershipRegistry();
+      let rejection: Promise<never> | undefined;
+      const rejectedAcknowledgement = () => {
+        rejection = Promise.reject(new Error(`async registry ${stage} failed`));
+        return rejection as unknown as boolean;
+      };
+      const ownership: SurfaceOwnershipRegistryPort = {
+        register: (...arguments_) => registry.register(...arguments_),
+        begin: (token) => {
+          const acknowledged = registry.begin(token);
+          return stage === "begin" && acknowledged ? rejectedAcknowledgement() : acknowledged;
+        },
+        commit: (token) => {
+          const acknowledged = registry.commit(token);
+          return stage === "commit" && acknowledged ? rejectedAcknowledgement() : acknowledged;
+        },
+        ready: (token) => {
+          const acknowledged = registry.ready(token);
+          return stage === "ready" && acknowledged ? rejectedAcknowledgement() : acknowledged;
+        },
+        rollback: (token) => registry.rollback(token),
+        recoverSurface: (...arguments_) => registry.recoverSurface(...arguments_),
+        ownerOf: (id) => registry.ownerOf(id),
+        snapshot: () => registry.snapshot(),
+      };
+      const events: string[] = [];
+      const coordinator = new SurfaceTransferCoordinator({
+        adapter,
+        ownership,
+        sessionNonce: "session:test",
+        createToken: () => `transfer:async-registry-${stage}`,
+        hooks: {
+          revalidatePolicy: () => true,
+          currentRevision: () => revision(7),
+          commitOwnership: () => {
+            events.push("semantic-commit");
+            return true;
+          },
+          releaseSource: async () => {
+            events.push("release");
+          },
+          compensateOwnership: async () => {
+            events.push("compensate");
+          },
+        },
+      });
+      const destinationRemainsAuthoritative = stage === "ready";
+
+      await expect(coordinator.transfer(transferRequest())).resolves.toMatchObject({
+        ok: false,
+        safeSurfaceId: destinationRemainsAuthoritative ? destinationSurfaceId : sourceSurfaceId,
+        error: {
+          code: "OWNERSHIP_CONFLICT",
+          stage: stage === "ready" ? "destination-ready" : "ownership-commit",
+        },
+      });
+      expect(rejection).toBeDefined();
+      await expect(rejection).rejects.toThrow(`async registry ${stage} failed`);
+      expect(events).toEqual(
+        stage === "begin"
+          ? []
+          : stage === "commit"
+            ? ["semantic-commit", "compensate"]
+            : ["semantic-commit"],
+      );
+      expect(adapter.events.includes("close")).toBe(!destinationRemainsAuthoritative);
+      expect(registry.ownerOf(mapPanelId)).toMatchObject({
+        surfaceId: destinationRemainsAuthoritative ? destinationSurfaceId : sourceSurfaceId,
+        state: "owned",
+      });
+    },
+  );
+
+  it("rolls back an ownership reservation that settles after an invalid async begin", async () => {
+    const adapter = new FakeAdapter();
+    const registry = new SurfaceOwnershipRegistry();
+    let releaseBegin: () => void = () => undefined;
+    const beginGate = new Promise<void>((resolve) => {
+      releaseBegin = resolve;
+    });
+    const ownership: SurfaceOwnershipRegistryPort = {
+      register: (...arguments_) => registry.register(...arguments_),
+      begin: (async (token: OwnershipToken) => {
+        await beginGate;
+        return registry.begin(token);
+      }) as unknown as SurfaceOwnershipRegistryPort["begin"],
+      commit: (token) => registry.commit(token),
+      ready: (token) => registry.ready(token),
+      rollback: (token) => registry.rollback(token),
+      recoverSurface: (...arguments_) => registry.recoverSurface(...arguments_),
+      ownerOf: (id) => registry.ownerOf(id),
+      snapshot: () => registry.snapshot(),
+    };
+    const coordinator = new SurfaceTransferCoordinator({
+      adapter,
+      ownership,
+      sessionNonce: "session:test",
+      createToken: () => "transfer:delayed-begin",
+      hooks: {
+        revalidatePolicy: () => true,
+        currentRevision: () => revision(7),
+        commitOwnership: () => true,
+        releaseSource: async () => undefined,
+        compensateOwnership: async () => undefined,
+      },
+    });
+
+    await expect(coordinator.transfer(transferRequest())).resolves.toMatchObject({
+      ok: false,
+      safeSurfaceId: sourceSurfaceId,
+      error: { code: "OWNERSHIP_CONFLICT", stage: "ownership-commit" },
+    });
+    expect(registry.ownerOf(mapPanelId)).toMatchObject({
+      surfaceId: sourceSurfaceId,
+      state: "owned",
+    });
+
+    releaseBegin();
+    await beginGate;
+    await Promise.resolve();
+    await Promise.resolve();
+    expect(registry.ownerOf(mapPanelId)).toMatchObject({
+      surfaceId: sourceSurfaceId,
+      state: "owned",
+    });
+  });
+
+  it("preserves a newer authoritative owner when reservation loses a checkpoint race", async () => {
+    const { coordinator, ownership, adapter, events } = fixture();
+    const request = {
+      ...transferRequest(),
+      checkpoint: async (): Promise<JsonValue> => {
+        ownership.recoverSurface(sourceSurfaceId, destinationSurfaceId, 4);
+        return { camera: [] };
+      },
+    };
+
+    await expect(coordinator.transfer(request)).resolves.toMatchObject({
+      ok: false,
+      safeSurfaceId: destinationSurfaceId,
+      error: { code: "OWNERSHIP_CONFLICT", stage: "ownership-commit" },
+    });
+    expect(events).toEqual([]);
+    expect(adapter.events).toEqual(["prepare", "bootstrap", "close"]);
+    expect(ownership.ownerOf(mapPanelId)).toMatchObject({
+      surfaceId: destinationSurfaceId,
+      state: "owned",
+      coordinatorEpoch: 4,
+    });
+  });
+
   it("keeps the ready destination authoritative when source cleanup must be retried", async () => {
     const { coordinator, ownership, events } = fixture("source-release");
     const result = await coordinator.transfer(transferRequest());
@@ -387,6 +904,7 @@ describe("prepared external surface transfer", () => {
         clearTimer: () => undefined,
         hooks: {
           currentRevision: () => revision(7),
+          revalidatePolicy: () => true,
           commitOwnership: () => {
             hookEvents.push("commit");
             return true;
@@ -450,6 +968,7 @@ describe("prepared external surface transfer", () => {
       clearTimer: () => undefined,
       hooks: {
         currentRevision: () => revision(7),
+        revalidatePolicy: () => true,
         commitOwnership: () => true,
         releaseSource: async () => undefined,
         compensateOwnership: () => {

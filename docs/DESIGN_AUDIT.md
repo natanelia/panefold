@@ -14,13 +14,13 @@ checked against those files by the conformance test suite.
 
 | Profile                            | Verified | Unresolved | Blocked |     N/A |   Total |
 | ---------------------------------- | -------: | ---------: | ------: | ------: | ------: |
-| `compact-react-chromium-desktop`   |      103 |         62 |      22 |       3 |     190 |
+| `compact-react-chromium-desktop`   |      105 |         60 |      22 |       3 |     190 |
 | `framework-adapter-contract-jsdom` |        2 |         53 |      11 |     124 |     190 |
-| **Both profiles**                  |  **105** |    **115** |  **33** | **127** | **380** |
+| **Both profiles**                  |  **107** |    **113** |  **33** | **127** | **380** |
 
 | Proof class                | Verified | Unresolved | Blocked | N/A | Total |
 | -------------------------- | -------: | ---------: | ------: | --: | ----: |
-| A — code-verifiable        |       85 |         59 |       0 |   0 |   144 |
+| A — code-verifiable        |       87 |         57 |       0 |   0 |   144 |
 | B — environment-verifiable |       20 |         56 |       0 |   0 |    76 |
 | C — manual/external        |        0 |          0 |      33 |   0 |    33 |
 | D — future scope           |        0 |          0 |       0 | 127 |   127 |
@@ -165,7 +165,7 @@ manual or external evidence, and `N/A` means the profile does not publish that c
 | `PRF-006`   | U                        | N/A                       |
 | `PRF-007`   | B                        | N/A                       |
 | `QLT-001`   | V                        | U                         |
-| `QLT-002`   | U                        | U                         |
+| `QLT-002`   | V                        | U                         |
 | `QLT-003`   | U                        | U                         |
 | `QLT-004`   | V                        | U                         |
 | `QLT-005`   | B                        | B                         |
@@ -222,14 +222,14 @@ manual or external evidence, and `N/A` means the profile does not publish that c
 | `TXN-004`   | V                        | N/A                       |
 | `TXN-005`   | U                        | N/A                       |
 | `TXN-006`   | V                        | N/A                       |
-| `TXN-007`   | U                        | N/A                       |
+| `TXN-007`   | V                        | N/A                       |
 | `TXN-008`   | V                        | N/A                       |
 
 <!-- END REQUIREMENT STATUS MATRIX -->
 
 ## Corrected verification overclaims
 
-The following 13 compact-profile rows had been marked verified by evidence that did not establish
+The following 11 compact-profile rows had been marked verified by evidence that did not establish
 the complete normative statement. They are now unresolved, with the exact reason also stored in
 their generated trace rationale.
 
@@ -245,11 +245,9 @@ their generated trace rationale.
 | `RSP-002`   | Partial environment proof                         | Touch emulation checks a compact region and 44 px target, not scrolling, safe areas, and no-hover operation together.                                                                                                                                 |
 | `THM-002`   | Partial environment proof                         | Forced colors, reduced motion, and touch have checks; the large-text/zoom and focus-visibility visual matrix is absent.                                                                                                                               |
 | `PKG-004`   | Documentation implementation gap                  | Manifests have export maps, but every package does not publish a compatibility policy and the lockfile is not an entry-point audit.                                                                                                                   |
-| `QLT-002`   | Missing release-policy behavior                   | The harness reports failed gates, but it computes no release-quality score that is forced to zero.                                                                                                                                                    |
 | `SCP-001`   | Completeness proof gap                            | The capability inventory is curated and is not generated or cross-checked against every public export.                                                                                                                                                |
 | `TST-009`   | Recovery coverage gap                             | Existing failure injection is bounded to persistence and surface cases; it does not prove a final location or placeholder for every panel in the complete recovery matrix.                                                                            |
 | `TXN-005`   | Missing transaction behavior                      | The runtime publishes no post-commit effect intent carrying transaction/revision identity and has no retry duplicate-delivery idempotence test.                                                                                                       |
-| `TXN-007`   | Missing policy revalidation                       | Prepared surface transfer checks the base revision but does not re-evaluate policy at final commit after asynchronous preparation.                                                                                                                    |
 
 <!-- END CORRECTED OVERCLAIMS -->
 
@@ -287,17 +285,17 @@ capabilities and route-specific tests; corrected declaration strings alone are n
 
 ### Repository-local code or deterministic proof
 
-The compact profile has 16 unresolved code-verifiable rows:
+The compact profile has 14 unresolved code-verifiable rows:
 
-`A11Y-002`, `COL-001`, `I18N-003`, `INT-002`, `INT-004`, `OBS-005`, `PKG-004`, `QLT-002`,
-`RSK-002`, `SCP-001`, `SEC-007`, `TST-001`, `TST-003`, `TST-009`, `TXN-005`, and `TXN-007`.
+`A11Y-002`, `COL-001`, `I18N-003`, `INT-002`, `INT-004`, `OBS-005`, `PKG-004`, `RSK-002`,
+`SCP-001`, `SEC-007`, `TST-001`, `TST-003`, `TST-009`, and `TXN-005`.
 
 The most direct implementation work is the complete renderer route inventory/parity, locale-aware
-shortcut formatting, package compatibility policies, zero-on-failed-gate quality scoring, generated
-public capability classification, post-commit effect identity/idempotence, and final async policy
-revalidation. `TST-001` is a missing ten-million-operation artifact; `TST-003` and `TST-009` need
-broader deterministic protocol and recovery matrices. The remaining governance/security rows need
-the policies and artifacts named by their requirement, not a change of status by assertion.
+shortcut formatting, package compatibility policies, generated public capability classification,
+and post-commit effect identity/idempotence. `TST-001` is a missing ten-million-operation artifact;
+`TST-003` and `TST-009` need broader deterministic protocol and recovery matrices. The remaining
+governance/security rows need the policies and artifacts named by their requirement, not a change of
+status by assertion.
 
 ### Implemented or partial behavior awaiting environment evidence
 

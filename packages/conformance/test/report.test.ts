@@ -59,7 +59,42 @@ describe("deterministic report generation", () => {
     expect(report.generatedAt).toBe("2026-08-12T01:02:03Z");
     expect(report.summary.expectedRequirements).toBe(PANEFOLD_V1_REQUIREMENT_COUNT);
     expect(report.summary.definedRequirements).toBe(0);
+    expect(report.summary.releaseQuality).toEqual({
+      ungatedScore: null,
+      hardGateMultiplier: 0,
+      releaseScore: 0,
+    });
     expect(report.traceability.missingRequirementIds).toHaveLength(PANEFOLD_V1_REQUIREMENT_COUNT);
+  });
+
+  it("forces the release-quality score to zero whenever a hard gate has not passed", () => {
+    const report = generateConformanceReport({
+      ...reportInput(),
+      ungatedQualityScore: 0.97,
+    });
+
+    expect(report.summary.releaseQuality).toEqual({
+      ungatedScore: 0.97,
+      hardGateMultiplier: 0,
+      releaseScore: 0,
+    });
+  });
+
+  it("rejects an invalid ungated quality score without allowing it into the report", () => {
+    const report = generateConformanceReport({
+      ...reportInput(),
+      ungatedQualityScore: 1.01,
+    });
+
+    expect(report.status).toBe("invalid");
+    expect(report.summary.releaseQuality).toEqual({
+      ungatedScore: null,
+      hardGateMultiplier: 0,
+      releaseScore: 0,
+    });
+    expect(report.issues).toContainEqual(
+      expect.objectContaining({ code: "INVALID_QUALITY_SCORE", path: "/ungatedQualityScore" }),
+    );
   });
 
   it("is byte-identical across input order and does not consult locale collation", () => {

@@ -199,8 +199,9 @@ last verified persisted revision without being able to break persistence.
 
 ## External surfaces
 
-External transfer is modeled as capability check, destination prepare/bootstrap, checkpoint,
-revision revalidation, ownership commit, destination mount/readiness, and source release. Tokens are
+External transfer is modeled as capability check, destination prepare/bootstrap, checkpoint, final
+capability plus synchronous application-policy revalidation, revision revalidation, ownership
+commit, destination mount/readiness, and source release. Tokens are
 bound to destination identity, protocol version, session context, and owner epoch. Failure reports
 one authoritative owner: the source only after rollback is confirmed, or the destination in a
 pending state when compensation cannot be confirmed within its independent safety budget. The

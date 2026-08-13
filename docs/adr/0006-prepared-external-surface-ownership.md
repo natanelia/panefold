@@ -11,10 +11,13 @@ the workspace changes.
 ## Decision
 
 External transfer follows one ordered protocol: capability check, destination preparation,
-bootstrap, panel checkpoint, revision revalidation, ownership commit, destination mount,
-destination-ready acknowledgement, then source release. The prepared destination is opaque and
-bound to a surface ID, protocol version, workspace session nonce, capability context, and owner
-epoch.
+bootstrap, panel checkpoint, final capability and application-policy revalidation, base-revision
+revalidation, ownership commit, destination mount, destination-ready acknowledgement, then source
+release. Token creation and the registry reservation occur before a final synchronous policy and
+revision-validation tail; no extension point remains between that tail and the atomic semantic
+commit. Asynchronous preparation therefore cannot retain permission that the application has since
+revoked. The prepared destination is opaque and bound to a surface ID, protocol version, workspace
+session nonce, capability context, and owner epoch.
 
 A driver-neutral ownership registry permits exactly one state per panel: source-owned,
 transferring, destination-pending-ready, or destination-owned. Failure before readiness rolls back

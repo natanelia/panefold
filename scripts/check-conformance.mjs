@@ -60,6 +60,7 @@ process.stdout.write(
     `${String(summary.documentedCommands)}/${String(summary.expectedCommands)} commands documented.`,
     `${String(summary.definedRequirements)}/${String(summary.expectedRequirements)} requirements registered.`,
     `${String(summary.definedHardGates)}/${String(summary.expectedHardGates)} hard gates accounted for.`,
+    `Release-quality score: ${summary.releaseQuality.releaseScore === null ? "not scored" : String(summary.releaseQuality.releaseScore)} (gate multiplier ${String(summary.releaseQuality.hardGateMultiplier)}).`,
     `${String(summary.invalid)} invalid, ${String(summary.blocked)} blocked, ${String(summary.unresolved)} unresolved.`,
     `Trace taxonomy: A/code ${formatTraceCounts(taxonomy["code-verifiable"])};`,
     `B/environment ${formatTraceCounts(taxonomy["environment-verifiable"])};`,

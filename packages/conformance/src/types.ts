@@ -262,6 +262,8 @@ export type ConformanceReportStatus = "verified" | "unresolved" | "blocked" | "i
 
 export interface ConformanceReportInput {
   readonly generatedAt: string;
+  /** Dimension score before the non-negotiable hard-gate multiplier is applied. */
+  readonly ungatedQualityScore?: number;
   readonly manifest: unknown;
   readonly authoritativeCommandTypes: readonly string[];
   readonly commandRegistry: readonly unknown[];
@@ -283,6 +285,11 @@ export interface ConformanceReportSummary {
   readonly definedRequirements: number;
   readonly expectedHardGates: number;
   readonly definedHardGates: number;
+  readonly releaseQuality: {
+    readonly ungatedScore: number | null;
+    readonly hardGateMultiplier: 0 | 1;
+    readonly releaseScore: number | null;
+  };
   readonly evidence: Readonly<Record<EvidenceStatus, number>>;
 }
 

@@ -62,6 +62,26 @@ export interface SurfaceMountRequest<Checkpoint extends JsonValue = JsonValue> {
   readonly restorationToken?: string;
 }
 
+/**
+ * Immutable inputs that an application rechecks immediately before semantic
+ * ownership moves. The callback is synchronous so no new asynchronous gap can
+ * open between the final policy decision and the atomic ownership commit.
+ */
+export interface SurfaceTransferPolicyContext {
+  readonly panelId: PanelId;
+  readonly sourceSurfaceId: SurfaceId;
+  readonly destinationSurfaceId: SurfaceId;
+  readonly destinationKind: ExternalSurfaceKind;
+  readonly sourcePolicy: SurfaceSourceTransferPolicy;
+  readonly destinationCapabilities: SurfaceCapabilities;
+  readonly panelCapabilities: {
+    readonly popout: boolean;
+    readonly pictureInPicture: boolean;
+  };
+  readonly baseRevision: Revision;
+  readonly coordinatorEpoch: number;
+}
+
 export interface ExternalSurfaceAdapter<Checkpoint extends JsonValue = JsonValue> {
   prepare(request: PrepareSurfaceRequest, signal: AbortSignal): Promise<PreparedSurfaceHandle>;
   bootstrap(
@@ -198,6 +218,8 @@ export type SurfaceTransferRequest<Checkpoint extends JsonValue = JsonValue> =
 
 export interface SurfaceTransferHooks {
   currentRevision(): Revision;
+  /** Re-evaluates current application policy after preparation and before commit. */
+  revalidatePolicy(context: SurfaceTransferPolicyContext): boolean;
   /** Must synchronously commit or reject semantic ownership atomically. */
   commitOwnership(token: OwnershipToken): boolean;
   releaseSource(token: OwnershipToken, signal: AbortSignal): Promise<void>;

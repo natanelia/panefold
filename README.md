@@ -28,7 +28,7 @@ adapters behind IDEs, map tools, operations consoles, and other panel-heavy prod
 > - **Install:** npm packages are **not published**. Version `0.1.0` is available from source and
 >   as private workspace packages only.
 
-Panefold `0.1.0` is an **experimental source release** and executable companion to the
+Panefold `0.1.0` is an **experimental source snapshot** and executable companion to the
 [system design](docs/spec/SYSTEM_DESIGN.md). Its 36-command reference kernel, geometry, runtime,
 adapters, and operational primitives are implemented and tested here. It does **not** claim stable
 conformance, product certification, npm availability, or unrestricted browser-window behavior.
