@@ -7,6 +7,9 @@ milestones, but no stable package-compatibility promise exists yet.
 
 ### Added
 
+- Transaction-correlated immutable post-commit effect envelopes, an abortable bounded delivery
+  controller with in-process duplicate suppression and explicit idempotent retry, plus an optional
+  Effect bridge. Durable and shared sinks must namespace and persist effect IDs themselves.
 - Same-strip pointer tab reordering with relational insertion anchors, exact visual markers,
   horizontal LTR/RTL and vertical-rail support, bounded overflow autoscroll, plus equivalent
   keyboard and menu routes.

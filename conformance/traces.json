@@ -596,7 +596,8 @@
         "architecture-contract",
         "independent-oracle-decision",
         "protocol-motion-decision",
-        "direct-placement-durability-decision"
+        "direct-placement-durability-decision",
+        "post-commit-effects-decision"
       ],
       "rationale": "Covered by repository-local automated evidence for this experimental profile."
     },
@@ -1859,10 +1860,14 @@
     {
       "requirementId": "TXN-005",
       "profileId": "compact-react-chromium-desktop",
-      "status": "unresolved",
+      "status": "verified",
       "verificationClass": "code-verifiable",
-      "evidenceIds": [],
-      "rationale": "The runtime does not publish post-commit effect intents carrying transaction and revision identity, and duplicate-delivery idempotence is not tested."
+      "evidenceIds": [
+        "kernel-post-commit-effects",
+        "runtime-post-commit-effects",
+        "post-commit-effects-decision"
+      ],
+      "rationale": "Covered by repository-local automated evidence for this experimental profile."
     },
     {
       "requirementId": "TXN-006",

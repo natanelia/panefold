@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "kind": "differential-model-result",
   "profile": "compact-react-chromium-desktop",
-  "producedAt": "2026-08-13T04:07:15Z",
+  "producedAt": "2026-08-13T11:48:00Z",
   "status": "passed-with-thresholds-unmet",
   "runner": "panefold-differential-campaign",
   "commands": {
@@ -29,14 +29,14 @@
     "missingCommandTypes": [],
     "divergenceCount": 0,
     "finalHash": "fnv1a64-v1:a1f58a1b0c635ad1",
-    "elapsedMs": 53373
+    "elapsedMs": 54591
   },
   "suite": {
     "testFiles": 5,
-    "tests": 24,
-    "passed": 24,
+    "tests": 25,
+    "passed": 25,
     "failed": 0,
-    "durationMs": 16019
+    "durationMs": 14766
   },
   "checks": {
     "curatedCommandDiscriminants": 36,
@@ -64,20 +64,23 @@
     "tsconfig.json": "b80805434d59ff95a362cfbff728ceab0e6313f80ea3c23853cb564c1dfc9a65",
     "scripts/run-independent-semantic-campaign.ts": "41cf49996dea1aa653b28c3060a910ed9da001782291fd6e76cd5925855f376f",
     "packages/kernel-optimized/src/differential.ts": "b01c11753637f681cb5e38073a87bfcc9c18e2bc278914fc5337fdffcfda8a82",
-    "packages/kernel-optimized/src/independent-reducer.ts": "8406cb76feb757b6b14c0ddea5fa32a6492007c4b8fb33c523b989052e48b3be",
-    "packages/kernel-optimized/src/independent-workspace.ts": "c3c78ac416aae9f7899e6aac3aa3680be7d3668f3f4a063cccbb179be5ba4250",
+    "packages/kernel-optimized/src/independent-reducer.ts": "0d6d5da296f9d92416f9b174b235fafa71ef0f153a891a80de430d9d1aeb815b",
+    "packages/kernel-optimized/src/independent-workspace.ts": "40e2c2341872e2433ea71e8ad93a228fbe4a3454eabd4625ebe35bcbbab04aa9",
     "packages/kernel-optimized/src/projection.ts": "bdef3ec847f88b44d8dbbab789a161e6af0f291ffa410073aa053ffc6575e0ef",
-    "packages/kernel/src/execute.ts": "4628e761739ce2f7bf70a642e26b1b1fee80504d3b475125551b2519d702e81d",
+    "packages/kernel/src/execute.ts": "65f7b3b487c522fdec4055d4118640f304dd040f47d636f57b23fc66a1a6f66f",
+    "packages/kernel/src/diff.ts": "1d7f028876fbac357f38be47ef53486c27d1b49d115c8d2b5cd30c69537a3004",
     "packages/kernel/src/reducer.ts": "210dc3c2521c50b877b401402cd09470e9659bab430e5ff49fb5088a7388a19f",
-    "packages/kernel/src/patches.ts": "73feade2f75ec6af347e5430821c4f6e627f31e1986030dd1c90ed285e12cd8b",
+    "packages/kernel/src/patches.ts": "af7aa2879b5d5b4173f013a3de5fd3bee0cb9b8a5f27d5f97e246e369665487b",
     "packages/kernel/src/hash.ts": "2a84a392f95e694738839f8608474c2051ca3e3893c4c4ee01591344e9c93fca",
     "packages/model/src/commands.ts": "e4d1dd8edd3fde607ae8f5640a2e9c9b7a4d571724b4847ab945d599d3fa32b7",
     "packages/model/src/entities.ts": "2f8461c6ced824a4d99258dfc3f35e983161cef641779b0d4bcaa72e04d0fd2b",
+    "packages/model/src/effects.ts": "553e13bb20b3da33a97a473734c6b0e053705cb8e7a5d3bb5346f7f552e174cd",
     "packages/model/src/factories.ts": "efb2d00d14f7f93fc249daae477a22e1b3dea8541d9cffc1cb2e1e04651c6b98",
-    "packages/model/src/results.ts": "57ee423eb7c08ae588a3750a2a067cd250993e20037af0b5aa91ade36fd2cc1a",
+    "packages/model/src/ids.ts": "cbf1947c1c8ed51447a6e3b5d77b04734e0b6b59e588099f442b99c3bde953c1",
+    "packages/model/src/results.ts": "f66a7e790365153a33f72df22e7961890d74f0e1723cf9ed2f13fcdd58c50fec",
     "packages/kernel-optimized/test/benchmark.test.ts": "1ed3acf97650eb802217931c29ec14021f14ffb7134873345975cf370ba6587c",
     "packages/kernel-optimized/test/differential.test.ts": "5df1ac571356551d240449e5892c56c98574c7ca3d6e4c001bbd927963137d96",
-    "packages/kernel-optimized/test/independent-reducer.test.ts": "7f973d4bf85544465d374a0c9b9ff5405a81435a40e708542b1be71411cd3ea7",
+    "packages/kernel-optimized/test/independent-reducer.test.ts": "62e4b41b5dc18457bbb6272f1a3f5ae0837824adc2763de858c840fab2eff768",
     "packages/kernel-optimized/test/persistent-bucket-map.test.ts": "6424a661d75a0edb6b000b6664b0a7ce1b6d60e7173291ddfa4883f7f52df3bf",
     "packages/kernel-optimized/test/projection.test.ts": "2799540bb4f1e0dd92dfba6c7b52c74517fe9f335fa4315e637066bfd23ecc96"
   },

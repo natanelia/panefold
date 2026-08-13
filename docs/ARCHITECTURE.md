@@ -95,10 +95,22 @@ The synchronous semantic path is:
 2. validate the current snapshot and revision;
 3. reduce one command or atomic batch against a mutable draft;
 4. canonicalize and validate the candidate;
-5. derive patches, inverse state, transaction metadata, and the next revision;
+5. derive patches, inverse state, transaction metadata, deterministic effect intents, and the next
+   revision;
 6. publish one immutable snapshot and notify current observers;
 7. queue reentrant work in a bounded FIFO for iterative draining;
-8. publish transaction observers and allow operational follow-up.
+8. publish transaction observers, drain their bounded reentrant command queue, then hand immutable
+   post-commit intents to the optional operational port.
+
+Every accepted command carries one frozen `transaction-committed` intent on both the kernel result
+and committed transaction. Its versioned ID binds the transaction ID, previous and committed
+revisions, and ordinal. The runtime invokes an optional abortable delivery port in a microtask after
+the synchronous commit and observers. A bounded receipt ledger coalesces concurrent duplicates,
+suppresses retained successes, and permits explicit retry only for `post-commit-idempotent` work.
+Delivery failure cannot roll back the semantic commit. This is process-local duplicate suppression,
+not a crash-durable or distributed exactly-once claim; those ports must durably deduplicate the same
+stable effect ID under an application-supplied workspace or session namespace. See
+[ADR-0014](adr/0014-post-commit-effect-delivery.md).
 
 Undo/redo runs through `dispatchKernelState`; it is bounded and separate from panel-content undo.
 The kernel's remote wrapper records a bounded deduplication receipt. The optional ecosystem layer
@@ -263,3 +275,4 @@ review, real OS failure testing, or third-party pilots.
 - [ADR-0011: Independent semantic oracle](adr/0011-independent-semantic-oracle.md)
 - [ADR-0012: Bounded protocol and motion lifecycles](adr/0012-bounded-protocol-and-motion-lifecycles.md)
 - [ADR-0013: Direct placement, durable opening, and controlled popouts](adr/0013-direct-placement-durable-demo.md)
+- [ADR-0014: Correlate and deduplicate post-commit effects](adr/0014-post-commit-effect-delivery.md)

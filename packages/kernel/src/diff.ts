@@ -1,4 +1,9 @@
-import { type EntityTable, type WorkspacePatch, type WorkspaceSnapshot } from "@panefold/model";
+import {
+  freezeWorkspacePatches,
+  type EntityTable,
+  type WorkspacePatch,
+  type WorkspaceSnapshot,
+} from "@panefold/model";
 import { canonicalSerialize } from "./hash";
 import { compareCanonicalStrings } from "./internal";
 
@@ -131,5 +136,5 @@ export function diffSnapshots(
       after: after.metadata,
     });
   }
-  return patches;
+  return freezeWorkspacePatches(patches);
 }

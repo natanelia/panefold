@@ -226,6 +226,21 @@
       ]
     },
     {
+      "id": "transaction-correlated-post-commit-effects",
+      "classification": "experimental",
+      "profileIds": [
+        "compact-react-chromium-desktop"
+      ],
+      "evidenceIds": [
+        "kernel-post-commit-effects",
+        "runtime-post-commit-effects",
+        "post-commit-effects-decision"
+      ],
+      "limitations": [
+        "Duplicate suppression uses a bounded per-workspace in-process receipt window; durable or distributed sinks must namespace and persist effect IDs"
+      ]
+    },
+    {
       "id": "conformance-evidence-system",
       "classification": "experimental",
       "profileIds": [

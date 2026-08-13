@@ -187,6 +187,15 @@ export const docPages = [
     eyebrow: "ADR 0013",
   },
   {
+    slug: "adr-post-commit-effects",
+    title: "Post-commit effect delivery",
+    description:
+      "Deterministic effect identity, bounded duplicate suppression, and honest retry guarantees.",
+    section: "Decisions",
+    loadSource: raw(() => import("../../../../docs/adr/0014-post-commit-effect-delivery.md?raw")),
+    eyebrow: "ADR 0014",
+  },
+  {
     slug: "system-design",
     title: "System design",
     description: "The complete normative design and 190-requirement register source.",

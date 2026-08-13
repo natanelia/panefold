@@ -3,6 +3,7 @@ import {
   APPLIED_REMOTE_TRANSACTION_LIMIT,
   cloneAndFreeze,
   createEntityTable,
+  freezeWorkspacePatches,
   type AppliedRemoteTransaction,
   type ClosedPanelRecord,
   type Diagnostic,
@@ -563,7 +564,7 @@ export function diffIndependentSnapshots(
   append("closed-panels", before.recoverableClosedPanels, after.recoverableClosedPanels);
   append("remote-transactions", before.appliedRemoteTransactions, after.appliedRemoteTransactions);
   append("metadata", before.metadata, after.metadata);
-  return patches;
+  return freezeWorkspacePatches(patches);
 }
 
 export function validateIndependentCandidate(snapshot: WorkspaceSnapshot): readonly string[] {

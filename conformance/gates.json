@@ -46,7 +46,10 @@
         "kernel-laws",
         "patch-replay-oracle",
         "independent-semantic-oracle",
-        "independent-semantic-oracle-result"
+        "independent-semantic-oracle-result",
+        "kernel-post-commit-effects",
+        "runtime-post-commit-effects",
+        "post-commit-effects-decision"
       ],
       "note": "The independent semantic oracle agrees with the reference in a bounded generated run, but it is not yet the retained optimized production kernel and the ten-million-command report is absent."
     },
@@ -74,7 +77,10 @@
       "evidenceIds": [
         "kernel-laws",
         "persistence-recovery",
-        "surface-ownership"
+        "surface-ownership",
+        "kernel-post-commit-effects",
+        "runtime-post-commit-effects",
+        "post-commit-effects-decision"
       ],
       "note": "Kernel atomicity passes locally; the complete fallible operational matrix is not certified."
     },

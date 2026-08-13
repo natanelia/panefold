@@ -13,6 +13,7 @@ import {
   type CommandId,
   type CommandOrigin,
   type CommittedTransaction,
+  type EffectIntentId,
   type KernelResult,
   type KernelStateResult,
   type WorkspaceCommand,
@@ -22,6 +23,14 @@ import {
 } from "@panefold/model";
 
 import { evaluatePolicies, type WorkspacePolicy } from "./policy";
+import {
+  createPostCommitEffectController,
+  type PostCommitEffectController,
+  type PostCommitEffectFailure,
+  type PostCommitEffectPort,
+  type PostCommitEffectReceipt,
+  type PostCommitEffectRetryResult,
+} from "./post-commit-effects";
 import type { Equality, WorkspaceSelector } from "./selectors";
 
 export interface DispatchOptions {
@@ -75,6 +84,19 @@ export interface WorkspaceRuntimeOptions {
   readonly onStructuralFailure?: (failure: RuntimeStructuralFailure) => void;
   /** Bounds transaction summaries retained in a structural reproduction. */
   readonly structuralReproductionTransactionLimit?: number;
+  /**
+   * Optional operational sink for immutable intents published after commit,
+   * synchronous observers, and the current notification queue drain.
+   */
+  readonly postCommitEffects?: PostCommitEffectPort;
+  /** Bounds recent receipts and their in-memory duplicate-suppression window. */
+  readonly postCommitEffectReceiptLimit?: number;
+  /** Bounds concurrently pending deliveries; additional intents fail visibly. */
+  readonly postCommitEffectPendingLimit?: number;
+  /** Opt-in because retained operational errors may contain application data. */
+  readonly retainPostCommitEffectErrorCause?: boolean;
+  /** An observational hook whose own exceptions are contained. */
+  readonly onPostCommitEffectError?: (failure: PostCommitEffectFailure) => void;
 }
 
 export type SubscriberChannel = "snapshot" | "transaction";
@@ -156,6 +178,9 @@ export interface WorkspaceRuntime {
   canRedo(): boolean;
   getTransactions(): readonly CommittedTransaction[];
   getSubscriberErrors(): readonly SubscriberNotificationFailure[];
+  getPostCommitEffectReceipts(): readonly PostCommitEffectReceipt[];
+  retryPostCommitEffect(effectId: EffectIntentId): Promise<PostCommitEffectRetryResult>;
+  flushPostCommitEffects(): Promise<void>;
   getStructuralFailure(): RuntimeStructuralFailure | undefined;
   dispose(): void;
 }
@@ -196,6 +221,7 @@ class WorkspaceRuntimeImpl implements WorkspaceRuntime {
   readonly #queueDrainLimit: number;
   readonly #retainSubscriberErrorCause: boolean;
   readonly #structuralReproductionTransactionLimit: number;
+  readonly #postCommitEffectController: PostCommitEffectController | undefined;
   #queueDrainRemaining: number | undefined;
   #draining = false;
   #notifying = false;
@@ -241,6 +267,24 @@ class WorkspaceRuntimeImpl implements WorkspaceRuntime {
     this.#createCommandId = options.createCommandId ?? defaultCreateCommandId;
     this.#onSubscriberError = options.onSubscriberError;
     this.#onStructuralFailure = options.onStructuralFailure;
+    this.#postCommitEffectController =
+      options.postCommitEffects === undefined
+        ? undefined
+        : createPostCommitEffectController({
+            port: options.postCommitEffects,
+            ...(options.postCommitEffectReceiptLimit === undefined
+              ? {}
+              : { receiptLimit: options.postCommitEffectReceiptLimit }),
+            ...(options.retainPostCommitEffectErrorCause === undefined
+              ? {}
+              : { retainErrorCause: options.retainPostCommitEffectErrorCause }),
+            ...(options.postCommitEffectPendingLimit === undefined
+              ? {}
+              : { pendingLimit: options.postCommitEffectPendingLimit }),
+            ...(options.onPostCommitEffectError === undefined
+              ? {}
+              : { onError: options.onPostCommitEffectError }),
+          });
   }
 
   public getSnapshot = (): WorkspaceSnapshot => this.#state.snapshot;
@@ -355,6 +399,21 @@ class WorkspaceRuntimeImpl implements WorkspaceRuntime {
     return Object.freeze([...this.#subscriberErrors]);
   }
 
+  public getPostCommitEffectReceipts(): readonly PostCommitEffectReceipt[] {
+    return this.#postCommitEffectController?.getReceipts() ?? Object.freeze([]);
+  }
+
+  public retryPostCommitEffect(effectId: EffectIntentId): Promise<PostCommitEffectRetryResult> {
+    return (
+      this.#postCommitEffectController?.retry(effectId) ??
+      Promise.resolve({ status: "rejected", reason: "NOT_FOUND" })
+    );
+  }
+
+  public flushPostCommitEffects(): Promise<void> {
+    return this.#postCommitEffectController?.flush() ?? Promise.resolve();
+  }
+
   public getStructuralFailure(): RuntimeStructuralFailure | undefined {
     return this.#structuralFailure;
   }
@@ -364,6 +423,7 @@ class WorkspaceRuntimeImpl implements WorkspaceRuntime {
       return;
     }
     this.#disposed = true;
+    this.#postCommitEffectController?.dispose();
     this.#listeners.clear();
     this.#transactionListeners.clear();
     this.#subscriberErrors.length = 0;
@@ -414,6 +474,11 @@ class WorkspaceRuntimeImpl implements WorkspaceRuntime {
       }
 
       this.#notifySubscribers(result.transaction);
+      for (const intent of result.transaction.effects) {
+        // Delivery starts in a microtask. The canonical commit and all current
+        // synchronous observers therefore finish before operational code runs.
+        void this.#postCommitEffectController?.submit(intent, result.transaction);
+      }
       return { status: "committed", commandId: envelope.id, result };
     } catch (cause) {
       return this.#freezeStructuralMutation(rawEnvelope, {

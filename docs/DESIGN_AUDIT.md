@@ -14,13 +14,13 @@ checked against those files by the conformance test suite.
 
 | Profile                            | Verified | Unresolved | Blocked |     N/A |   Total |
 | ---------------------------------- | -------: | ---------: | ------: | ------: | ------: |
-| `compact-react-chromium-desktop`   |      105 |         60 |      22 |       3 |     190 |
+| `compact-react-chromium-desktop`   |      106 |         59 |      22 |       3 |     190 |
 | `framework-adapter-contract-jsdom` |        2 |         53 |      11 |     124 |     190 |
-| **Both profiles**                  |  **107** |    **113** |  **33** | **127** | **380** |
+| **Both profiles**                  |  **108** |    **112** |  **33** | **127** | **380** |
 
 | Proof class                | Verified | Unresolved | Blocked | N/A | Total |
 | -------------------------- | -------: | ---------: | ------: | --: | ----: |
-| A — code-verifiable        |       87 |         57 |       0 |   0 |   144 |
+| A — code-verifiable        |       88 |         56 |       0 |   0 |   144 |
 | B — environment-verifiable |       20 |         56 |       0 |   0 |    76 |
 | C — manual/external        |        0 |          0 |      33 |   0 |    33 |
 | D — future scope           |        0 |          0 |       0 | 127 |   127 |
@@ -220,7 +220,7 @@ manual or external evidence, and `N/A` means the profile does not publish that c
 | `TXN-002`   | V                        | N/A                       |
 | `TXN-003`   | V                        | N/A                       |
 | `TXN-004`   | V                        | N/A                       |
-| `TXN-005`   | U                        | N/A                       |
+| `TXN-005`   | V                        | N/A                       |
 | `TXN-006`   | V                        | N/A                       |
 | `TXN-007`   | V                        | N/A                       |
 | `TXN-008`   | V                        | N/A                       |
@@ -229,7 +229,7 @@ manual or external evidence, and `N/A` means the profile does not publish that c
 
 ## Corrected verification overclaims
 
-The following 11 compact-profile rows had been marked verified by evidence that did not establish
+The following 10 compact-profile rows had been marked verified by evidence that did not establish
 the complete normative statement. They are now unresolved, with the exact reason also stored in
 their generated trace rationale.
 
@@ -247,12 +247,20 @@ their generated trace rationale.
 | `PKG-004`   | Documentation implementation gap                  | Manifests have export maps, but every package does not publish a compatibility policy and the lockfile is not an entry-point audit.                                                                                                                   |
 | `SCP-001`   | Completeness proof gap                            | The capability inventory is curated and is not generated or cross-checked against every public export.                                                                                                                                                |
 | `TST-009`   | Recovery coverage gap                             | Existing failure injection is bounded to persistence and surface cases; it does not prove a final location or placeholder for every panel in the complete recovery matrix.                                                                            |
-| `TXN-005`   | Missing transaction behavior                      | The runtime publishes no post-commit effect intent carrying transaction/revision identity and has no retry duplicate-delivery idempotence test.                                                                                                       |
 
 <!-- END CORRECTED OVERCLAIMS -->
 
 `TXN-004` remains verified, but its evidence was corrected: prepared-resource rollback is now tied
 to the injected surface-transfer failure matrix, not to the unrelated in-page panel-drop planner.
+
+`TXN-005` is now verified for the compact code profile. Accepted kernel transactions publish a
+deterministic frozen effect envelope containing the exact transaction ID and revision tuple; the
+runtime delivers it after commit and observers through an optional abortable port. Focused tests
+cover sequential and concurrent duplicates, explicit retry of failed idempotent work, bounded
+capacity, disposal, observer and handler failures, reentrant-command ordering, and fresh undo/redo
+identities. The receipt ledger is deliberately process-local. Crash-durable or distributed
+exactly-once application remains outside this result and is recorded in
+[ADR-0014](adr/0014-post-commit-effect-delivery.md).
 
 ## Structural action parity audit
 
@@ -285,17 +293,17 @@ capabilities and route-specific tests; corrected declaration strings alone are n
 
 ### Repository-local code or deterministic proof
 
-The compact profile has 14 unresolved code-verifiable rows:
+The compact profile has 13 unresolved code-verifiable rows:
 
 `A11Y-002`, `COL-001`, `I18N-003`, `INT-002`, `INT-004`, `OBS-005`, `PKG-004`, `RSK-002`,
-`SCP-001`, `SEC-007`, `TST-001`, `TST-003`, `TST-009`, and `TXN-005`.
+`SCP-001`, `SEC-007`, `TST-001`, `TST-003`, and `TST-009`.
 
 The most direct implementation work is the complete renderer route inventory/parity, locale-aware
 shortcut formatting, package compatibility policies, generated public capability classification,
-and post-commit effect identity/idempotence. `TST-001` is a missing ten-million-operation artifact;
-`TST-003` and `TST-009` need broader deterministic protocol and recovery matrices. The remaining
-governance/security rows need the policies and artifacts named by their requirement, not a change of
-status by assertion.
+and broader deterministic protocol/recovery matrices. `TST-001` is a missing
+ten-million-operation artifact; `TST-003` and `TST-009` need broader deterministic protocol and
+recovery matrices. The remaining governance/security rows need the policies and artifacts named by
+their requirement, not a change of status by assertion.
 
 ### Implemented or partial behavior awaiting environment evidence
 

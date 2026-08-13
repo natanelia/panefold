@@ -102,4 +102,47 @@ describe("incremental patch projection", () => {
     expect(projected.applicationLayoutVersion).toBe(3);
     expect(canonicalHash(projected)).toBe(canonicalHash(result.next));
   });
+
+  it("binds replayed patches to their immutable transaction effect identity", () => {
+    const initial = fixtureSnapshot();
+    const result = executeCommand(initial, {
+      id: commandId("patch:effect-binding"),
+      origin: "application",
+      label: "Select panel",
+      baseRevision: initial.revision,
+      command: { type: "select-panel", panelId: ids.panels[1] },
+    });
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+
+    const projected = applyTransaction(initial, result.transaction);
+    expect(canonicalHash(projected)).toBe(canonicalHash(result.next));
+    expect(result.transaction.effects).toBe(result.effects);
+    expect(Object.isFrozen(result.transaction.effects)).toBe(true);
+    expect(Object.isFrozen(result.transaction.patches)).toBe(true);
+    expect(result.transaction.patches.every(Object.isFrozen)).toBe(true);
+    for (const patch of result.transaction.patches) {
+      if ("before" in patch && patch.before !== undefined && typeof patch.before === "object") {
+        expect(Object.isFrozen(patch.before)).toBe(true);
+      }
+      if ("after" in patch && patch.after !== undefined && typeof patch.after === "object") {
+        expect(Object.isFrozen(patch.after)).toBe(true);
+      }
+    }
+
+    expect(() => applyTransaction(initial, { ...result.transaction, effects: [] })).toThrow(
+      /at least one effect intent/,
+    );
+    expect(() =>
+      applyTransaction(initial, {
+        ...result.transaction,
+        effects: [
+          Object.freeze({
+            ...(result.effects[0] as NonNullable<(typeof result.effects)[number]>),
+            ordinal: 1,
+          }),
+        ],
+      }),
+    ).toThrow(/invalid identity/);
+  });
 });

@@ -3,6 +3,8 @@ import {
   BROWSER_WINDOW_SURFACE_CAPABILITIES,
   FLOATING_SURFACE_CAPABILITIES,
   PICTURE_IN_PICTURE_SURFACE_CAPABILITIES,
+  cloneAndFreeze,
+  createTransactionCommittedEffectIntent,
   nextRevision,
   type ClosedPanelRecord,
   type CommandEnvelope,
@@ -1971,8 +1973,9 @@ export function executeIndependentCommand(
   }
 
   try {
+    const command = cloneAndFreeze(envelope.command);
     const draft = createIndependentDraft(snapshot);
-    reduceIndependentCommand(draft, envelope.command);
+    reduceIndependentCommand(draft, command);
     const diagnostics = canonicalizeIndependentDraft(draft);
     const canonical = snapshotIndependentDraft(draft);
     const violations = validateIndependentCandidate(canonical);
@@ -1992,24 +1995,35 @@ export function executeIndependentCommand(
     const next = Object.freeze({ ...canonical, revision });
     const patches = diffIndependentSnapshots(snapshot, next);
     const inverse: WorkspaceCommand | undefined =
-      envelope.command.type === "apply-remote-transaction"
+      command.type === "apply-remote-transaction"
         ? undefined
-        : { type: "restore-workspace", snapshot };
-    const transaction = {
+        : Object.freeze({ type: "restore-workspace", snapshot });
+    const effects = Object.freeze([
+      createTransactionCommittedEffectIntent({
+        transactionId: envelope.id,
+        previousRevision: snapshot.revision,
+        revision,
+        ordinal: 0,
+        commandType: command.type,
+        origin: envelope.origin,
+      }),
+    ]);
+    const transaction = Object.freeze({
       id: envelope.id,
       origin: envelope.origin,
       label: envelope.label,
       previousRevision: snapshot.revision,
       revision,
-      command: envelope.command,
+      command,
       patches,
-    } as const;
+      effects,
+    } as const);
     return {
       ok: true,
       next,
       patches,
       ...(inverse === undefined ? {} : { inverse }),
-      effects: [],
+      effects,
       diagnostics,
       transaction,
     };

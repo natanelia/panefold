@@ -54,10 +54,12 @@ conformance, product certification, npm availability, or unrestricted browser-wi
   frame-coalesced previews, direct center/edge panel docking, accessible tabs and splitters, four-way
   keyboard/menu splitting, configurable logical tab rails and content, focus recovery, stable panel
   hosts, lifecycle leases, and optional FLIP motion.
-- A bounded synchronous runtime plus versioned persistence codecs, atomic snapshot/journal
+- A bounded synchronous runtime with transaction-correlated post-commit effect delivery and
+  in-process duplicate suppression, plus versioned persistence codecs, atomic snapshot/journal
   contracts, deterministic schema migration, last-known-good recovery, a restore-before-render open
-  path, observable save status, and an IndexedDB/Effect adapter. Atlas visibly reports the exact
-  saved/restored canonical revision. Real browser crash and quota certification is still absent.
+  path, observable save status, and IndexedDB/Effect adapters. Atlas visibly reports the exact
+  saved/restored canonical revision. Crash-durable effect deduplication, real browser crash, and
+  quota certification are still absent.
 - Driver-neutral protocol contracts and a public twelve-actor XState catalog with scoped disposal,
   deterministic traces, revision-conflict handling, and prepared external-surface ownership. The
   injected same-origin browser adapter opens, bootstraps, observes, recovers, and closes a real
@@ -115,8 +117,8 @@ npm.
 | `@panefold/kernel`           | Reference reduction, canonicalization, invariants, patches, hashes, history dispatch  |
 | `@panefold/kernel-optimized` | Experimental indexes/projection, independent semantic oracle, differential campaigns  |
 | `@panefold/geometry`         | Constraint aggregation, n-ary allocation, resolved rectangles, hit/drop testing       |
-| `@panefold/runtime`          | Bounded dispatch, policies, selectors, persistence codecs, journals, durable runtime  |
-| `@panefold/runtime-effect`   | Optional Effect wrappers and injected IndexedDB journal adapter                       |
+| `@panefold/runtime`          | Bounded dispatch, post-commit effect delivery, policies, persistence, durable runtime |
+| `@panefold/runtime-effect`   | Optional Effect bridges and injected IndexedDB journal adapter                        |
 | `@panefold/protocol`         | Driver-neutral protocol identities, scopes, clocks, and bounded traces                |
 | `@panefold/protocol-xstate`  | Twelve bounded XState protocol actors with scoped identity and deterministic traces   |
 | `@panefold/surfaces`         | Prepared ownership plus injected popup/PiP adapters, bootstrap, loss recovery         |

@@ -1,4 +1,6 @@
 import {
+  cloneAndFreeze,
+  createTransactionCommittedEffectIntent,
   nextRevision,
   type CommandEnvelope,
   type CommandRejection,
@@ -95,7 +97,11 @@ export function executeCommand(
     );
   }
 
-  const reduced = reduceWorkspace(snapshot, envelope.command);
+  // Commit/history must never retain mutable application-owned command data.
+  // Clone once at the semantic boundary, then use the same owned value for
+  // reduction, transaction publication, effect correlation, and redo.
+  const command = cloneAndFreeze(envelope.command);
+  const reduced = reduceWorkspace(snapshot, command);
   if (!reduced.ok) {
     return rejection(
       snapshot,
@@ -124,28 +130,39 @@ export function executeCommand(
   // values by reference for fine-grained selectors.
   const next = applyPatches(snapshot, patches, canonicalNext.revision);
   const inverse: WorkspaceCommand | undefined =
-    envelope.command.type === "apply-remote-transaction"
+    command.type === "apply-remote-transaction"
       ? undefined
-      : {
+      : Object.freeze({
           type: "restore-workspace",
           snapshot,
-        };
-  const transaction = {
+        });
+  const effects = Object.freeze([
+    createTransactionCommittedEffectIntent({
+      transactionId: envelope.id,
+      previousRevision: snapshot.revision,
+      revision: next.revision,
+      ordinal: 0,
+      commandType: command.type,
+      origin: envelope.origin,
+    }),
+  ]);
+  const transaction = Object.freeze({
     id: envelope.id,
     origin: envelope.origin,
     label: envelope.label,
     previousRevision: snapshot.revision,
     revision: next.revision,
-    command: envelope.command,
+    command,
     patches,
-  } as const;
+    effects,
+  } as const);
 
   return {
     ok: true,
     next,
     patches,
     ...(inverse === undefined ? {} : { inverse }),
-    effects: [],
+    effects,
     diagnostics: [...reduced.diagnostics, ...canonical.diagnostics],
     transaction,
   };
@@ -174,6 +191,17 @@ function historyEmpty(
   };
 }
 
+function historyEntry(
+  envelope: CommandEnvelope,
+  command: WorkspaceCommand,
+  inverse: WorkspaceCommand,
+): WorkspaceHistoryEntry {
+  return Object.freeze({
+    envelope: Object.freeze({ ...envelope, command }),
+    inverse,
+  });
+}
+
 function dispatchUndo(state: WorkspaceKernelState, envelope: CommandEnvelope): KernelStateResult {
   const entry = state.undoStack.at(-1);
   if (entry === undefined) return historyEmpty(state, envelope, "undo");
@@ -195,6 +223,7 @@ function dispatchUndo(state: WorkspaceKernelState, envelope: CommandEnvelope): K
       redoStack: Object.freeze([...state.redoStack, entry]),
     }),
     transaction: result.transaction,
+    effects: result.effects,
     diagnostics: result.diagnostics,
   };
 }
@@ -224,10 +253,7 @@ function dispatchRedo(state: WorkspaceKernelState, envelope: CommandEnvelope): K
       ),
     );
   }
-  const nextEntry: WorkspaceHistoryEntry = {
-    envelope: entry.envelope,
-    inverse,
-  };
+  const nextEntry = historyEntry(entry.envelope, entry.envelope.command, inverse);
   return {
     ok: true,
     state: Object.freeze({
@@ -237,6 +263,7 @@ function dispatchRedo(state: WorkspaceKernelState, envelope: CommandEnvelope): K
       redoStack: Object.freeze(state.redoStack.slice(0, -1)),
     }),
     transaction: result.transaction,
+    effects: result.effects,
     diagnostics: result.diagnostics,
   };
 }
@@ -260,7 +287,7 @@ export function dispatchKernelState(
     ? []
     : inverse === undefined || state.historyLimit === 0
       ? state.undoStack
-      : [...state.undoStack, { envelope, inverse } satisfies WorkspaceHistoryEntry].slice(
+      : [...state.undoStack, historyEntry(envelope, result.transaction.command, inverse)].slice(
           -state.historyLimit,
         );
 
@@ -273,6 +300,7 @@ export function dispatchKernelState(
       redoStack: Object.freeze([]),
     }),
     transaction: result.transaction,
+    effects: result.effects,
     diagnostics: result.diagnostics,
   };
 }

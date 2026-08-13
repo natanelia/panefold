@@ -13,6 +13,7 @@ import {
   JournalFailure,
   PersistenceFailure,
   fromPersistencePort,
+  fromEffectPostCommitHandler,
   fromWorkspaceJournalPort,
 } from "../src";
 
@@ -50,6 +51,60 @@ describe("Effect persistence adapter", () => {
     expect(failure).toBeInstanceOf(PersistenceFailure);
     expect(failure.operation).toBe("load");
     expect(failure.cause).toEqual(new Error("offline"));
+  });
+});
+
+describe("Effect post-commit adapter", () => {
+  it("keeps success, failure, and cancellation behind the Effect boundary", async () => {
+    const seen: string[] = [];
+    const controller = new AbortController();
+    const port = fromEffectPostCommitHandler({
+      deliver: ({ intent, signal }) =>
+        Effect.sync(() => {
+          expect(signal).toBe(controller.signal);
+          seen.push(intent.id);
+        }),
+    });
+    const intent = {
+      id: "effect:test" as never,
+      kind: "transaction-committed" as const,
+      class: "post-commit-idempotent" as const,
+      transactionId: "command:test" as never,
+      previousRevision: 0n as never,
+      revision: 1n as never,
+      ordinal: 0,
+      payload: { commandType: "select-panel" as const, origin: "application" as const },
+    };
+    const delivery = {
+      intent,
+      transaction: {
+        id: intent.transactionId,
+        origin: "application",
+        label: "Test",
+        previousRevision: intent.previousRevision,
+        revision: intent.revision,
+        command: { type: "select-panel", panelId: "panel:test" as never },
+        patches: [],
+        effects: [intent],
+      },
+      attempt: 1,
+      signal: controller.signal,
+    } as const;
+    await port.deliver(delivery);
+
+    expect(seen).toEqual([intent.id]);
+
+    const failure = new Error("typed Effect failure");
+    const failingPort = fromEffectPostCommitHandler({
+      deliver: () => Effect.fail(failure),
+    });
+    await expect(failingPort.deliver(delivery)).rejects.toThrow("typed Effect failure");
+
+    const cancellation = new AbortController();
+    const neverPort = fromEffectPostCommitHandler({ deliver: () => Effect.never });
+    const cancelled = neverPort.deliver({ ...delivery, signal: cancellation.signal });
+    cancellation.abort(new Error("delivery cancelled"));
+    await expect(cancelled).rejects.toThrow();
   });
 });
 
