@@ -285,6 +285,7 @@ describe("browser external-surface adapter", () => {
       clearTimer: () => undefined,
       hooks: {
         currentRevision: () => revision(7),
+        revalidatePolicy: () => true,
         commitOwnership: () => true,
         releaseSource: async () => undefined,
         compensateOwnership,

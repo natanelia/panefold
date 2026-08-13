@@ -45,6 +45,17 @@ test("normalizes static-host trailing-slash routes", async ({ page }) => {
       .frameLocator('iframe[title="Panefold Atlas live workspace demo"]')
       .getByLabel("Map operations workspace"),
   ).toBeVisible();
+  await expect(
+    page.getByRole("heading", { name: "Panefold Atlas live workspace demo" }),
+  ).toBeAttached();
+  const atlas = page.frameLocator('iframe[title="Panefold Atlas live workspace demo"]');
+  await expect(
+    atlas.getByRole("heading", { name: "Panefold Atlas map operations workspace" }),
+  ).toBeAttached();
+  await expect(atlas.getByRole("link", { name: "Panefold home" })).toHaveAttribute(
+    "href",
+    /\/panefold\/$/,
+  );
 });
 
 test("publishes complete route and social metadata", async ({ page }) => {
@@ -72,6 +83,19 @@ test("publishes complete route and social metadata", async ({ page }) => {
     name: "Panefold",
     codeRepository: "https://github.com/natanelia/panefold",
   });
+});
+
+test("keeps the standalone Atlas fixture out of search while sharing the demo route", async ({
+  request,
+}) => {
+  const response = await request.get("./atlas/");
+  expect(response.ok()).toBe(true);
+  const html = await response.text();
+  expect(html).toContain('<meta name="robots" content="noindex,follow"');
+  expect(html).toContain('<link rel="canonical" href="https://natanelia.github.io/panefold/demo/"');
+  expect(html).toContain(
+    '<meta property="og:url" content="https://natanelia.github.io/panefold/demo/"',
+  );
 });
 
 test("publishes every documentation route in the sitemap", async ({ page, request }) => {

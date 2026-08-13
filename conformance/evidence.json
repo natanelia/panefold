@@ -9,7 +9,7 @@
       "artifactRole": "source",
       "uri": "repo://.dependency-cruiser.cjs",
       "sha256": "ebc47e6bfe26fd8b4277f6907b9200e0fcb80b841729c42926d633f79588934a",
-      "producedAt": "2026-08-13T03:54:04Z",
+      "producedAt": "2026-08-13T11:12:10Z",
       "requirementIds": [
         "ARC-001",
         "ARC-005",
@@ -30,7 +30,7 @@
       "artifactRole": "source",
       "uri": "repo://packages/model/test/model.test.ts",
       "sha256": "8fa37646d33a7b3059b046f6057f3475003f3f0a4d5b4bfa0087f57a70f0f43c",
-      "producedAt": "2026-08-13T03:54:04Z",
+      "producedAt": "2026-08-13T11:12:10Z",
       "requirementIds": [
         "API-003",
         "DOM-001"
@@ -48,7 +48,7 @@
       "artifactRole": "source",
       "uri": "repo://packages/kernel/test/properties.test.ts",
       "sha256": "c3c074f4870886eed45649cc1f0fdee5d6c9059c2172bdee2a16de9c93072e20",
-      "producedAt": "2026-08-13T03:54:04Z",
+      "producedAt": "2026-08-13T11:12:10Z",
       "requirementIds": [
         "LAY-001",
         "LAY-007",
@@ -72,7 +72,7 @@
       "artifactRole": "source",
       "uri": "repo://packages/kernel/test/exploration.test.ts",
       "sha256": "b4819d6494b7123149866807ad812d041dfb9308b5e7fdaf1b05f773b6d3988c",
-      "producedAt": "2026-08-13T03:54:04Z",
+      "producedAt": "2026-08-13T11:12:10Z",
       "requirementIds": [
         "TST-001",
         "TST-002"
@@ -90,7 +90,7 @@
       "artifactRole": "source",
       "uri": "repo://packages/kernel/test/patches.test.ts",
       "sha256": "3410652cf3f737bebca016668a154d41b1d8c822d5fdc43aac297018c9c566eb",
-      "producedAt": "2026-08-13T03:54:04Z",
+      "producedAt": "2026-08-13T11:12:10Z",
       "requirementIds": [
         "TST-002",
         "PER-008"
@@ -108,7 +108,7 @@
       "artifactRole": "source",
       "uri": "repo://packages/geometry/test/solve-layout.test.ts",
       "sha256": "f9eeb6af1c0ca92f7ec7446de66cd165730a91151ead5262b0fa0241b06cb6c2",
-      "producedAt": "2026-08-13T03:54:04Z",
+      "producedAt": "2026-08-13T11:12:10Z",
       "requirementIds": [
         "LAY-002",
         "LAY-003",
@@ -128,7 +128,7 @@
       "artifactRole": "source",
       "uri": "repo://packages/geometry/test/hit-test.test.ts",
       "sha256": "5b60d1bc2ed2e3586fd34bac146a269a4249aef46dbe105747a921ad8bc3faaa",
-      "producedAt": "2026-08-13T03:54:04Z",
+      "producedAt": "2026-08-13T11:12:10Z",
       "requirementIds": [
         "EXP-002",
         "INT-005"
@@ -146,7 +146,7 @@
       "artifactRole": "source",
       "uri": "repo://packages/kernel/test/plan-panel-drop.test.ts",
       "sha256": "fd38bb300cf5506acb92a7e09ab7979acd3222cb8784ae317324d0aff817c9c5",
-      "producedAt": "2026-08-13T03:54:04Z",
+      "producedAt": "2026-08-13T11:12:10Z",
       "requirementIds": [
         "EXP-002",
         "INT-005",
@@ -165,7 +165,7 @@
       "artifactRole": "source",
       "uri": "repo://packages/runtime/test/runtime.test.ts",
       "sha256": "5ed37341e27f34ad522c0013292c3e225c1513219565df39f32cfeeec8ed1144",
-      "producedAt": "2026-08-13T03:54:04Z",
+      "producedAt": "2026-08-13T11:12:10Z",
       "requirementIds": [
         "API-005",
         "OBS-002"
@@ -183,7 +183,7 @@
       "artifactRole": "source",
       "uri": "repo://packages/runtime/test/persistence.test.ts",
       "sha256": "cdd4a682115ffe87103ab8fa7e08676e5497f31fc16c02b5b30c160d2c463ca9",
-      "producedAt": "2026-08-13T03:54:04Z",
+      "producedAt": "2026-08-13T11:12:10Z",
       "requirementIds": [
         "PER-001",
         "PER-002",
@@ -205,7 +205,7 @@
       "artifactRole": "source",
       "uri": "repo://packages/runtime-effect/test/persistence.test.ts",
       "sha256": "2cd6da5ef9c306a18a67d057e84bf440e93202919afe0b5ce673236aa3bcb538",
-      "producedAt": "2026-08-13T03:54:04Z",
+      "producedAt": "2026-08-13T11:12:10Z",
       "requirementIds": [
         "ARC-003",
         "PER-003"
@@ -223,7 +223,7 @@
       "artifactRole": "source",
       "uri": "repo://packages/protocol-xstate/test/protocol-machines.test.ts",
       "sha256": "b473558c7f1a64c17e58e0d1ebb1503f05734f4ba7e194d53b9b8b780c7d23ce",
-      "producedAt": "2026-08-13T03:54:04Z",
+      "producedAt": "2026-08-13T11:12:10Z",
       "requirementIds": [
         "ARC-002",
         "INT-003",
@@ -242,7 +242,7 @@
       "artifactRole": "source",
       "uri": "repo://packages/protocol-xstate/test/catalog-machines.test.ts",
       "sha256": "3d33e4ca3ea49b32e0a98e7749184d73ad5d93fd20b4ceff749c16156407142d",
-      "producedAt": "2026-08-13T03:54:04Z",
+      "producedAt": "2026-08-13T11:12:10Z",
       "requirementIds": [
         "ARC-002",
         "INT-003",
@@ -261,7 +261,7 @@
       "artifactRole": "source",
       "uri": "repo://packages/motion/test/motion.test.ts",
       "sha256": "02b6068c1abaa54b4433da29c0a7bb430254b24082385541e5617abfccc22ed8",
-      "producedAt": "2026-08-13T03:54:04Z",
+      "producedAt": "2026-08-13T11:12:10Z",
       "requirementIds": [
         "ARC-004",
         "INT-001",
@@ -283,7 +283,7 @@
       "artifactRole": "source",
       "uri": "repo://packages/motion/test/motion-lifecycle.test.ts",
       "sha256": "1cedfcdecfc3ba2ae9bd55b650ba2b69992efc0626c5a7a7d1addebe61b74964",
-      "producedAt": "2026-08-13T03:54:04Z",
+      "producedAt": "2026-08-13T11:12:10Z",
       "requirementIds": [
         "MOT-003",
         "MOT-004",
@@ -307,8 +307,8 @@
       "verificationClass": "code-verifiable",
       "artifactRole": "source",
       "uri": "repo://packages/surfaces/test/surfaces.test.ts",
-      "sha256": "6fda348ea8b25a2a2bf09245094076a6267240a926805bef230892a6d5b1ee8d",
-      "producedAt": "2026-08-13T03:54:04Z",
+      "sha256": "b2b921e6bb30ae1e6a9c60ed22b6503a8136407b370a9a31f658b87bbb9e5505",
+      "producedAt": "2026-08-13T11:12:10Z",
       "requirementIds": [
         "COL-004",
         "LIF-005",
@@ -317,7 +317,8 @@
         "SUR-005",
         "SUR-007",
         "TST-004",
-        "TXN-004"
+        "TXN-004",
+        "TXN-007"
       ],
       "profileIds": [
         "compact-react-chromium-desktop"
@@ -332,7 +333,7 @@
       "artifactRole": "source",
       "uri": "repo://packages/react/test/WorkspaceSurface.test.tsx",
       "sha256": "780445f35413e6d3c56948ce2aacca02eea7c230f87b0f20bae314583cbf9e49",
-      "producedAt": "2026-08-13T03:54:04Z",
+      "producedAt": "2026-08-13T11:12:10Z",
       "requirementIds": [
         "A11Y-003",
         "ARC-002",
@@ -362,7 +363,7 @@
       "artifactRole": "source",
       "uri": "repo://packages/react/test/tab-reorder.test.ts",
       "sha256": "da6e97901c25a0e5b32480ffd0450e058bb1f6070eef5df5d3e062067282dae2",
-      "producedAt": "2026-08-13T03:54:04Z",
+      "producedAt": "2026-08-13T11:12:10Z",
       "requirementIds": [
         "A11Y-002",
         "EXP-001",
@@ -384,7 +385,7 @@
       "artifactRole": "source",
       "uri": "repo://packages/adapter-contract/test/native-adapters.test.ts",
       "sha256": "52f513593cbdfbc472e9788fae3dce6928aca642ef156cc0e2018625b062d3b1",
-      "producedAt": "2026-08-13T03:54:04Z",
+      "producedAt": "2026-08-13T11:12:10Z",
       "requirementIds": [
         "FWK-001",
         "FWK-003",
@@ -403,7 +404,7 @@
       "artifactRole": "source",
       "uri": "repo://packages/web-components/test/ssr-import.test.ts",
       "sha256": "ca44a0b9c0c7d85431b596ee78191a387e4a8d4b576f6ee89c14d6236e38be29",
-      "producedAt": "2026-08-13T03:54:04Z",
+      "producedAt": "2026-08-13T11:12:10Z",
       "requirementIds": [
         "FWK-004"
       ],
@@ -420,7 +421,7 @@
       "artifactRole": "source",
       "uri": "repo://packages/ecosystem/test/ecosystem.test.ts",
       "sha256": "0843e1a9ceb0aa22f19e22184e9eabfb206327e06d02f22e09213448bba1be19",
-      "producedAt": "2026-08-13T03:54:04Z",
+      "producedAt": "2026-08-13T11:12:10Z",
       "requirementIds": [
         "EXT-001",
         "EXT-003",
@@ -441,7 +442,7 @@
       "artifactRole": "source",
       "uri": "repo://packages/testkit/test/testkit.test.ts",
       "sha256": "816eedd7adcd65d94f0c4580c3a6ba480ab3bac101ac591c888eedfbc6b49247",
-      "producedAt": "2026-08-13T03:54:04Z",
+      "producedAt": "2026-08-13T11:12:10Z",
       "requirementIds": [
         "COL-004",
         "COL-005",
@@ -465,12 +466,13 @@
       "verificationClass": "code-verifiable",
       "artifactRole": "source",
       "uri": "repo://packages/conformance/test/report.test.ts",
-      "sha256": "3a45dc08b41b7b1d76f4fe488e1b630c72d29dee2cf859b0d4ccad72b2919b22",
-      "producedAt": "2026-08-13T03:54:04Z",
+      "sha256": "19d8f3bf275e4321e501241b04608a640c2b0cd0634439918c26ed89d3bb1d83",
+      "producedAt": "2026-08-13T11:12:10Z",
       "requirementIds": [
         "ACC-001",
         "OBS-006",
         "QLT-001",
+        "QLT-002",
         "QLT-004"
       ],
       "profileIds": [
@@ -487,7 +489,7 @@
       "artifactRole": "source",
       "uri": "repo://scripts/security-check.mjs",
       "sha256": "d3bfb79faca83779760d2288f63c77646e5de18f75b0386a155d5af18022d0b3",
-      "producedAt": "2026-08-13T03:54:04Z",
+      "producedAt": "2026-08-13T11:12:10Z",
       "requirementIds": [
         "SEC-003",
         "SEC-008"
@@ -505,7 +507,7 @@
       "artifactRole": "source",
       "uri": "repo://scripts/performance-smoke.mjs",
       "sha256": "fc0d8ce5df966b75312b5d9fae367e07b5ce4f8215afa724d03a7a6cb17fdc95",
-      "producedAt": "2026-08-13T03:54:04Z",
+      "producedAt": "2026-08-13T11:12:10Z",
       "requirementIds": [
         "QLT-003",
         "TST-006"
@@ -523,7 +525,7 @@
       "artifactRole": "source",
       "uri": "repo://pnpm-lock.yaml",
       "sha256": "dce38aee0e6e7d90983daba3fcc585995cd7e0013d2276e7978b409b450f6acf",
-      "producedAt": "2026-08-13T03:54:04Z",
+      "producedAt": "2026-08-13T11:12:10Z",
       "requirementIds": [
         "ARC-005",
         "PKG-003",
@@ -544,7 +546,7 @@
       "artifactRole": "source",
       "uri": "repo://packages/model/test/panel-registry.test.ts",
       "sha256": "78c85eb3f55058870acf6cc5388eafc989878c1a28b75ad3606606da0e40d5a7",
-      "producedAt": "2026-08-13T03:54:04Z",
+      "producedAt": "2026-08-13T11:12:10Z",
       "requirementIds": [
         "API-001",
         "DOM-004",
@@ -565,7 +567,7 @@
       "artifactRole": "source",
       "uri": "repo://packages/kernel/test/kernel.test.ts",
       "sha256": "c515657345a403fedee073cf74eb44ccc7b05b12d227dc7580fc80e23d2a17c3",
-      "producedAt": "2026-08-13T03:54:04Z",
+      "producedAt": "2026-08-13T11:12:10Z",
       "requirementIds": [
         "MOD-006",
         "PER-006",
@@ -586,7 +588,7 @@
       "artifactRole": "source",
       "uri": "repo://packages/kernel-optimized/test/differential.test.ts",
       "sha256": "5df1ac571356551d240449e5892c56c98574c7ca3d6e4c001bbd927963137d96",
-      "producedAt": "2026-08-13T03:54:04Z",
+      "producedAt": "2026-08-13T11:12:10Z",
       "requirementIds": [
         "MOD-004",
         "PRF-003",
@@ -606,7 +608,7 @@
       "artifactRole": "source",
       "uri": "repo://packages/kernel-optimized/test/independent-reducer.test.ts",
       "sha256": "7f973d4bf85544465d374a0c9b9ff5405a81435a40e708542b1be71411cd3ea7",
-      "producedAt": "2026-08-13T03:54:04Z",
+      "producedAt": "2026-08-13T11:12:10Z",
       "requirementIds": [
         "MOD-004",
         "PRF-003",
@@ -625,7 +627,7 @@
       "artifactRole": "source",
       "uri": "repo://packages/geometry/test/invalidation.test.ts",
       "sha256": "ef54d506202106cdfb7d85066fa71f6d83e1ed234d17125d3e94cba0e1118b11",
-      "producedAt": "2026-08-13T03:54:04Z",
+      "producedAt": "2026-08-13T11:12:10Z",
       "requirementIds": [
         "LAY-006",
         "PRF-006"
@@ -643,7 +645,7 @@
       "artifactRole": "source",
       "uri": "repo://packages/runtime/test/runtime.test.ts",
       "sha256": "5ed37341e27f34ad522c0013292c3e225c1513219565df39f32cfeeec8ed1144",
-      "producedAt": "2026-08-13T03:54:04Z",
+      "producedAt": "2026-08-13T11:12:10Z",
       "requirementIds": [
         "OBS-004",
         "SEC-006",
@@ -663,7 +665,7 @@
       "artifactRole": "source",
       "uri": "repo://packages/runtime/test/policy.test.ts",
       "sha256": "c0abfacc8f1a0c1e5740a77c913a6b218ae13b29fd127d5fe37bba47205c3195",
-      "producedAt": "2026-08-13T03:54:04Z",
+      "producedAt": "2026-08-13T11:12:10Z",
       "requirementIds": [
         "API-004",
         "TXN-006"
@@ -680,8 +682,8 @@
       "verificationClass": "code-verifiable",
       "artifactRole": "source",
       "uri": "repo://packages/surfaces/test/browser-adapter.test.ts",
-      "sha256": "0aea9a5534600d455c43737f1af5e1cf066b656bec257b04e54a63d14e640f9a",
-      "producedAt": "2026-08-13T03:54:04Z",
+      "sha256": "f7e0d8c3c7e96cb25ae21220ebcb0276bd60d09710f313f209543fd78141ace7",
+      "producedAt": "2026-08-13T11:12:10Z",
       "requirementIds": [
         "LIF-002",
         "LIF-004",
@@ -707,7 +709,7 @@
       "artifactRole": "source",
       "uri": "repo://packages/react/test/WorkspaceSurface.test.tsx",
       "sha256": "780445f35413e6d3c56948ce2aacca02eea7c230f87b0f20bae314583cbf9e49",
-      "producedAt": "2026-08-13T03:54:04Z",
+      "producedAt": "2026-08-13T11:12:10Z",
       "requirementIds": [
         "I18N-001",
         "I18N-002",
@@ -729,7 +731,7 @@
       "artifactRole": "source",
       "uri": "repo://packages/ecosystem/test/isolated-frame.test.ts",
       "sha256": "de495a2d78d852b9d879f03b8a5623c27455323f62a74d8d8edfe7be9534c314",
-      "producedAt": "2026-08-13T03:54:04Z",
+      "producedAt": "2026-08-13T11:12:10Z",
       "requirementIds": [
         "EXT-001",
         "EXT-002",
@@ -750,7 +752,7 @@
       "artifactRole": "source",
       "uri": "repo://packages/ecosystem/test/ecosystem.test.ts",
       "sha256": "0843e1a9ceb0aa22f19e22184e9eabfb206327e06d02f22e09213448bba1be19",
-      "producedAt": "2026-08-13T03:54:04Z",
+      "producedAt": "2026-08-13T11:12:10Z",
       "requirementIds": [
         "COL-003",
         "COL-006",
@@ -778,7 +780,7 @@
       "artifactRole": "source",
       "uri": "repo://docs/adr/0010-executable-evidence-taxonomy.md",
       "sha256": "40fe0c32070b4f532d78b56af7a3295c2bcc16a166d04bebb1f4d0fcd6cd4b61",
-      "producedAt": "2026-08-13T03:54:04Z",
+      "producedAt": "2026-08-13T11:12:10Z",
       "requirementIds": [
         "GOV-001",
         "GOV-002",
@@ -802,8 +804,8 @@
       "verificationClass": "code-verifiable",
       "artifactRole": "source",
       "uri": "repo://docs/ARCHITECTURE.md",
-      "sha256": "402a9eeb07b84e7c302d71fef7d511ce972a10c2749ffc4d11489fa071377358",
-      "producedAt": "2026-08-13T03:54:04Z",
+      "sha256": "dc75b810a15f682acf0faeae0f2e6b5d73fd27f22e6b99ae3a1228282c1bdad1",
+      "producedAt": "2026-08-13T11:12:10Z",
       "requirementIds": [
         "API-002",
         "API-008",
@@ -829,7 +831,7 @@
       "artifactRole": "source",
       "uri": "repo://docs/adr/0011-independent-semantic-oracle.md",
       "sha256": "5769cf116a24a7a78e05f8a0053805f90785a147b0cdcd96c6367d04f276d6b9",
-      "producedAt": "2026-08-13T03:54:04Z",
+      "producedAt": "2026-08-13T11:12:10Z",
       "requirementIds": [
         "GOV-004",
         "MOD-004",
@@ -849,7 +851,7 @@
       "artifactRole": "source",
       "uri": "repo://docs/adr/0012-bounded-protocol-and-motion-lifecycles.md",
       "sha256": "cf215bc1a4907adef9915346f0649bfa844597630850253cf632a0bacf1945b7",
-      "producedAt": "2026-08-13T03:54:04Z",
+      "producedAt": "2026-08-13T11:12:10Z",
       "requirementIds": [
         "ARC-002",
         "ARC-004",
@@ -871,7 +873,7 @@
       "artifactRole": "source",
       "uri": "repo://docs/adr/0013-direct-placement-durable-demo.md",
       "sha256": "c22447083c7f4278b173e662445165793c45c2b5bb54013976e597f9b51b6229",
-      "producedAt": "2026-08-13T03:54:04Z",
+      "producedAt": "2026-08-13T11:12:10Z",
       "requirementIds": [
         "EXP-002",
         "GOV-004",
@@ -891,7 +893,7 @@
       "artifactRole": "source",
       "uri": "repo://packages/conformance/test/certification.test.ts",
       "sha256": "693024e361fa59f5c095fdb348df69771e6f477693cbbe5f0e2148ea26176908",
-      "producedAt": "2026-08-13T03:54:04Z",
+      "producedAt": "2026-08-13T11:12:10Z",
       "requirementIds": [
         "GOV-006"
       ],
@@ -909,7 +911,7 @@
       "artifactRole": "result",
       "uri": "repo://conformance/results/model-campaign-50000-2026-08-12.json",
       "sha256": "bc01310655ce931adb323dbd3dad65e1e4599c148f2fa0f35c0e3ae88f9b69e9",
-      "producedAt": "2026-08-13T03:54:04Z",
+      "producedAt": "2026-08-13T11:12:10Z",
       "requirementIds": [
         "MOD-004",
         "PRF-003",
@@ -928,8 +930,8 @@
       "verificationClass": "environment-verifiable",
       "artifactRole": "result",
       "uri": "repo://conformance/results/chromium-reference-2026-08-13.json",
-      "sha256": "8a11c1355f97c0e0be37e65858131efe97642a8820f03dda25332ec07b3f1116",
-      "producedAt": "2026-08-13T03:54:04Z",
+      "sha256": "f4f9552c7ab5c1287bc4eb3596b78411c0928850170b4323c1be2bc55e68e405",
+      "producedAt": "2026-08-13T11:12:10Z",
       "requirementIds": [
         "A11Y-002",
         "A11Y-003",
@@ -965,7 +967,7 @@
       "artifactRole": "result",
       "uri": "repo://conformance/results/interaction-performance-2026-08-13.json",
       "sha256": "53e05740d5d6e144017b675622f4c47170d15020e56df1dadee1641819257e86",
-      "producedAt": "2026-08-13T03:54:04Z",
+      "producedAt": "2026-08-13T11:12:10Z",
       "requirementIds": [
         "PRF-001",
         "PRF-006",
@@ -985,7 +987,7 @@
       "artifactRole": "result",
       "uri": "repo://conformance/results/framework-contract-2026-08-12.json",
       "sha256": "2ea2778ce6de7bae5b8c9df3ef795033435c834557d1e720eda7bff9edf9b8e0",
-      "producedAt": "2026-08-13T03:54:04Z",
+      "producedAt": "2026-08-13T11:12:10Z",
       "requirementIds": [
         "FWK-001",
         "FWK-003"
@@ -1003,7 +1005,7 @@
       "artifactRole": "result",
       "uri": "repo://conformance/results/protocol-motion-2026-08-13.json",
       "sha256": "f6b65fe8f216e368e0fb13ff8d0495b2bbf057ca3fe1cb725b3360684f3a5948",
-      "producedAt": "2026-08-13T03:54:04Z",
+      "producedAt": "2026-08-13T11:12:10Z",
       "requirementIds": [
         "A11Y-002",
         "ARC-002",
@@ -1037,7 +1039,7 @@
       "artifactRole": "result",
       "uri": "repo://conformance/results/independent-semantic-oracle-2026-08-13.json",
       "sha256": "cb7af3f88a4715daa080a1719d33d97222097873964c1d3a69e7985b14074fc5",
-      "producedAt": "2026-08-13T03:54:04Z",
+      "producedAt": "2026-08-13T11:12:10Z",
       "requirementIds": [
         "MOD-004",
         "PRF-003",

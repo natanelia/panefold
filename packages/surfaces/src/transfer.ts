@@ -6,6 +6,7 @@ import type {
   PreparedSurfaceHandle,
   SurfaceTransferCoordinatorOptions,
   SurfaceTransferErrorCode,
+  SurfaceTransferPolicyContext,
   SurfaceTransferRequest,
   SurfaceTransferResult,
   SurfaceTransferStage,
@@ -37,6 +38,7 @@ export class SurfaceTransferCoordinator<Checkpoint extends JsonValue = JsonValue
     const completed: SurfaceTransferStage[] = [];
     let prepared: PreparedSurfaceHandle | undefined;
     let ownership: OwnershipToken | undefined;
+    let ownershipBegun = false;
     let requiresCompensation = false;
     let destinationReady = false;
     const timeoutController = new AbortController();
@@ -75,8 +77,69 @@ export class SurfaceTransferCoordinator<Checkpoint extends JsonValue = JsonValue
       completed.push("bootstrap");
       const checkpoint = await runWithSignal(() => request.checkpoint(combined), combined);
       completed.push("checkpoint");
+
+      ownership = this.#createOwnership(request, preparedHandle);
+      const ownershipToken = ownership;
+      const beginAcknowledgement: unknown = this.#options.ownership.begin(ownershipToken);
+      if (beginAcknowledgement !== true) {
+        observeThenableSettlement(beginAcknowledgement, () => {
+          if (
+            this.#options.ownership.ownerOf(request.panelId)?.transferToken === ownershipToken.token
+          ) {
+            this.#options.ownership.rollback(ownershipToken);
+          }
+        });
+        const observedOwner = this.#options.ownership.ownerOf(request.panelId);
+        ownershipBegun = observedOwner?.transferToken === ownershipToken.token;
+        throw failure(
+          "OWNERSHIP_CONFLICT",
+          "ownership-commit",
+          "The panel is no longer owned by the expected source surface.",
+          ["Refresh surface ownership", "Retry from the authoritative surface"],
+        );
+      }
+      ownershipBegun = true;
+
+      // Token creation and registry reservation are extensibility points. Run
+      // the final policy and revision checks after both, leaving no caller code
+      // between revalidation and the atomic semantic commit.
       throwIfAborted(combined);
-      if (this.#options.hooks.currentRevision() !== request.baseRevision) {
+      this.#assertCapability(request, "revalidate");
+      let policyDecision: unknown = false;
+      try {
+        policyDecision = this.#options.hooks.revalidatePolicy(this.#policyContext(request));
+      } catch (cause) {
+        throw failure(
+          "CAPABILITY_DENIED",
+          "revalidate",
+          "Application transfer policy could not be revalidated safely.",
+          ["Keep the panel in its source surface", "Retry after policy synchronization"],
+          cause,
+        );
+      }
+      if (policyDecision !== true) {
+        containRejectedThenable(policyDecision);
+        throw failure(
+          "CAPABILITY_DENIED",
+          "revalidate",
+          "Application transfer policy changed while the destination was being prepared.",
+          ["Keep the panel in its source surface", "Retry under the current policy"],
+        );
+      }
+      let currentRevision: unknown;
+      try {
+        currentRevision = this.#options.hooks.currentRevision();
+      } catch (cause) {
+        throw failure(
+          "REVISION_CONFLICT",
+          "revalidate",
+          "Workspace revision could not be revalidated safely.",
+          ["Keep the panel in its source surface", "Retry after revision synchronization"],
+          cause,
+        );
+      }
+      if (currentRevision !== request.baseRevision) {
+        containRejectedThenable(currentRevision);
         throw failure(
           "REVISION_CONFLICT",
           "revalidate",
@@ -86,21 +149,11 @@ export class SurfaceTransferCoordinator<Checkpoint extends JsonValue = JsonValue
       }
       completed.push("revalidate");
 
-      ownership = this.#createOwnership(request, preparedHandle);
-      const ownershipToken = ownership;
-      if (!this.#options.ownership.begin(ownershipToken)) {
-        throw failure(
-          "OWNERSHIP_CONFLICT",
-          "ownership-commit",
-          "The panel is no longer owned by the expected source surface.",
-          ["Refresh surface ownership", "Retry from the authoritative surface"],
-        );
-      }
       requiresCompensation = true;
-      throwIfAborted(combined);
-      const kernelCommitted = this.#options.hooks.commitOwnership(ownershipToken);
-      if (!kernelCommitted) {
-        requiresCompensation = false;
+      const kernelCommitted: unknown = this.#options.hooks.commitOwnership(ownershipToken);
+      if (kernelCommitted !== true) {
+        containRejectedThenable(kernelCommitted);
+        requiresCompensation = kernelCommitted !== false;
         throw failure(
           "OWNERSHIP_CONFLICT",
           "ownership-commit",
@@ -108,7 +161,9 @@ export class SurfaceTransferCoordinator<Checkpoint extends JsonValue = JsonValue
           ["Keep the panel in its source surface", "Retry after synchronization"],
         );
       }
-      if (!this.#options.ownership.commit(ownershipToken)) {
+      const registryCommitted: unknown = this.#options.ownership.commit(ownershipToken);
+      if (registryCommitted !== true) {
+        containRejectedThenable(registryCommitted);
         throw failure(
           "OWNERSHIP_CONFLICT",
           "ownership-commit",
@@ -138,7 +193,13 @@ export class SurfaceTransferCoordinator<Checkpoint extends JsonValue = JsonValue
         () => this.#options.adapter.waitUntilReady(preparedHandle, combined),
         combined,
       );
-      if (!this.#options.ownership.ready(ownershipToken)) {
+      const registryReady: unknown = this.#options.ownership.ready(ownershipToken);
+      if (registryReady !== true) {
+        containRejectedThenable(registryReady);
+        const observedOwner = this.#options.ownership.ownerOf(request.panelId);
+        destinationReady =
+          observedOwner?.surfaceId === request.destination.destinationSurfaceId &&
+          observedOwner.state === "owned";
         throw failure(
           "OWNERSHIP_CONFLICT",
           "destination-ready",
@@ -204,7 +265,7 @@ export class SurfaceTransferCoordinator<Checkpoint extends JsonValue = JsonValue
         } finally {
           clearTimer(compensationTimer);
         }
-      } else if (!destinationReady && ownership !== undefined) {
+      } else if (!destinationReady && ownership !== undefined && ownershipBegun) {
         safeSurfaceId = this.#options.ownership.rollback(ownership) ?? request.sourceSurfaceId;
       }
       if (
@@ -258,11 +319,14 @@ export class SurfaceTransferCoordinator<Checkpoint extends JsonValue = JsonValue
     );
   }
 
-  #assertCapability(request: SurfaceTransferRequest<Checkpoint>): void {
+  #assertCapability(
+    request: SurfaceTransferRequest<Checkpoint>,
+    stage: "capability" | "revalidate" = "capability",
+  ): void {
     if (request.destination.security.sessionNonce !== this.#options.sessionNonce) {
       throw failure(
         "PROTOCOL_MISMATCH",
-        "capability",
+        stage,
         "Destination security context is not bound to this workspace session.",
         ["Prepare the destination with the active session context"],
       );
@@ -270,7 +334,7 @@ export class SurfaceTransferCoordinator<Checkpoint extends JsonValue = JsonValue
     if (!request.destination.userActivation && request.destination.kind === "browser-window") {
       throw failure(
         "USER_ACTIVATION_REQUIRED",
-        "capability",
+        stage,
         "Browser-window transfer requires an active user gesture.",
         ["Retry from a button or keyboard command", "Keep the panel in-page"],
       );
@@ -284,7 +348,7 @@ export class SurfaceTransferCoordinator<Checkpoint extends JsonValue = JsonValue
     ) {
       throw failure(
         "CAPABILITY_DENIED",
-        "capability",
+        stage,
         "Legacy source capabilities cannot prove an external transfer is allowed.",
         [
           "Provide an explicit source transfer policy",
@@ -307,11 +371,33 @@ export class SurfaceTransferCoordinator<Checkpoint extends JsonValue = JsonValue
     ) {
       throw failure(
         "CAPABILITY_DENIED",
-        "capability",
+        stage,
         `The source policy, panel, or destination does not support ${request.destination.kind}.`,
         ["Use an in-page floating surface", "Choose a supported panel"],
       );
     }
+  }
+
+  #policyContext(request: SurfaceTransferRequest<Checkpoint>): SurfaceTransferPolicyContext {
+    if (request.sourcePolicy === undefined || request.destinationCapabilities === undefined) {
+      throw failure(
+        "CAPABILITY_DENIED",
+        "revalidate",
+        "The transfer has no explicit policy inputs to revalidate.",
+        ["Provide source policy and detected destination capabilities"],
+      );
+    }
+    return Object.freeze({
+      panelId: request.panelId,
+      sourceSurfaceId: request.sourceSurfaceId,
+      destinationSurfaceId: request.destination.destinationSurfaceId,
+      destinationKind: request.destination.kind,
+      sourcePolicy: Object.freeze({ ...request.sourcePolicy }),
+      destinationCapabilities: Object.freeze({ ...request.destinationCapabilities }),
+      panelCapabilities: Object.freeze({ ...request.panelCapabilities }),
+      baseRevision: request.baseRevision,
+      coordinatorEpoch: request.coordinatorEpoch,
+    });
   }
 
   #assertPrepared(
@@ -410,6 +496,32 @@ function invokeAsPromise<Value>(operation: () => Value | PromiseLike<Value>): Pr
     return Promise.resolve(operation());
   } catch (cause) {
     return Promise.reject(cause);
+  }
+}
+
+function containRejectedThenable(value: unknown): void {
+  observeThenableSettlement(value, () => undefined);
+}
+
+function observeThenableSettlement(value: unknown, onSettled: () => void): void {
+  if (value === null || (typeof value !== "object" && typeof value !== "function")) {
+    return;
+  }
+  try {
+    const then = Reflect.get(value, "then");
+    if (typeof then === "function") {
+      const settleSafely = () => {
+        try {
+          onSettled();
+        } catch {
+          // Invalid extension points cannot surface a second global failure.
+        }
+      };
+      void Promise.resolve(value).then(settleSafely, settleSafely);
+    }
+  } catch {
+    // A hostile thenable is still an invalid synchronous acknowledgement. Its
+    // accessor failure must not replace the coordinator's stable rejection.
   }
 }
 

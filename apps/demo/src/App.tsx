@@ -53,6 +53,8 @@ const LazyCommandPalette = lazy(async () => {
   return { default: module.CommandPalette };
 });
 
+const marketingHomeUrl = new URL("../", document.baseURI).href;
+
 type BootstrapState =
   | { readonly status: "loading" }
   | { readonly status: "ready"; readonly session: DemoWorkspaceSession }
@@ -217,8 +219,9 @@ function MapWorkspaceApp({ session }: { readonly session: DemoWorkspaceSession }
 
   return (
     <div className="demo-app" data-theme={theme} dir={direction}>
+      <h1 className="demo-visually-hidden">Panefold Atlas map operations workspace</h1>
       <header className="demo-topbar">
-        <a className="demo-brand" href="/" aria-label="Panefold home">
+        <a className="demo-brand" href={marketingHomeUrl} aria-label="Panefold home">
           <span className="demo-brand-mark" aria-hidden="true">
             <i />
             <i />

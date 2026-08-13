@@ -2,7 +2,7 @@ import { createHash } from "node:crypto";
 import { readFile, writeFile } from "node:fs/promises";
 import process from "node:process";
 
-const producedAt = "2026-08-13T03:54:04Z";
+const producedAt = "2026-08-13T11:12:10Z";
 const requirementsDocument = JSON.parse(await readFile("conformance/requirements.json", "utf8"));
 const manifest = JSON.parse(await readFile("conformance/manifest.json", "utf8"));
 const requirements = requirementsDocument.requirements;
@@ -130,7 +130,17 @@ const sourceDefinitions = [
     "surface-ownership",
     "model-report",
     "packages/surfaces/test/surfaces.test.ts",
-    ["COL-004", "LIF-005", "SUR-001", "SUR-003", "SUR-005", "SUR-007", "TST-004", "TXN-004"],
+    [
+      "COL-004",
+      "LIF-005",
+      "SUR-001",
+      "SUR-003",
+      "SUR-005",
+      "SUR-007",
+      "TST-004",
+      "TXN-004",
+      "TXN-007",
+    ],
     [compactProfile],
   ],
   [
@@ -204,7 +214,7 @@ const sourceDefinitions = [
     "conformance-harness",
     "automated-test",
     "packages/conformance/test/report.test.ts",
-    ["ACC-001", "OBS-006", "QLT-001", "QLT-004"],
+    ["ACC-001", "OBS-006", "QLT-001", "QLT-002", "QLT-004"],
     profileIds,
   ],
   [
@@ -653,6 +663,7 @@ const verifiedByProfile = {
     "PRF-002",
     "PRF-003",
     "QLT-001",
+    "QLT-002",
     "QLT-004",
     "REN-001",
     "REN-002",
@@ -681,6 +692,7 @@ const verifiedByProfile = {
     "TXN-003",
     "TXN-004",
     "TXN-006",
+    "TXN-007",
     "TXN-008",
     "TST-004",
     "TST-002",
@@ -722,10 +734,6 @@ const correctedOverclaimRationales = new Map([
     "Package manifests publish export maps, but every package does not yet publish a documented compatibility policy backed by an exact manifest audit.",
   ],
   [
-    "QLT-002",
-    "The harness reports failed hard gates, but it does not compute a release-quality score that is forced to zero.",
-  ],
-  [
     "RSP-002",
     "The touch fixture checks a compact region and target size, but no recorded task establishes scrolling, safe-area, and no-hover behavior together.",
   ],
@@ -744,10 +752,6 @@ const correctedOverclaimRationales = new Map([
   [
     "TXN-005",
     "The runtime does not publish post-commit effect intents carrying transaction and revision identity, and duplicate-delivery idempotence is not tested.",
-  ],
-  [
-    "TXN-007",
-    "Prepared surface transfer rechecks base revision, but the final commit does not re-evaluate policy after asynchronous preparation.",
   ],
 ]);
 

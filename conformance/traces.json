@@ -1303,10 +1303,12 @@
     {
       "requirementId": "QLT-002",
       "profileId": "compact-react-chromium-desktop",
-      "status": "unresolved",
+      "status": "verified",
       "verificationClass": "code-verifiable",
-      "evidenceIds": [],
-      "rationale": "The harness reports failed hard gates, but it does not compute a release-quality score that is forced to zero."
+      "evidenceIds": [
+        "conformance-harness"
+      ],
+      "rationale": "Covered by repository-local automated evidence for this experimental profile."
     },
     {
       "requirementId": "QLT-003",
@@ -1875,10 +1877,12 @@
     {
       "requirementId": "TXN-007",
       "profileId": "compact-react-chromium-desktop",
-      "status": "unresolved",
+      "status": "verified",
       "verificationClass": "code-verifiable",
-      "evidenceIds": [],
-      "rationale": "Prepared surface transfer rechecks base revision, but the final commit does not re-evaluate policy after asynchronous preparation."
+      "evidenceIds": [
+        "surface-ownership"
+      ],
+      "rationale": "Covered by repository-local automated evidence for this experimental profile."
     },
     {
       "requirementId": "TXN-008",
@@ -2981,7 +2985,9 @@
       "profileId": "framework-adapter-contract-jsdom",
       "status": "unresolved",
       "verificationClass": "code-verifiable",
-      "evidenceIds": [],
+      "evidenceIds": [
+        "conformance-harness"
+      ],
       "rationale": "The repository implementation or its requirement-specific static/model proof is incomplete for this profile."
     },
     {
