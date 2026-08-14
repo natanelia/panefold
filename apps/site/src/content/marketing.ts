@@ -69,7 +69,7 @@ export const featureCards = [
   {
     title: "Recovery is visible",
     description:
-      "The Atlas fixture opens from a checksummed IndexedDB journal before first render and reports the exact restored or persisted revision.",
+      "The Panefold Code fixture opens from a checksummed IndexedDB journal before first render and reports the exact restored or persisted revision.",
     icon: RefreshCw,
     tone: "amber",
     size: "standard",

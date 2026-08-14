@@ -46,9 +46,9 @@ export function updatePageMetadata(path: string): void {
 function metadataFor(path: string): PageMetadata {
   if (path === "/demo") {
     return {
-      title: "Live Atlas workspace — Panefold",
+      title: "Live code workbench — Panefold",
       description:
-        "Try the interactive Atlas map-operations fixture powered by Panefold's deterministic workspace runtime.",
+        "Try the interactive Panefold Code fixture powered by Panefold's deterministic workspace runtime.",
       path,
     };
   }

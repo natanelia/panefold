@@ -39,7 +39,7 @@ export function SocialCardPage() {
               <i className="size-2.5 rounded-full bg-white/10" />
             </div>
             <span className="mx-auto font-mono text-[9px] text-slate-600">
-              atlas / route-analysis
+              panefold-code / src / App.tsx
             </span>
             <Command className="size-3 text-slate-600" />
           </div>
@@ -57,32 +57,58 @@ export function SocialCardPage() {
               </div>
             </div>
             <div className="relative overflow-hidden border-r border-white/[0.08] bg-[#0c1720]">
-              <MiniTab label="Map canvas" />
-              <div className="absolute inset-0 top-9 opacity-25 [background-image:linear-gradient(rgba(125,211,252,.14)_1px,transparent_1px),linear-gradient(90deg,rgba(125,211,252,.14)_1px,transparent_1px)] [background-size:27px_27px]" />
-              <svg
-                className="absolute inset-0 top-9 h-[calc(100%-36px)] w-full"
-                viewBox="0 0 500 360"
-                fill="none"
-              >
-                <path
-                  d="M45 350 C85 250 150 252 205 205 S260 120 320 115 S420 122 470 35"
-                  stroke="#1d2d3c"
-                  strokeWidth="16"
-                />
-                <path
-                  d="M72 304 C120 260 146 243 207 204 S260 144 322 116 S404 84 456 54"
-                  stroke="#5eead4"
-                  strokeWidth="4"
-                  strokeLinecap="round"
-                />
-                <circle cx="72" cy="304" r="7" fill="#0c1720" stroke="#7dd3fc" strokeWidth="3" />
-                <circle cx="456" cy="54" r="7" fill="#0c1720" stroke="#5eead4" strokeWidth="3" />
-              </svg>
+              <MiniTab label="App.tsx" />
+              <div className="grid grid-cols-[30px_1fr] px-3 py-5 font-mono text-[8px] leading-6">
+                <div className="grid text-right text-slate-700">
+                  {Array.from({ length: 10 }, (_, index) => (
+                    <span key={index}>{index + 1}</span>
+                  ))}
+                </div>
+                <div className="grid min-w-max pl-4 text-slate-300">
+                  <code>
+                    <span className="text-fuchsia-300">import</span> {"{ WorkspaceSurface }"};
+                  </code>
+                  <code> </code>
+                  <code>
+                    <span className="text-fuchsia-300">export function</span>{" "}
+                    <span className="text-amber-200">App</span>() {"{"}
+                  </code>
+                  <code>
+                    {" "}
+                    <span className="text-fuchsia-300">return</span> (
+                  </code>
+                  <code>
+                    {" "}
+                    <span className="text-teal-200">&lt;WorkspaceSurface</span>
+                  </code>
+                  <code>
+                    {" "}
+                    <span className="text-sky-200">workspaceLabel</span>=
+                    <span className="text-orange-200">&quot;Panefold Code&quot;</span>
+                  </code>
+                  <code>
+                    {" "}
+                    <span className="text-sky-200">responsive</span>=
+                    <span className="text-orange-200">&quot;auto&quot;</span>
+                  </code>
+                  <code>
+                    {" "}
+                    <span className="text-teal-200">/&gt;</span>
+                  </code>
+                  <code> );</code>
+                  <code>{"}"}</code>
+                </div>
+              </div>
+              <div className="absolute right-2 top-12 grid w-12 gap-1 opacity-25">
+                {[80, 52, 72, 45, 88, 64].map((width) => (
+                  <i key={width} className="h-px bg-cyan-200" style={{ width: `${width}%` }} />
+                ))}
+              </div>
             </div>
             <div className="p-3">
-              <MiniTab label="Inspector" />
+              <MiniTab label="Outline" />
               <div className="mt-4 space-y-2">
-                {["Selection", "Distance", "Traffic"].map((label, index) => (
+                {["Symbol", "Line", "Type"].map((label, index) => (
                   <div key={label} className="rounded-md border border-white/[0.08] p-3">
                     <p className="font-mono text-[7px] uppercase tracking-wider text-slate-600">
                       {label}
@@ -90,7 +116,7 @@ export function SocialCardPage() {
                     <p
                       className={`mt-2 text-[10px] ${index === 0 ? "text-cyan-200" : "text-slate-300"}`}
                     >
-                      {index === 0 ? "Ayer Rajah Ave" : index === 1 ? "2.8 km" : "Moderate"}
+                      {index === 0 ? "WorkspaceSurface" : index === 1 ? "10" : "Component"}
                     </p>
                   </div>
                 ))}

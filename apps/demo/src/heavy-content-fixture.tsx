@@ -69,8 +69,12 @@ export function HeavyContentFixturePanel({ lifecycle }: WorkspacePanelRenderProp
       return;
     }
     let frame = 0;
+    let frameWindow = ownerWindow;
     const tick = () => {
-      frame = ownerWindow.requestAnimationFrame(() => {
+      const currentWindow = output.ownerDocument.defaultView;
+      if (currentWindow === null) return;
+      frameWindow = currentWindow;
+      frame = currentWindow.requestAnimationFrame(() => {
         const units = Number(output.dataset.workUnits ?? "0") + 1;
         output.dataset.workUnits = String(units);
         output.value = String(units);
@@ -79,7 +83,7 @@ export function HeavyContentFixturePanel({ lifecycle }: WorkspacePanelRenderProp
     };
     tick();
     return () => {
-      ownerWindow.cancelAnimationFrame(frame);
+      frameWindow.cancelAnimationFrame(frame);
     };
   }, [lifecycle]);
 
@@ -161,11 +165,14 @@ export function HeavyContentFixturePanel({ lifecycle }: WorkspacePanelRenderProp
         <Fixture kind="code-editor">
           <label>
             Editor buffer
-            <textarea aria-label="Code editor fixture" defaultValue="const lane = 'LN-1842';" />
+            <textarea
+              aria-label="Code editor fixture"
+              defaultValue="const workbench = createWorkspace();"
+            />
           </label>
         </Fixture>
         <Fixture kind="webgl-map">
-          <canvas ref={canvasRef} width="260" height="92" aria-label="GPU map fixture" />
+          <canvas ref={canvasRef} width="260" height="92" aria-label="GPU editor fixture" />
         </Fixture>
         <Fixture kind="canvas">
           <span data-canvas-identity={mountToken}>Stable canvas buffer · {mountToken}</span>
@@ -173,12 +180,12 @@ export function HeavyContentFixturePanel({ lifecycle }: WorkspacePanelRenderProp
         <Fixture kind="data-grid">
           <div className="demo-heavy-table-scroll">
             <table>
-              <caption>Lane inventory</caption>
+              <caption>Module inventory</caption>
               <tbody>
                 {Array.from({ length: 24 }, (_, index) => (
                   <tr key={index}>
-                    <th scope="row">LN-{1842 + index}</th>
-                    <td>{index % 2 === 0 ? "Valid" : "Review"}</td>
+                    <th scope="row">MOD-{String(index + 1).padStart(3, "0")}</th>
+                    <td>{index % 2 === 0 ? "Typed" : "Review"}</td>
                   </tr>
                 ))}
               </tbody>

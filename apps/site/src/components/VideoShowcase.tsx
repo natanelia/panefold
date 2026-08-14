@@ -31,7 +31,7 @@ export function VideoShowcase() {
         loop
         playsInline
         preload="metadata"
-        aria-label="Panefold Atlas demo: resizing panes, moving a panel, closing it, and undoing the operation"
+        aria-label="Panefold Code demo: resizing panes, moving an editor, closing it, and undoing the operation"
         onPlay={() => setPlaying(true)}
         onPause={() => setPlaying(false)}
       />

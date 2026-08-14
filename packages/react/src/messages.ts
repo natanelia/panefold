@@ -30,6 +30,9 @@ export interface WorkspaceMessageCatalog {
   panelActions(values: { readonly title: string }): string;
   chooseDestination(): string;
   moveToGroup(values: { readonly group: string }): string;
+  /** Optional group-container strings; omitted methods use the English fallback. */
+  removePanelContainer?(values: { readonly target: string }): string;
+  removedPanelContainer?(values: { readonly group: string; readonly target: string }): string;
   movePanelDialog(values: { readonly title: string }): string;
   noAvailableGroup(): string;
   moveInstructions(): string;
@@ -93,6 +96,9 @@ export const ENGLISH_WORKSPACE_MESSAGES = Object.freeze<WorkspaceMessageCatalog>
   panelActions: ({ title }) => `${title} actions`,
   chooseDestination: () => "Choose destination…",
   moveToGroup: ({ group }) => `Move to ${group}`,
+  removePanelContainer: ({ target }) => `Remove panel container (merge into ${target})`,
+  removedPanelContainer: ({ group, target }) =>
+    `Removed ${group} panel container and moved its tabs to ${target}`,
   movePanelDialog: ({ title }) => `Move ${title}`,
   noAvailableGroup: () => "No available group",
   moveInstructions: () => "Use arrow keys to preview, Enter to move, or Escape to cancel.",

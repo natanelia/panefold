@@ -179,7 +179,7 @@ export const docPages = [
   },
   {
     slug: "adr-direct-placement-durable-demo",
-    title: "Direct placement and durable Atlas",
+    title: "Direct placement and durable demo",
     description:
       "Revision-bound docking, controlled live popouts, tab presentation, and restore-before-render persistence.",
     section: "Decisions",

@@ -8,10 +8,10 @@
       "id": "compact-react-chromium-desktop",
       "status": "experimental",
       "framework": "React 19.2.8",
-      "browser": "Chromium via Playwright 1.62.1 on desktop Linux CI with a 390x844 emulated-touch subprofile",
+      "browser": "Chromium via Playwright 1.62.1 with a 390x844 emulated-touch subprofile",
       "surfaces": ["main", "same-origin-popup-fixture"],
       "inputs": ["keyboard", "mouse", "programmatic", "touch-emulated"],
-      "workload": "Atlas compact map operations, 17-kind lifecycle lab, popup-loss fixture, and splitter-frame capture",
+      "workload": "Panefold Code workbench, 17-kind lifecycle lab, popup-loss fixture, and splitter-frame capture",
       "accessibility": [
         "axe-core automation and semantic keyboard tests; no manual AT certification"
       ],

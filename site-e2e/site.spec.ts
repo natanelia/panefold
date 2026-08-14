@@ -11,13 +11,13 @@ test("presents the product story and live reference fixture", async ({ page }) =
     page.getByRole("heading", { name: /Workspace state you can reason about/i }),
   ).toBeVisible();
   await expect(page.getByText("36", { exact: true })).toBeVisible();
-  const embeddedFixture = page.getByTitle("Interactive Panefold Atlas map-operations demo");
+  const embeddedFixture = page.getByTitle("Interactive Panefold Code workbench demo");
   await expect(embeddedFixture).toBeVisible();
   await embeddedFixture.scrollIntoViewIfNeeded();
   await expect(
     page
-      .frameLocator('iframe[title="Interactive Panefold Atlas map-operations demo"]')
-      .getByLabel("Map operations workspace"),
+      .frameLocator('iframe[title="Interactive Panefold Code workbench demo"]')
+      .getByLabel("Panefold Code workbench"),
   ).toBeVisible();
   expect(consoleErrors).toEqual([]);
 });
@@ -39,20 +39,18 @@ test("normalizes static-host trailing-slash routes", async ({ page }) => {
   await page.goto("./docs/architecture/");
   await expect(page.getByRole("heading", { name: "Architecture", exact: true })).toBeVisible();
   await page.goto("./demo/");
-  await expect(page.getByTitle("Panefold Atlas live workspace demo")).toBeVisible();
+  await expect(page.getByTitle("Panefold Code live workbench demo")).toBeVisible();
   await expect(
     page
-      .frameLocator('iframe[title="Panefold Atlas live workspace demo"]')
-      .getByLabel("Map operations workspace"),
+      .frameLocator('iframe[title="Panefold Code live workbench demo"]')
+      .getByLabel("Panefold Code workbench"),
   ).toBeVisible();
   await expect(
-    page.getByRole("heading", { name: "Panefold Atlas live workspace demo" }),
+    page.getByRole("heading", { name: "Panefold Code live workbench demo" }),
   ).toBeAttached();
-  const atlas = page.frameLocator('iframe[title="Panefold Atlas live workspace demo"]');
-  await expect(
-    atlas.getByRole("heading", { name: "Panefold Atlas map operations workspace" }),
-  ).toBeAttached();
-  await expect(atlas.getByRole("link", { name: "Panefold home" })).toHaveAttribute(
+  const workbench = page.frameLocator('iframe[title="Panefold Code live workbench demo"]');
+  await expect(workbench.getByRole("heading", { name: "Panefold Code workbench" })).toBeAttached();
+  await expect(workbench.getByRole("link", { name: "Panefold home" })).toHaveAttribute(
     "href",
     /\/panefold\/$/,
   );
@@ -74,7 +72,7 @@ test("publishes complete route and social metadata", async ({ page }) => {
   await expect(page.locator('meta[property="og:image:height"]')).toHaveAttribute("content", "630");
   await expect(page.locator('meta[name="twitter:image:alt"]')).toHaveAttribute(
     "content",
-    "Panefold workspace runtime shown as a three-pane Atlas map workspace",
+    "Panefold workspace runtime shown as a VS Code-like developer workbench",
   );
   const structuredData = page.locator('script[type="application/ld+json"]');
   await expect(structuredData).toHaveCount(1);
@@ -85,17 +83,22 @@ test("publishes complete route and social metadata", async ({ page }) => {
   });
 });
 
-test("keeps the standalone Atlas fixture out of search while sharing the demo route", async ({
+test("keeps the standalone workbench fixture out of search while sharing the demo route", async ({
   request,
 }) => {
-  const response = await request.get("./atlas/");
+  const response = await request.get("./workbench/");
   expect(response.ok()).toBe(true);
   const html = await response.text();
   expect(html).toContain('<meta name="robots" content="noindex,follow"');
-  expect(html).toContain('<link rel="canonical" href="https://natanelia.github.io/panefold/demo/"');
   expect(html).toContain(
-    '<meta property="og:url" content="https://natanelia.github.io/panefold/demo/"',
+    '<link rel="canonical" href="https://natanelia.github.io/panefold/workbench/"',
   );
+  expect(html).toContain(
+    '<meta property="og:url" content="https://natanelia.github.io/panefold/workbench/"',
+  );
+
+  const compatibilityAlias = await request.get("./atlas/");
+  expect(compatibilityAlias.ok()).toBe(true);
 });
 
 test("publishes every documentation route in the sitemap", async ({ page, request }) => {

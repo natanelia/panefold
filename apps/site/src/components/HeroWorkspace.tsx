@@ -1,34 +1,34 @@
-import { Check, ChevronDown, Circle, Command, Layers3, Map, Route, Search } from "lucide-react";
+import { Check, ChevronDown, Command, Layers3, Search } from "lucide-react";
 import { useEffect, useState } from "react";
 
 const scenes = [
   {
-    center: "Route notes",
-    right: "Inspector",
+    center: "workspace.ts",
+    right: "Outline",
     moved: false,
     columns: "22% 1fr 25%",
     receipt: "select-panel",
     revision: "r41",
   },
   {
-    center: "Route notes",
-    right: "Inspector",
+    center: "workspace.ts",
+    right: "Outline",
     moved: false,
     columns: "22% 1fr 32%",
     receipt: "resize-split",
     revision: "r42",
   },
   {
-    center: "Map canvas",
-    right: "Route notes",
+    center: "App.tsx",
+    right: "workspace.ts",
     moved: true,
     columns: "22% 1fr 32%",
     receipt: "move-panel",
     revision: "r43",
   },
   {
-    center: "Route notes",
-    right: "Inspector",
+    center: "workspace.ts",
+    right: "Outline",
     moved: false,
     columns: "22% 1fr 32%",
     receipt: "undo-workspace-operation",
@@ -77,7 +77,7 @@ export function HeroWorkspace() {
           </div>
           <div className="mx-auto flex h-6 items-center gap-2 rounded-md border border-white/[0.07] bg-black/20 px-3 text-[9px] font-medium tracking-wide text-slate-500">
             <span className="size-1.5 rounded-full bg-teal-300 shadow-[0_0_8px_#5eead4]" />
-            atlas / route-analysis / one-north
+            panefold-code / src / App.tsx
           </div>
           <div className="flex items-center gap-1.5 text-[9px] text-slate-500">
             <Command className="size-3" /> K
@@ -96,7 +96,7 @@ export function HeroWorkspace() {
           <span className="h-4 w-px bg-white/10" />
           <div className="ml-4 flex items-center gap-2 text-[9px] text-slate-400">
             <span className="size-1.5 rounded-full bg-teal-300" />
-            One-North route review
+            panefold-demo · TypeScript workspace
           </div>
           <div className="ml-auto flex gap-1.5">
             {["↶", "↷", "◫"].map((item) => (
@@ -118,90 +118,47 @@ export function HeroWorkspace() {
             <PanelTabs labels={["Explorer"]} selected="Explorer" />
             <div className="p-2.5">
               <div className="mb-2 flex items-center gap-1.5 rounded border border-white/[0.08] bg-black/15 px-2 py-1.5 text-[8px] text-slate-600">
-                <Search className="size-2.5" /> Search routes
+                <Search className="size-2.5" /> Filter files
               </div>
-              <TreeRow depth={0} label="Route analysis" open />
-              <TreeRow depth={1} label="RA-042 · One-North" active />
-              <TreeRow depth={1} label="RA-039 · Punggol" />
-              <TreeRow depth={0} label="Saved views" />
-              <TreeRow depth={0} label="Data sources" />
+              <TreeRow depth={0} label="src" open />
+              <TreeRow depth={1} label="App.tsx" active />
+              <TreeRow depth={1} label="workspace.ts" />
+              <TreeRow depth={0} label="package.json" />
+              <TreeRow depth={0} label="tsconfig.json" />
             </div>
           </section>
 
           <section className="min-w-0 border-r border-white/[0.08] bg-[#0d141e]">
             <PanelTabs
-              labels={scene.moved ? ["Map canvas"] : ["Map canvas", "Route notes"]}
+              labels={scene.moved ? ["App.tsx"] : ["App.tsx", "workspace.ts"]}
               selected={scene.center}
             />
-            {scene.center === "Route notes" ? (
-              <NotesPanel />
-            ) : (
-              <div className="relative h-[calc(100%-32px)] overflow-hidden bg-[#0c1720]">
-                <div className="absolute inset-0 opacity-25 [background-image:linear-gradient(rgba(125,211,252,.12)_1px,transparent_1px),linear-gradient(90deg,rgba(125,211,252,.12)_1px,transparent_1px)] [background-size:29px_29px]" />
-                <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_46%,rgba(45,212,191,.09),transparent_45%)]" />
-                <svg className="absolute inset-0 h-full w-full" viewBox="0 0 500 360" fill="none">
-                  <path
-                    d="M-20 95 C80 80 90 150 180 135 S285 66 355 105 S430 200 520 175"
-                    stroke="#223343"
-                    strokeWidth="18"
-                  />
-                  <path
-                    d="M45 350 C85 250 150 252 205 205 S260 120 320 115 S420 122 470 35"
-                    stroke="#1d2d3c"
-                    strokeWidth="13"
-                  />
-                  <path
-                    d="M72 304 C120 260 146 243 207 204 S260 144 322 116 S404 84 456 54"
-                    stroke="#5eead4"
-                    strokeWidth="3"
-                    strokeLinecap="round"
-                    strokeDasharray="1 0"
-                    className="hero-route-line"
-                  />
-                  <circle cx="72" cy="304" r="6" fill="#0c1720" stroke="#7dd3fc" strokeWidth="3" />
-                  <circle cx="456" cy="54" r="6" fill="#0c1720" stroke="#5eead4" strokeWidth="3" />
-                  <circle r="5" fill="#f8fafc" className="hero-route-dot">
-                    {reducedMotion ? null : (
-                      <animateMotion
-                        dur="5.6s"
-                        repeatCount="indefinite"
-                        path="M72 304 C120 260 146 243 207 204 S260 144 322 116 S404 84 456 54"
-                      />
-                    )}
-                  </circle>
-                </svg>
-                <div className="absolute left-3 top-3 flex items-center gap-1.5 rounded-md border border-white/[0.1] bg-[#101925]/90 px-2 py-1.5 text-[8px] text-slate-400 shadow-lg">
-                  <Map className="size-3 text-cyan-300" /> Singapore · 1.2956° N
-                </div>
-                <div className="absolute bottom-3 left-3 flex gap-1.5">
-                  <MapChip icon={<Route className="size-2.5" />} label="11.4 km" />
-                  <MapChip icon={<Circle className="size-2.5" />} label="8 stops" />
-                </div>
-              </div>
-            )}
+            {scene.center === "workspace.ts" ? <NotesPanel /> : <CodePreview />}
           </section>
 
           <section className="min-w-0 bg-[#0b111a]">
             <PanelTabs
               labels={
-                scene.moved ? ["Inspector", "Layers", "Route notes"] : ["Inspector", "Layers"]
+                scene.moved
+                  ? ["Outline", "Source Control", "workspace.ts"]
+                  : ["Outline", "Source Control"]
               }
               selected={scene.right}
             />
-            {scene.right === "Route notes" ? (
+            {scene.right === "workspace.ts" ? (
               <NotesPanel compact />
             ) : (
               <div className="space-y-3 p-3 text-[8px]">
-                <MetaBlock label="Selection" value="Ayer Rajah Ave" accent />
+                <MetaBlock label="Symbol" value="WorkspaceSurface" accent />
                 <div className="grid grid-cols-2 gap-2">
-                  <MetaBlock label="Distance" value="2.8 km" />
-                  <MetaBlock label="Traffic" value="Moderate" />
+                  <MetaBlock label="Line" value="10" />
+                  <MetaBlock label="Type" value="Component" />
                 </div>
                 <div className="border-t border-white/[0.08] pt-3">
                   <p className="mb-2 font-semibold uppercase tracking-[0.15em] text-slate-400">
-                    Constraints
+                    Symbols
                   </p>
-                  {["Vehicle height", "Time window", "Restricted turns"].map((label, index) => (
+                  {["commands", "projector", "responsive"].map((label, index) => (
                     <div
                       key={label}
                       className="flex items-center gap-2 border-b border-white/[0.05] py-2 text-slate-400"
@@ -256,14 +213,14 @@ function NotesPanel({ compact = false }: { readonly compact?: boolean }) {
   return (
     <div className="h-[calc(100%-32px)] overflow-hidden bg-[#0c121b] p-4 text-[8px] text-slate-400">
       <p className="font-mono text-[7px] uppercase tracking-[0.15em] text-cyan-300/70">
-        Route review · RA-042
+        src / workspace.ts
       </p>
-      <h3 className="mt-3 text-[11px] font-semibold text-slate-200">One-North delivery notes</h3>
+      <h3 className="mt-3 text-[11px] font-semibold text-slate-200">Workbench configuration</h3>
       <div className="mt-4 space-y-3">
         {[
-          "Validate Ayer Rajah clearance",
-          "Confirm 14:30 arrival window",
-          "Share stop 8 handoff",
+          "Enable responsive projection",
+          "Persist the canonical layout",
+          "Preserve stable editor hosts",
         ].map((note, index) => (
           <div key={note} className="flex gap-2 border-b border-white/[0.06] pb-3">
             <span
@@ -277,8 +234,7 @@ function NotesPanel({ compact = false }: { readonly compact?: boolean }) {
       </div>
       {compact ? null : (
         <div className="mt-4 rounded-md border border-cyan-300/10 bg-cyan-300/[0.025] p-3 leading-4 text-slate-400">
-          Driver reported moderate traffic near stop 5. Current route remains within the delivery
-          window.
+          The editor, side bars, and terminal share one deterministic workspace snapshot.
         </div>
       )}
     </div>
@@ -352,11 +308,69 @@ function MetaBlock({
   );
 }
 
-function MapChip({ icon, label }: { readonly icon: React.ReactNode; readonly label: string }) {
+function CodePreview() {
+  const lines = [
+    <>
+      <span className="text-fuchsia-300">import</span> {"{ WorkspaceSurface }"}{" "}
+      <span className="text-fuchsia-300">from</span>{" "}
+      <span className="text-orange-200">&quot;@panefold/react&quot;</span>;
+    </>,
+    null,
+    <>
+      <span className="text-fuchsia-300">export function</span>{" "}
+      <span className="text-amber-200">App</span>() {"{"}
+    </>,
+    <>
+      {" "}
+      <span className="text-fuchsia-300">return</span> (
+    </>,
+    <>
+      {" "}
+      <span className="text-teal-200">&lt;WorkspaceSurface</span>
+    </>,
+    <>
+      {" "}
+      <span className="text-sky-200">workspaceLabel</span>=
+      <span className="text-orange-200">&quot;Panefold Code&quot;</span>
+    </>,
+    <>
+      {" "}
+      <span className="text-sky-200">responsive</span>=
+      <span className="text-orange-200">&quot;auto&quot;</span>
+    </>,
+    <>
+      {" "}
+      <span className="text-teal-200">/&gt;</span>
+    </>,
+    <> );</>,
+    <> {"}"}</>,
+  ];
   return (
-    <span className="flex items-center gap-1 rounded border border-white/[0.09] bg-[#101925]/90 px-2 py-1 text-[7px] text-slate-400">
-      {icon}
-      {label}
-    </span>
+    <div className="relative h-[calc(100%-32px)] overflow-hidden bg-[#0d1117] px-2 py-4 font-mono text-[8px] leading-6 text-slate-300">
+      <div className="grid grid-cols-[24px_minmax(0,1fr)]">
+        <div className="grid text-right text-slate-700">
+          {lines.map((_, index) => (
+            <span key={index}>{index + 1}</span>
+          ))}
+        </div>
+        <div className="grid min-w-max pl-3">
+          {lines.map((line, index) => (
+            <code key={index}>{line ?? " "}</code>
+          ))}
+        </div>
+      </div>
+      <div className="absolute right-2 top-4 grid w-12 gap-1 opacity-30" aria-hidden="true">
+        {[72, 48, 84, 66, 55, 80, 62].map((width, index) => (
+          <i
+            key={`${width}-${index}`}
+            className="h-px bg-cyan-200"
+            style={{ width: `${width}%` }}
+          />
+        ))}
+      </div>
+      <div className="absolute inset-x-0 bottom-0 flex h-6 items-center border-t border-white/[0.06] px-3 text-[7px] text-slate-600">
+        Ln 6, Col 24 <span className="ml-auto text-teal-300/70">TypeScript React</span>
+      </div>
+    </div>
   );
 }

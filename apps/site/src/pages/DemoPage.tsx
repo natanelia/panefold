@@ -6,7 +6,7 @@ import { siteAsset } from "../lib/router";
 export function DemoPage({ navigate }: { readonly navigate: (path: string) => void }) {
   return (
     <main id="main-content" tabIndex={-1} className="flex h-dvh min-h-0 flex-col pt-[68px]">
-      <h1 className="sr-only">Panefold Atlas live workspace demo</h1>
+      <h1 className="sr-only">Panefold Code live workbench demo</h1>
       <div className="flex min-h-[54px] shrink-0 flex-wrap items-center gap-x-3 gap-y-2 border-b border-white/[0.08] bg-[#080c12] px-4 py-2 md:px-6">
         <SiteLink
           to="/"
@@ -18,11 +18,11 @@ export function DemoPage({ navigate }: { readonly navigate: (path: string) => vo
         </SiteLink>
         <span className="h-4 w-px bg-white/10" />
         <div className="flex min-w-0 items-start gap-2 text-[11px] leading-5 text-slate-400">
-          <Info className="size-3.5 text-cyan-300" /> Atlas is an interactive reference fixture. Its
-          canonical layout is saved in IndexedDB in this browser.
+          <Info className="size-3.5 text-cyan-300" /> Panefold Code is an interactive workbench
+          fixture. Its panel layout is saved in IndexedDB in this browser.
         </div>
         <a
-          href={siteAsset("atlas/")}
+          href={siteAsset("workbench/")}
           target="_blank"
           rel="noreferrer"
           data-track="demo_open_standalone"
@@ -32,8 +32,8 @@ export function DemoPage({ navigate }: { readonly navigate: (path: string) => vo
         </a>
       </div>
       <iframe
-        title="Panefold Atlas live workspace demo"
-        src={siteAsset("atlas/")}
+        title="Panefold Code live workbench demo"
+        src={siteAsset("workbench/")}
         className="block min-h-0 flex-1 w-full bg-[#08101d]"
       />
     </main>

@@ -9,6 +9,11 @@ export default defineConfig({
     ? {
         server: {
           proxy: {
+            "/panefold/workbench": {
+              target: "http://127.0.0.1:4317",
+              changeOrigin: true,
+              rewrite: (path: string) => path.replace(/^\/panefold\/workbench/, "") || "/",
+            },
             "/panefold/atlas": {
               target: "http://127.0.0.1:4317",
               changeOrigin: true,

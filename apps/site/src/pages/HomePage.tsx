@@ -207,8 +207,8 @@ export function HomePage({ navigate }: { readonly navigate: (path: string) => vo
               <p className="section-eyebrow">Interaction film</p>
               <h2 className="section-title mt-4">The details are the product.</h2>
               <p className="section-description mt-6">
-                Watch Atlas resize with solver-backed geometry, preserve its map host, move panels
-                semantically, and restore a close with one undo.
+                Watch Panefold Code resize with solver-backed geometry, preserve its editor host,
+                move panels semantically, and restore a close with one undo.
               </p>
               <ul className="mt-8 grid gap-3 text-sm text-slate-400">
                 {[
@@ -268,6 +268,7 @@ export function HomePage({ navigate }: { readonly navigate: (path: string) => vo
                 {[
                   "Drag a tab to a group center to dock it.",
                   "Drop on any edge to create a new container.",
+                  "Use ⊠ to remove a container in one undoable merge.",
                   "Drag beyond the workspace to open a live popup.",
                   "Reload — the canonical layout returns from IndexedDB.",
                 ].map((step, index) => (
@@ -301,8 +302,8 @@ export function HomePage({ navigate }: { readonly navigate: (path: string) => vo
               </span>
             </div>
             <iframe
-              title="Interactive Panefold Atlas map-operations demo"
-              src={siteAsset("atlas/")}
+              title="Interactive Panefold Code workbench demo"
+              src={siteAsset("workbench/")}
               loading="lazy"
               className="h-[620px] w-full bg-[#08101d] max-md:h-[520px]"
             />
@@ -316,9 +317,9 @@ export function HomePage({ navigate }: { readonly navigate: (path: string) => vo
             <p className="section-eyebrow">One contract, two evidence levels</p>
             <h2 className="section-title mt-4">One browser fixture. Four contract bindings.</h2>
             <p className="section-description mt-6">
-              React drives Atlas in automated Chromium. Vue, Svelte, Angular, and Web Components
-              share the immutable-store and lifecycle contract in JSDOM; browser rendering
-              certification remains pending.
+              React drives Panefold Code in automated Chromium. Vue, Svelte, Angular, and Web
+              Components share the immutable-store and lifecycle contract in JSDOM; browser
+              rendering certification remains pending.
             </p>
           </div>
           <div className="grid gap-2 sm:grid-cols-2">
@@ -351,8 +352,8 @@ export function HomePage({ navigate }: { readonly navigate: (path: string) => vo
               Evaluate Panefold against the hard parts.
             </h2>
             <p className="relative mx-auto mt-5 max-w-xl text-sm leading-6 text-slate-400">
-              Run Atlas, inspect support and conformance, then decide whether the experimental
-              architecture fits your product.
+              Run Panefold Code, inspect support and conformance, then decide whether the
+              experimental architecture fits your product.
             </p>
             <div className="relative mt-8 flex flex-col justify-center gap-3 sm:flex-row">
               <SiteLink

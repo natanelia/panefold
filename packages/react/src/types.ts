@@ -209,6 +209,12 @@ export interface WorkspaceCommandAdapter<TCommand> {
     placement: WorkspacePanelReorderPlacement,
   ) => TCommand;
   readonly movePanel?: (panelId: string, groupId: string) => TCommand;
+  /** Moves every panel into an adjacent group and removes the source container atomically. */
+  readonly mergeGroup?: (
+    sourceGroupId: string,
+    targetGroupId: string,
+    selectedPanelId?: string,
+  ) => TCommand;
   readonly floatPanel?: (panelId: string) => TCommand;
   /**
    * Pure, revision-bound direct-manipulation plan. The application owns real

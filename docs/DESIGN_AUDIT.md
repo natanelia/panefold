@@ -364,12 +364,13 @@ The implementation uses stable external-store projection, active-only protocol a
 scheduler for pointer visuals, precomputed reorder slots, binary slot lookup, constant-time cached
 geometry translation during same-slot autoscroll, and local DOM style writes. Those are useful
 design properties, not certification. The checked-in container capture retained 179 frame deltas
-with p95 16.7 ms, p99 16.8 ms, maximum 16.8 ms, and no observed long task. On the same AMD EPYC VM,
-the Node smoke run measured 50-panel reorder at 0.366 ms p95, 500-panel reorder at 2.840 ms p95,
-100/500/1,000-node hit testing at 3.972/20.352/43.137 microseconds mean, and 10,000 reference kernel
-operations with zero invariant violations. These single-container regression guards passed, but
-they are neither a statistically separated history nor physical 60 Hz/120 Hz evidence. The
-performance hard gate therefore remains blocked.
+with p95 9.3 ms, p99 9.4 ms, maximum 58.2 ms, and two observed long tasks of 91 ms and 58 ms. On the
+same Apple M1 Max machine, the Node smoke run measured 50-panel reorder at 0.9273 ms p95 and
+500-panel reorder at 5.0729 ms p95, missing the latter's 5 ms design target. The 100/500/1,000-node
+hit-test means were 4.622/21.389/44.874 microseconds, and 10,000 reference kernel operations had zero
+invariant violations. These single-container regression guards are neither a statistically
+separated history nor physical 60 Hz/120 Hz evidence. The performance hard gate therefore remains
+blocked.
 
 ## Hard-gate status
 

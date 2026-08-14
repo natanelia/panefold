@@ -56,10 +56,10 @@ async function dragTabToGroup(
   return previewRect;
 }
 
-async function splitNotesFromMenu(page: Page, menuLabel: string) {
-  const notesTab = page.getByRole("tab", { name: "Notes" });
-  if ((await notesTab.getAttribute("aria-selected")) !== "true") await notesTab.click();
-  await page.getByRole("button", { name: "Actions for Notes" }).click();
+async function splitWorkspaceEditorFromMenu(page: Page, menuLabel: string) {
+  const workspaceTab = page.getByRole("tab", { name: "workspace.ts" });
+  if ((await workspaceTab.getAttribute("aria-selected")) !== "true") await workspaceTab.click();
+  await page.getByRole("button", { name: "Actions for workspace.ts" }).click();
   await page.getByRole("menuitem", { name: menuLabel }).click();
 }
 
@@ -134,7 +134,7 @@ async function waitForRectToSettle(locator: Locator) {
 }
 
 async function waitForGroupToFillWorkspaceBlock(page: Page, groupId: string) {
-  const workspace = page.getByLabel("Map operations workspace");
+  const workspace = page.getByLabel("Panefold Code workbench");
   const group = page.locator(`[data-workspace-group="${groupId}"]`);
   await expect
     .poll(async () => {
@@ -172,32 +172,32 @@ async function expectRectToSettle(
 test("projects semantic commands through accessible workspace chrome", async ({ page }) => {
   await page.goto("/");
 
-  await expect(page.getByLabel("Map operations workspace")).toBeVisible();
+  await expect(page.getByLabel("Panefold Code workbench")).toBeVisible();
   await expect(page.getByRole("tablist")).toHaveCount(4);
 
-  const mapTab = page.getByRole("tab", { name: "Map Canvas" });
-  const notesTab = page.getByRole("tab", { name: "Notes" });
-  await expect(mapTab).toHaveAttribute("aria-selected", "true");
+  const appTab = page.getByRole("tab", { name: "App.tsx" });
+  const workspaceTab = page.getByRole("tab", { name: "workspace.ts" });
+  await expect(appTab).toHaveAttribute("aria-selected", "true");
 
-  await mapTab.focus();
-  await mapTab.press("ArrowRight");
-  await expect(notesTab).toHaveAttribute("aria-selected", "true");
-  await expect(page.getByText("Active: Notes")).toBeVisible();
+  await appTab.focus();
+  await appTab.press("ArrowRight");
+  await expect(workspaceTab).toHaveAttribute("aria-selected", "true");
+  await expect(page.getByText("Active: workspace.ts")).toBeVisible();
 
-  await page.getByRole("button", { name: "Close Notes" }).click();
-  await expect(notesTab).toHaveCount(0);
+  await page.getByRole("button", { name: "Close workspace.ts" }).click();
+  await expect(workspaceTab).toHaveCount(0);
   await page.getByRole("button", { name: "Undo layout change" }).click();
-  await expect(page.getByRole("tab", { name: "Notes" })).toBeVisible();
+  await expect(page.getByRole("tab", { name: "workspace.ts" })).toBeVisible();
 
   await page.keyboard.press("Control+K");
-  await expect(page.getByRole("dialog", { name: "Workspace command palette" })).toBeVisible();
+  await expect(page.getByRole("dialog", { name: "Command Palette" })).toBeVisible();
   await page.keyboard.press("Escape");
-  await expect(page.getByRole("dialog", { name: "Workspace command palette" })).toHaveCount(0);
+  await expect(page.getByRole("dialog", { name: "Command Palette" })).toHaveCount(0);
 });
 
 test("has no automated WCAG A/AA violations in the initial projection", async ({ page }) => {
   await page.goto("/");
-  await expect(page.getByLabel("Map operations workspace")).toBeVisible();
+  await expect(page.getByLabel("Panefold Code workbench")).toBeVisible();
 
   const results = await new AxeBuilder({ page })
     .withTags(["wcag2a", "wcag2aa", "wcag21a", "wcag21aa", "wcag22aa"])
@@ -208,7 +208,7 @@ test("has no automated WCAG A/AA violations in the initial projection", async ({
 
 test("uses solved geometry for keyboard resize in LTR and RTL", async ({ page }) => {
   await page.goto("/");
-  const workspace = page.getByLabel("Map operations workspace");
+  const workspace = page.getByLabel("Panefold Code workbench");
   await expect(workspace).toHaveAttribute("data-geometry-mode", "model");
   await expect(workspace).toHaveAttribute("data-geometry-diagnostics", "0");
 
@@ -241,13 +241,13 @@ test("honors OS and explicit motion preferences without remounting panel hosts",
 }) => {
   await page.emulateMedia({ reducedMotion: "reduce" });
   await page.goto("/");
-  const workspace = page.getByLabel("Map operations workspace");
+  const workspace = page.getByLabel("Panefold Code workbench");
   await expect(workspace).toHaveAttribute("data-effective-motion", "reduced");
 
   const mapHost = page.locator('[data-workspace-panel-host="map-canvas"]');
   const originalHostId = await mapHost.getAttribute("id");
-  await page.getByRole("tab", { name: "Notes" }).click();
-  await page.getByRole("tab", { name: "Map Canvas" }).click();
+  await page.getByRole("tab", { name: "workspace.ts" }).click();
+  await page.getByRole("tab", { name: "App.tsx" }).click();
   await expect(mapHost).toHaveAttribute("id", originalHostId ?? "");
   await expect(mapHost).toHaveAttribute("data-lifecycle", "active");
 
@@ -261,17 +261,17 @@ test("pauses and resumes expensive panel work without remounting its stable host
 }) => {
   await page.goto("/");
   const host = page.locator('[data-workspace-panel-host="map-canvas"]');
-  const work = host.locator('[aria-label="Map render work units"]');
+  const work = host.locator('[aria-label="Editor work units"]');
   await expect.poll(async () => Number(await work.textContent())).toBeGreaterThan(2);
   const hostId = await host.getAttribute("id");
 
-  await page.getByRole("tab", { name: "Notes" }).click();
+  await page.getByRole("tab", { name: "workspace.ts" }).click();
   await expect(host).toHaveAttribute("data-lifecycle", "suspended");
   const paused = Number(await work.textContent());
   await page.waitForTimeout(120);
   expect(Number(await work.textContent())).toBe(paused);
 
-  await page.getByRole("tab", { name: "Map Canvas" }).click();
+  await page.getByRole("tab", { name: "App.tsx" }).click();
   await expect(host).toHaveAttribute("id", hostId ?? "");
   await expect(host).toHaveAttribute("data-lifecycle", "active");
   await expect.poll(async () => Number(await work.textContent())).toBeGreaterThan(paused);
@@ -279,13 +279,13 @@ test("pauses and resumes expensive panel work without remounting its stable host
 
 test("drags a stateful panel into another container and undoes it atomically", async ({ page }) => {
   await page.goto("/");
-  await expect(page.getByLabel("Map operations workspace")).toBeVisible();
+  await expect(page.getByLabel("Panefold Code workbench")).toBeVisible();
   const notesTab = page.locator('[data-workspace-panel-tab="notes"]');
   await notesTab.click();
   const notesHost = page.locator('[data-workspace-panel-host="notes"]');
   const hostId = await notesHost.getAttribute("id");
-  const editor = notesHost.getByRole("textbox", { name: "Workspace review notes" });
-  await editor.fill("State survives a direct panel drop.");
+  const editor = notesHost.getByRole("textbox", { name: "workspace.ts editor" });
+  await editor.fill("export const stableHost = true;");
   const before = await revisionOf(page);
 
   await dragTabToGroup(page, "notes", "inspector", "center");
@@ -297,13 +297,13 @@ test("drags a stateful panel into another container and undoes it atomically", a
       .locator('[data-workspace-panel-tab="notes"]'),
   ).toBeVisible();
   await expect(notesHost).toHaveAttribute("id", hostId ?? "");
-  await expect(editor).toHaveValue("State survives a direct panel drop.");
+  await expect(editor).toHaveValue("export const stableHost = true;");
 
   await page.getByRole("button", { name: "Undo layout change" }).click();
   await expect(
     page.locator('[data-workspace-group="primary"]').locator('[data-workspace-panel-tab="notes"]'),
   ).toBeVisible();
-  await expect(editor).toHaveValue("State survives a direct panel drop.");
+  await expect(editor).toHaveValue("export const stableHost = true;");
 });
 
 test("reorders tabs by drag in horizontal LTR, RTL, and vertical rails without remounting", async ({
@@ -313,8 +313,8 @@ test("reorders tabs by drag in horizontal LTR, RTL, and vertical rails without r
   const primary = page.locator('[data-workspace-group="primary"]');
   const notesHost = page.locator('[data-workspace-panel-host="notes"]');
   const hostId = await notesHost.getAttribute("id");
-  const editor = notesHost.getByRole("textbox", { name: "Workspace review notes" });
-  await page.getByRole("tab", { name: "Notes" }).click();
+  const editor = notesHost.getByRole("textbox", { name: "workspace.ts editor" });
+  await page.getByRole("tab", { name: "workspace.ts" }).click();
   await editor.fill("Tab reorder keeps this live editor.");
   const initialRevision = await revisionOf(page);
 
@@ -452,7 +452,7 @@ test("creates new containers on all four logical sides through the shared drop p
 }) => {
   await page.goto("/");
   await expect(page.locator("[data-workspace-group]")).toHaveCount(4);
-  await page.getByRole("tab", { name: "Notes" }).click();
+  await page.getByRole("tab", { name: "workspace.ts" }).click();
 
   for (const [menuLabel, side] of [
     ["Split left", "inline-start"],
@@ -461,10 +461,10 @@ test("creates new containers on all four logical sides through the shared drop p
     ["Split below", "block-end"],
   ] as const) {
     const before = await revisionOf(page);
-    await splitNotesFromMenu(page, menuLabel);
+    await splitWorkspaceEditorFromMenu(page, menuLabel);
     await expect.poll(() => revisionOf(page)).toBe(before + 1);
     await expect(page.locator("[data-workspace-group]")).toHaveCount(5);
-    const notesTab = page.getByRole("tab", { name: "Notes" });
+    const notesTab = page.getByRole("tab", { name: "workspace.ts" });
     await expect(notesTab).toBeVisible();
     const notesGroup = notesTab.locator("xpath=ancestor::*[@data-workspace-group][1]");
     const primaryGroup = page.locator('[data-workspace-group="primary"]');
@@ -485,24 +485,79 @@ test("creates new containers on all four logical sides through the shared drop p
     await page.getByRole("button", { name: "Undo layout change" }).click();
     await expect(page.locator("[data-workspace-group]")).toHaveCount(4);
     await expect(
-      page.locator('[data-workspace-group="primary"]').getByRole("tab", { name: "Notes" }),
+      page.locator('[data-workspace-group="primary"]').getByRole("tab", { name: "workspace.ts" }),
     ).toBeVisible();
   }
+});
+
+test("removes a split panel container in one undoable action", async ({ page }) => {
+  await page.goto("/");
+  await page.getByRole("tab", { name: "workspace.ts" }).click();
+  await splitWorkspaceEditorFromMenu(page, "Split right");
+  await expect(page.locator("[data-workspace-group]")).toHaveCount(5);
+
+  const before = await revisionOf(page);
+  const workspaceTab = page.locator('[data-workspace-panel-tab="notes"]');
+  const splitGroup = workspaceTab.locator("xpath=ancestor::*[@data-workspace-group][1]");
+  await splitGroup.getByRole("button", { name: /Remove panel container/ }).click();
+
+  await expect.poll(() => revisionOf(page)).toBe(before + 1);
+  await expect(page.locator("[data-workspace-group]")).toHaveCount(4);
+  const mergedWorkspaceTab = page.locator(
+    '[data-workspace-group="primary"] [data-workspace-panel-tab="notes"]',
+  );
+  await expect(mergedWorkspaceTab).toBeVisible();
+  await expect(mergedWorkspaceTab).toBeFocused();
+  await expect(page.getByText("Active: workspace.ts")).toBeVisible();
+
+  await page.getByRole("button", { name: "Undo layout change" }).click();
+  await expect(page.locator("[data-workspace-group]")).toHaveCount(5);
+  await expect(
+    page.locator('[data-workspace-group="primary"] [data-workspace-panel-tab="notes"]'),
+  ).toHaveCount(0);
+});
+
+test("removes an empty retained panel container without discarding panels", async ({ page }) => {
+  await page.emulateMedia({ reducedMotion: "reduce" });
+  await page.goto("/");
+  await page.getByRole("tab", { name: "workspace.ts" }).click();
+  await splitWorkspaceEditorFromMenu(page, "Split right");
+  await page.getByRole("button", { name: "Actions for App.tsx" }).click();
+  await page.getByRole("menuitem", { name: "Move to Secondary Side Bar" }).click();
+
+  const emptyPrimary = page.locator('[data-workspace-group="primary"]');
+  await expect(emptyPrimary).toHaveAttribute("data-empty", "true");
+  const before = await revisionOf(page);
+  await emptyPrimary.getByRole("button", { name: /Remove panel container/ }).click();
+
+  await expect.poll(() => revisionOf(page)).toBe(before + 1);
+  await expect(page.locator('[data-workspace-group="primary"]')).toHaveCount(0);
+  await expect(page.locator("[data-workspace-group]")).toHaveCount(4);
+  await expect(page.locator("[data-workspace-panel-tab]")).toHaveCount(8);
+  await expect(page.getByRole("tab", { name: "App.tsx" })).toBeFocused();
+
+  await page.getByRole("button", { name: "Undo layout change" }).click();
+  await expect(page.locator('[data-workspace-group="primary"]')).toHaveAttribute(
+    "data-empty",
+    "true",
+  );
+  await expect(page.locator("[data-workspace-group]")).toHaveCount(5);
 });
 
 test("redocks into a persistent group after its last tab moves away", async ({ page }) => {
   await page.emulateMedia({ reducedMotion: "reduce" });
   await page.goto("/");
-  await page.getByRole("tab", { name: "Notes" }).click();
-  await splitNotesFromMenu(page, "Split right");
+  await page.getByRole("tab", { name: "workspace.ts" }).click();
+  await splitWorkspaceEditorFromMenu(page, "Split right");
   await expect(page.locator("[data-workspace-group]")).toHaveCount(5);
 
-  await page.getByRole("button", { name: "Actions for Map Canvas" }).click();
-  await page.getByRole("menuitem", { name: "Move to Inspector" }).click();
+  await page.getByRole("button", { name: "Actions for App.tsx" }).click();
+  await page.getByRole("menuitem", { name: "Move to Secondary Side Bar" }).click();
   const emptyPrimary = page.locator('[data-workspace-group="primary"]');
   await expect(emptyPrimary).toHaveAttribute("data-empty", "true");
   await expect(page.locator('[data-workspace-empty-group="primary"]')).toBeVisible();
-  await expect(emptyPrimary).toContainText(/Primary workspace is empty/i);
+  await expect(emptyPrimary).toContainText(/Editor Group is empty/i);
+  await expect(emptyPrimary.getByRole("button", { name: /Remove panel container/ })).toBeVisible();
   const emptyBox = await requiredBox(emptyPrimary);
   expect(emptyBox.width).toBeGreaterThanOrEqual(96);
   expect(emptyBox.height).toBeGreaterThanOrEqual(96);
@@ -518,8 +573,8 @@ test("redocks into a persistent group after its last tab moves away", async ({ p
 test("allocates a fresh split identity from persisted topology after reload", async ({ page }) => {
   await page.emulateMedia({ reducedMotion: "reduce" });
   await page.goto("/");
-  await page.getByRole("tab", { name: "Notes" }).click();
-  await splitNotesFromMenu(page, "Split right");
+  await page.getByRole("tab", { name: "workspace.ts" }).click();
+  await splitWorkspaceEditorFromMenu(page, "Split right");
   const persistedSplitRevision = await revisionOf(page);
   await expect(page.locator("[data-persistence-state='saved']")).toHaveAttribute(
     "data-persisted-revision",
@@ -574,14 +629,14 @@ test("split menu, vertical rails, icon-only tabs, and pointer splitter remain us
   await settings.getByRole("combobox", { name: "Tab labels" }).selectOption("icon-only");
   const primaryTablist = page.locator('[data-workspace-group="primary"]').getByRole("tablist");
   await expect(primaryTablist).toHaveAttribute("aria-orientation", "vertical");
-  const mapTab = primaryTablist.getByRole("tab", { name: "Map Canvas" });
-  const notesTab = primaryTablist.getByRole("tab", { name: "Notes" });
+  const mapTab = primaryTablist.getByRole("tab", { name: "App.tsx" });
+  const notesTab = primaryTablist.getByRole("tab", { name: "workspace.ts" });
   await expect(mapTab.locator(".pf-tab-title")).toHaveClass(/pf-visually-hidden/);
   await mapTab.focus();
   await mapTab.press("ArrowDown");
   await expect(notesTab).toHaveAttribute("aria-selected", "true");
 
-  await page.getByRole("button", { name: "Actions for Notes" }).click();
+  await page.getByRole("button", { name: "Actions for workspace.ts" }).click();
   await page.getByRole("menuitem", { name: "Split right" }).click();
   await expect(page.locator("[data-workspace-group]")).toHaveCount(5);
   await page.getByRole("button", { name: "Undo layout change" }).click();
@@ -642,12 +697,12 @@ test("persists canonical panel configuration and view preferences across reload"
     "inline-end",
   );
   await expect(
-    page.locator('[data-workspace-group="inspector"]').getByRole("tab", { name: "Notes" }),
+    page.locator('[data-workspace-group="inspector"]').getByRole("tab", { name: "workspace.ts" }),
   ).toBeVisible();
   await expect(
     page
       .locator('[data-workspace-group="inspector"]')
-      .getByRole("tab", { name: "Notes" })
+      .getByRole("tab", { name: "workspace.ts" })
       .locator(".pf-tab-title"),
   ).toHaveClass(/pf-visually-hidden/);
 });
@@ -692,7 +747,7 @@ test("runs all normative heavy-content fixture classes in a real browser lifecyc
     .getAttribute("data-instance-token");
   const editor = lab.getByRole("textbox", { name: "Code editor fixture" });
   await editor.fill("const preserved = true;");
-  await expect(lab.getByLabel("GPU map fixture")).toHaveAttribute(
+  await expect(lab.getByLabel("GPU editor fixture")).toHaveAttribute(
     "data-renderer",
     /^(webgl2|canvas-2d)$/,
   );
@@ -711,14 +766,14 @@ test("runs all normative heavy-content fixture classes in a real browser lifecyc
   const work = lab.locator('[aria-label="Heavy fixture work units"]');
   await expect.poll(async () => Number(await work.textContent())).toBeGreaterThan(2);
 
-  await page.getByRole("tab", { name: "Notes" }).click();
+  await page.getByRole("tab", { name: "workspace.ts" }).click();
   await expect(host).toHaveAttribute("data-lifecycle", "suspended");
   const paused = Number(await work.textContent());
   await page.waitForTimeout(120);
   expect(Number(await work.textContent())).toBe(paused);
   await expect(host.getByLabel("Video fixture")).toHaveAttribute("data-suspended", "");
 
-  await page.getByRole("tab", { name: "Map Canvas" }).click();
+  await page.getByRole("tab", { name: "App.tsx" }).click();
   await expect(host).toHaveAttribute("id", hostId ?? "");
   await expect(lab).toHaveAttribute("data-heavy-mount-token", mountToken ?? "");
   await expect(editor).toHaveValue("const preserved = true;");
@@ -732,8 +787,8 @@ test("runs all normative heavy-content fixture classes in a real browser lifecyc
   await expect.poll(async () => Number(await work.textContent())).toBeGreaterThan(paused);
 
   await host.getByRole("button", { name: "Throw renderer failure" }).click();
-  await expect(host.getByRole("alert")).toContainText("Map Canvas could not be rendered");
-  await expect(page.getByRole("tab", { name: "Map Canvas" })).toBeVisible();
+  await expect(host.getByRole("alert")).toContainText("App.tsx could not be rendered");
+  await expect(page.getByRole("tab", { name: "App.tsx" })).toBeVisible();
   await host.getByRole("button", { name: "Retry" }).click();
   await expect(host.locator("[data-test-panel-fixture]")).toHaveCount(17);
   await expect(host).toHaveAttribute("id", hostId ?? "");
@@ -799,7 +854,7 @@ test("caps and scrolls appearance settings in a low viewport", async ({ page }) 
   await reset.scrollIntoViewIfNeeded();
   await expect(reset).toBeVisible();
   await reset.click();
-  await expect(page.locator(".demo-surface-status")).toContainText("starting workspace");
+  await expect(page.locator(".demo-surface-status")).toContainText("Panefold Code workspace");
 });
 
 test("fails closed instead of hanging when IndexedDB open rejects", async ({ page }) => {
@@ -815,21 +870,21 @@ test("fails closed instead of hanging when IndexedDB open rejects", async ({ pag
     page.getByRole("heading", { name: "The saved workspace was not overwritten." }),
   ).toBeVisible();
   await expect(page.getByText("INDEXEDDB_OPEN_FAILED")).toBeVisible();
-  await expect(page.getByLabel("Opening Atlas workspace")).toHaveCount(0);
+  await expect(page.getByLabel("Opening Panefold Code workspace")).toHaveCount(0);
 });
 
 test("drags a live panel beyond the workspace into a popup and redocks it", async ({ page }) => {
   await page.goto("/");
-  await page.getByRole("tab", { name: "Notes" }).click();
+  await page.getByRole("tab", { name: "workspace.ts" }).click();
   const notesHost = page.locator('[data-workspace-panel-host="notes"]');
   const hostId = await notesHost.getAttribute("id");
-  const editor = notesHost.getByRole("textbox", { name: "Workspace review notes" });
+  const editor = notesHost.getByRole("textbox", { name: "workspace.ts editor" });
   await editor.fill("The same React host is interactive across documents.");
 
   const notesTab = page.locator('[data-workspace-panel-tab="notes"]');
   await waitForRectToSettle(notesTab);
   const tabBox = await requiredBox(notesTab);
-  const workspaceBox = await requiredBox(page.getByLabel("Map operations workspace"));
+  const workspaceBox = await requiredBox(page.getByLabel("Panefold Code workbench"));
   const popupPromise = page.waitForEvent("popup");
   await page.mouse.move(tabBox.x + tabBox.width / 2, tabBox.y + tabBox.height / 2);
   await page.mouse.down();
@@ -844,7 +899,7 @@ test("drags a live panel beyond the workspace into a popup and redocks it", asyn
   const popup = await popupPromise;
 
   await expect(popup.getByText("Panefold browser surface")).toBeVisible();
-  await expect(popup.getByText("Notes", { exact: true })).toBeVisible();
+  await expect(popup.locator("header").getByText("workspace.ts", { exact: true })).toBeVisible();
   await expect(popup.locator("#panefold-surface-root")).toHaveAttribute(
     "data-panefold-ready",
     "true",
@@ -858,7 +913,7 @@ test("drags a live panel beyond the workspace into a popup and redocks it", asyn
   await expect(page.locator("[data-workspace-group]")).toHaveCount(4);
   const popupHost = popup.locator('[data-workspace-panel-host="notes"]');
   await expect(popupHost).toHaveAttribute("id", hostId ?? "");
-  const popupEditor = popupHost.getByRole("textbox", { name: "Workspace review notes" });
+  const popupEditor = popupHost.getByRole("textbox", { name: "workspace.ts editor" });
   await expect(popupEditor).toHaveValue("The same React host is interactive across documents.");
   const accessibility = await new AxeBuilder({ page: popup })
     .withTags(["wcag2a", "wcag2aa", "wcag21a", "wcag21aa", "wcag22aa"])
@@ -881,7 +936,9 @@ test("drags a live panel beyond the workspace into a popup and redocks it", asyn
   await expect(page.locator(".demo-surface-status")).toContainText(
     "returned to the main workspace",
   );
-  await expect(page.locator(".pf-live-region")).toHaveText("Notes returned to the main window.");
+  await expect(page.locator(".pf-live-region")).toHaveText(
+    "workspace.ts returned to the main window.",
+  );
   await expect(returnedNotesTab).toBeFocused();
   await expect
     .poll(() => page.evaluate(() => document.activeElement === document.body))
@@ -901,10 +958,10 @@ test("a blocked popup leaves the panel and semantic revision in the source works
   });
   await page.goto("/");
   const before = await revisionOf(page);
-  await page.getByRole("tab", { name: "Notes" }).click();
+  await page.getByRole("tab", { name: "workspace.ts" }).click();
   const afterSelection = await revisionOf(page);
   expect(afterSelection).toBeGreaterThanOrEqual(before);
-  await page.getByRole("button", { name: "Actions for Notes" }).click();
+  await page.getByRole("button", { name: "Actions for workspace.ts" }).click();
   await page.getByRole("menuitem", { name: "Open in new window" }).click();
 
   await expect(page.locator(".demo-surface-status")).toContainText("popup was blocked");
@@ -917,8 +974,8 @@ test("unexpected popup loss recovers the authoritative panel into the main works
 }) => {
   await page.goto("/");
   const popupPromise = page.waitForEvent("popup");
-  await page.getByRole("tab", { name: "Notes" }).click();
-  await page.getByRole("button", { name: "Actions for Notes" }).click();
+  await page.getByRole("tab", { name: "workspace.ts" }).click();
+  await page.getByRole("button", { name: "Actions for workspace.ts" }).click();
   await page.getByRole("menuitem", { name: "Open in new window" }).click();
   const popup = await popupPromise;
   await expect(popup.locator("#panefold-surface-root")).toHaveAttribute(
@@ -931,7 +988,9 @@ test("unexpected popup loss recovers the authoritative panel into the main works
   await expect(page.locator(".demo-surface-status")).toContainText(
     "returned to the main workspace",
   );
-  await expect(page.locator(".pf-live-region")).toHaveText("Notes returned to the main window.");
+  await expect(page.locator(".pf-live-region")).toHaveText(
+    "workspace.ts returned to the main window.",
+  );
   await expect(returnedNotesTab).toBeFocused();
 });
 
@@ -940,8 +999,8 @@ test("reload closes an external window, restores its panel, and permits a fresh 
 }) => {
   await page.goto("/");
   const popupPromise = page.waitForEvent("popup");
-  await page.getByRole("tab", { name: "Notes" }).click();
-  await page.getByRole("button", { name: "Actions for Notes" }).click();
+  await page.getByRole("tab", { name: "workspace.ts" }).click();
+  await page.getByRole("button", { name: "Actions for workspace.ts" }).click();
   await page.getByRole("menuitem", { name: "Open in new window" }).click();
   const popup = await popupPromise;
   await expect(popup.locator("#panefold-surface-root")).toHaveAttribute(
@@ -979,7 +1038,7 @@ test("reload closes an external window, restores its panel, and permits a fresh 
 
   const secondPopupPromise = page.waitForEvent("popup");
   await page.locator('[data-workspace-panel-tab="notes"]').click();
-  await page.getByRole("button", { name: "Actions for Notes" }).click();
+  await page.getByRole("button", { name: "Actions for workspace.ts" }).click();
   await page.getByRole("menuitem", { name: "Open in new window" }).click();
   const secondPopup = await secondPopupPromise;
   await expect(secondPopup.locator("#panefold-surface-root")).toHaveAttribute(
@@ -1001,12 +1060,12 @@ test.describe("compact touch projection", () => {
     page,
   }) => {
     await page.goto("/");
-    const workspace = page.getByLabel("Map operations workspace");
+    const workspace = page.getByLabel("Panefold Code workbench");
     await expect(workspace).toHaveAttribute("data-responsive-projection", "single-region");
     const region = page.getByRole("combobox", { name: "Current workspace region" });
     await expect(region).toHaveValue("primary");
-    await expect(page.getByRole("tab", { name: "Map Canvas" })).toBeVisible();
-    await expect(page.getByRole("tab", { name: "Routes" })).toHaveCount(0);
+    await expect(page.getByRole("tab", { name: "App.tsx" })).toBeVisible();
+    await expect(page.getByRole("tab", { name: "Explorer" })).toHaveCount(0);
 
     await page.getByRole("button", { name: "Workspace appearance" }).click();
     const settings = page.getByRole("dialog", { name: "Workspace appearance" });
@@ -1015,11 +1074,11 @@ test.describe("compact touch projection", () => {
     await page.getByRole("button", { name: "Workspace appearance" }).click();
     const primaryTablist = page.locator('[data-workspace-group="primary"]').getByRole("tablist");
     await expect(primaryTablist).toHaveAttribute("aria-orientation", "vertical");
-    const mapTarget = await requiredBox(primaryTablist.getByRole("tab", { name: "Map Canvas" }));
+    const mapTarget = await requiredBox(primaryTablist.getByRole("tab", { name: "App.tsx" }));
     expect(mapTarget.width).toBeGreaterThanOrEqual(44);
     expect(mapTarget.height).toBeGreaterThanOrEqual(44);
     await expect(
-      primaryTablist.getByRole("tab", { name: "Map Canvas" }).locator(".pf-tab-title"),
+      primaryTablist.getByRole("tab", { name: "App.tsx" }).locator(".pf-tab-title"),
     ).toHaveClass(/pf-visually-hidden/);
 
     const before = await page
@@ -1027,19 +1086,19 @@ test.describe("compact touch projection", () => {
       .first()
       .textContent();
     await region.selectOption("navigation");
-    await expect(page.getByRole("tab", { name: "Routes" })).toBeVisible();
-    await page.getByRole("tab", { name: "Layers" }).tap();
-    await expect(page.getByRole("tab", { name: "Layers" })).toHaveAttribute(
+    await expect(page.getByRole("tab", { name: "Explorer" })).toBeVisible();
+    await page.getByRole("tab", { name: "Search" }).tap();
+    await expect(page.getByRole("tab", { name: "Search" })).toHaveAttribute(
       "aria-selected",
       "true",
     );
     const targetSize = await page
-      .getByRole("tab", { name: "Layers" })
+      .getByRole("tab", { name: "Search" })
       .evaluate((element) => element.getBoundingClientRect().height);
     expect(targetSize).toBeGreaterThanOrEqual(44);
 
     await region.selectOption("primary");
-    await expect(page.getByRole("tab", { name: "Notes" })).toBeVisible();
+    await expect(page.getByRole("tab", { name: "workspace.ts" })).toBeVisible();
     expect(
       await page
         .getByText(/^Revision \d+$/)

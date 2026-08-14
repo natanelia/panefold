@@ -33,7 +33,7 @@ try {
     deviceScaleFactor: 1,
   });
   await page.goto("http://127.0.0.1:4317", { waitUntil: "networkidle" });
-  await page.getByLabel("Map operations workspace").waitFor();
+  await page.getByLabel("Panefold Code workbench").waitFor();
   await page.evaluate(() => {
     const style = globalThis.document.createElement("style");
     style.textContent = `
@@ -60,7 +60,7 @@ try {
     pointer.id = "panefold-film-pointer";
     const chapter = globalThis.document.createElement("div");
     chapter.id = "panefold-film-chapter";
-    chapter.textContent = "Atlas · semantic interaction";
+    chapter.textContent = "Panefold Code · semantic interaction";
     globalThis.document.head.append(style);
     globalThis.document.body.append(pointer, chapter);
   });
@@ -84,7 +84,7 @@ try {
   })();
 
   await delay(850);
-  const notesTab = page.getByRole("tab", { name: "Notes" });
+  const notesTab = page.getByRole("tab", { name: "workspace.ts" });
   const inspector = page.locator('[data-workspace-group="inspector"]');
   await dragTo(notesTab, inspector, "Dock · direct center drop");
   await inspector.locator('[data-workspace-panel-tab="notes"]').waitFor();
@@ -105,7 +105,18 @@ try {
     "inline-start",
   );
   await page.locator("[data-workspace-group]").nth(4).waitFor();
-  await delay(900);
+  await delay(700);
+
+  const splitGroup = page
+    .locator('[data-workspace-panel-tab="notes"]')
+    .locator("xpath=ancestor::*[@data-workspace-group][1]");
+  const splitGroupId = await splitGroup.getAttribute("data-workspace-group");
+  if (splitGroupId === null) throw new Error("Could not identify the split panel container");
+  const removeContainer = splitGroup.getByRole("button", { name: /Remove panel container/ });
+  await cue(removeContainer, "Remove · one atomic container merge");
+  await removeContainer.click();
+  await page.locator(`[data-workspace-group="${splitGroupId}"]`).waitFor({ state: "detached" });
+  await delay(750);
 
   const settingsButton = page.getByRole("button", { name: "Workspace appearance" });
   await cue(settingsButton, "Tabs · logical and application-owned");
@@ -124,7 +135,7 @@ try {
   await splitter.press("Shift+ArrowRight");
   await delay(850);
 
-  const actionsButton = page.getByRole("button", { name: "Actions for Notes" });
+  const actionsButton = page.getByRole("button", { name: "Actions for workspace.ts" });
   await cue(actionsButton, "Pop out · same live panel host");
   await actionsButton.click();
   const popupPromise = page.waitForEvent("popup");

@@ -73,8 +73,8 @@ the command output.
   save/reload/restore evidence, live same-origin popup transfer/redock/loss recovery, LTR/RTL resize,
   motion preference, stable-host lifecycle, all 17 panel classes, forced colors, touch projection,
   same-strip reorder in horizontal LTR, horizontal RTL, and vertical rails, bounded LTR/RTL
-  overflow autoscroll, and raw splitter-frame capture. The checked-in result records 26/26 passing
-  browser tasks.
+  overflow autoscroll, one-action populated and empty panel-container removal, and raw
+  splitter-frame capture. The checked-in result records 28/28 passing browser tasks.
 - The framework JSDOM contract passed 20/20 tests across Vue, Svelte, Angular, and Web Components.
 - The compact headless protocol result matches the reviewed graphs for all 12 Appendix-C actors:
   84/84 states, 258/258 transition branches, both outcomes for 64/64 guarded branches, and 146/146
@@ -94,10 +94,10 @@ the command output.
   state per command, not the retained optimized production kernel.
 - The earlier 50,000-attempt projection campaign completed with zero replay/projection divergence.
   It is below the ten-million stable threshold and its checked-in summary records the missing seed.
-- The container interaction capture retained 179 frame deltas at 16.7 ms p95 and 16.8 ms p99 with
-  no observed long task. The paired Node smoke run kept 50-panel reorder at 0.366 ms p95 and
-  500-panel reorder at 2.840 ms p95 on that machine. These are experimental regression guards—not
-  physical performance certification.
+- The container interaction capture retained 179 frame deltas at 9.3 ms p95 and 9.4 ms p99, with
+  two observed long tasks of 91 ms and 58 ms. The paired Node smoke run measured 50-panel reorder
+  at 0.9273 ms p95 and 500-panel reorder at 5.0729 ms p95; the latter missed its 5 ms design target
+  on that machine. These are experimental regression guards—not physical performance certification.
 
 ## Hard release gates
 
@@ -116,7 +116,7 @@ the command output.
 
 ## Published profile boundary
 
-- `compact-react-chromium-desktop` is one React 19.2.8 / Playwright Chromium Linux fixture, with a
+- `compact-react-chromium-desktop` is one React 19.2.8 / Playwright Chromium Darwin 25.6 arm64 fixture, with a
   390×844 touch-emulation subprofile and controlled same-origin popup. It is not a general browser,
   OS, mobile hardware, PiP, multi-screen, crash, security, or assistive-technology promise.
 - `framework-adapter-contract-jsdom` is an immutable-store/lifecycle/SSR contract for Vue, Svelte,

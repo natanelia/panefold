@@ -12,7 +12,13 @@ import {
 } from "react";
 import { validateWorkspace } from "@panefold/kernel";
 import { solveLayout } from "@panefold/geometry";
-import { getEntity, nodeId, type WorkspaceCommand, type WorkspaceSnapshot } from "@panefold/model";
+import {
+  getEntity,
+  nodeId,
+  panelId,
+  type WorkspaceCommand,
+  type WorkspaceSnapshot,
+} from "@panefold/model";
 import {
   WorkspaceRuntimeProvider,
   WorkspaceSurface,
@@ -54,6 +60,32 @@ const LazyCommandPalette = lazy(async () => {
 });
 
 const marketingHomeUrl = new URL("../", document.baseURI).href;
+
+const applicationMenuItems = [
+  { label: "File" },
+  { label: "Edit" },
+  { label: "Selection", collapseAt: "medium" },
+  { label: "View" },
+  { label: "Go", collapseAt: "medium" },
+  { label: "Run", collapseAt: "narrow" },
+  { label: "Terminal", collapseAt: "narrow" },
+  { label: "Help", collapseAt: "medium" },
+] as const;
+
+type WorkbenchIconName =
+  "account" | "branch" | "explorer" | "manage" | "problems" | "search" | "source" | "terminal";
+
+const activityItems = [
+  { icon: "explorer", label: "Explorer", panelId: "route-explorer" },
+  { icon: "search", label: "Search", panelId: "layers" },
+  { icon: "source", label: "Source Control", panelId: "validation" },
+  { icon: "terminal", label: "Terminal", panelId: "problems" },
+  { icon: "problems", label: "Problems", panelId: "timeline" },
+] as const satisfies readonly {
+  readonly icon: WorkbenchIconName;
+  readonly label: string;
+  readonly panelId: string;
+}[];
 
 type BootstrapState =
   | { readonly status: "loading" }
@@ -100,12 +132,12 @@ export default function App() {
 
   return (
     <WorkspaceRuntimeProvider runtime={bootstrap.session.runtime}>
-      <MapWorkspaceApp session={bootstrap.session} />
+      <CodeWorkspaceApp session={bootstrap.session} />
     </WorkspaceRuntimeProvider>
   );
 }
 
-function MapWorkspaceApp({ session }: { readonly session: DemoWorkspaceSession }) {
+function CodeWorkspaceApp({ session }: { readonly session: DemoWorkspaceSession }) {
   const runtime = session.runtime;
   const snapshot = useWorkspaceSnapshot<
     WorkspaceSnapshot,
@@ -217,9 +249,42 @@ function MapWorkspaceApp({ session }: { readonly session: DemoWorkspaceSession }
   const canRedo = runtime.canRedo();
   const invariantViolations = useMemo(() => validateWorkspace(snapshot), [snapshot]);
 
+  const activateWorkbenchPanel = (id: string, label: string) => {
+    if (getEntity(snapshot.panels, panelId(id)) === undefined) {
+      setSurfaceStatus(`${label} is closed. Undo the layout change to restore it.`);
+      return;
+    }
+    runtime.dispatch(
+      { type: "select-panel", panelId: panelId(id), activate: true },
+      { origin: "menu", label: `Show ${label}` },
+    );
+    setSurfaceStatus(`${label} focused`);
+  };
+
+  const handleApplicationMenu = (item: (typeof applicationMenuItems)[number]["label"]) => {
+    if (item === "Edit") {
+      if (runtime.canUndo()) runtime.undo();
+      else setSurfaceStatus("Nothing to undo");
+      return;
+    }
+    if (item === "View") {
+      setInspectorOpen((value) => !value);
+      return;
+    }
+    if (item === "Run" || item === "Terminal") {
+      activateWorkbenchPanel("problems", "Terminal");
+      return;
+    }
+    if (item === "Help") {
+      setSurfaceStatus("Panefold Code · deterministic workspace runtime demo");
+      return;
+    }
+    setPaletteOpen(true);
+  };
+
   return (
     <div className="demo-app" data-theme={theme} dir={direction}>
-      <h1 className="demo-visually-hidden">Panefold Atlas map operations workspace</h1>
+      <h1 className="demo-visually-hidden">Panefold Code workbench</h1>
       <header className="demo-topbar">
         <a className="demo-brand" href={marketingHomeUrl} aria-label="Panefold home">
           <span className="demo-brand-mark" aria-hidden="true">
@@ -227,19 +292,35 @@ function MapWorkspaceApp({ session }: { readonly session: DemoWorkspaceSession }
             <i />
             <i />
           </span>
-          <span>
-            <strong>Panefold</strong>
-            <small>Workspace Runtime</small>
-          </span>
+          <strong>Panefold Code</strong>
         </a>
-        <span className="demo-topbar-divider" aria-hidden="true" />
-        <div className="demo-workspace-title">
-          <span className="demo-workspace-dot" aria-hidden="true" />
-          <span>
-            <strong>One-North route review</strong>
-            <small>Atlas Operations · RA-042 · Singapore</small>
-          </span>
-        </div>
+        <nav className="demo-menu" aria-label="Application menu">
+          {applicationMenuItems.map((item) => (
+            <button
+              type="button"
+              key={item.label}
+              data-collapse-at={"collapseAt" in item ? item.collapseAt : undefined}
+              title={`${item.label} menu`}
+              onClick={() => {
+                handleApplicationMenu(item.label);
+              }}
+            >
+              {item.label}
+            </button>
+          ))}
+        </nav>
+        <button
+          className="demo-command-center"
+          type="button"
+          aria-label="Open Command Palette"
+          onClick={() => {
+            setPaletteOpen(true);
+          }}
+        >
+          <WorkbenchIcon name="search" />
+          <span>panefold-demo</span>
+          <kbd>⌘K</kbd>
+        </button>
         <span className="demo-toolbar-spacer" />
         <ToolbarButton
           label="Undo layout change"
@@ -258,14 +339,6 @@ function MapWorkspaceApp({ session }: { readonly session: DemoWorkspaceSession }
           }}
         >
           ↷
-        </ToolbarButton>
-        <ToolbarButton
-          label="Open command palette"
-          onClick={() => {
-            setPaletteOpen(true);
-          }}
-        >
-          <span className="demo-command-key">⌘K</span>
         </ToolbarButton>
         <ToolbarButton
           label={inspectorOpen ? "Close workspace inspector" : "Open workspace inspector"}
@@ -299,13 +372,56 @@ function MapWorkspaceApp({ session }: { readonly session: DemoWorkspaceSession }
           }}
           onResetLayout={() => {
             void session.resetLayout().then(() => {
-              setSurfaceStatus("Saved layout reset to the Atlas starting workspace");
+              setSurfaceStatus("Saved layout reset to the Panefold Code workspace");
             });
           }}
         />
       </header>
 
       <main className="demo-main" ref={workspaceFrameRef}>
+        <aside className="demo-activity-bar" aria-label="Activity bar">
+          {activityItems.map((item) => {
+            const active = String(snapshot.activation.activePanelId ?? "") === item.panelId;
+            const available = getEntity(snapshot.panels, panelId(item.panelId)) !== undefined;
+            return (
+              <button
+                type="button"
+                key={item.label}
+                aria-label={item.label}
+                aria-pressed={active}
+                title={available ? item.label : `${item.label} (closed)`}
+                disabled={!available}
+                onClick={() => {
+                  activateWorkbenchPanel(item.panelId, item.label);
+                }}
+              >
+                <WorkbenchIcon name={item.icon} />
+              </button>
+            );
+          })}
+          <span className="demo-activity-spacer" />
+          <button
+            type="button"
+            aria-label="Accounts"
+            aria-pressed={inspectorOpen}
+            title="Accounts and runtime inspector"
+            onClick={() => {
+              setInspectorOpen((value) => !value);
+            }}
+          >
+            <WorkbenchIcon name="account" />
+          </button>
+          <button
+            type="button"
+            aria-label="Manage"
+            title="Manage workbench"
+            onClick={() => {
+              setPaletteOpen(true);
+            }}
+          >
+            <WorkbenchIcon name="manage" />
+          </button>
+        </aside>
         <WorkspaceSurface
           projector={projector}
           commands={commands}
@@ -313,7 +429,7 @@ function MapWorkspaceApp({ session }: { readonly session: DemoWorkspaceSession }
           layoutSolver={layoutSolver}
           direction={direction}
           motion={motion}
-          workspaceLabel="Map operations workspace"
+          workspaceLabel="Panefold Code workbench"
           className="demo-workspace"
           responsive="auto"
           compactGroupId={compactGroupId}
@@ -341,17 +457,27 @@ function MapWorkspaceApp({ session }: { readonly session: DemoWorkspaceSession }
       </main>
 
       <footer className="demo-statusbar">
+        <span className="demo-status-remote" title="Open a remote window by dragging a tab out">
+          <span aria-hidden="true">›‹</span>
+        </span>
         <span
           className="demo-health"
           data-valid={String(invariantViolations.length === 0)}
-          title={invariantViolations.map((violation) => violation.message).join("\n")}
+          title={
+            invariantViolations.length === 0
+              ? "Kernel valid · main branch"
+              : invariantViolations.map((violation) => violation.message).join("\n")
+          }
         >
-          <i aria-hidden="true" />
+          <WorkbenchIcon name="branch" />
           {invariantViolations.length === 0
-            ? "Kernel valid"
+            ? "main"
             : `${invariantViolations.length} invariant ${
                 invariantViolations.length === 1 ? "violation" : "violations"
               }`}
+        </span>
+        <span className="demo-status-problems" title="Problems">
+          <span aria-hidden="true">⊗</span> 1&nbsp;&nbsp;<span aria-hidden="true">△</span> 1
         </span>
         <span
           className="demo-status-revision"
@@ -362,14 +488,15 @@ function MapWorkspaceApp({ session }: { readonly session: DemoWorkspaceSession }
         <span className="demo-status-topology">
           {snapshot.panels.ids.length} panels · {snapshot.groups.ids.length} groups
         </span>
-        <span className="demo-toolbar-spacer" />
-        <span className="demo-status-active">Active: {activePanel?.title ?? "None"}</span>
-        <span className="demo-status-projection">Responsive projection</span>
-        <span className="demo-status-motion">{motion} motion</span>
         <span className="demo-surface-status" role="status">
           {surfaceStatus}
         </span>
-        <span className="demo-status-lifecycle">Stable hosts · hidden work suspends</span>
+        <span className="demo-toolbar-spacer" />
+        <span className="demo-status-active">Active: {activePanel?.title ?? "None"}</span>
+        <span className="demo-status-position">Ln 8, Col 24</span>
+        <span className="demo-status-encoding">UTF-8</span>
+        <span className="demo-status-indent">Spaces: 2</span>
+        <span className="demo-status-language">{"{ }"} TypeScript React</span>
         <PersistenceBadge
           snapshot={snapshot}
           status={persistenceStatus}
@@ -465,14 +592,14 @@ class DeferredToolBoundary extends Component<
 
 function WorkspaceBootstrap() {
   return (
-    <main className="demo-bootstrap" aria-busy="true" aria-label="Opening Atlas workspace">
+    <main className="demo-bootstrap" aria-busy="true" aria-label="Opening Panefold Code workspace">
       <span className="demo-brand-mark" aria-hidden="true">
         <i />
         <i />
         <i />
       </span>
       <div>
-        <strong>Opening Atlas</strong>
+        <strong>Opening Panefold Code</strong>
         <span>Checking the saved workspace before first render…</span>
       </div>
     </main>
@@ -563,6 +690,78 @@ function PersistenceBadge({
       <i aria-hidden="true" />
       <span>{label}</span>
     </span>
+  );
+}
+
+function WorkbenchIcon({ name }: { readonly name: WorkbenchIconName }) {
+  const common = {
+    fill: "none",
+    stroke: "currentColor",
+    strokeLinecap: "round" as const,
+    strokeLinejoin: "round" as const,
+    strokeWidth: 1.55,
+  };
+  const paths: Record<WorkbenchIconName, ReactNode> = {
+    account: (
+      <>
+        <circle cx="12" cy="8" r="3.25" {...common} />
+        <path d="M5.5 20c.8-3.5 3-5.25 6.5-5.25s5.7 1.75 6.5 5.25" {...common} />
+      </>
+    ),
+    branch: (
+      <>
+        <circle cx="7" cy="5" r="2" {...common} />
+        <circle cx="17" cy="7" r="2" {...common} />
+        <circle cx="7" cy="19" r="2" {...common} />
+        <path d="M7 7v10M9 8.5c4.8 0 3.2-1.5 6-1.5" {...common} />
+      </>
+    ),
+    terminal: (
+      <>
+        <path d="m5 7 4 4-4 4M11 16h7" {...common} />
+        <rect x="3" y="4" width="18" height="16" rx="2" {...common} />
+      </>
+    ),
+    explorer: (
+      <>
+        <path d="M6.5 3.5h8l3 3v10h-11v-13Z" {...common} />
+        <path d="M14.5 3.5v3h3M3.5 7.5v13h11" {...common} />
+      </>
+    ),
+    manage: (
+      <>
+        <circle cx="12" cy="12" r="3" {...common} />
+        <path
+          d="m9.6 3.7.7-1.7h3.4l.7 1.7 1.6.9 1.8-.2 1.7 3-1.1 1.4v1.8l1.1 1.4-1.7 3-1.8-.2-1.6.9-.7 1.7h-3.4l-.7-1.7-1.6-.9-1.8.2-1.7-3 1.1-1.4V8.8L4.5 7.4l1.7-3 1.8.2 1.6-.9Z"
+          {...common}
+        />
+      </>
+    ),
+    problems: (
+      <>
+        <path d="M12 3.5 21 20H3L12 3.5Z" {...common} />
+        <path d="M12 9v5M12 17v.2" {...common} />
+      </>
+    ),
+    search: (
+      <>
+        <circle cx="10.5" cy="10.5" r="6" {...common} />
+        <path d="m15 15 5 5" {...common} />
+      </>
+    ),
+    source: (
+      <>
+        <circle cx="7" cy="5" r="2" {...common} />
+        <circle cx="17" cy="7" r="2" {...common} />
+        <circle cx="7" cy="19" r="2" {...common} />
+        <path d="M7 7v10M9 18c6 0 8-3.5 8-9" {...common} />
+      </>
+    ),
+  };
+  return (
+    <svg viewBox="0 0 24 24" aria-hidden="true">
+      {paths[name]}
+    </svg>
   );
 }
 

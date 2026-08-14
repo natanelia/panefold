@@ -35,7 +35,7 @@ export function Footer({ navigate }: { readonly navigate: (path: string) => void
               data-track="footer_demo"
               className="hover:text-white"
             >
-              Live Atlas demo
+              Live workbench demo
             </SiteLink>
             <SiteLink to="/docs/architecture" navigate={navigate} className="hover:text-white">
               Architecture
