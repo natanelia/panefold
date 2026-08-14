@@ -369,13 +369,13 @@ protocol authority.
 The implementation uses stable external-store projection, active-only protocol actors, one frame
 scheduler for pointer visuals, precomputed reorder slots, binary slot lookup, constant-time cached
 geometry translation during same-slot autoscroll, and local DOM style writes. Those are useful
-design properties, not certification. The checked-in container capture retained 179 frame deltas
-with p95 9.3 ms, p99 9.4 ms, maximum 58.2 ms, and two observed long tasks of 91 ms and 58 ms. On the
-same Apple M1 Max machine, the Node smoke run measured 50-panel reorder at 0.9273 ms p95 and
-500-panel reorder at 5.0729 ms p95, missing the latter's 5 ms design target. The 100/500/1,000-node
-hit-test means were 4.622/21.389/44.874 microseconds, and 10,000 reference kernel operations had zero
-invariant violations. These single-container regression guards are neither a statistically
-separated history nor physical 60 Hz/120 Hz evidence. The performance hard gate therefore remains
+design properties, not certification. The checked-in local macOS capture retained 179 frame deltas
+with p95 9.1 ms, p99 9.2 ms, maximum 58.4 ms, and one observed long task of 61 ms. On the same Apple
+M1 Max machine, the Node smoke run measured 50-panel reorder at 0.2796 ms p95, 500-panel reorder at
+2.0506 ms p95, 100/500/1,000-node hit testing at 3.332/17.506/36.737 microseconds mean, and 10,000
+reference kernel operations with zero invariant violations. These single-machine regression guards
+are neither a statistically separated history nor physical 60 Hz/120 Hz evidence. The performance
+hard gate therefore remains
 blocked.
 
 ## Hard-gate status

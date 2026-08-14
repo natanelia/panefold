@@ -2,23 +2,23 @@
   "schemaVersion": 1,
   "kind": "browser-profile-result",
   "profile": "compact-react-chromium-desktop",
-  "producedAt": "2026-08-14T06:03:17.330Z",
+  "producedAt": "2026-08-14T06:41:53.774Z",
   "status": "passed",
   "runner": "Playwright 1.62.1",
-  "command": "pnpm test:e2e",
+  "command": "pnpm exec playwright test --reporter=json",
   "project": "chromium",
   "environment": {
     "operatingSystem": "Darwin 25.6.0 arm64",
     "node": "22.21.0",
-    "browserExecutableVersion": "Chromium 151.0.7922.34",
+    "browserExecutableVersion": "Google Chrome for Testing 151.0.7922.34",
     "browserExecutableSha256": "a596b1cfc6353e987fcec8d71a23a28cd6a9e7a6b4e20b908e4c4fcffe51158e",
     "viewport": "1280x720 plus 390x844 touch emulation"
   },
   "summary": {
-    "tests": 28,
-    "passed": 28,
+    "tests": 29,
+    "passed": 29,
     "failed": 0,
-    "durationMs": 21000
+    "durationMs": 17955
   },
   "coverage": [
     "accessible semantic command projection",
@@ -32,6 +32,7 @@
     "direct edge drop and four-way menu container creation in exactly one revision",
     "visible pointer and keyboard acquisition for a retained group after its final tab moves away",
     "one-action non-empty and empty panel-container removal with adjacent merge, focus repair, and one-step undo",
+    "same-document floating move and edge/corner resize, maximize/restore, minimize/restore with movable minimized titlebar, compact sole-panel chrome, stable live-host state, surface-local structural motion, and redock",
     "solver-derived drop preview and committed geometry parity within one CSS pixel",
     "logical vertical and icon-only tab presentation",
     "IndexedDB layout and view-preference restoration across reload with fresh post-restore identity allocation",
@@ -46,7 +47,7 @@
     "raw splitter interaction frame capture and experimental guardrail"
   ],
   "sourceDigests": {
-    "e2e/demo.spec.ts": "ad398f06c4d9fe5e036bde7b9a9ac959501946f58c4a888492dbde921b26eead",
+    "e2e/demo.spec.ts": "4352b3a3d8f1c8b7db82e408115a9164a01a85316764dcbea10d538d2f021652",
     "e2e/performance.spec.ts": "2bbc7b6cb40fd2ad97ba33824b5b8a0a3cf43a82ce638e432f13d29c8db164f3",
     "e2e/performance-baseline.json": "128b4c7dc2c7fc03372224828417f675b279359ebbe9bab7408b172ad76b48a9",
     "playwright.config.ts": "1488b4ef7257ef5a6dc5505148550cbb6ed89e9488b2c9e39e874f15469cc245",
@@ -57,22 +58,24 @@
     "apps/demo/src/demo-panels.tsx": "f971ebb4efbe9b5f111c50c03417e42615a3ce13af6fc0faa8164be76d1a24c1",
     "apps/demo/src/external-panels.ts": "fb54f45c1b28c0c7506b92434d66090b416bc0e4f0b347ba169f86f8710051ab",
     "apps/demo/src/runtime-session.ts": "1b09817f5f32bc10b8e574ac979f3bad472d5840ecb1c08bebdce6d62563c287",
-    "apps/demo/src/workspace-config.ts": "4ad9209eba7b811ba081d398a8ac285b8ffbb98aa177a9ba6705ee1ac2a96d8f",
+    "apps/demo/src/workspace-config.ts": "fb80bd513007fa229fb8d6f0938900020e82afcdc3917316875405412cd11b64",
     "packages/geometry/src/hit-test.ts": "2da9ca42d97c135f37d599bbaebed8f758343fa4e52fd647c05a4b179340c121",
     "packages/kernel/src/plan-panel-drop.ts": "0e31fc1bacc61a5f3d7de20cffea99f746481e1c3c6be9c40549a75e1892bbe9",
     "packages/motion/src/coordinator.ts": "b34a5428e17f0c715b50b45706fa078f77a4841eddf2ff6d357f181afea91715",
     "packages/motion/src/motion-dom-driver.ts": "57092ac380b7d666ed807c31d2f691fea906d63d9cdff9095f5c2bc32260323b",
-    "packages/react/src/WorkspaceSurface.tsx": "d8ee17b9eb75d596ebd814ac362b3f2b1b6875b554c156d418cc3279ec143c7b",
+    "packages/react/src/WorkspaceSurface.tsx": "6b5e641d27c63a7944a7bbc127044b8a7ebf75c217314b27f71f375494b377a3",
     "packages/react/src/panel-drag.tsx": "ee14a96aaa569972e36b295af8bfdc255536eac04307a004014d796ab59d889b",
-    "packages/react/src/panel-drop.ts": "b82ddb1686408e3a08073dba2e336dae9d5ed19a84988578ca7ee352b6780788",
+    "packages/react/src/panel-drop.ts": "598964dffd2db007e3fae5eb645b96c3df766ec0690310d52b239580f62665d7",
     "packages/react/src/tab-reorder.ts": "c139803bc37c5f2c6fc6a17eb836784ff8d203b7bae8acebedcbf290cdabc599",
-    "packages/react/src/messages.ts": "acc43a4f1af98a27d492247b9bbeeeb6b7aaf72463796d74c973fcbcfd006c75",
-    "packages/react/src/styles.css": "7ad4e7c0f0718d214ef0f26df85ac08e1a32024239868c2bad9ee2b10d99d4ed",
-    "packages/react/src/types.ts": "68d25fd772a4aa46d1491244b7e80aedd00abca0b4a1f3b91d2662adb10d7d82",
+    "packages/react/src/messages.ts": "6eaa5370e1915ee428ce92ac33a518b8df3031e68490ffe55a46379383765601",
+    "packages/react/src/styles.css": "3d6038c6d09f570e7fd9062e76a5b7f6dbe7b41f6bde06057a72187d67f65a01",
+    "packages/react/src/types.ts": "629739da4a59687cd78f8b83f02a67b9750edb7b49faafd866c5e701036496d9",
     "packages/runtime/src/durable-runtime.ts": "6ad6e629017a3c4089fdc22f2eef868e3f7873416e9353a2c29825730df63634",
     "packages/surfaces/src/browser-adapter.ts": "1e452c51b94eb96d640defb858d05f28bad3c76550982a20bbcc1ab379cc2d42",
     "packages/surfaces/src/transfer.ts": "2ae27ae6d5f76269d2e49f9649f5e2cf51792441460b13fceee9c7bfabe4318f",
-    "packages/surfaces/src/types.ts": "119ae61f47124f0d7bb4c9f2b74afd3fa5510f27cb3e928fe328590488b029e6"
+    "packages/surfaces/src/types.ts": "119ae61f47124f0d7bb4c9f2b74afd3fa5510f27cb3e928fe328590488b029e6",
+    "packages/react/src/floating-surface.tsx": "dcd429be1a230203acca6b977267933ed31f09852f78b9b8031921fd38cef0d8",
+    "packages/react/src/node-motion.ts": "5f7efe09d09573ea1c2baa44744627d34fabe60cc6978f287da83e6b02ed52bb"
   },
   "limitations": [
     "This is one automated Chromium run on macOS, not a stable browser matrix.",

@@ -5,44 +5,42 @@
   "browser": "chromium",
   "environment": {
     "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.7922.34 Safari/537.36",
-    "hardwareConcurrency": 10,
+    "hardwareConcurrency": 9,
     "devicePixelRatio": 1,
     "viewport": {
       "width": 1280,
       "height": 720
     },
-    "operatingSystem": "Darwin 25.6.0 arm64",
-    "node": "22.21.0",
-    "browserExecutableVersion": "Google Chrome for Testing 151.0.7922.34",
-    "browserExecutableSha256": "a596b1cfc6353e987fcec8d71a23a28cd6a9e7a6b4e20b908e4c4fcffe51158e"
+    "operatingSystem": "Linux 6.18.35 x86_64",
+    "node": "24.14.0",
+    "browserExecutableVersion": "Chromium 149.0.7827.0",
+    "browserExecutableSha256": "434d2607c55941dcaa7fdd19b0800ee90488922fd9744a6642ef527ba8fabf63"
   },
   "sampleCount": 179,
   "summary": {
-    "minimum": 5.8,
-    "maximum": 66.6,
-    "mean": 8.664,
-    "median": 8.2,
-    "p95": 9.2,
-    "p99": 15.864
+    "minimum": 16.5,
+    "maximum": 16.8,
+    "mean": 16.666,
+    "median": 16.7,
+    "p95": 16.8,
+    "p99": 16.8
   },
   "rawFrameDeltasMs": [
-    66.6, 16.8, 7.6, 8.3, 9.1, 8.2, 8.4, 8.3, 8.1, 8.6, 8.3, 8.4, 8.3, 8.3, 7.8, 8.9, 8.3, 8.2, 7.7,
-    8.9, 8.6, 8.3, 8.3, 7.7, 8.1, 9.3, 7.7, 8.9, 8.3, 8.2, 8.5, 8.3, 8.3, 8.4, 7.6, 9.1, 8.3, 7.4,
-    8.4, 9.3, 8.2, 8.3, 8.1, 8.7, 7.5, 8.4, 9, 8.4, 7.4, 9, 8.6, 7.8, 8.9, 7.4, 9.3, 8.2, 7.7, 8.8,
-    8.6, 8.3, 8.3, 8.4, 7.8, 7.9, 9.2, 8.3, 7.9, 8.5, 8.7, 7.5, 9.2, 7.7, 9, 7.8, 8.8, 7.4, 9, 7.7,
-    8.9, 8.7, 8.3, 7.7, 8.3, 8.4, 8.1, 9.2, 8.2, 8.2, 8.6, 8.3, 7.6, 9.1, 8.1, 5.8, 8.1, 7.7, 15.6,
-    7.8, 7.3, 7.8, 8.3, 7.5, 9, 7.3, 8.5, 7.3, 8, 8.5, 7.9, 7.7, 8.2, 7.2, 8.6, 7.4, 8.7, 7.8, 8,
-    7.1, 8.5, 14, 14.1, 8, 7.9, 7.7, 8, 8.9, 8, 8.1, 7.3, 9, 8, 8.1, 7.5, 8.8, 8, 8.1, 8.1, 7.4, 8,
-    9, 8, 8.1, 7.6, 8.6, 8, 7.6, 8.7, 8, 8.2, 8, 8.1, 8.1, 8.1, 8.1, 8.1, 7.8, 8.5, 8, 8.1, 8, 8.2,
-    8.1, 8.1, 8.1, 7.7, 8.5, 8, 8.1, 7.8, 8.2, 7.9, 7.9, 8.8, 8, 8.1, 8.1, 7.3, 8.3, 8.8
+    16.7, 16.7, 16.6, 16.7, 16.6, 16.7, 16.7, 16.6, 16.7, 16.7, 16.6, 16.8, 16.6, 16.6, 16.7, 16.7,
+    16.7, 16.6, 16.7, 16.6, 16.7, 16.7, 16.7, 16.6, 16.7, 16.7, 16.7, 16.6, 16.6, 16.7, 16.7, 16.6,
+    16.7, 16.7, 16.7, 16.7, 16.6, 16.6, 16.7, 16.7, 16.6, 16.7, 16.7, 16.6, 16.7, 16.7, 16.6, 16.7,
+    16.7, 16.7, 16.7, 16.6, 16.7, 16.6, 16.7, 16.7, 16.6, 16.7, 16.6, 16.7, 16.7, 16.6, 16.7, 16.6,
+    16.8, 16.6, 16.7, 16.6, 16.7, 16.7, 16.6, 16.7, 16.6, 16.7, 16.7, 16.7, 16.7, 16.6, 16.7, 16.6,
+    16.7, 16.6, 16.7, 16.6, 16.8, 16.6, 16.7, 16.6, 16.7, 16.7, 16.7, 16.6, 16.7, 16.6, 16.8, 16.5,
+    16.8, 16.6, 16.6, 16.7, 16.8, 16.6, 16.7, 16.6, 16.7, 16.6, 16.7, 16.7, 16.6, 16.7, 16.6, 16.7,
+    16.7, 16.7, 16.6, 16.7, 16.7, 16.7, 16.6, 16.7, 16.6, 16.7, 16.6, 16.7, 16.7, 16.7, 16.6, 16.7,
+    16.6, 16.7, 16.7, 16.6, 16.7, 16.7, 16.7, 16.7, 16.6, 16.6, 16.7, 16.7, 16.6, 16.8, 16.6, 16.7,
+    16.6, 16.7, 16.7, 16.6, 16.6, 16.7, 16.7, 16.7, 16.6, 16.7, 16.7, 16.7, 16.6, 16.7, 16.6, 16.7,
+    16.6, 16.8, 16.6, 16.6, 16.8, 16.6, 16.6, 16.7, 16.7, 16.7, 16.7, 16.6, 16.6, 16.8, 16.6, 16.6,
+    16.8, 16.6, 16.7
   ],
-  "longTasks": [
-    {
-      "startTime": 280.2999999821186,
-      "duration": 73
-    }
-  ],
-  "producedAt": "2026-08-14T06:18:23.187Z",
+  "longTasks": [],
+  "producedAt": "2026-08-13T04:05:43.725Z",
   "guardrail": {
     "schemaVersion": 1,
     "profile": "compact-react-chromium-desktop",
@@ -56,28 +54,28 @@
   "nodeSmoke": {
     "schemaVersion": 1,
     "environment": {
-      "node": "v22.21.0",
-      "v8": "12.4.254.21-node.33",
-      "platform": "darwin",
-      "architecture": "arm64",
-      "cpu": "Apple M1 Max"
+      "node": "v24.14.0",
+      "v8": "13.6.233.17-node.41",
+      "platform": "linux",
+      "architecture": "x64",
+      "cpu": "AMD EPYC 9V74 80-Core Processor"
     },
     "kernel": {
       "iterations": 10000,
-      "elapsedMs": 1392.9
+      "elapsedMs": 1657.86
     },
     "geometry": {
       "iterations": 100000,
-      "elapsedMs": 206.79
+      "elapsedMs": 285.06
     },
     "reorderProfiles": [
       {
         "panelCount": 50,
         "warmupCount": 250,
         "sampleCount": 2000,
-        "medianMs": 0.1973,
-        "p95Ms": 0.422,
-        "p99Ms": 0.5831,
+        "medianMs": 0.2365,
+        "p95Ms": 0.3659,
+        "p99Ms": 0.4465,
         "designTargetMs": 1,
         "withinDesignTargetOnThisMachine": true,
         "invariantViolations": 0
@@ -86,9 +84,9 @@
         "panelCount": 500,
         "warmupCount": 100,
         "sampleCount": 1000,
-        "medianMs": 1.9439,
-        "p95Ms": 2.7185,
-        "p99Ms": 4.3511,
+        "medianMs": 2.4182,
+        "p95Ms": 2.8398,
+        "p99Ms": 3.9662,
         "designTargetMs": 5,
         "withinDesignTargetOnThisMachine": true,
         "invariantViolations": 0
@@ -98,23 +96,23 @@
       {
         "nodeCount": 100,
         "sampleCount": 10000,
-        "elapsedMs": 34.32,
-        "meanMicroseconds": 3.432
+        "elapsedMs": 39.72,
+        "meanMicroseconds": 3.972
       },
       {
         "nodeCount": 500,
         "sampleCount": 10000,
-        "elapsedMs": 194.21,
-        "meanMicroseconds": 19.421
+        "elapsedMs": 203.52,
+        "meanMicroseconds": 20.352
       },
       {
         "nodeCount": 1000,
         "sampleCount": 10000,
-        "elapsedMs": 423.93,
-        "meanMicroseconds": 42.393
+        "elapsedMs": 431.37,
+        "meanMicroseconds": 43.137
       }
     ],
-    "totalElapsedMs": 5134.98,
+    "totalElapsedMs": 6025.34,
     "finalRevision": "10000",
     "invariantViolations": 0
   },
@@ -122,13 +120,17 @@
     "e2e/performance.spec.ts": "2bbc7b6cb40fd2ad97ba33824b5b8a0a3cf43a82ce638e432f13d29c8db164f3",
     "e2e/performance-baseline.json": "128b4c7dc2c7fc03372224828417f675b279359ebbe9bab7408b172ad76b48a9",
     "scripts/performance-smoke.mjs": "fc0d8ce5df966b75312b5d9fae367e07b5ce4f8215afa724d03a7a6cb17fdc95",
-    "packages/react/src/WorkspaceSurface.tsx": "ca8ba3619361d6abcd5ef02fcb9ed4f541a16f121025888eb5a208ca0dfeb81b",
+    "packages/react/src/WorkspaceSurface.tsx": "be9b4dbb7be3d6daea6dbd80c7a2106689216183699b090f17b61662271fa1c3",
     "packages/react/src/panel-drag.tsx": "b856959070689054a28c51e3e79b21b9e981a703762f0b52f14aeef8d8e6b23d",
     "packages/geometry/src/hit-test.ts": "2da9ca42d97c135f37d599bbaebed8f758343fa4e52fd647c05a4b179340c121",
     "packages/geometry/src/invalidation.ts": "dfe873cb6df480d8ce023688e199463489877527b5b1c5155c4a7d1e234d4f1b",
     "packages/kernel-optimized/src/indexes.ts": "c6d962626b3c0cac8d7d89f156aed383b1e313a201f7c3ce5f228d97959ac0a8",
-    "packages/motion/src/coordinator.ts": "b34a5428e17f0c715b50b45706fa078f77a4841eddf2ff6d357f181afea91715",
-    "packages/react/src/floating-surface.tsx": "dcd429be1a230203acca6b977267933ed31f09852f78b9b8031921fd38cef0d8",
-    "packages/react/src/node-motion.ts": "5f7efe09d09573ea1c2baa44744627d34fabe60cc6978f287da83e6b02ed52bb"
-  }
+    "packages/motion/src/coordinator.ts": "b34a5428e17f0c715b50b45706fa078f77a4841eddf2ff6d357f181afea91715"
+  },
+  "limitations": [
+    "This container result is an automated regression guard, not a physical 60 Hz or 120 Hz certification.",
+    "One run is not a statistically separated baseline history or a comparison across devices.",
+    "The Playwright Desktop Chrome descriptor supplies the recorded user agent; the launched executable reports Chromium 149.0.7827.0.",
+    "Node microbenchmarks share this container with other workloads and are design-budget checks rather than production latency guarantees."
+  ]
 }

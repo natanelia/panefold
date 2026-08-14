@@ -75,8 +75,8 @@ the command output.
   same-strip reorder in horizontal LTR, horizontal RTL, and vertical rails, bounded LTR/RTL
   overflow autoscroll, one-action populated and empty panel-container removal, same-document
   floating move/resize/minimize/maximize/restore/redock with compact sole-panel chrome, movable
-  minimized headers, stable live panel state, and raw splitter-frame capture. The checked-in result
-  records 29/29 passing browser tasks.
+  minimized headers, stable live panel state, and raw splitter-frame capture.
+  The checked-in result records 29/29 passing browser tasks.
 - The framework JSDOM contract passed 20/20 tests across Vue, Svelte, Angular, and Web Components.
 - The compact headless protocol result matches the reviewed graphs for all 12 Appendix-C actors:
   84/84 states, 258/258 transition branches, both outcomes for 64/64 guarded branches, and 146/146
@@ -86,7 +86,7 @@ the command output.
   primary and byte-equivalent replay runs plus 12 cancelled twins, with zero pending handles. This
   is code evidence, not browser/OS/process failure certification or the per-panel final-authority
   matrix required by `TST-009`.
-- Protocol/motion validation passed 86/86 focused tests plus 92/92 React integration tests. It
+- Protocol/motion validation passed 86/86 focused tests plus 86/86 React integration tests. It
   covers the twelve-actor catalog, cancellation/revision conflicts, disposable motion leases,
   progressive View Transition fallback, and deterministic load degradation; these focused tests
   supplement rather than substitute for the exact graph result above.
@@ -96,10 +96,10 @@ the command output.
   state per command, not the retained optimized production kernel.
 - The earlier 50,000-attempt projection campaign completed with zero replay/projection divergence.
   It is below the ten-million stable threshold and its checked-in summary records the missing seed.
-- The container interaction capture retained 179 frame deltas at 9.3 ms p95 and 9.4 ms p99, with
-  two observed long tasks of 91 ms and 58 ms. The paired Node smoke run measured 50-panel reorder
-  at 0.9273 ms p95 and 500-panel reorder at 5.0729 ms p95; the latter missed its 5 ms design target
-  on that machine. These are experimental regression guards—not physical performance certification.
+- The local automated interaction capture retained 179 frame deltas at 9.1 ms p95 and 9.2 ms p99,
+  with one observed long task of 61 ms. The paired Node smoke run measured 50-panel reorder at
+  0.2796 ms p95 and 500-panel reorder at 2.0506 ms p95 on that machine. These are experimental
+  regression guards—not physical performance certification.
 
 ## Hard release gates
 

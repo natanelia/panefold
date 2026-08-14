@@ -383,7 +383,7 @@
       "verificationClass": "code-verifiable",
       "artifactRole": "source",
       "uri": "repo://packages/react/test/WorkspaceSurface.test.tsx",
-      "sha256": "c526b845458fb2ddfa571bf013d64a2b4e12434eb65f57f164b0f3e84a65f1bd",
+      "sha256": "e5bf82d1acee48e56242746fca66af7a318d15658d419c6418ae7b045f1ef58f",
       "producedAt": "2026-08-13T11:49:00Z",
       "requirementIds": [
         "A11Y-003",
@@ -759,7 +759,7 @@
       "verificationClass": "code-verifiable",
       "artifactRole": "source",
       "uri": "repo://packages/react/test/WorkspaceSurface.test.tsx",
-      "sha256": "c526b845458fb2ddfa571bf013d64a2b4e12434eb65f57f164b0f3e84a65f1bd",
+      "sha256": "e5bf82d1acee48e56242746fca66af7a318d15658d419c6418ae7b045f1ef58f",
       "producedAt": "2026-08-13T11:49:00Z",
       "requirementIds": [
         "I18N-001",
@@ -855,7 +855,7 @@
       "verificationClass": "code-verifiable",
       "artifactRole": "source",
       "uri": "repo://docs/ARCHITECTURE.md",
-      "sha256": "f969944d24da928bef5eef2a3ec4ab2091cdd207da6a4c720b1ed359667c4e40",
+      "sha256": "9eabf96b4d78834b5d325c30af0077016ba9d5be81dd5314979741f0c56b35b5",
       "producedAt": "2026-08-13T11:49:00Z",
       "requirementIds": [
         "API-002",
@@ -999,8 +999,8 @@
       "verificationClass": "environment-verifiable",
       "artifactRole": "result",
       "uri": "repo://conformance/results/chromium-reference-2026-08-14.json",
-      "sha256": "e7cdabc64fa34a5721cd84eb66455fa948aa2a807e7a5df88f9b1c09b1973f3e",
-      "producedAt": "2026-08-14T06:03:17.330Z",
+      "sha256": "1c86254bc16eb86320b29156dfd33617acd2a8343dabf212fe78fc5287d60fe9",
+      "producedAt": "2026-08-14T06:41:53.774Z",
       "requirementIds": [
         "A11Y-002",
         "A11Y-003",
@@ -1035,8 +1035,8 @@
       "verificationClass": "environment-verifiable",
       "artifactRole": "result",
       "uri": "repo://conformance/results/interaction-performance-2026-08-14.json",
-      "sha256": "f832471ec439c9b1cc0c73c96e0eb4f03e960ef553a35a6d5a7cfdf28315530b",
-      "producedAt": "2026-08-14T06:03:17.330Z",
+      "sha256": "effff92e58d303004a9e1d8dfdff9bc103bc896064398689a23484dc717911a5",
+      "producedAt": "2026-08-14T06:41:53.774Z",
       "requirementIds": [
         "PRF-001",
         "PRF-006",
@@ -1073,8 +1073,8 @@
       "verificationClass": "environment-verifiable",
       "artifactRole": "result",
       "uri": "repo://conformance/results/protocol-motion-2026-08-14.json",
-      "sha256": "c0ef75b1140e7421b01a48db4734ffe0a3f69197c7915ad4db3720aa5d8afccd",
-      "producedAt": "2026-08-14T06:03:17.330Z",
+      "sha256": "bc05fd4842a329f0b0f2ccd8dac85a0bafdbbbde2cc09074cacc31d527b01b7d",
+      "producedAt": "2026-08-14T06:41:09.678Z",
       "requirementIds": [
         "A11Y-002",
         "ARC-002",
