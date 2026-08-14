@@ -4,6 +4,7 @@ import {
   type DurableWorkspaceRestoration,
   type DurableWorkspaceRuntime,
   type WorkspaceJournalPort,
+  type WorkspaceMigration,
   type WorkspaceRuntime,
 } from "@panefold/runtime";
 import { IndexedDbWorkspaceJournalPort } from "@panefold/runtime-effect";
@@ -13,6 +14,70 @@ import { initialWorkspaceSnapshot } from "./workspace-config";
 const WORKSPACE_STORAGE_KEY = "atlas.workspace.v2";
 const WORKSPACE_DATABASE_NAME = "panefold-atlas-demo";
 const WORKSPACE_STORE_NAME = "workspace-journal";
+
+const workbenchPanelTitles: Readonly<Record<string, string>> = {
+  "feature-inspector": "Outline",
+  layers: "Search",
+  "map-canvas": "App.tsx",
+  notes: "workspace.ts",
+  problems: "Terminal",
+  "route-explorer": "Explorer",
+  timeline: "Problems",
+  validation: "Source Control",
+};
+
+/** Retains the stable Atlas-era storage key while upgrading its visible fixture identity. */
+export const demoWorkspaceMigrations: readonly WorkspaceMigration[] = [
+  {
+    id: "panefold.demo.application.1-to-2.code-workbench",
+    scope: "application",
+    fromVersion: 1,
+    toVersion: 2,
+    migrate(workspace: unknown): unknown {
+      const record = requireRecord(workspace, "Workspace migration input");
+      const panels = requireRecord(record.panels, "Workspace panels");
+      const byId = requireRecord(panels.byId, "Workspace panel table");
+      const migratedById = Object.fromEntries(
+        Object.entries(byId).map(([id, value]) => [id, migratePanelTitle(value, id)]),
+      );
+      if (!Array.isArray(record.recoverableClosedPanels)) {
+        throw new TypeError("Recoverable closed panels must be an array");
+      }
+      const recoverableClosedPanels = record.recoverableClosedPanels.map((value, index) => {
+        const closed = requireRecord(value, `Closed panel ${String(index)}`);
+        const panel = requireRecord(closed.panel, `Closed panel ${String(index)} value`);
+        const id = typeof panel.id === "string" ? panel.id : "";
+        return { ...closed, panel: migratePanelTitle(panel, id) };
+      });
+      const metadata = requireRecord(record.metadata, "Workspace metadata");
+      return {
+        ...record,
+        applicationLayoutVersion: 2,
+        panels: { ...panels, byId: migratedById },
+        recoverableClosedPanels,
+        metadata: {
+          ...metadata,
+          locale: "en-US",
+          name: "panefold-demo",
+          product: "Panefold Code",
+        },
+      };
+    },
+  },
+];
+
+function migratePanelTitle(value: unknown, id: string): Readonly<Record<string, unknown>> {
+  const panel = requireRecord(value, `Panel ${id}`);
+  const title = workbenchPanelTitles[id];
+  return title === undefined ? panel : { ...panel, title };
+}
+
+function requireRecord(value: unknown, label: string): Readonly<Record<string, unknown>> {
+  if (typeof value !== "object" || value === null || Array.isArray(value)) {
+    throw new TypeError(`${label} must be an object`);
+  }
+  return value as Readonly<Record<string, unknown>>;
+}
 
 export type DemoWorkspaceRestoration = DurableWorkspaceRestoration & {
   readonly recoveredExternalSurfaces: number;
@@ -48,7 +113,7 @@ export type OpenDemoWorkspaceSessionResult =
 type DemoWorkspaceSessionFailure = Extract<OpenDemoWorkspaceSessionResult, { readonly ok: false }>;
 
 /**
- * Opens Atlas only after its checksummed IndexedDB snapshot and journal have
+ * Opens the Code workbench only after its checksummed IndexedDB snapshot and journal have
  * been recovered. A persisted external surface is deliberately rehomed into
  * the main document: reloading a page must never recreate a popup without a
  * fresh user activation.
@@ -78,6 +143,7 @@ export async function openDemoWorkspaceSession(): Promise<OpenDemoWorkspaceSessi
         currentKernelSchemaVersion: initialWorkspaceSnapshot.schemaVersion,
         currentApplicationLayoutVersion: initialWorkspaceSnapshot.applicationLayoutVersion,
         currentProtocolVersion: 1,
+        migrations: demoWorkspaceMigrations,
       },
       durability: "balanced",
       // The reference fixture keeps one verified snapshot per transaction. This
@@ -144,7 +210,7 @@ export async function openDemoWorkspaceSession(): Promise<OpenDemoWorkspaceSessi
     async resetLayout() {
       opened.runtime.dispatch(
         { type: "restore-workspace", snapshot: initialWorkspaceSnapshot },
-        { origin: "restore", label: "Reset saved Atlas layout" },
+        { origin: "restore", label: "Reset saved Code workspace" },
       );
       await opened.durable.flush();
     },

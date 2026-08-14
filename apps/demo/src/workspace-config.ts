@@ -64,39 +64,39 @@ function panel(
 }
 
 const panelRecords = [
-  panel("route-explorer", "map.route-explorer", "Routes", {
+  panel("route-explorer", "map.route-explorer", "Explorer", {
     hardMinInline: 180,
     preferredInline: 250,
   }),
-  panel("layers", "map.layers", "Layers", {
+  panel("layers", "map.layers", "Search", {
     hardMinInline: 180,
     preferredInline: 250,
   }),
-  panel("map-canvas", "map.canvas", "Map Canvas", {
+  panel("map-canvas", "map.canvas", "App.tsx", {
     hardMinInline: 320,
     hardMinBlock: 220,
     preferredInline: 900,
     preferredBlock: 650,
     resizeDelivery: "adaptive",
   }),
-  panel("notes", "map.notes", "Notes", {
+  panel("notes", "map.notes", "workspace.ts", {
     hardMinInline: 240,
     hardMinBlock: 160,
   }),
-  panel("feature-inspector", "map.inspector", "Inspector", {
+  panel("feature-inspector", "map.inspector", "Outline", {
     hardMinInline: 230,
     preferredInline: 310,
   }),
-  panel("validation", "map.validation", "Validation", {
+  panel("validation", "map.validation", "Source Control", {
     hardMinInline: 230,
     preferredInline: 310,
   }),
-  panel("problems", "map.problems", "Problems", {
+  panel("problems", "map.problems", "Terminal", {
     hardMinBlock: 130,
     preferredBlock: 220,
     resizeDelivery: "throttled",
   }),
-  panel("timeline", "map.timeline", "Timeline", {
+  panel("timeline", "map.timeline", "Problems", {
     hardMinBlock: 130,
     preferredBlock: 220,
   }),
@@ -183,6 +183,7 @@ const surfaces: readonly SurfaceRecord[] = [
 ];
 
 export const initialWorkspaceSnapshot = createWorkspaceSnapshot({
+  applicationLayoutVersion: 2,
   panels: panelRecords,
   groups,
   nodes,
@@ -197,16 +198,17 @@ export const initialWorkspaceSnapshot = createWorkspaceSnapshot({
     fallback: "selected-tab",
   },
   metadata: {
-    name: "One-North route review",
-    locale: "en-SG",
+    name: "panefold-demo",
+    locale: "en-US",
+    product: "Panefold Code",
   },
 });
 
 const groupLabels: Readonly<Record<string, string>> = {
-  navigation: "Navigation",
-  primary: "Primary workspace",
-  inspector: "Inspector",
-  output: "Problems and activity",
+  navigation: "Primary Side Bar",
+  primary: "Editor Group",
+  inspector: "Secondary Side Bar",
+  output: "Panel",
 };
 
 export function projectWorkspace(snapshot: WorkspaceSnapshot): WorkspaceProjection {
@@ -341,6 +343,26 @@ export function createDemoCommands(
       select: true,
       activate: true,
     }),
+    mergeGroup: (sourceGroupId, targetGroupId, selectedPanelId) => {
+      const merge: WorkspaceCommand = {
+        type: "merge-groups",
+        sourceGroupId: groupId(sourceGroupId),
+        target: { groupId: groupId(targetGroupId) },
+      };
+      return selectedPanelId === undefined
+        ? merge
+        : {
+            type: "batch",
+            commands: [
+              merge,
+              {
+                type: "select-panel",
+                panelId: panelId(selectedPanelId),
+                activate: true,
+              },
+            ],
+          };
+    },
     planPanelDrop: (request, context) => planDemoPanelDrop(getSnapshot(), request, context),
   };
 }

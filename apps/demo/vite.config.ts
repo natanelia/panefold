@@ -21,7 +21,7 @@ export default defineConfig({
           groups: [
             {
               // Keep the framework/interaction runtime cacheable across
-              // changes to the Atlas fixture. Application code—including
+              // changes to the workbench fixture. Application code—including
               // synchronous popup creation—remains in the eager entry chunk.
               name: "vendor",
               test: isDemoVendorModule,

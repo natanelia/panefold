@@ -8,9 +8,9 @@ const siteOrigin = "https://natanelia.github.io/panefold";
 const siteRoutes = [
   {
     path: "demo",
-    title: "Live Atlas workspace — Panefold",
+    title: "Live code workbench — Panefold",
     description:
-      "Try the interactive Atlas map-operations fixture powered by Panefold's deterministic workspace runtime.",
+      "Try the interactive Panefold Code fixture powered by Panefold's deterministic workspace runtime.",
   },
   {
     path: "docs",
@@ -120,7 +120,7 @@ const siteRoutes = [
   },
   {
     path: "docs/adr-direct-placement-durable-demo",
-    title: "Direct placement and durable Atlas — Panefold documentation",
+    title: "Direct placement and durable demo — Panefold documentation",
     description:
       "Revision-bound docking, controlled live popouts, tab presentation, and restore-before-render persistence.",
   },
@@ -138,9 +138,11 @@ const siteRoutes = [
 ];
 
 await stat(resolve(demoDist, "index.html")).catch(() => {
-  throw new Error("Atlas demo must be built before the marketing site");
+  throw new Error("Workbench demo must be built before the marketing site");
 });
 
+await copyStableTree(demoDist, resolve(siteDist, "workbench"));
+// Retain the previous standalone URL as a compatibility alias.
 await copyStableTree(demoDist, resolve(siteDist, "atlas"));
 const rootHtml = await readFile(resolve(siteDist, "index.html"), "utf8");
 for (const route of siteRoutes) {

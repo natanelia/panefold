@@ -73,8 +73,8 @@ the command output.
   save/reload/restore evidence, live same-origin popup transfer/redock/loss recovery, LTR/RTL resize,
   motion preference, stable-host lifecycle, all 17 panel classes, forced colors, touch projection,
   same-strip reorder in horizontal LTR, horizontal RTL, and vertical rails, bounded LTR/RTL
-  overflow autoscroll, and raw splitter-frame capture. The checked-in result records 26/26 passing
-  browser tasks.
+  overflow autoscroll, one-action populated and empty panel-container removal, and raw
+  splitter-frame capture. The checked-in result records 28/28 passing browser tasks.
 - The framework JSDOM contract passed 20/20 tests across Vue, Svelte, Angular, and Web Components.
 - The compact headless protocol result matches the reviewed graphs for all 12 Appendix-C actors:
   84/84 states, 258/258 transition branches, both outcomes for 64/64 guarded branches, and 146/146

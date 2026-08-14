@@ -12,7 +12,7 @@ adapters behind IDEs, map tools, operations consoles, and other panel-heavy prod
 [Documentation](https://natanelia.github.io/panefold/docs/) ·
 [Source](https://github.com/natanelia/panefold)
 
-[![Open the interactive Atlas demo](apps/site/public/media/panefold-interactions-poster.jpg)](https://natanelia.github.io/panefold/demo/)
+[![Open the interactive Panefold Code demo](apps/site/public/media/panefold-interactions-poster.jpg)](https://natanelia.github.io/panefold/demo/)
 
 **[Watch the interaction film](https://natanelia.github.io/panefold/media/panefold-interactions.webm)**
 · [Try the live workspace](https://natanelia.github.io/panefold/demo/)
@@ -23,7 +23,7 @@ adapters behind IDEs, map tools, operations consoles, and other panel-heavy prod
 
 > **Use Panefold today**
 >
-> - **Explore:** open the [live Atlas demo](https://natanelia.github.io/panefold/demo/).
+> - **Explore:** open the [live Panefold Code demo](https://natanelia.github.io/panefold/demo/).
 > - **Evaluate:** clone this repository and follow [Run the demo](#run-the-demo).
 > - **Install:** npm packages are **not published**. Version `0.1.0` is available from source and
 >   as private workspace packages only.
@@ -57,8 +57,8 @@ conformance, product certification, npm availability, or unrestricted browser-wi
 - A bounded synchronous runtime with transaction-correlated post-commit effect delivery and
   in-process duplicate suppression, plus versioned persistence codecs, atomic snapshot/journal
   contracts, deterministic schema migration, last-known-good recovery, a restore-before-render open
-  path, observable save status, and IndexedDB/Effect adapters. Atlas visibly reports the exact
-  saved/restored canonical revision. Crash-durable effect deduplication, real browser crash, and
+  path, observable save status, and IndexedDB/Effect adapters. Panefold Code visibly reports the
+  exact saved/restored canonical revision. Crash-durable effect deduplication, real browser crash, and
   quota certification are still absent.
 - Driver-neutral protocol contracts and a public twelve-actor XState catalog with scoped disposal,
   deterministic traces, revision-conflict handling, and prepared external-surface ownership. The
@@ -133,8 +133,8 @@ npm.
 | `@panefold/testkit`          | Workload manifests, 17 panel fixtures, parity, ownership, lifecycle, and statistics   |
 | `@panefold/conformance`      | Claims, proof classes, gates, reports, and third-party certification validation       |
 
-`@panefold/demo` is the workspace application used for the Atlas reference fixture; it is not a
-published package or a support certification.
+`@panefold/demo` is the VS Code-like reference workbench application; it is not a published package
+or a support certification.
 
 ## Run the demo
 
@@ -146,26 +146,31 @@ pnpm install
 pnpm dev
 ```
 
-Open the URL printed by Vite. Atlas lets you drag a tab into another group, drop it on any logical
-edge to create a group, drag it beyond the workspace into a controlled same-origin browser window,
-split from the keyboard/menu, resize splitters, choose top/bottom/vertical and icon/label tab chrome,
+Open the URL printed by Vite. Panefold Code lets you drag an editor into another group, drop it on
+any logical edge to create a group, remove a container with its visible **⊠** action, drag it beyond
+the workspace into a controlled same-origin browser window, split from the keyboard/menu, resize
+splitters, choose top/bottom/vertical and icon/label tab chrome,
 and reload the canonical arrangement from IndexedDB. Stable panel-host identity, undo/redo, a mobile
 single-region projection, and an optional 17-kind lifecycle lab remain observable in the same
 fixture. Panel-owned document content needs an application checkpoint codec; the demo does not imply
 support for every browser, input, framework, workload, or deployment.
 
-### Direct-interaction proof in Atlas
+### Direct-interaction proof in Panefold Code
 
-1. Drag **Notes** onto the center of **Inspector** to dock it in that tab group.
-2. Drag **Notes** before or after **Map Canvas** in the same tab strip. The insertion marker,
-   sibling preview, and final order use one relational reorder command; **Alt+Arrow** and the
-   Actions menu expose the same operation.
+1. Drag **workspace.ts** onto the center of **Outline** to dock it in that tab group.
+2. Drag **workspace.ts** before or after **App.tsx** in the same editor tab strip. The insertion
+   marker, sibling preview, and final order use one relational reorder command; **Alt+Arrow** and
+   the Actions menu expose the same operation.
 3. Drag a tab onto a group edge—or use **Actions → Split left/right/above/below**—to create a new
    container in one undoable transaction.
-4. Drag a popout-capable tab beyond the workspace, or choose **Open in new window**, to move the live
-   host into a same-origin popup. Edit Notes there, then return or close the popup to see recovery.
-5. Open **Workspace appearance** to select a logical tab rail and icon/label treatment.
-6. Wait for **Saved revision _n_ in IndexedDB**, reload, and inspect **Restored revision _n_** plus
+4. Choose the visible **⊠ Remove panel container** action to merge all tabs into the nearest
+   container and collapse the split in one undoable transaction. It also works for empty retained
+   containers.
+5. Drag a popout-capable editor beyond the workbench, or choose **Open in new window**, to move the
+   live host into a same-origin popup. Edit workspace.ts there, then return or close the popup to see
+   recovery.
+6. Open **Workspace appearance** to select a logical tab rail and icon/label treatment.
+7. Wait for **Saved revision _n_ in IndexedDB**, reload, and inspect **Restored revision _n_** plus
    the recovered layout.
 
 ## Verify the repository

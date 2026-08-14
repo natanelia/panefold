@@ -1,4 +1,4 @@
-import { lazy, Suspense, useEffect, useId, useRef, useState, type ReactNode } from "react";
+import { lazy, Suspense, useEffect, useId, useMemo, useRef, useState, type ReactNode } from "react";
 import type { WorkspacePanelRegistry, WorkspacePanelRenderProps } from "@panefold/react";
 
 const LazyHeavyContentFixturePanel = lazy(async () => {
@@ -7,7 +7,7 @@ const LazyHeavyContentFixturePanel = lazy(async () => {
 });
 
 type GlyphName =
-  "route" | "layers" | "map" | "notes" | "inspect" | "validate" | "problems" | "timeline";
+  "code" | "explorer" | "file" | "outline" | "problems" | "search" | "source" | "terminal";
 
 export function Glyph({ name }: { readonly name: GlyphName }) {
   const common = {
@@ -15,61 +15,61 @@ export function Glyph({ name }: { readonly name: GlyphName }) {
     stroke: "currentColor",
     strokeLinecap: "round" as const,
     strokeLinejoin: "round" as const,
-    strokeWidth: 1.7,
+    strokeWidth: 1.55,
   };
   const paths: Record<GlyphName, ReactNode> = {
-    route: (
+    code: (
       <>
-        <circle cx="4" cy="12" r="1.5" {...common} />
-        <circle cx="12" cy="4" r="1.5" {...common} />
-        <path d="M5.5 12c4 0 2-8 5-8" {...common} />
+        <path d="m6 4-4 4 4 4M10 4l4 4-4 4" {...common} />
+        <path d="m9 2-2 12" {...common} />
       </>
     ),
-    layers: (
+    explorer: (
       <>
-        <path d="m2.5 6 5.5-3 5.5 3L8 9 2.5 6Z" {...common} />
-        <path d="m3 9 5 2.8L13 9M3 12l5 2.7 5-2.7" {...common} />
+        <path d="M3 3h6l2 2h3v9H3z" {...common} />
+        <path d="M3 6h11" {...common} />
       </>
     ),
-    map: (
-      <path
-        d="m2.5 3 3.7-1.5 3.6 1.6L13.5 2v11L9.8 14l-3.6-1.6-3.7 1.5V3Z M6.2 1.5v10.9M9.8 3.1V14"
-        {...common}
-      />
-    ),
-    notes: (
+    file: (
       <>
-        <path d="M3 2h10v12H3z" {...common} />
-        <path d="M5.2 5h5.6M5.2 8h5.6M5.2 11h3.5" {...common} />
+        <path d="M4 1.8h5l3 3v9.4H4z" {...common} />
+        <path d="M9 1.8v3h3" {...common} />
       </>
     ),
-    inspect: (
+    outline: (
+      <>
+        <circle cx="3" cy="3.5" r="1" fill="currentColor" />
+        <circle cx="3" cy="8" r="1" fill="currentColor" />
+        <circle cx="3" cy="12.5" r="1" fill="currentColor" />
+        <path d="M6 3.5h7M6 8h5M6 12.5h6" {...common} />
+      </>
+    ),
+    problems: (
+      <>
+        <path d="M8 2 14 13H2z" {...common} />
+        <path d="M8 5.5v3.8M8 11.3v.2" {...common} />
+      </>
+    ),
+    search: (
       <>
         <circle cx="7" cy="7" r="4" {...common} />
         <path d="m10 10 3.5 3.5" {...common} />
       </>
     ),
-    validate: (
+    source: (
       <>
-        <path d="M8 1.5 13 3v4c0 3.1-1.8 5.6-5 7-3.2-1.4-5-3.9-5-7V3l5-1.5Z" {...common} />
-        <path d="m5.5 7.5 1.7 1.7 3.5-3.7" {...common} />
+        <circle cx="4" cy="3" r="1.5" {...common} />
+        <circle cx="12" cy="5" r="1.5" {...common} />
+        <circle cx="4" cy="13" r="1.5" {...common} />
+        <path d="M4 4.5v7M5.5 12c5 0 6.5-2.7 6.5-5.5" {...common} />
       </>
     ),
-    problems: (
+    terminal: (
       <>
-        <path d="M8 2 14 13H2L8 2Z" {...common} />
-        <path d="M8 5.5v3.8M8 11.3v.2" {...common} />
-      </>
-    ),
-    timeline: (
-      <>
-        <path d="M4 2v12M4 5h5M4 11h7" {...common} />
-        <circle cx="4" cy="5" r="1" fill="currentColor" />
-        <circle cx="4" cy="11" r="1" fill="currentColor" />
+        <path d="m3 5 3 3-3 3M8 12h5" {...common} />
       </>
     ),
   };
-
   return (
     <svg viewBox="0 0 16 16" aria-hidden="true">
       {paths[name]}
@@ -81,13 +81,15 @@ function PanelFrame({
   children,
   toolbar,
   status,
+  className = "",
 }: {
   readonly children: ReactNode;
   readonly toolbar?: ReactNode;
   readonly status?: ReactNode;
+  readonly className?: string;
 }) {
   return (
-    <div className="demo-panel-frame">
+    <div className={`demo-panel-frame ${className}`.trim()}>
       {toolbar === undefined ? null : <div className="demo-panel-toolbar">{toolbar}</div>}
       <div className="demo-panel-body">{children}</div>
       {status === undefined ? null : <div className="demo-panel-status">{status}</div>}
@@ -102,7 +104,7 @@ function HeavyContentFixtureBoundary(props: WorkspacePanelRenderProps) {
         <div
           className="demo-panel-loading"
           aria-busy="true"
-          aria-label="Loading browser lifecycle fixture"
+          aria-label="Loading editor lifecycle fixture"
         >
           <span className="demo-brand-mark" aria-hidden="true">
             <i />
@@ -111,7 +113,7 @@ function HeavyContentFixtureBoundary(props: WorkspacePanelRenderProps) {
           </span>
           <div>
             <strong>Loading fixture lab</strong>
-            <span>Preparing the browser lifecycle probes…</span>
+            <span>Preparing browser lifecycle probes…</span>
           </div>
         </div>
       }
@@ -121,13 +123,8 @@ function HeavyContentFixtureBoundary(props: WorkspacePanelRenderProps) {
   );
 }
 
-function MapCanvasPanel({ panel, lifecycle }: WorkspacePanelRenderProps) {
-  const [zoom, setZoom] = useState(15.8);
-  const [selectedFeature, setSelectedFeature] = useState("LN-1842");
-  const [showLabels, setShowLabels] = useState(true);
-  const mountToken = useId().replaceAll(":", "");
+function useLifecycleWorkProbe(lifecycle: WorkspacePanelRenderProps["lifecycle"]) {
   const workProbeRef = useRef<HTMLOutputElement>(null);
-
   useEffect(() => {
     const output = workProbeRef.current;
     const ownerWindow = output?.ownerDocument.defaultView;
@@ -135,8 +132,12 @@ function MapCanvasPanel({ panel, lifecycle }: WorkspacePanelRenderProps) {
     output.dataset.lifecycle = lifecycle;
     if (lifecycle === "suspended") return;
     let frame = 0;
+    let frameWindow = ownerWindow;
     const tick = () => {
-      frame = ownerWindow.requestAnimationFrame(() => {
+      const currentWindow = output.ownerDocument.defaultView;
+      if (currentWindow === null) return;
+      frameWindow = currentWindow;
+      frame = currentWindow.requestAnimationFrame(() => {
         const workUnits = Number(output.dataset.workUnits ?? "0") + 1;
         output.dataset.workUnits = String(workUnits);
         output.value = String(workUnits);
@@ -145,290 +146,117 @@ function MapCanvasPanel({ panel, lifecycle }: WorkspacePanelRenderProps) {
     };
     tick();
     return () => {
-      ownerWindow.cancelAnimationFrame(frame);
+      frameWindow.cancelAnimationFrame(frame);
     };
   }, [lifecycle]);
-
-  return (
-    <PanelFrame
-      toolbar={
-        <>
-          <div className="demo-segmented" aria-label="Map view mode">
-            <button type="button" aria-pressed="true">
-              Map
-            </button>
-            <button type="button" aria-pressed="false">
-              Satellite
-            </button>
-          </div>
-          <span className="demo-toolbar-spacer" />
-          <label className="demo-compact-check">
-            <input
-              type="checkbox"
-              checked={showLabels}
-              onChange={(event) => {
-                setShowLabels(event.target.checked);
-              }}
-            />
-            Labels
-          </label>
-          <button
-            type="button"
-            className="demo-icon-button"
-            aria-label="Zoom out"
-            onClick={() => {
-              setZoom((value) => Math.max(12, value - 0.5));
-            }}
-          >
-            −
-          </button>
-          <output aria-label="Map zoom" className="demo-zoom-output">
-            {zoom.toFixed(1)}
-          </output>
-          <button
-            type="button"
-            className="demo-icon-button"
-            aria-label="Zoom in"
-            onClick={() => {
-              setZoom((value) => Math.min(20, value + 0.5));
-            }}
-          >
-            +
-          </button>
-        </>
-      }
-      status={
-        <>
-          <span>1.3521° N, 103.8198° E</span>
-          <span>Zoom {zoom.toFixed(1)}</span>
-          <span className="demo-lifecycle-badge" data-state={lifecycle}>
-            {lifecycle === "suspended" ? "Render work paused" : `Render ${lifecycle}`}
-          </span>
-          <output ref={workProbeRef} aria-label="Map render work units" data-work-units="0">
-            0
-          </output>
-          <span className="demo-mount-proof" title="Local panel state survives same-document moves">
-            Host {mountToken}
-          </span>
-        </>
-      }
-    >
-      <div className="demo-map" data-panel-id={panel.id}>
-        <svg
-          viewBox="0 0 960 620"
-          role="group"
-          aria-label="Interactive HD map around One-North with a selected route and lane features"
-          preserveAspectRatio="xMidYMid slice"
-        >
-          <defs>
-            <pattern id="minor-grid" width="28" height="28" patternUnits="userSpaceOnUse">
-              <path d="M28 0H0V28" fill="none" stroke="currentColor" strokeOpacity=".065" />
-            </pattern>
-            <pattern id="major-grid" width="140" height="140" patternUnits="userSpaceOnUse">
-              <rect width="140" height="140" fill="url(#minor-grid)" />
-              <path d="M140 0H0V140" fill="none" stroke="currentColor" strokeOpacity=".12" />
-            </pattern>
-            <filter id="route-glow" x="-30%" y="-30%" width="160%" height="160%">
-              <feGaussianBlur stdDeviation="5" result="blur" />
-              <feMerge>
-                <feMergeNode in="blur" />
-                <feMergeNode in="SourceGraphic" />
-              </feMerge>
-            </filter>
-          </defs>
-          <rect width="960" height="620" className="map-base" />
-          <rect width="960" height="620" fill="url(#major-grid)" />
-          <g className="map-blocks">
-            <path d="M80 70h190l35 120-126 72-121-58Z" />
-            <path d="M360 52h166l70 110-41 122-192-12-52-101Z" />
-            <path d="M670 38h216l25 152-94 81-178-47-27-102Z" />
-            <path d="M81 374l168-73 105 81-36 173H94l-49-99Z" />
-            <path d="M430 355l177-49 88 106-50 155H438l-71-96Z" />
-            <path d="M750 345l151 30 18 167-201 24-40-111Z" />
-          </g>
-          <g className="map-roads map-roads-casing">
-            <path d="M-20 311C160 262 268 231 422 260s257 82 558 10" />
-            <path d="M302-20c17 151 10 250 58 348s104 170 152 312" />
-            <path d="M650-20c-10 131-35 218-5 330s92 168 88 330" />
-            <path d="M-20 493c189-37 302-38 450 11s280 52 550-8" />
-            <path d="M96-20c14 91 52 161 44 252s-67 202-68 408" />
-          </g>
-          <g className="map-roads map-roads-fill">
-            <path d="M-20 311C160 262 268 231 422 260s257 82 558 10" />
-            <path d="M302-20c17 151 10 250 58 348s104 170 152 312" />
-            <path d="M650-20c-10 131-35 218-5 330s92 168 88 330" />
-            <path d="M-20 493c189-37 302-38 450 11s280 52 550-8" />
-            <path d="M96-20c14 91 52 161 44 252s-67 202-68 408" />
-          </g>
-          <path
-            className="map-route-glow"
-            d="M45 302c165-45 255-68 382-40s201 56 341 45c91-7 142-24 218-47"
-            filter="url(#route-glow)"
-          />
-          <path
-            className="map-route"
-            d="M45 302c165-45 255-68 382-40s201 56 341 45c91-7 142-24 218-47"
-          />
-          <g className="map-lane-lines">
-            <path d="M323-20c12 151 7 246 51 339s104 169 151 301" />
-            <path d="M639-20c-9 130-31 217 0 332s88 164 83 328" />
-          </g>
-          <g className="map-features">
-            {["LN-1842", "LN-1843", "LN-1901", "LN-1912"].map((feature, index) => {
-              const points = [
-                [505, 276],
-                [646, 303],
-                [349, 249],
-                [791, 304],
-              ] as const;
-              const point = points[index];
-              if (point === undefined) return null;
-              return (
-                <g
-                  key={feature}
-                  className="map-feature"
-                  data-selected={String(feature === selectedFeature)}
-                  role="button"
-                  tabIndex={0}
-                  aria-label={`Select lane ${feature}`}
-                  onClick={() => {
-                    setSelectedFeature(feature);
-                  }}
-                  onKeyDown={(event) => {
-                    if (event.key === "Enter" || event.key === " ") {
-                      event.preventDefault();
-                      setSelectedFeature(feature);
-                    }
-                  }}
-                >
-                  <circle cx={point[0]} cy={point[1]} r="8" />
-                  <circle cx={point[0]} cy={point[1]} r="3" />
-                  {showLabels ? (
-                    <text x={point[0] + 12} y={point[1] - 10}>
-                      {feature}
-                    </text>
-                  ) : null}
-                </g>
-              );
-            })}
-          </g>
-          {showLabels ? (
-            <g className="map-labels">
-              <text x="157" y="345">
-                North Buona Vista Rd
-              </text>
-              <text x="327" y="105" transform="rotate(82 327 105)">
-                Portsdown Rd
-              </text>
-              <text x="676" y="150" transform="rotate(94 676 150)">
-                Ayer Rajah Ave
-              </text>
-              <text x="142" y="466">
-                one-north
-              </text>
-              <text x="744" y="460">
-                Fusionopolis
-              </text>
-            </g>
-          ) : null}
-        </svg>
-        <div className="demo-map-compass" aria-hidden="true">
-          <span>N</span>
-          <i />
-        </div>
-        <div className="demo-map-card">
-          <span className="demo-map-card-kicker">Selected lane</span>
-          <strong>{selectedFeature}</strong>
-          <span>Primary · 50 km/h · 98.2%</span>
-        </div>
-      </div>
-    </PanelFrame>
-  );
+  return workProbeRef;
 }
 
-function RouteExplorerPanel() {
-  const [expanded, setExpanded] = useState<ReadonlySet<string>>(
-    new Set(["singapore", "one-north"]),
+interface ExplorerFile {
+  readonly name: string;
+  readonly path: string;
+  readonly type: "json" | "markdown" | "typescript";
+  readonly dirty?: boolean;
+}
+
+const explorerFiles: readonly ExplorerFile[] = [
+  { name: "App.tsx", path: "src/App.tsx", type: "typescript", dirty: true },
+  { name: "workspace.ts", path: "src/workspace.ts", type: "typescript", dirty: true },
+  { name: "README.md", path: "README.md", type: "markdown" },
+  { name: "package.json", path: "package.json", type: "json" },
+  { name: "tsconfig.json", path: "tsconfig.json", type: "json" },
+];
+
+function FileExplorerPanel() {
+  const [expanded, setExpanded] = useState(true);
+  const [filter, setFilter] = useState("");
+  const [selected, setSelected] = useState("src/App.tsx");
+  const visibleFiles = explorerFiles.filter((file) =>
+    file.path.toLowerCase().includes(filter.trim().toLowerCase()),
   );
-  const [selected, setSelected] = useState("RA-042");
-  const toggle = (id: string) => {
-    setExpanded((current) => {
-      const next = new Set(current);
-      if (next.has(id)) next.delete(id);
-      else next.add(id);
-      return next;
-    });
-  };
 
   return (
     <PanelFrame
+      className="demo-sidebar-panel"
       toolbar={
-        <label className="demo-search">
-          <span className="pf-visually-hidden">Filter routes</span>
-          <input type="search" placeholder="Filter routes…" />
-        </label>
+        <>
+          <strong className="demo-pane-heading">EXPLORER</strong>
+          <span className="demo-toolbar-spacer" />
+          <button
+            type="button"
+            className="demo-icon-button"
+            aria-label={expanded ? "Collapse folders" : "Expand folders"}
+            title={expanded ? "Collapse folders" : "Expand folders"}
+            onClick={() => {
+              setExpanded((value) => !value);
+            }}
+          >
+            {expanded ? "⊟" : "⊞"}
+          </button>
+        </>
       }
       status={
         <>
-          <span>3 routes</span>
-          <span>Last sync 14:32</span>
+          <span>PANEFOLD-DEMO</span>
+          <span>{visibleFiles.length} files</span>
         </>
       }
     >
-      <nav className="demo-tree" aria-label="Route assessment workspace">
+      <label className="demo-sidebar-filter">
+        <span className="demo-visually-hidden">Filter files</span>
+        <Glyph name="search" />
+        <input
+          type="search"
+          value={filter}
+          placeholder="Filter files"
+          onChange={(event) => {
+            setFilter(event.target.value);
+          }}
+        />
+      </label>
+      <nav className="demo-tree" aria-label="File Explorer">
         <button
-          type="button"
           className="demo-tree-row demo-tree-folder"
-          aria-expanded={expanded.has("singapore")}
+          type="button"
+          aria-expanded={expanded}
           onClick={() => {
-            toggle("singapore");
+            setExpanded((value) => !value);
           }}
         >
-          <span aria-hidden="true">⌄</span>
-          <strong>Singapore</strong>
-          <small>3</small>
+          <span className="demo-tree-chevron" aria-hidden="true">
+            {expanded ? "⌄" : "›"}
+          </span>
+          <strong>PANEFOLD-DEMO</strong>
         </button>
-        {expanded.has("singapore") ? (
+        {expanded ? (
           <div className="demo-tree-branch">
-            <button
-              type="button"
-              className="demo-tree-row demo-tree-folder"
-              aria-expanded={expanded.has("one-north")}
-              onClick={() => {
-                toggle("one-north");
-              }}
-            >
-              <span aria-hidden="true">⌄</span>
-              <strong>One-North</strong>
-              <small>2</small>
-            </button>
-            {expanded.has("one-north") ? (
-              <div className="demo-tree-branch">
-                {["RA-042", "RA-047"].map((route) => (
-                  <button
-                    key={route}
-                    type="button"
-                    className="demo-tree-row"
-                    aria-current={selected === route ? "true" : undefined}
-                    onClick={() => {
-                      setSelected(route);
-                    }}
-                  >
-                    <span className="demo-route-dot" aria-hidden="true" />
-                    <span>
-                      <strong>{route}</strong>
-                      <small>North Buona Vista</small>
-                    </span>
-                    <span className="demo-state-pill">Ready</span>
-                  </button>
-                ))}
-              </div>
+            <div className="demo-tree-section" aria-label="src folder">
+              <span className="demo-tree-chevron" aria-hidden="true">
+                ⌄
+              </span>
+              <strong>src</strong>
+            </div>
+            {visibleFiles.map((file) => (
+              <button
+                className="demo-tree-row demo-file-row"
+                type="button"
+                key={file.path}
+                aria-current={selected === file.path ? "page" : undefined}
+                title={file.path}
+                onClick={() => {
+                  setSelected(file.path);
+                }}
+              >
+                <span className={`demo-file-icon file-${file.type}`} aria-hidden="true">
+                  {file.type === "typescript" ? "TS" : file.type === "markdown" ? "M↓" : "{}"}
+                </span>
+                <span>{file.name}</span>
+                {file.dirty ? <i className="demo-dirty-dot" aria-label="Modified" /> : null}
+              </button>
+            ))}
+            {visibleFiles.length === 0 ? (
+              <p className="demo-empty-state">No files match “{filter}”.</p>
             ) : null}
-            <button type="button" className="demo-tree-row demo-tree-folder" aria-expanded="false">
-              <span aria-hidden="true">›</span>
-              <strong>Jurong East</strong>
-              <small>1</small>
-            </button>
           </div>
         ) : null}
       </nav>
@@ -436,339 +264,652 @@ function RouteExplorerPanel() {
   );
 }
 
-function LayersPanel() {
-  const [layers, setLayers] = useState({
-    centerlines: true,
-    boundaries: true,
-    signs: true,
-    pointCloud: false,
-    satellite: false,
+const appSource = [
+  "import { useMemo } from 'react';",
+  "import { WorkspaceSurface } from '@panefold/react';",
+  "",
+  "import { panels, projectWorkspace } from './workspace';",
+  "",
+  "export function App() {",
+  "  const commands = useMemo(() => createCommands(), []);",
+  "",
+  "  return (",
+  "    <WorkspaceSurface",
+  '      workspaceLabel="Panefold Code"',
+  "      panels={panels}",
+  "      commands={commands}",
+  "      projector={projectWorkspace}",
+  '      responsive="auto"',
+  "    />",
+  "  );",
+  "}",
+] as const;
+
+const syntaxPattern =
+  /(\/\/.*|'.*?'|".*?"|\b(?:const|export|from|function|import|return|true|false|type|readonly)\b|WorkspaceSurface|useMemo|createCommands|projectWorkspace)/g;
+
+function highlightSourceLine(line: string) {
+  return line.split(syntaxPattern).map((part, index) => {
+    let token = "";
+    if (part.startsWith("//")) token = "comment";
+    else if (part.startsWith("'") || part.startsWith('"')) token = "string";
+    else if (/^(const|export|from|function|import|return|true|false|type|readonly)$/.test(part))
+      token = "keyword";
+    else if (/^[A-Z]/.test(part)) token = "type";
+    else if (/^(useMemo|createCommands|projectWorkspace)$/.test(part)) token = "function";
+    return token === "" ? (
+      part
+    ) : (
+      <span className={`token-${token}`} key={index}>
+        {part}
+      </span>
+    );
   });
-  const labels: Readonly<Record<keyof typeof layers, string>> = {
-    centerlines: "Lane centerlines",
-    boundaries: "Road boundaries",
-    signs: "Traffic signs",
-    pointCloud: "Point cloud",
-    satellite: "Satellite imagery",
+}
+
+function AppEditorPanel({ panel, lifecycle }: WorkspacePanelRenderProps) {
+  const [activeLine, setActiveLine] = useState(10);
+  const [breakpoints, setBreakpoints] = useState<ReadonlySet<number>>(new Set([6]));
+  const mountToken = useId().replaceAll(":", "");
+  const workProbeRef = useLifecycleWorkProbe(lifecycle);
+
+  const toggleBreakpoint = (line: number) => {
+    setBreakpoints((current) => {
+      const next = new Set(current);
+      if (next.has(line)) next.delete(line);
+      else next.add(line);
+      return next;
+    });
+    setActiveLine(line);
   };
 
   return (
-    <PanelFrame status={<span>{Object.values(layers).filter(Boolean).length} visible layers</span>}>
-      <div className="demo-layer-list">
-        {(Object.keys(layers) as (keyof typeof layers)[]).map((key, index) => (
-          <label key={key} className="demo-layer-row">
-            <input
-              type="checkbox"
-              checked={layers[key]}
-              onChange={(event) => {
-                setLayers((current) => ({ ...current, [key]: event.target.checked }));
-              }}
-            />
-            <span className={`demo-layer-swatch swatch-${index}`} aria-hidden="true" />
-            <span>{labels[key]}</span>
-            <small>{index < 3 ? `${614 - index * 121}` : "—"}</small>
-          </label>
-        ))}
+    <PanelFrame
+      className="demo-editor-panel"
+      toolbar={
+        <nav className="demo-breadcrumbs" aria-label="Editor breadcrumbs">
+          <span>panefold-demo</span>
+          <i>›</i>
+          <span>src</span>
+          <i>›</i>
+          <strong>App.tsx</strong>
+          <i>›</i>
+          <span>App</span>
+        </nav>
+      }
+      status={
+        <>
+          <span>Ln {activeLine}, Col 1</span>
+          <span>Spaces: 2</span>
+          <span>UTF-8</span>
+          <span className="demo-toolbar-spacer" />
+          <span className="demo-lifecycle-badge" data-state={lifecycle}>
+            {lifecycle === "suspended" ? "Language service paused" : "TypeScript React"}
+          </span>
+          <output
+            ref={workProbeRef}
+            className="demo-visually-hidden"
+            aria-label="Editor work units"
+            data-work-units="0"
+          >
+            0
+          </output>
+          <span className="demo-mount-proof" title="Stable editor host">
+            Host {mountToken}
+          </span>
+        </>
+      }
+    >
+      <div className="demo-code-editor" data-panel-id={panel.id}>
+        <div className="demo-code-overview" aria-hidden="true">
+          <i />
+          <i />
+          <i />
+          <i />
+          <i />
+          <i />
+        </div>
+        <div
+          className="demo-code-lines"
+          role="region"
+          aria-label="Read-only App.tsx source"
+          tabIndex={0}
+        >
+          {appSource.map((line, index) => {
+            const lineNumber = index + 1;
+            const breakpoint = breakpoints.has(lineNumber);
+            return (
+              <div
+                className="demo-code-line"
+                data-active={String(activeLine === lineNumber)}
+                key={lineNumber}
+                onPointerDown={() => {
+                  setActiveLine(lineNumber);
+                }}
+              >
+                <button
+                  type="button"
+                  className="demo-code-gutter"
+                  data-breakpoint={String(breakpoint)}
+                  aria-label={`${breakpoint ? "Remove" : "Add"} breakpoint on line ${lineNumber}`}
+                  onClick={() => {
+                    toggleBreakpoint(lineNumber);
+                  }}
+                >
+                  <i aria-hidden="true" />
+                  <span>{lineNumber}</span>
+                </button>
+                <code>{line === "" ? " " : highlightSourceLine(line)}</code>
+              </div>
+            );
+          })}
+        </div>
       </div>
     </PanelFrame>
   );
 }
 
-function InspectorPanel() {
-  const formId = useId();
-  const [status, setStatus] = useState("review");
+const initialWorkspaceSource = `import type { WorkspaceProjection } from '@panefold/react';
+
+export const workspace = {
+  name: 'panefold-demo',
+  autosave: true,
+  layout: ['sidebar', 'editor', 'panel'],
+} as const;
+
+export function projectWorkspace(): WorkspaceProjection {
+  return createProjection(workspace);
+}`;
+
+function WorkspaceEditorPanel({ lifecycle }: WorkspacePanelRenderProps) {
+  const [value, setValue] = useState(initialWorkspaceSource);
+  const [cursor, setCursor] = useState({ line: 1, column: 1 });
+  const mountToken = useId().replaceAll(":", "");
+  const workProbeRef = useLifecycleWorkProbe(lifecycle);
+  const lines = value.split("\n");
+
+  const updateCursor = (element: HTMLTextAreaElement, source: string) => {
+    const beforeCursor = source.slice(0, element.selectionStart);
+    const line = beforeCursor.split("\n").length;
+    const lastBreak = beforeCursor.lastIndexOf("\n");
+    setCursor({ line, column: beforeCursor.length - lastBreak });
+  };
+
   return (
     <PanelFrame
+      className="demo-editor-panel"
       toolbar={
-        <>
-          <span className="demo-kicker">Lane feature</span>
-          <span className="demo-toolbar-spacer" />
-          <span className="demo-state-pill">Modified</span>
-        </>
+        <nav className="demo-breadcrumbs" aria-label="Editor breadcrumbs">
+          <span>panefold-demo</span>
+          <i>›</i>
+          <span>src</span>
+          <i>›</i>
+          <strong>workspace.ts</strong>
+        </nav>
       }
       status={
         <>
-          <span>Local draft</span>
-          <button type="submit" form={formId}>
-            Apply changes
-          </button>
+          <span>
+            Ln {cursor.line}, Col {cursor.column}
+          </span>
+          <span>{value.length} characters</span>
+          <span className="demo-toolbar-spacer" />
+          <span className="demo-lifecycle-badge" data-state={lifecycle}>
+            {lifecycle === "suspended" ? "Editor suspended" : `Editor ${lifecycle}`}
+          </span>
+          <output
+            ref={workProbeRef}
+            className="demo-visually-hidden"
+            aria-label="workspace.ts editor work units"
+            data-work-units="0"
+          >
+            0
+          </output>
+          <span className="demo-mount-proof">Host {mountToken}</span>
         </>
       }
     >
+      <div className="demo-text-editor">
+        <div className="demo-text-line-numbers" aria-hidden="true">
+          {lines.map((_, index) => (
+            <span key={index}>{index + 1}</span>
+          ))}
+        </div>
+        <textarea
+          aria-label="workspace.ts editor"
+          value={value}
+          spellCheck={false}
+          onChange={(event) => {
+            const next = event.target.value;
+            setValue(next);
+            updateCursor(event.target, next);
+          }}
+          onSelect={(event) => {
+            updateCursor(event.currentTarget, value);
+          }}
+        />
+      </div>
+    </PanelFrame>
+  );
+}
+
+interface SearchResult {
+  readonly file: string;
+  readonly line: number;
+  readonly preview: string;
+}
+
+const searchResults: readonly SearchResult[] = [
+  { file: "src/App.tsx", line: 2, preview: "import { WorkspaceSurface } from '@panefold/react';" },
+  { file: "src/App.tsx", line: 10, preview: "<WorkspaceSurface" },
+  { file: "src/App.tsx", line: 11, preview: 'workspaceLabel="Panefold Code"' },
+  { file: "src/workspace.ts", line: 3, preview: "export const workspace = {" },
+];
+
+function SearchPanel() {
+  const [query, setQuery] = useState("WorkspaceSurface");
+  const [matchCase, setMatchCase] = useState(false);
+  const [selected, setSelected] = useState<string>();
+  const matches = useMemo(() => {
+    if (query.trim() === "") return [];
+    const needle = matchCase ? query : query.toLowerCase();
+    return searchResults.filter((result) => {
+      const haystack = `${result.file} ${result.preview}`;
+      return (matchCase ? haystack : haystack.toLowerCase()).includes(needle);
+    });
+  }, [matchCase, query]);
+
+  return (
+    <PanelFrame
+      className="demo-sidebar-panel"
+      toolbar={<strong className="demo-pane-heading">SEARCH</strong>}
+      status={
+        <span>
+          {matches.length} results in {new Set(matches.map((item) => item.file)).size} files
+        </span>
+      }
+    >
+      <div className="demo-search-box">
+        <label>
+          <span className="demo-visually-hidden">Search workspace</span>
+          <Glyph name="search" />
+          <input
+            type="search"
+            value={query}
+            placeholder="Search"
+            onChange={(event) => {
+              setQuery(event.target.value);
+            }}
+          />
+        </label>
+        <button
+          type="button"
+          aria-label="Match case"
+          aria-pressed={matchCase}
+          title="Match case"
+          onClick={() => {
+            setMatchCase((value) => !value);
+          }}
+        >
+          Aa
+        </button>
+      </div>
+      <div className="demo-search-results" aria-live="polite">
+        {matches.length === 0 ? <p>No results found.</p> : null}
+        {matches.map((result) => {
+          const key = `${result.file}:${result.line}`;
+          return (
+            <button
+              type="button"
+              key={key}
+              aria-pressed={selected === key}
+              onClick={() => {
+                setSelected(key);
+              }}
+            >
+              <span className="demo-file-icon file-typescript" aria-hidden="true">
+                TS
+              </span>
+              <span>
+                <strong>{result.file}</strong>
+                <small>
+                  <b>{result.line}</b> {result.preview}
+                </small>
+              </span>
+            </button>
+          );
+        })}
+      </div>
+    </PanelFrame>
+  );
+}
+
+const outlineItems = [
+  { depth: 0, icon: "ƒ", label: "App" },
+  { depth: 1, icon: "◇", label: "commands" },
+  { depth: 1, icon: "◇", label: "WorkspaceSurface" },
+  { depth: 2, icon: "▫", label: "workspaceLabel" },
+  { depth: 2, icon: "▫", label: "panels" },
+  { depth: 2, icon: "▫", label: "projector" },
+  { depth: 2, icon: "▫", label: "responsive" },
+] as const;
+
+function OutlinePanel() {
+  const [selected, setSelected] = useState("App");
+  return (
+    <PanelFrame
+      className="demo-sidebar-panel"
+      toolbar={
+        <>
+          <strong className="demo-pane-heading">OUTLINE</strong>
+          <span className="demo-toolbar-spacer" />
+          <span className="demo-pane-file">App.tsx</span>
+        </>
+      }
+      status={<span>7 symbols</span>}
+    >
+      <nav className="demo-outline" aria-label="Document Outline">
+        {outlineItems.map((item) => (
+          <button
+            type="button"
+            key={item.label}
+            aria-current={selected === item.label ? "location" : undefined}
+            style={{ paddingInlineStart: `${8 + item.depth * 14}px` }}
+            onClick={() => {
+              setSelected(item.label);
+            }}
+          >
+            <span aria-hidden="true">{item.icon}</span>
+            {item.label}
+          </button>
+        ))}
+      </nav>
+    </PanelFrame>
+  );
+}
+
+const initialChanges = [
+  { file: "App.tsx", path: "src", state: "M" },
+  { file: "workspace.ts", path: "src", state: "M" },
+] as const;
+
+function SourceControlPanel() {
+  const [message, setMessage] = useState("");
+  const [changes, setChanges] =
+    useState<readonly (typeof initialChanges)[number][]>(initialChanges);
+  const [lastCommit, setLastCommit] = useState<string>();
+
+  return (
+    <PanelFrame
+      className="demo-sidebar-panel"
+      toolbar={
+        <>
+          <strong className="demo-pane-heading">SOURCE CONTROL</strong>
+          <span className="demo-toolbar-spacer" />
+          <button
+            type="button"
+            className="demo-icon-button"
+            aria-label="Refresh source control"
+            title="Refresh"
+            onClick={() => {
+              setChanges(initialChanges);
+              setLastCommit(undefined);
+            }}
+          >
+            ↻
+          </button>
+        </>
+      }
+      status={<span>{lastCommit ?? `${changes.length} working tree changes`}</span>}
+    >
       <form
-        id={formId}
-        className="demo-inspector-form"
+        className="demo-source"
         onSubmit={(event) => {
           event.preventDefault();
+          if (message.trim() === "" || changes.length === 0) return;
+          setLastCommit(`Committed “${message.trim()}” locally`);
+          setChanges([]);
+          setMessage("");
         }}
       >
-        <div className="demo-inspector-heading">
-          <span className="demo-feature-icon" aria-hidden="true">
-            <Glyph name="route" />
-          </span>
-          <div>
-            <strong>LN-1842</strong>
-            <small>lane_centerline</small>
-          </div>
+        <label>
+          <span className="demo-visually-hidden">Commit message</span>
+          <textarea
+            value={message}
+            rows={2}
+            placeholder="Message (⌘Enter to commit)"
+            onChange={(event) => {
+              setMessage(event.target.value);
+            }}
+          />
+        </label>
+        <button
+          type="submit"
+          className="demo-primary-button"
+          disabled={message.trim() === "" || changes.length === 0}
+        >
+          Commit
+        </button>
+        <div className="demo-source-heading">
+          <strong>CHANGES</strong>
+          <span>{changes.length}</span>
         </div>
-        <fieldset>
-          <legend>Properties</legend>
-          <label>
-            Road class
-            <select defaultValue="primary">
-              <option value="primary">Primary</option>
-              <option value="secondary">Secondary</option>
-              <option value="residential">Residential</option>
-            </select>
-          </label>
-          <label>
-            Speed limit
-            <div className="demo-field-with-unit">
-              <input type="number" defaultValue="50" min="0" max="130" />
-              <span>km/h</span>
-            </div>
-          </label>
-          <label>
-            Direction
-            <select defaultValue="forward">
-              <option value="forward">Forward</option>
-              <option value="backward">Backward</option>
-              <option value="both">Bidirectional</option>
-            </select>
-          </label>
-          <label>
-            Confidence
-            <input type="range" defaultValue="98" min="0" max="100" />
-            <output>98%</output>
-          </label>
-        </fieldset>
-        <fieldset>
-          <legend>Review</legend>
-          <div className="demo-radio-cards">
-            {(["review", "approved", "blocked"] as const).map((value) => (
-              <label key={value} data-checked={String(status === value)}>
-                <input
-                  type="radio"
-                  name="review-status"
-                  value={value}
-                  checked={status === value}
-                  onChange={() => {
-                    setStatus(value);
-                  }}
-                />
-                {value[0]?.toUpperCase()}
-                {value.slice(1)}
-              </label>
-            ))}
-          </div>
-          <label>
-            Comment
-            <textarea rows={3} defaultValue="Verify divider continuity near junction." />
-          </label>
-        </fieldset>
+        {changes.map((change) => (
+          <button className="demo-change" type="button" key={change.file}>
+            <span className="demo-file-icon file-typescript" aria-hidden="true">
+              TS
+            </span>
+            <span>
+              <strong>{change.file}</strong>
+              <small>{change.path}</small>
+            </span>
+            <i>{change.state}</i>
+          </button>
+        ))}
+        {changes.length === 0 ? <p className="demo-empty-state">No pending changes.</p> : null}
       </form>
     </PanelFrame>
   );
 }
 
-const validationItems = [
-  { level: "error", title: "Boundary gap", detail: "0.42 m gap at node 8192", count: 2 },
-  {
-    level: "warning",
-    title: "Heading discontinuity",
-    detail: "12.8° delta exceeds threshold",
-    count: 5,
-  },
-  {
-    level: "warning",
-    title: "Missing predecessor",
-    detail: "Lane LN-1904 has no incoming edge",
-    count: 1,
-  },
-  { level: "passed", title: "Topology connectivity", detail: "1,248 checks passed", count: 0 },
-] as const;
+interface TerminalEntry {
+  readonly command: string;
+  readonly output: readonly string[];
+}
 
-function ValidationPanel() {
-  const [running, setRunning] = useState(false);
+const initialTerminalEntries: readonly TerminalEntry[] = [
+  {
+    command: "pnpm test --run",
+    output: [
+      "✓ workspace runtime checks passed",
+      "✓ 18 tests passed in 1.42s",
+      "",
+      "Test Files  4 passed (4)",
+    ],
+  },
+];
+
+function terminalOutput(command: string): readonly string[] {
+  if (command === "git status")
+    return ["On branch main", "Changes not staged for commit:", "  modified: src/App.tsx"];
+  if (command === "pnpm test" || command === "pnpm test --run")
+    return ["✓ 18 tests passed in 1.42s"];
+  if (command === "clear") return [];
+  return [`zsh: command not found: ${command.split(" ")[0] ?? command}`];
+}
+
+function TerminalPanel() {
+  const [input, setInput] = useState("");
+  const [entries, setEntries] = useState<readonly TerminalEntry[]>(initialTerminalEntries);
+  const inputRef = useRef<HTMLInputElement>(null);
+
   return (
     <PanelFrame
+      className="demo-terminal-panel"
       toolbar={
         <>
-          <span className="demo-kicker">Route RA-042</span>
+          <strong className="demo-pane-heading">TERMINAL</strong>
+          <span className="demo-terminal-session">zsh</span>
           <span className="demo-toolbar-spacer" />
           <button
             type="button"
+            className="demo-icon-button"
+            aria-label="Clear terminal"
+            title="Clear"
             onClick={() => {
-              setRunning(true);
-              window.setTimeout(() => {
-                setRunning(false);
-              }, 900);
+              setEntries([]);
+              inputRef.current?.focus();
             }}
           >
-            {running ? "Running…" : "Run validation"}
+            ⌫
           </button>
         </>
       }
       status={
         <>
-          <span className="demo-status-error">2 errors</span>
-          <span className="demo-status-warning">6 warnings</span>
-          <span>Updated just now</span>
+          <span>zsh</span>
+          <span>pid 4421</span>
         </>
       }
     >
-      <div className="demo-validation-list" aria-busy={running}>
-        {validationItems.map((item) => (
-          <button
-            key={item.title}
-            type="button"
-            className="demo-validation-row"
-            data-level={item.level}
-          >
-            <span className="demo-validation-mark" aria-hidden="true">
-              {item.level === "passed" ? "✓" : item.level === "error" ? "!" : "△"}
-            </span>
-            <span>
-              <strong>{item.title}</strong>
-              <small>{item.detail}</small>
-            </span>
-            {item.count === 0 ? null : <span className="demo-count-badge">{item.count}</span>}
-          </button>
-        ))}
+      <div
+        className="demo-terminal"
+        onPointerDown={() => {
+          inputRef.current?.focus();
+        }}
+      >
+        <div className="demo-terminal-history" aria-live="polite">
+          {entries.map((entry, index) => (
+            <div key={`${entry.command}:${index}`}>
+              <p>
+                <span>➜</span> <b>panefold-demo</b> <i>git:(main)</i> {entry.command}
+              </p>
+              {entry.output.map((line, lineIndex) => (
+                <p className="demo-terminal-output" key={`${line}:${lineIndex}`}>
+                  {line === "" ? <br /> : line}
+                </p>
+              ))}
+            </div>
+          ))}
+        </div>
+        <form
+          onSubmit={(event) => {
+            event.preventDefault();
+            const command = input.trim();
+            if (command === "") return;
+            if (command === "clear") setEntries([]);
+            else
+              setEntries((current) => [...current, { command, output: terminalOutput(command) }]);
+            setInput("");
+          }}
+        >
+          <span aria-hidden="true">➜</span>
+          <b>panefold-demo</b>
+          <i>git:(main)</i>
+          <input
+            ref={inputRef}
+            aria-label="Terminal input"
+            value={input}
+            autoCapitalize="off"
+            autoComplete="off"
+            spellCheck={false}
+            onChange={(event) => {
+              setInput(event.target.value);
+            }}
+          />
+        </form>
       </div>
     </PanelFrame>
   );
 }
 
-const problems = [
-  ["Error", "LN-1842", "Boundary gap exceeds 0.30 m", "One-North"],
-  ["Error", "LN-1901", "Self-intersection in centerline", "One-North"],
-  ["Warning", "LN-1843", "Heading delta 12.8°", "Portsdown"],
-  ["Warning", "SG-098", "Sign association is ambiguous", "Portsdown"],
+const problemRows = [
+  {
+    level: "error",
+    message: "Cannot find name 'createCommands'.",
+    file: "App.tsx",
+    line: 7,
+    column: 34,
+  },
+  {
+    level: "warning",
+    message: "Import 'useMemo' can be simplified.",
+    file: "App.tsx",
+    line: 1,
+    column: 10,
+  },
+  {
+    level: "info",
+    message: "Consider enabling noUncheckedIndexedAccess.",
+    file: "tsconfig.json",
+    line: 8,
+    column: 5,
+  },
 ] as const;
 
 function ProblemsPanel() {
+  const [selected, setSelected] = useState<string>();
   return (
     <PanelFrame
-      status={
-        <>
-          <span>8 issues</span>
-          <span>4 shown</span>
-        </>
-      }
-    >
-      <div className="demo-table-scroll">
-        <table className="demo-problems-table">
-          <thead>
-            <tr>
-              <th>Severity</th>
-              <th>Feature</th>
-              <th>Message</th>
-              <th>Region</th>
-            </tr>
-          </thead>
-          <tbody>
-            {problems.map((problem) => (
-              <tr key={`${problem[0]}-${problem[1]}`} tabIndex={0}>
-                <td>
-                  <span className={`demo-severity severity-${problem[0].toLowerCase()}`}>
-                    <i aria-hidden="true" />
-                    {problem[0]}
-                  </span>
-                </td>
-                <td>
-                  <code>{problem[1]}</code>
-                </td>
-                <td>{problem[2]}</td>
-                <td>{problem[3]}</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
-    </PanelFrame>
-  );
-}
-
-function NotesPanel({ lifecycle }: WorkspacePanelRenderProps) {
-  const [value, setValue] = useState(
-    "Review the divider continuity near the Portsdown junction.\n\nCompare the 2026-08-10 capture before approving RA-042.",
-  );
-  const mountToken = useId().replaceAll(":", "");
-  return (
-    <PanelFrame
+      className="demo-problems-panel"
       toolbar={
         <>
-          <span className="demo-kicker">Review notes</span>
-          <span className="demo-toolbar-spacer" />
-          <span>{value.length} characters</span>
+          <strong className="demo-pane-heading">PROBLEMS</strong>
+          <span className="demo-problem-summary">
+            <b>⊗ 1</b>
+            <i>△ 1</i>
+            <span>ⓘ 1</span>
+          </span>
         </>
       }
       status={
         <>
-          <span>Panel-local draft · stable host</span>
-          <span className="demo-lifecycle-badge" data-state={lifecycle}>
-            {lifecycle === "suspended" ? "Editor suspended" : `Editor ${lifecycle}`}
-          </span>
-          <span className="demo-mount-proof">Host {mountToken}</span>
+          <span>3 problems in 2 files</span>
+          <span>Workspace</span>
         </>
       }
     >
-      <label className="demo-notes-label">
-        <span className="pf-visually-hidden">Workspace review notes</span>
-        <textarea
-          value={value}
-          onChange={(event) => {
-            setValue(event.target.value);
-          }}
-          spellCheck="true"
-        />
-      </label>
-    </PanelFrame>
-  );
-}
-
-function TimelinePanel() {
-  const events = [
-    ["14:32", "Validation completed", "8 issues across 1,248 checks"],
-    ["14:27", "LN-1842 edited", "Speed limit changed by Natan"],
-    ["14:18", "Route loaded", "RA-042 · One-North"],
-    ["13:54", "Snapshot restored", "Autosave checkpoint #1841"],
-  ] as const;
-  return (
-    <PanelFrame status={<span>Workspace activity · today</span>}>
-      <ol className="demo-timeline">
-        {events.map((event, index) => (
-          <li key={event[0]}>
-            <time>{event[0]}</time>
-            <span
-              className="demo-timeline-dot"
-              data-current={String(index === 0)}
-              aria-hidden="true"
-            />
-            <span>
-              <strong>{event[1]}</strong>
-              <small>{event[2]}</small>
-            </span>
-          </li>
-        ))}
-      </ol>
+      <div className="demo-problem-list" aria-label="Problems">
+        {problemRows.map((problem) => {
+          const key = `${problem.file}:${problem.line}:${problem.column}`;
+          return (
+            <button
+              type="button"
+              key={key}
+              aria-pressed={selected === key}
+              onClick={() => {
+                setSelected(key);
+              }}
+            >
+              <span className={`demo-problem-icon problem-${problem.level}`} aria-hidden="true">
+                {problem.level === "error" ? "⊗" : problem.level === "warning" ? "△" : "ⓘ"}
+              </span>
+              <span>
+                <strong>{problem.message}</strong>
+                <small>
+                  {problem.file} [{problem.line}, {problem.column}]
+                </small>
+              </span>
+            </button>
+          );
+        })}
+      </div>
     </PanelFrame>
   );
 }
 
 export const demoPanelRegistry: WorkspacePanelRegistry = {
-  "map.route-explorer": { render: RouteExplorerPanel, icon: <Glyph name="route" /> },
-  "map.layers": { render: LayersPanel, icon: <Glyph name="layers" /> },
-  "map.canvas": { render: MapCanvasPanel, icon: <Glyph name="map" /> },
-  "map.notes": { render: NotesPanel, icon: <Glyph name="notes" /> },
-  "map.inspector": { render: InspectorPanel, icon: <Glyph name="inspect" /> },
-  "map.validation": { render: ValidationPanel, icon: <Glyph name="validate" /> },
-  "map.problems": { render: ProblemsPanel, icon: <Glyph name="problems" /> },
-  "map.timeline": { render: TimelinePanel, icon: <Glyph name="timeline" /> },
+  "map.route-explorer": { render: FileExplorerPanel, icon: <Glyph name="explorer" /> },
+  "map.layers": { render: SearchPanel, icon: <Glyph name="search" /> },
+  "map.canvas": { render: AppEditorPanel, icon: <Glyph name="code" /> },
+  "map.notes": { render: WorkspaceEditorPanel, icon: <Glyph name="file" /> },
+  "map.inspector": { render: OutlinePanel, icon: <Glyph name="outline" /> },
+  "map.validation": { render: SourceControlPanel, icon: <Glyph name="source" /> },
+  "map.problems": { render: TerminalPanel, icon: <Glyph name="terminal" /> },
+  "map.timeline": { render: ProblemsPanel, icon: <Glyph name="problems" /> },
 };
 
 export const heavyContentDemoPanelRegistry: WorkspacePanelRegistry = {
   ...demoPanelRegistry,
-  "map.canvas": { render: HeavyContentFixtureBoundary, icon: <Glyph name="map" /> },
+  "map.canvas": { render: HeavyContentFixtureBoundary, icon: <Glyph name="code" /> },
 };

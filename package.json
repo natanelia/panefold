@@ -20,7 +20,7 @@
   "scripts": {
     "build": "pnpm build:packages && pnpm build:site",
     "build:packages": "pnpm -r --filter './packages/**' run build",
-    "build:site": "pnpm --filter '@panefold/demo^...' run build && PANEFOLD_DEMO_BASE=/panefold/atlas/ pnpm --filter @panefold/demo run build && pnpm --filter @panefold/site run build",
+    "build:site": "pnpm --filter '@panefold/demo^...' run build && PANEFOLD_DEMO_BASE=/panefold/workbench/ pnpm --filter @panefold/demo run build && pnpm --filter @panefold/site run build",
     "dev": "pnpm build:packages && pnpm --filter @panefold/demo run dev",
     "dev:site": "pnpm build:packages && node scripts/dev-marketing-site.mjs",
     "preview": "pnpm --filter @panefold/demo run preview",

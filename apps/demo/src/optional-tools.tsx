@@ -246,7 +246,7 @@ export function CommandPalette({
         className="demo-command-palette"
         role="dialog"
         aria-modal="true"
-        aria-label="Workspace command palette"
+        aria-label="Command Palette"
         onKeyDown={(event) => {
           if (event.key === "Escape") onClose();
         }}
@@ -259,7 +259,7 @@ export function CommandPalette({
             onChange={(event) => {
               setQuery(event.target.value);
             }}
-            placeholder="Find a panel or command…"
+            placeholder="Type a command or panel name…"
           />
         </label>
         <div className="demo-command-results">
@@ -306,15 +306,15 @@ export function CommandPalette({
             onClick={() => {
               runtime.dispatch(
                 { type: "restore-workspace", snapshot: initialWorkspaceSnapshot },
-                { origin: "restore", label: "Restore map operations preset" },
+                { origin: "restore", label: "Restore default workbench layout" },
               );
               onClose();
             }}
           >
             <span className="demo-command-icon">⌂</span>
             <span>
-              <strong>Restore map operations preset</strong>
-              <small>Return to the initial four-region layout</small>
+              <strong>Workbench: Reset Layout</strong>
+              <small>Return to the default editor arrangement</small>
             </span>
           </button>
         </div>
@@ -332,14 +332,14 @@ export function CommandPalette({
 }
 
 function glyphForPanel(type: string): Parameters<typeof Glyph>[0]["name"] {
-  if (type.includes("route")) return "route";
-  if (type.includes("layers")) return "layers";
-  if (type.includes("canvas")) return "map";
-  if (type.includes("notes")) return "notes";
-  if (type.includes("inspector")) return "inspect";
-  if (type.includes("validation")) return "validate";
-  if (type.includes("problems")) return "problems";
-  return "timeline";
+  if (type.includes("route")) return "explorer";
+  if (type.includes("layers")) return "search";
+  if (type.includes("canvas")) return "code";
+  if (type.includes("notes")) return "file";
+  if (type.includes("inspector")) return "outline";
+  if (type.includes("validation")) return "source";
+  if (type === "map.problems") return "terminal";
+  return "problems";
 }
 
 async function copyReproduction(runtime: WorkspaceRuntime) {

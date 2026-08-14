@@ -16,7 +16,7 @@ behavior must remain coherent as complexity grows.
 2. **Mechanism:** one immutable semantic model and one authoritative command kernel.
 3. **Craft:** solver-backed geometry, stable hosts, semantic undo, accessible projections, bounded
    failure, and evidence-backed support claims.
-4. **Proof:** a real interactive Atlas fixture, a reproducible interaction film, public tests, and
+4. **Proof:** a real interactive Panefold Code fixture, a reproducible interaction film, public tests, and
    repository-backed documentation.
 5. **Boundary:** version 0.1 is experimental and does not claim stable conformance or product
    certification.
@@ -25,7 +25,7 @@ behavior must remain coherent as complexity grows.
 
 - `/` — product narrative, animated workspace hero, feature proof, craftsmanship, interaction film,
   embedded live fixture, framework story, and calls to action.
-- `/demo` — full-height Atlas fixture with explicit IndexedDB save/restore status and boundaries.
+- `/demo` — full-height VS Code-like workbench with explicit IndexedDB save/restore status and boundaries.
 - `/docs` — searchable documentation index.
 - `/docs/:slug` — repository Markdown rendered with navigation, headings, tables, and copyable code.
 
@@ -46,7 +46,7 @@ pnpm build:site
 PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH=/path/to/chromium pnpm marketing:social
 ```
 
-The video is assembled from deterministic Playwright screenshots of Atlas and encoded to VP9 WebM.
+The video is assembled from deterministic Playwright screenshots of Panefold Code and encoded to VP9 WebM.
 The social card is rendered from the same Tailwind design system at exactly 1200×630.
 
 ## Measurement contract

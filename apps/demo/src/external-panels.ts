@@ -60,7 +60,7 @@ export interface DemoExternalPanelControllerOptions {
 
 /**
  * Demo-only application coordinator. The library owns capability, prepared
- * destination, and exclusive-ownership mechanics; this class supplies Atlas
+ * destination, and exclusive-ownership mechanics; this class supplies the Code workbench
  * policy, deterministic IDs, semantic commands, and its stable React host.
  */
 export class DemoExternalPanelController {

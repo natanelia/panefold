@@ -213,6 +213,25 @@
     line-height: 1.45;
   }
 
+  .pf-empty-group-remove {
+    justify-self: center;
+    min-block-size: 30px;
+    margin-block-start: 4px;
+    padding-inline: 10px;
+    border: 1px solid var(--pf-border-strong);
+    border-radius: 4px;
+    color: var(--pf-text);
+    background: var(--pf-surface-raised);
+    font: inherit;
+    font-size: 10px;
+    pointer-events: auto;
+  }
+
+  .pf-empty-group-remove:hover {
+    border-color: var(--pf-accent);
+    background: var(--pf-surface-soft);
+  }
+
   .pf-group[data-empty="true"] :is(.pf-tab-strip, .pf-panel-slot) {
     display: none;
   }
@@ -311,6 +330,7 @@
   }
 
   .pf-tab-close,
+  .pf-group-remove,
   .pf-tab-more {
     display: grid;
     flex: 0 0 auto;
@@ -329,11 +349,16 @@
     font-size: 18px;
   }
 
+  .pf-group-remove {
+    font-size: 14px;
+  }
+
   .pf-tab-more {
     font-size: 10px;
   }
 
   .pf-tab-close:hover,
+  .pf-group-remove:hover,
   .pf-tab-more:hover {
     color: var(--pf-text);
     background: var(--pf-surface-soft);
@@ -678,14 +703,16 @@
     }
 
     .pf-tab-close,
+    .pf-group-remove,
+    .pf-empty-group-remove,
     .pf-tab-more {
       inline-size: var(--pf-target-size);
       block-size: var(--pf-target-size);
     }
 
     .pf-group[data-tab-content="icon-only"][data-tab-orientation="vertical"] {
-      /* Two adjacent controls retain full 44px touch targets without flex shrink. */
-      --pf-tab-inline-size: 100px;
+      /* Three adjacent controls retain full 44px touch targets without flex shrink. */
+      --pf-tab-inline-size: 148px;
     }
   }
 

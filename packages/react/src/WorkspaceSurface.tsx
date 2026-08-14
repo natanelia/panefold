@@ -1711,6 +1711,7 @@ function PanelGroup<TCommand, TResult>({
   const createReorderPanelCommand = commands.reorderPanel;
   const createFloatPanelCommand = commands.floatPanel;
   const createDropPanelCommand = commands.planPanelDrop;
+  const createMergeGroupCommand = commands.mergeGroup;
   const presentation = resolveTabPresentation(tabPresentation, group, projection);
   const orientation = tabOrientation(presentation);
   const empty = groupPanels.length === 0;
@@ -1718,6 +1719,14 @@ function PanelGroup<TCommand, TResult>({
   const rootRect = resolvedLayout.nodeRects[resolvedLayout.rootNodeId] ?? groupRect;
   const acquisitionRect = emptyGroupAcquisitionRect(group, groupRect, rootRect);
   const emptyGroupLabel = group.label ?? messages.panelGroupFallback();
+  const mergeTarget =
+    createMergeGroupCommand === undefined ? undefined : adjacentGroupForNode(projection, nodeId);
+  const mergeTargetLabel = mergeTarget?.label ?? messages.groupFallback();
+  const removeContainerLabel =
+    mergeTarget === undefined
+      ? undefined
+      : (messages.removePanelContainer?.({ target: mergeTargetLabel }) ??
+        `Remove panel container (merge into ${mergeTargetLabel})`);
   const emptyGroupDescriptionId = `${groupLabelId}-empty`;
   const emptyGroupStyle = empty
     ? ({
@@ -1727,6 +1736,34 @@ function PanelGroup<TCommand, TResult>({
         "--pf-empty-group-block-size": `${acquisitionRect.blockSize}px`,
       } as CSSProperties)
     : undefined;
+
+  const removePanelContainer = (
+    origin: Extract<WorkspaceCommandOrigin, "pointer" | "keyboard">,
+  ) => {
+    if (createMergeGroupCommand === undefined || mergeTarget === undefined) return;
+    const ownerDocument = groupRef.current?.ownerDocument;
+    const selectedSourcePanelId = selectedPanel?.id;
+    const targetFocusPanelId = mergeTarget.panelIds.includes(mergeTarget.selectedPanelId)
+      ? mergeTarget.selectedPanelId
+      : mergeTarget.panelIds[0];
+    const outcome = dispatch(
+      createMergeGroupCommand(group.id, mergeTarget.id, selectedSourcePanelId),
+      messages.removedPanelContainer?.({
+        group: emptyGroupLabel,
+        target: mergeTargetLabel,
+      }) ?? `Removed ${emptyGroupLabel} panel container and moved its tabs to ${mergeTargetLabel}`,
+      origin,
+    ).outcome;
+    const focusPanelId = selectedSourcePanelId ?? projection.activePanelId ?? targetFocusPanelId;
+    if (
+      focusPanelId !== undefined &&
+      (outcome.status === "committed" || outcome.status === "queued")
+    ) {
+      queueMicrotask(() => {
+        ownerDocument?.getElementById(panelTabId(domIdPrefix, focusPanelId))?.focus();
+      });
+    }
+  };
 
   const commitMenuDrop = (
     panel: WorkspacePanelView,
@@ -1877,6 +1914,19 @@ function PanelGroup<TCommand, TResult>({
         >
           <strong>{emptyGroupLabel}</strong>
           <span>{messages.emptyPanelGroupInstructions({ group: emptyGroupLabel })}</span>
+          {removeContainerLabel === undefined ? null : (
+            <button
+              className="pf-empty-group-remove"
+              type="button"
+              aria-label={removeContainerLabel}
+              title={removeContainerLabel}
+              onClick={(event) => {
+                removePanelContainer(clickOrigin(event));
+              }}
+            >
+              Remove panel container
+            </button>
+          )}
         </div>
       ) : null}
       <div className="pf-tab-strip">
@@ -1999,6 +2049,7 @@ function PanelGroup<TCommand, TResult>({
           createReorderPanelCommand === undefined &&
           createFloatPanelCommand === undefined &&
           createDropPanelCommand === undefined &&
+          removeContainerLabel === undefined &&
           !externalPanelAvailable) ? null : (
           <div
             id={panelControlsId(domIdPrefix, selectedPanel.id)}
@@ -2016,6 +2067,19 @@ function PanelGroup<TCommand, TResult>({
                 }}
               >
                 <span aria-hidden="true">×</span>
+              </button>
+            )}
+            {removeContainerLabel === undefined ? null : (
+              <button
+                className="pf-group-remove"
+                type="button"
+                aria-label={removeContainerLabel}
+                title={removeContainerLabel}
+                onClick={(event) => {
+                  removePanelContainer(clickOrigin(event));
+                }}
+              >
+                <span aria-hidden="true">⊠</span>
               </button>
             )}
             {createMovePanelCommand === undefined &&
@@ -2910,6 +2974,57 @@ function applyResolvedLayoutPreview(root: HTMLElement | null, layout: ResolvedLa
     element.dataset.blockStart = String(resolved.rect.blockStart);
     element.style.setProperty("--pf-splitter-size", `${axisSize(resolved.rect, axis)}px`);
   }
+}
+
+function adjacentGroupForNode(
+  projection: WorkspaceProjection,
+  sourceNodeId: string,
+): WorkspaceGroupView | undefined {
+  const parent = Object.values(projection.nodes).find(
+    (node) => node.kind === "split" && node.childIds.includes(sourceNodeId),
+  );
+  if (parent === undefined || parent.kind !== "split") return undefined;
+  const sourceIndex = parent.childIds.indexOf(sourceNodeId);
+  if (sourceIndex < 0) return undefined;
+  const candidateIndexes =
+    sourceIndex === 0
+      ? [1]
+      : sourceIndex === parent.childIds.length - 1
+        ? [sourceIndex - 1]
+        : [sourceIndex - 1, sourceIndex + 1];
+  for (const candidateIndex of candidateIndexes) {
+    const candidateId = parent.childIds[candidateIndex];
+    if (candidateId === undefined) continue;
+    const groupId = boundaryGroupForNode(
+      projection,
+      candidateId,
+      candidateIndex < sourceIndex ? "end" : "start",
+      new Set(),
+    );
+    if (groupId === undefined) continue;
+    const group = projection.groups[groupId];
+    if (group !== undefined) return group;
+  }
+  return undefined;
+}
+
+function boundaryGroupForNode(
+  projection: WorkspaceProjection,
+  nodeId: string,
+  boundary: "start" | "end",
+  visited: Set<string>,
+): string | undefined {
+  if (visited.has(nodeId)) return undefined;
+  visited.add(nodeId);
+  const node = projection.nodes[nodeId];
+  if (node === undefined) return undefined;
+  if (node.kind === "group") return node.groupId;
+  const childIds = boundary === "start" ? node.childIds : [...node.childIds].reverse();
+  for (const childId of childIds) {
+    const groupId = boundaryGroupForNode(projection, childId, boundary, visited);
+    if (groupId !== undefined) return groupId;
+  }
+  return undefined;
 }
 
 function subtreeHasEmptyGroup(

@@ -998,9 +998,9 @@
       "status": "verified",
       "verificationClass": "environment-verifiable",
       "artifactRole": "result",
-      "uri": "repo://conformance/results/chromium-reference-2026-08-13.json",
-      "sha256": "f4f9552c7ab5c1287bc4eb3596b78411c0928850170b4323c1be2bc55e68e405",
-      "producedAt": "2026-08-13T11:12:01.000Z",
+      "uri": "repo://conformance/results/chromium-reference-2026-08-14.json",
+      "sha256": "8b019385f8cf41483bbf57d5fdb87abf124a398bd26ef98a76ef1d98ca4d0a93",
+      "producedAt": "2026-08-14T04:01:00.000Z",
       "requirementIds": [
         "A11Y-002",
         "A11Y-003",
@@ -1034,9 +1034,9 @@
       "status": "verified",
       "verificationClass": "environment-verifiable",
       "artifactRole": "result",
-      "uri": "repo://conformance/results/interaction-performance-2026-08-13.json",
-      "sha256": "53e05740d5d6e144017b675622f4c47170d15020e56df1dadee1641819257e86",
-      "producedAt": "2026-08-13T04:05:43.725Z",
+      "uri": "repo://conformance/results/interaction-performance-2026-08-14.json",
+      "sha256": "777397cd25623bca874a4512d34ccffb04830ac8330083e59ef80b224bf00c66",
+      "producedAt": "2026-08-14T04:10:00.000Z",
       "requirementIds": [
         "PRF-001",
         "PRF-006",
@@ -1072,9 +1072,9 @@
       "status": "verified",
       "verificationClass": "environment-verifiable",
       "artifactRole": "result",
-      "uri": "repo://conformance/results/protocol-motion-2026-08-13.json",
-      "sha256": "ed66c673c482d70c556a91344d1767b8c03ae45a142f3768405a761d5fba2791",
-      "producedAt": "2026-08-14T01:16:17.784Z",
+      "uri": "repo://conformance/results/protocol-motion-2026-08-14.json",
+      "sha256": "ea6c0e8ced806788484ce1a94a29a4f791df7bc087eca407283307395d4fbb9b",
+      "producedAt": "2026-08-14T04:06:00.000Z",
       "requirementIds": [
         "A11Y-002",
         "ARC-002",
@@ -1107,7 +1107,7 @@
       "verificationClass": "code-verifiable",
       "artifactRole": "result",
       "uri": "repo://conformance/results/protocol-state-machine-coverage-2026-08-14.json",
-      "sha256": "16eb7959026baecbd9fbf671d951d8d8d1f78ac6408aad182936503cfca32c41",
+      "sha256": "04abc3b3bf6afb15ec4dcf298cc89550506fe0e7b54f33cc829514ec126ffa5b",
       "producedAt": "2026-08-14T01:12:00Z",
       "requirementIds": [
         "TST-003"
