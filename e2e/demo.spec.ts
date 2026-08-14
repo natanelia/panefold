@@ -727,11 +727,50 @@ test("floats, moves, resizes, minimizes, maximizes, restores, and redocks a live
   const frame = page.locator('[data-workspace-floating-surface^="floating:notes:"]');
   await expect(frame).toBeVisible();
   await expect(frame).toHaveAttribute("data-compact-header", "true");
+  await expect(frame).not.toHaveAttribute("aria-modal");
   await expect(frame.locator(".pf-floating-titlebar .pf-tab-strip")).toBeVisible();
-  await frame.getByRole("button", { name: "Actions for workspace.ts" }).click();
-  await expect(frame.getByRole("menu", { name: "workspace.ts actions" })).toBeVisible();
-  await page.keyboard.press("Escape");
   await expect.poll(() => revisionOf(page)).toBe(beforeFloat + 1);
+  const titlebar = frame.getByLabel("Move workspace.ts floating window");
+  await titlebar.focus();
+  await page.keyboard.press("Shift+Tab");
+  await expect(frame.locator(":focus")).toHaveCount(0);
+
+  const bottomHandle = frame.locator('[data-resize-edge="bottom"]');
+  const bottomHandleBox = await requiredBox(bottomHandle);
+  await page.mouse.move(
+    bottomHandleBox.x + bottomHandleBox.width / 2,
+    bottomHandleBox.y + bottomHandleBox.height / 2,
+  );
+  await page.mouse.down();
+  await page.mouse.move(
+    bottomHandleBox.x + bottomHandleBox.width / 2,
+    bottomHandleBox.y + bottomHandleBox.height / 2 - 260,
+    { steps: 8 },
+  );
+  await page.mouse.up();
+  await expect.poll(async () => Math.round((await requiredBox(frame)).height)).toBe(120);
+
+  await frame.getByRole("button", { name: "Actions for workspace.ts" }).click();
+  const compactMenu = frame.getByRole("menu", { name: "workspace.ts actions" });
+  await expect(compactMenu).toBeVisible();
+  const compactFrameBox = await requiredBox(frame);
+  const compactMenuBox = await requiredBox(compactMenu);
+  expect(compactMenuBox.y + compactMenuBox.height).toBeGreaterThan(
+    compactFrameBox.y + compactFrameBox.height,
+  );
+  expect(await frame.evaluate((element) => getComputedStyle(element).overflow)).toBe("visible");
+  const lastMenuItem = compactMenu.getByRole("menuitem").last();
+  expect(
+    await lastMenuItem.evaluate((element) => {
+      const bounds = element.getBoundingClientRect();
+      const hit = document.elementFromPoint(
+        bounds.x + bounds.width / 2,
+        bounds.y + bounds.height / 2,
+      );
+      return hit === element || (hit !== null && element.contains(hit));
+    }),
+  ).toBe(true);
+  await page.keyboard.press("Escape");
   await expect(frame.locator('[data-workspace-panel-host="notes"]')).toHaveAttribute(
     "id",
     hostId ?? "",
@@ -742,7 +781,6 @@ test("floats, moves, resizes, minimizes, maximizes, restores, and redocks a live
     document.documentElement.dataset.floatingNodeAnimationCount = "0";
   });
   const initialFrame = await requiredBox(frame);
-  const titlebar = frame.getByLabel("Move workspace.ts floating window");
   const dragRegionBox = await requiredBox(frame.locator(".pf-floating-header-drag-region"));
   await page.mouse.move(
     dragRegionBox.x + dragRegionBox.width / 2,
@@ -791,6 +829,7 @@ test("floats, moves, resizes, minimizes, maximizes, restores, and redocks a live
   const workspaceBounds = await requiredBox(page.getByLabel("Panefold Code workbench"));
   await expectRectToSettle(workspaceBounds, frame);
   await frame.getByRole("button", { name: "Restore workspace.ts floating window" }).click();
+  await expect(frame).toHaveAttribute("data-maximized", "false");
 
   await frame.getByRole("button", { name: "Minimize workspace.ts floating window" }).click();
   await expect(frame).toHaveAttribute("data-minimized", "true");

@@ -497,10 +497,12 @@
     {
       "requirementId": "FOC-005",
       "profileId": "compact-react-chromium-desktop",
-      "status": "unresolved",
+      "status": "verified",
       "verificationClass": "environment-verifiable",
-      "evidenceIds": [],
-      "rationale": "A reproducible automated environment result with profile, workload, and execution metadata has not been recorded."
+      "evidenceIds": [
+        "chromium-reference-result"
+      ],
+      "rationale": "Covered by repository-local automated evidence for this experimental profile."
     },
     {
       "requirementId": "FOC-006",

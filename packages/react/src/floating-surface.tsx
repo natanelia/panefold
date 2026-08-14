@@ -21,7 +21,7 @@ import {
   type FloatingManipulationEvent,
 } from "@panefold/protocol-xstate";
 
-import type { ResolvedWorkspaceInteractionMessages } from "./messages";
+import type { ResolvedWorkspaceInteractionMessages, WorkspaceFloatingResizeEdge } from "./messages";
 import type {
   WorkspaceCommandOrigin,
   WorkspaceDirection,
@@ -35,8 +35,8 @@ const MINIMUM_FLOATING_WIDTH = 200;
 const MINIMUM_FLOATING_HEIGHT = 120;
 
 type FloatingManipulationActor = ReturnType<typeof createFloatingManipulationActor>;
-type FloatingResizeEdge =
-  "top" | "right" | "bottom" | "left" | "top-left" | "top-right" | "bottom-right" | "bottom-left";
+type FloatingResizeEdge = WorkspaceFloatingResizeEdge;
+type CardinalFloatingResizeEdge = Extract<FloatingResizeEdge, "top" | "right" | "bottom" | "left">;
 
 interface FloatingPointerSample {
   readonly clientX: number;
@@ -434,12 +434,13 @@ export function FloatingSurfaceFrame({
   };
 
   const frameStyle = {
+    "--pf-floating-surface-chrome-size": `${String(FLOATING_SURFACE_CHROME_SIZE)}px`,
     left: `${String(bounds.x)}px`,
     top: `${String(bounds.y)}px`,
     width: `${String(bounds.width)}px`,
     height: `${String(minimized ? FLOATING_SURFACE_CHROME_SIZE : bounds.height)}px`,
     zIndex,
-  } satisfies CSSProperties;
+  } satisfies CSSProperties & { readonly "--pf-floating-surface-chrome-size": string };
 
   return (
     <FloatingSurfaceHeaderSlotContext.Provider value={headerSlot}>
@@ -561,22 +562,38 @@ export function FloatingSurfaceFrame({
         {minimized ? null : <div className="pf-floating-content">{children}</div>}
         {!canResize || onResize === undefined
           ? null
-          : FLOATING_RESIZE_EDGES.map((edge) => (
-              <div
-                key={edge}
-                className="pf-floating-resize-handle"
-                data-resize-edge={edge}
-                role="separator"
-                tabIndex={0}
-                aria-label={messages.resizeFloatingSurface({ title, edge: edgeLabel(edge) })}
-                onPointerDown={(event) => begin("resize", edge, event)}
-                onPointerMove={move}
-                onPointerUp={finish}
-                onPointerCancel={cancel}
-                onLostPointerCapture={cancel}
-                onKeyDown={(event) => resizeByKeyboard(edge, event)}
-              />
-            ))}
+          : FLOATING_RESIZE_EDGES.map((edge) => {
+              const keyboardResizable = isCardinalResizeEdge(edge);
+              return (
+                <div
+                  key={edge}
+                  className="pf-floating-resize-handle"
+                  data-resize-edge={edge}
+                  role={keyboardResizable ? "separator" : undefined}
+                  tabIndex={keyboardResizable ? 0 : undefined}
+                  aria-hidden={keyboardResizable ? undefined : true}
+                  aria-label={
+                    keyboardResizable ? messages.resizeFloatingSurface({ title, edge }) : undefined
+                  }
+                  aria-orientation={keyboardResizable ? floatingResizeOrientation(edge) : undefined}
+                  aria-valuemin={keyboardResizable ? 0 : undefined}
+                  aria-valuemax={keyboardResizable ? 100 : undefined}
+                  aria-valuenow={
+                    keyboardResizable
+                      ? floatingResizePositionPercent(edge, bounds, viewportWidth, viewportHeight)
+                      : undefined
+                  }
+                  onPointerDown={(event) => begin("resize", edge, event)}
+                  onPointerMove={move}
+                  onPointerUp={finish}
+                  onPointerCancel={cancel}
+                  onLostPointerCapture={cancel}
+                  onKeyDown={
+                    keyboardResizable ? (event) => resizeByKeyboard(edge, event) : undefined
+                  }
+                />
+              );
+            })}
       </section>
     </FloatingSurfaceHeaderSlotContext.Provider>
   );
@@ -705,8 +722,32 @@ function edgeAcceptsDelta(
   );
 }
 
-function edgeLabel(edge: FloatingResizeEdge): string {
-  return edge.replace("-", " ");
+function isCardinalResizeEdge(edge: FloatingResizeEdge): edge is CardinalFloatingResizeEdge {
+  return edge === "top" || edge === "right" || edge === "bottom" || edge === "left";
+}
+
+function floatingResizeOrientation(edge: CardinalFloatingResizeEdge): "horizontal" | "vertical" {
+  return edge === "top" || edge === "bottom" ? "horizontal" : "vertical";
+}
+
+function floatingResizePositionPercent(
+  edge: CardinalFloatingResizeEdge,
+  bounds: WorkspaceFloatingBounds,
+  viewportWidth: number,
+  viewportHeight: number,
+): number {
+  const horizontal = edge === "left" || edge === "right";
+  const extent = horizontal ? viewportWidth : viewportHeight;
+  if (!Number.isFinite(extent) || extent <= 0) return 0;
+  const position =
+    edge === "left"
+      ? bounds.x
+      : edge === "right"
+        ? bounds.x + bounds.width
+        : edge === "top"
+          ? bounds.y
+          : bounds.y + bounds.height;
+  return clamp(Math.round((position / extent) * 100), 0, 100);
 }
 
 function acceptedOutcome(outcome: WorkspaceDispatchOutcome): boolean {

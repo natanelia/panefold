@@ -66,6 +66,7 @@ import {
   panelsForGroup,
   planPanelDrop as resolvePanelDropPlan,
   splitLabel,
+  subtreeContainsNode,
   surfaceLayoutBoundsForNode,
 } from "./panel-drop";
 import { useWorkspaceRuntime, useWorkspaceSnapshot } from "./runtime-context";
@@ -2480,6 +2481,10 @@ function PanelGroup<TCommand, TResult>({
   );
 }
 
+/**
+ * Undefined keeps the strip inline, null hides it while the compact-header ref
+ * resolves, and an element receives the existing strip through a portal.
+ */
 function placePanelGroupTabStrip(
   tabStrip: ReactNode,
   target: HTMLDivElement | null | undefined,
@@ -3630,22 +3635,6 @@ function groupBelongsToFloatingSurface(projection: WorkspaceProjection, groupId:
   if (groupNode === undefined) return false;
   return (projection.floatingSurfaces ?? EMPTY_FLOATING_SURFACES).some((surface) =>
     subtreeContainsNode(projection, surface.rootNodeId, groupNode.id),
-  );
-}
-
-function subtreeContainsNode(
-  projection: WorkspaceProjection,
-  rootNodeId: string,
-  targetNodeId: string,
-  visited = new Set<string>(),
-): boolean {
-  if (rootNodeId === targetNodeId) return true;
-  if (visited.has(rootNodeId)) return false;
-  visited.add(rootNodeId);
-  const root = projection.nodes[rootNodeId];
-  return (
-    root?.kind === "split" &&
-    root.childIds.some((childId) => subtreeContainsNode(projection, childId, targetNodeId, visited))
   );
 }
 

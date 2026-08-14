@@ -2,7 +2,7 @@ import { createHash } from "node:crypto";
 import { readFile, writeFile } from "node:fs/promises";
 import process from "node:process";
 
-const producedAt = "2026-08-13T11:49:00Z";
+const producedAt = "2026-08-14T07:19:51.074Z";
 const requirementsDocument = JSON.parse(await readFile("conformance/requirements.json", "utf8"));
 const manifest = JSON.parse(await readFile("conformance/manifest.json", "utf8"));
 const requirements = requirementsDocument.requirements;
@@ -175,6 +175,7 @@ const sourceDefinitions = [
       "FOC-001",
       "FOC-003",
       "FOC-004",
+      "FOC-005",
       "INT-001",
       "LIF-001",
       "LIF-003",
@@ -440,6 +441,7 @@ const resultDefinitions = [
       "A11Y-003",
       "EXP-003",
       "EXP-002",
+      "FOC-005",
       "I18N-002",
       "INT-004",
       "INT-005",
@@ -655,6 +657,7 @@ const verifiedByProfile = {
     "FOC-001",
     "FOC-003",
     "FOC-004",
+    "FOC-005",
     "EXP-002",
     "INT-001",
     "INT-003",

@@ -16,11 +16,13 @@ import {
 } from "@panefold/motion";
 
 import {
+  ENGLISH_WORKSPACE_MESSAGES,
   WorkspaceRuntimeProvider,
   WorkspaceSurface,
   solveWorkspaceProjectionLayout,
   type WorkspaceMessageCatalog,
   type WorkspaceCommandAdapter,
+  type WorkspaceFloatingResizeEdge,
   type WorkspaceCommandOrigin,
   type WorkspacePanelRegistry,
   type WorkspacePanelDropRequest,
@@ -34,6 +36,7 @@ import {
   type WorkspaceTabPresentationResolver,
   type WorkspaceLayoutSolver,
 } from "../src";
+import { FLOATING_SURFACE_CHROME_SIZE } from "../src/floating-surface";
 
 const protocolActorInventory = vi.hoisted(() => ({
   drag: { created: 0, started: 0, stopped: 0, active: 0, pointerMoves: 0 },
@@ -387,8 +390,9 @@ describe("WorkspaceSurface", () => {
     expect(runtime.transactions.at(-1)?.origin).toBe("keyboard");
   });
 
-  it("projects same-document floating surfaces without modal semantics", () => {
+  it("projects same-document floating surfaces without modal semantics", async () => {
     const runtime = new FixtureRuntime(floatingProjection);
+    const user = userEvent.setup();
     renderWorkspace(runtime, { commands: floatingCommands });
 
     const frame = document.querySelector<HTMLElement>(
@@ -396,12 +400,18 @@ describe("WorkspaceSurface", () => {
     );
     expect(frame).not.toBeNull();
     expect(frame?.getAttribute("role")).toBeNull();
+    expect(frame?.getAttribute("aria-modal")).toBeNull();
     expect(frame?.style.left).toBe("100px");
     expect(frame?.style.top).toBe("80px");
     expect(frame?.style.width).toBe("320px");
     expect(frame?.style.height).toBe("240px");
     expect(screen.getByRole("tabpanel", { name: "Delta" })).toBeTruthy();
     expect(document.querySelectorAll('[data-workspace-panel-host="delta"]')).toHaveLength(1);
+
+    screen.getByLabelText("Move Floating tools floating window").focus();
+    await user.tab({ shift: true });
+    expect(document.activeElement).not.toBe(document.body);
+    expect(document.activeElement?.closest("[data-workspace-floating-surface]")).toBeNull();
   });
 
   it("combines a sole floating panel tab and window chrome into one header row", () => {
@@ -572,7 +582,7 @@ describe("WorkspaceSurface", () => {
     const frame = document.querySelector<HTMLElement>(
       '[data-workspace-floating-surface="floating:delta"]',
     );
-    expect(frame?.style.height).toBe("34px");
+    expect(frame?.style.height).toBe(`${String(FLOATING_SURFACE_CHROME_SIZE)}px`);
     expect(frame?.querySelector(".pf-floating-resize-handle")).toBeNull();
     const titlebar = screen.getByLabelText("Move Floating tools floating window");
     installPointerCapture(titlebar);
@@ -678,11 +688,36 @@ describe("WorkspaceSurface", () => {
   it("supports keyboard resize and floating minimize, maximize, restore, and redock controls", async () => {
     const runtime = new FixtureRuntime(floatingProjection);
     const user = userEvent.setup();
-    renderWorkspace(runtime, { commands: floatingCommands });
+    const resizeFloatingSurface = vi.fn(
+      ({ title, edge }: { readonly title: string; readonly edge: WorkspaceFloatingResizeEdge }) =>
+        `Ubah ukuran ${title} dari ${edge === "right" ? "kanan" : edge}`,
+    );
+    renderWorkspace(runtime, {
+      commands: floatingCommands,
+      messageCatalog: { ...ENGLISH_WORKSPACE_MESSAGES, resizeFloatingSurface },
+    });
 
     const resizeHandle = await screen.findByRole("separator", {
-      name: "Resize Floating tools floating window from bottom right",
+      name: "Ubah ukuran Floating tools dari kanan",
     });
+    expect(resizeFloatingSurface).toHaveBeenCalledWith({ title: "Floating tools", edge: "right" });
+    expect(resizeHandle.getAttribute("aria-orientation")).toBe("vertical");
+    expect(resizeHandle.getAttribute("aria-valuemin")).toBe("0");
+    expect(resizeHandle.getAttribute("aria-valuemax")).toBe("100");
+    expect(resizeHandle.getAttribute("aria-valuenow")).toBe("42");
+    const frameBeforeResize = document.querySelector<HTMLElement>(
+      '[data-workspace-floating-surface="floating:delta"]',
+    );
+    expect(frameBeforeResize?.querySelectorAll('[role="separator"]')).toHaveLength(4);
+    expect(
+      frameBeforeResize?.querySelector('[data-resize-edge="bottom-right"]')?.getAttribute("role"),
+    ).toBeNull();
+    expect(
+      frameBeforeResize
+        ?.querySelector('[data-resize-edge="bottom-right"]')
+        ?.getAttribute("tabindex"),
+    ).toBeNull();
+
     resizeHandle.focus();
     await user.keyboard("{ArrowRight}");
     expect(runtime.lastCommand).toMatchObject({
@@ -3619,6 +3654,7 @@ function renderWorkspace(
     readonly onExternalPanelRequest?: WorkspaceExternalPanelHandler;
     readonly externalPanelRequestTimeoutMs?: number;
     readonly onAnnouncement?: (message: string) => void;
+    readonly messageCatalog?: WorkspaceMessageCatalog;
     readonly interpretResult?: WorkspaceResultInterpreter<FixtureCommand, FixtureReceipt>;
   } = {},
 ) {
@@ -3631,6 +3667,9 @@ function renderWorkspace(
           panels={options.registry ?? panels}
           layoutBounds={{ inlineStart: 0, blockStart: 0, inlineSize: 1000, blockSize: 700 }}
           workspaceLabel="Fixture workspace"
+          {...(options.messageCatalog === undefined
+            ? {}
+            : { messageCatalog: options.messageCatalog })}
           {...(options.tabPresentation === undefined
             ? {}
             : { tabPresentation: options.tabPresentation })}

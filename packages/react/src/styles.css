@@ -81,7 +81,7 @@
     flex-direction: column;
     min-inline-size: 0;
     min-block-size: 0;
-    overflow: hidden;
+    overflow: visible;
     border: 1px solid var(--pf-border-strong);
     border-radius: 8px;
     background: var(--pf-surface);
@@ -99,19 +99,21 @@
   }
 
   .pf-floating-surface[data-minimized="true"] {
-    block-size: 34px !important;
+    block-size: var(--pf-floating-surface-chrome-size) !important;
   }
 
   .pf-floating-titlebar {
     position: relative;
     z-index: 8;
     display: flex;
-    flex: 0 0 34px;
+    flex: 0 0 var(--pf-floating-surface-chrome-size);
     align-items: center;
     gap: 8px;
     min-inline-size: 0;
     padding-inline-start: 10px;
     border-block-end: 1px solid var(--pf-border);
+    border-start-start-radius: inherit;
+    border-start-end-radius: inherit;
     outline: none;
     background: var(--pf-surface-raised);
     touch-action: none;
@@ -203,11 +205,23 @@
     flex: 1 1 auto;
     min-inline-size: 0;
     min-block-size: 0;
+    overflow: visible;
+    border-end-start-radius: inherit;
+    border-end-end-radius: inherit;
   }
 
   .pf-floating-content > :is(.pf-group, .pf-split) {
     inline-size: 100%;
     block-size: 100%;
+  }
+
+  .pf-floating-surface .pf-split-child {
+    overflow: visible;
+  }
+
+  .pf-floating-surface .pf-floating-titlebar:has(.pf-menu),
+  .pf-floating-surface .pf-tab-controls:has(.pf-menu) {
+    z-index: 13;
   }
 
   .pf-floating-resize-handle {

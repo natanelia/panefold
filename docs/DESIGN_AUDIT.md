@@ -21,7 +21,7 @@ checked against those files by the conformance test suite.
 | Proof class                | Verified | Unresolved | Blocked | N/A | Total |
 | -------------------------- | -------: | ---------: | ------: | --: | ----: |
 | A — code-verifiable        |       89 |         54 |       0 |   0 |   143 |
-| B — environment-verifiable |       20 |         56 |       0 |   0 |    76 |
+| B — environment-verifiable |       21 |         55 |       0 |   0 |    76 |
 | C — manual/external        |        0 |          0 |      33 |   0 |    33 |
 | D — future scope           |        0 |          0 |       0 | 128 |   128 |
 
@@ -84,7 +84,7 @@ manual or external evidence, and `N/A` means the profile does not publish that c
 | `FOC-002`   | U                        | N/A                       |
 | `FOC-003`   | U                        | N/A                       |
 | `FOC-004`   | U                        | N/A                       |
-| `FOC-005`   | U                        | N/A                       |
+| `FOC-005`   | V                        | N/A                       |
 | `FOC-006`   | U                        | N/A                       |
 | `FWK-001`   | U                        | V                         |
 | `FWK-002`   | U                        | U                         |
@@ -325,10 +325,10 @@ status by assertion.
 
 ### Implemented or partial behavior awaiting environment evidence
 
-The compact profile has 46 unresolved environment-verifiable rows:
+The compact profile has 45 unresolved environment-verifiable rows:
 
 `A11Y-005`, `A11Y-006`, `API-005`, `DOM-005`, `EXP-003`, `EXP-004`, `FOC-002`, `FOC-003`,
-`FOC-004`, `FOC-005`, `FOC-006`, `FWK-001`, `FWK-002`, `FWK-003`, `FWK-004`, `INT-001`,
+`FOC-004`, `FOC-006`, `FWK-001`, `FWK-002`, `FWK-003`, `FWK-004`, `INT-001`,
 `INT-006`, `INT-007`, `LAY-006`, `LIF-002`, `LIF-003`, `LIF-004`, `MOT-002`, `MOT-004`,
 `MOT-005`, `MOT-006`, `MOT-009`, `MOT-010`, `OBS-001`, `PRF-001`, `PRF-004`, `PRF-005`,
 `PRF-006`, `QLT-003`, `REN-002`, `RSP-002`, `SEC-003`, `SEC-005`, `SUR-005`, `SUR-006`,
@@ -370,9 +370,9 @@ The implementation uses stable external-store projection, active-only protocol a
 scheduler for pointer visuals, precomputed reorder slots, binary slot lookup, constant-time cached
 geometry translation during same-slot autoscroll, and local DOM style writes. Those are useful
 design properties, not certification. The checked-in local macOS capture retained 179 frame deltas
-with p95 9.1 ms, p99 9.2 ms, maximum 58.4 ms, and one observed long task of 61 ms. On the same Apple
-M1 Max machine, the Node smoke run measured 50-panel reorder at 0.2796 ms p95, 500-panel reorder at
-2.0506 ms p95, 100/500/1,000-node hit testing at 3.332/17.506/36.737 microseconds mean, and 10,000
+with p95 10.11 ms, p99 10.3 ms, maximum 48.8 ms, and one observed long task of 56 ms. On the same
+Apple M1 Max machine, the Node smoke run measured 50-panel reorder at 0.2946 ms p95, 500-panel reorder
+at 2.1511 ms p95, 100/500/1,000-node hit testing at 3.201/17.61/38.067 microseconds mean, and 10,000
 reference kernel operations with zero invariant violations. These single-machine regression guards
 are neither a statistically separated history nor physical 60 Hz/120 Hz evidence. The performance
 hard gate therefore remains

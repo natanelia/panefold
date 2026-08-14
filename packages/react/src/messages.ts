@@ -1,6 +1,8 @@
 import type { WorkspaceDispatchStatus } from "./types";
 
 export type WorkspacePhysicalEdge = "left" | "right" | "above" | "below";
+export type WorkspaceFloatingResizeEdge =
+  "top" | "right" | "bottom" | "left" | "top-left" | "top-right" | "bottom-right" | "bottom-left";
 
 /** Every user-visible string emitted by the reference React projection. */
 export interface WorkspaceMessageCatalog {
@@ -69,7 +71,10 @@ export interface WorkspaceMessageCatalog {
   floatingSurface?(values: { readonly title: string }): string;
   moveFloatingSurface?(values: { readonly title: string }): string;
   movedFloatingSurface?(values: { readonly title: string }): string;
-  resizeFloatingSurface?(values: { readonly title: string; readonly edge: string }): string;
+  resizeFloatingSurface?(values: {
+    readonly title: string;
+    readonly edge: WorkspaceFloatingResizeEdge;
+  }): string;
   resizedFloatingSurface?(values: { readonly title: string }): string;
   minimizeFloatingSurface?(values: { readonly title: string }): string;
   minimizedFloatingSurface?(values: { readonly title: string }): string;
@@ -82,7 +87,7 @@ export interface WorkspaceMessageCatalog {
   raisedFloatingSurface?(values: { readonly title: string }): string;
 }
 
-export const ENGLISH_WORKSPACE_MESSAGES = Object.freeze<WorkspaceMessageCatalog>({
+export const ENGLISH_WORKSPACE_MESSAGES = Object.freeze({
   workspaceLabel: () => "Workspace",
   panelGroupFallback: () => "Panel group",
   groupFallback: () => "group",
@@ -147,7 +152,8 @@ export const ENGLISH_WORKSPACE_MESSAGES = Object.freeze<WorkspaceMessageCatalog>
   floatingSurface: ({ title }) => `${title} floating window`,
   moveFloatingSurface: ({ title }) => `Move ${title} floating window`,
   movedFloatingSurface: ({ title }) => `Moved ${title} floating window`,
-  resizeFloatingSurface: ({ title, edge }) => `Resize ${title} floating window from ${edge}`,
+  resizeFloatingSurface: ({ title, edge }) =>
+    `Resize ${title} floating window from ${floatingResizeEdgeLabel(edge)}`,
   resizedFloatingSurface: ({ title }) => `Resized ${title} floating window`,
   minimizeFloatingSurface: ({ title }) => `Minimize ${title} floating window`,
   minimizedFloatingSurface: ({ title }) => `Minimized ${title} floating window`,
@@ -158,7 +164,7 @@ export const ENGLISH_WORKSPACE_MESSAGES = Object.freeze<WorkspaceMessageCatalog>
   redockFloatingSurface: ({ title }) => `Dock ${title} in the workspace`,
   redockedFloatingSurface: ({ title }) => `Docked ${title} in the workspace`,
   raisedFloatingSurface: ({ title }) => `Raised ${title} floating window`,
-});
+} satisfies WorkspaceMessageCatalog);
 
 export interface ResolvedWorkspaceInteractionMessages {
   readonly movedPanelTo: (values: { readonly title: string; readonly group: string }) => string;
@@ -190,7 +196,7 @@ export interface ResolvedWorkspaceInteractionMessages {
   readonly movedFloatingSurface: (values: { readonly title: string }) => string;
   readonly resizeFloatingSurface: (values: {
     readonly title: string;
-    readonly edge: string;
+    readonly edge: WorkspaceFloatingResizeEdge;
   }) => string;
   readonly resizedFloatingSurface: (values: { readonly title: string }) => string;
   readonly minimizeFloatingSurface: (values: { readonly title: string }) => string;
@@ -247,33 +253,36 @@ export function resolveWorkspaceInteractionMessages(
     movedTabAfter:
       catalog.movedTabAfter ?? (({ title, anchor }) => `Moved ${title} tab after ${anchor}`),
     keptTabPosition: catalog.keptTabPosition ?? (({ title }) => `${title} tab kept in place`),
-    floatingSurface: catalog.floatingSurface ?? (({ title }) => `${title} floating window`),
+    floatingSurface: catalog.floatingSurface ?? ENGLISH_WORKSPACE_MESSAGES.floatingSurface,
     moveFloatingSurface:
-      catalog.moveFloatingSurface ?? (({ title }) => `Move ${title} floating window`),
+      catalog.moveFloatingSurface ?? ENGLISH_WORKSPACE_MESSAGES.moveFloatingSurface,
     movedFloatingSurface:
-      catalog.movedFloatingSurface ?? (({ title }) => `Moved ${title} floating window`),
+      catalog.movedFloatingSurface ?? ENGLISH_WORKSPACE_MESSAGES.movedFloatingSurface,
     resizeFloatingSurface:
-      catalog.resizeFloatingSurface ??
-      (({ title, edge }) => `Resize ${title} floating window from ${edge}`),
+      catalog.resizeFloatingSurface ?? ENGLISH_WORKSPACE_MESSAGES.resizeFloatingSurface,
     resizedFloatingSurface:
-      catalog.resizedFloatingSurface ?? (({ title }) => `Resized ${title} floating window`),
+      catalog.resizedFloatingSurface ?? ENGLISH_WORKSPACE_MESSAGES.resizedFloatingSurface,
     minimizeFloatingSurface:
-      catalog.minimizeFloatingSurface ?? (({ title }) => `Minimize ${title} floating window`),
+      catalog.minimizeFloatingSurface ?? ENGLISH_WORKSPACE_MESSAGES.minimizeFloatingSurface,
     minimizedFloatingSurface:
-      catalog.minimizedFloatingSurface ?? (({ title }) => `Minimized ${title} floating window`),
+      catalog.minimizedFloatingSurface ?? ENGLISH_WORKSPACE_MESSAGES.minimizedFloatingSurface,
     maximizeFloatingSurface:
-      catalog.maximizeFloatingSurface ?? (({ title }) => `Maximize ${title} floating window`),
+      catalog.maximizeFloatingSurface ?? ENGLISH_WORKSPACE_MESSAGES.maximizeFloatingSurface,
     maximizedFloatingSurface:
-      catalog.maximizedFloatingSurface ?? (({ title }) => `Maximized ${title} floating window`),
+      catalog.maximizedFloatingSurface ?? ENGLISH_WORKSPACE_MESSAGES.maximizedFloatingSurface,
     restoreFloatingSurface:
-      catalog.restoreFloatingSurface ?? (({ title }) => `Restore ${title} floating window`),
+      catalog.restoreFloatingSurface ?? ENGLISH_WORKSPACE_MESSAGES.restoreFloatingSurface,
     restoredFloatingSurface:
-      catalog.restoredFloatingSurface ?? (({ title }) => `Restored ${title} floating window`),
+      catalog.restoredFloatingSurface ?? ENGLISH_WORKSPACE_MESSAGES.restoredFloatingSurface,
     redockFloatingSurface:
-      catalog.redockFloatingSurface ?? (({ title }) => `Dock ${title} in the workspace`),
+      catalog.redockFloatingSurface ?? ENGLISH_WORKSPACE_MESSAGES.redockFloatingSurface,
     redockedFloatingSurface:
-      catalog.redockedFloatingSurface ?? (({ title }) => `Docked ${title} in the workspace`),
+      catalog.redockedFloatingSurface ?? ENGLISH_WORKSPACE_MESSAGES.redockedFloatingSurface,
     raisedFloatingSurface:
-      catalog.raisedFloatingSurface ?? (({ title }) => `Raised ${title} floating window`),
+      catalog.raisedFloatingSurface ?? ENGLISH_WORKSPACE_MESSAGES.raisedFloatingSurface,
   };
+}
+
+function floatingResizeEdgeLabel(edge: WorkspaceFloatingResizeEdge): string {
+  return edge.replace("-", " ");
 }

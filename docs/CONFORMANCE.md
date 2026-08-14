@@ -6,11 +6,11 @@ conformance to the [Panefold system design](spec/SYSTEM_DESIGN.md).
 The current machine report is structurally valid and intentionally reports **blocked**: all 36
 commands, all 190 Appendix A requirements, and all ten hard gates are present, but stable-release
 evidence is incomplete. On the two published experimental profiles, the 380 trace cells currently
-contain 109 verified, 110 unresolved, 33 blocked, and 128 not applicable results. A missing result
+contain 110 verified, 109 unresolved, 33 blocked, and 128 not applicable results. A missing result
 never becomes an implicit pass.
 
 The trace-cell taxonomy above is distinct from the aggregate validator report, which currently
-contains 42 blocked issues and 115 unresolved issues. Aggregate issues also include hard-gate and
+contains 42 blocked issues and 114 unresolved issues. Aggregate issues also include hard-gate and
 evidence findings, so those counts are not trace-cell totals.
 
 Because at least one hard gate remains open, the machine report applies a hard-gate multiplier of
@@ -27,7 +27,7 @@ Every trace and evidence record declares one proof class:
 | Class                      | Meaning                                                                                                | Current totals                               |
 | -------------------------- | ------------------------------------------------------------------------------------------------------ | -------------------------------------------- |
 | A — code-verifiable        | Repository implementation, model/property proof, source contract, or deterministic code result         | 89 verified, 54 unresolved, 0 blocked, 0 N/A |
-| B — environment-verifiable | Executed browser, framework, workload, recovery, or performance result with environment metadata       | 20 verified, 56 unresolved, 0 blocked, 0 N/A |
+| B — environment-verifiable | Executed browser, framework, workload, recovery, or performance result with environment metadata       | 21 verified, 55 unresolved, 0 blocked, 0 N/A |
 | C — manual/external        | Manual AT/physical evidence, independent review, adoption record, usability result, or signed approval | 0 verified, 0 unresolved, 33 blocked, 0 N/A  |
 | D — future scope           | Capability the specific experimental profile does not publish                                          | 0 verified, 0 unresolved, 0 blocked, 128 N/A |
 
@@ -96,9 +96,9 @@ the command output.
   state per command, not the retained optimized production kernel.
 - The earlier 50,000-attempt projection campaign completed with zero replay/projection divergence.
   It is below the ten-million stable threshold and its checked-in summary records the missing seed.
-- The local automated interaction capture retained 179 frame deltas at 9.1 ms p95 and 9.2 ms p99,
-  with one observed long task of 61 ms. The paired Node smoke run measured 50-panel reorder at
-  0.2796 ms p95 and 500-panel reorder at 2.0506 ms p95 on that machine. These are experimental
+- The local automated interaction capture retained 179 frame deltas at 10.11 ms p95 and 10.3 ms
+  p99, with one observed long task of 56 ms. The paired Node smoke run measured 50-panel reorder at
+  0.2946 ms p95 and 500-panel reorder at 2.1511 ms p95 on that machine. These are experimental
   regression guards—not physical performance certification.
 
 ## Hard release gates
