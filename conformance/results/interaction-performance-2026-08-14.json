@@ -19,35 +19,35 @@
   "sampleCount": 179,
   "summary": {
     "minimum": 7.3,
-    "maximum": 58.2,
-    "mean": 8.608,
+    "maximum": 75,
+    "mean": 8.706,
     "median": 8.3,
-    "p95": 9.3,
-    "p99": 9.4
+    "p95": 9.2,
+    "p99": 9.322
   },
   "rawFrameDeltasMs": [
-    58.2, 8.6, 7.4, 9.3, 8.1, 7.6, 9.1, 8.5, 8.3, 8.2, 8.5, 8.3, 8.4, 8.2, 8.3, 7.6, 9.2, 7.8, 8.9,
-    8.2, 7.9, 8.9, 8.2, 8.2, 7.8, 9.1, 7.7, 9, 8.3, 7.4, 9.1, 8.2, 8.1, 8, 9.2, 8.1, 7.6, 9.4, 7.3,
-    9.3, 7.8, 8.8, 8.3, 8.3, 8.4, 8.3, 8.4, 8.3, 8.4, 7.6, 8.2, 9.2, 8.3, 8.3, 8.4, 8.3, 7.4, 9,
-    7.7, 8.3, 9.3, 8.3, 7.4, 9, 8.6, 7.4, 8.5, 9.1, 8, 8.4, 8.6, 8, 8.6, 7.4, 8.4, 9.1, 8.5, 8.2,
-    7.8, 9.1, 8.2, 8.1, 8, 8, 8.3, 9.4, 8.2, 8.3, 8.3, 8.4, 7.6, 9.2, 7.3, 9.3, 8.3, 8.3, 8.2, 7.7,
-    8.4, 8.1, 8.4, 9.3, 7.3, 8.4, 8.5, 8.8, 8.6, 7.8, 8, 9, 8.1, 8, 8.2, 9.2, 8.3, 7.4, 9.4, 8, 8.6,
-    8.3, 8.3, 8.3, 7.5, 9.2, 8.3, 7.6, 9.2, 7.4, 8.4, 9.2, 7.4, 8.3, 8.5, 9.1, 8, 7.7, 9.3, 8.2,
-    8.4, 8.4, 8.2, 8.4, 8.3, 8.4, 8.3, 8.3, 8.4, 8.3, 8.3, 7.5, 8.4, 8.2, 9.3, 8.3, 8.3, 7.5, 9.1,
-    8.4, 8.4, 7.8, 8.9, 7.6, 9.1, 8.3, 8.3, 8.3, 8.3, 8.4, 7.9, 8.3, 7.9, 9.3, 7.6, 9.1, 7.9, 8.1,
-    8.5, 8.6, 7.6
+    8.3, 75, 8.3, 8.4, 8.3, 8.4, 8.3, 8.3, 8.4, 8.3, 8.4, 7.3, 8.5, 9.2, 7.5, 9.2, 7.5, 8.7, 8.8,
+    8.2, 8.1, 8.6, 8.3, 8.4, 7.5, 8.6, 8.9, 7.4, 9.1, 8, 8.9, 7.4, 8.6, 9, 7.5, 9.1, 8.3, 7.4, 8.3,
+    9.3, 8.3, 7.9, 8.9, 8.2, 8.4, 8.1, 8.6, 7.9, 8.7, 7.8, 8.9, 8.2, 8.4, 7.9, 8.1, 9.1, 8.3, 8.3,
+    8.3, 7.8, 8.9, 8.3, 8.3, 8.4, 8.2, 8.4, 8.4, 8.3, 8.3, 7.7, 9.1, 7.8, 8.9, 7.4, 9.2, 7.3, 9.4,
+    8.3, 8.3, 8.3, 8.3, 8.3, 8.4, 8.4, 8.1, 7.7, 9.2, 8.3, 8.3, 7.9, 8.8, 8.3, 8.4, 8.3, 8.3, 7.9,
+    8.8, 8.3, 8.3, 8.3, 8.4, 8.3, 8.4, 7.4, 9.3, 7.4, 9.3, 7.7, 8.9, 8.3, 8.2, 8.3, 7.9, 9.1, 8.2,
+    8.3, 7.6, 8.9, 7.6, 8.8, 8.9, 8.2, 8.2, 8.5, 8.3, 7.9, 8.8, 7.7, 8.9, 7.7, 9, 8.4, 8.3, 8.3,
+    8.4, 8.3, 8.3, 8.3, 8.4, 8.3, 7.5, 9.2, 8.3, 8.3, 8.4, 8.4, 8.3, 8.3, 8.3, 7.8, 9, 8.2, 8.4,
+    7.6, 9, 8.3, 8.4, 8.3, 8.3, 8.4, 7.9, 8.8, 8.3, 8.3, 7.5, 9.3, 8.2, 8.3, 8.4, 7.9, 8.8, 8.3,
+    8.3, 8.3, 8.4, 8.3, 8.4, 8.3, 8.3
   ],
   "longTasks": [
     {
-      "startTime": 173.2000000178814,
-      "duration": 91
+      "startTime": 205.7999999821186,
+      "duration": 72
     },
     {
-      "startTime": 370.30000001192093,
-      "duration": 58
+      "startTime": 363.5,
+      "duration": 76
     }
   ],
-  "producedAt": "2026-08-14T04:10:00.000Z",
+  "producedAt": "2026-08-14T06:03:17.330Z",
   "guardrail": {
     "schemaVersion": 1,
     "profile": "compact-react-chromium-desktop",
@@ -68,20 +68,20 @@
     },
     "kernel": {
       "iterations": 10000,
-      "elapsedMs": 2572.31
+      "elapsedMs": 1525.79
     },
     "geometry": {
       "iterations": 100000,
-      "elapsedMs": 238.78
+      "elapsedMs": 255.87
     },
     "reorderProfiles": [
       {
         "panelCount": 50,
         "warmupCount": 250,
         "sampleCount": 2000,
-        "medianMs": 0.2135,
-        "p95Ms": 0.9273,
-        "p99Ms": 1.639,
+        "medianMs": 0.1933,
+        "p95Ms": 0.39,
+        "p99Ms": 0.5309,
         "designTargetMs": 1,
         "withinDesignTargetOnThisMachine": true,
         "invariantViolations": 0
@@ -90,11 +90,11 @@
         "panelCount": 500,
         "warmupCount": 100,
         "sampleCount": 1000,
-        "medianMs": 2.3631,
-        "p95Ms": 5.0729,
-        "p99Ms": 9.3947,
+        "medianMs": 2.1819,
+        "p95Ms": 4.0993,
+        "p99Ms": 8.9401,
         "designTargetMs": 5,
-        "withinDesignTargetOnThisMachine": false,
+        "withinDesignTargetOnThisMachine": true,
         "invariantViolations": 0
       }
     ],
@@ -102,23 +102,23 @@
       {
         "nodeCount": 100,
         "sampleCount": 10000,
-        "elapsedMs": 46.22,
-        "meanMicroseconds": 4.622
+        "elapsedMs": 32.09,
+        "meanMicroseconds": 3.209
       },
       {
         "nodeCount": 500,
         "sampleCount": 10000,
-        "elapsedMs": 213.89,
-        "meanMicroseconds": 21.389
+        "elapsedMs": 182.18,
+        "meanMicroseconds": 18.218
       },
       {
         "nodeCount": 1000,
         "sampleCount": 10000,
-        "elapsedMs": 448.74,
-        "meanMicroseconds": 44.874
+        "elapsedMs": 403.31,
+        "meanMicroseconds": 40.331
       }
     ],
-    "totalElapsedMs": 7447.16,
+    "totalElapsedMs": 5769.31,
     "finalRevision": "10000",
     "invariantViolations": 0
   },
@@ -127,7 +127,7 @@
     "e2e/performance-baseline.json": "128b4c7dc2c7fc03372224828417f675b279359ebbe9bab7408b172ad76b48a9",
     "scripts/performance-smoke.mjs": "fc0d8ce5df966b75312b5d9fae367e07b5ce4f8215afa724d03a7a6cb17fdc95",
     "packages/react/src/WorkspaceSurface.tsx": "d8ee17b9eb75d596ebd814ac362b3f2b1b6875b554c156d418cc3279ec143c7b",
-    "packages/react/src/panel-drag.tsx": "b856959070689054a28c51e3e79b21b9e981a703762f0b52f14aeef8d8e6b23d",
+    "packages/react/src/panel-drag.tsx": "ee14a96aaa569972e36b295af8bfdc255536eac04307a004014d796ab59d889b",
     "packages/geometry/src/hit-test.ts": "2da9ca42d97c135f37d599bbaebed8f758343fa4e52fd647c05a4b179340c121",
     "packages/geometry/src/invalidation.ts": "dfe873cb6df480d8ce023688e199463489877527b5b1c5155c4a7d1e234d4f1b",
     "packages/kernel-optimized/src/indexes.ts": "c6d962626b3c0cac8d7d89f156aed383b1e313a201f7c3ce5f228d97959ac0a8",

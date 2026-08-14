@@ -84,7 +84,7 @@ the command output.
   primary and byte-equivalent replay runs plus 12 cancelled twins, with zero pending handles. This
   is code evidence, not browser/OS/process failure certification or the per-panel final-authority
   matrix required by `TST-009`.
-- Protocol/motion validation passed 86/86 focused tests plus 68/68 React integration tests. It
+- Protocol/motion validation passed 86/86 focused tests plus 72/72 React integration tests. It
   covers the twelve-actor catalog, cancellation/revision conflicts, disposable motion leases,
   progressive View Transition fallback, and deterministic load degradation; these focused tests
   supplement rather than substitute for the exact graph result above.

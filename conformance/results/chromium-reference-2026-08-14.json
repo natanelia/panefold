@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "kind": "browser-profile-result",
   "profile": "compact-react-chromium-desktop",
-  "producedAt": "2026-08-14T04:01:00.000Z",
+  "producedAt": "2026-08-14T06:03:17.330Z",
   "status": "passed",
   "runner": "Playwright 1.62.1",
   "command": "pnpm test:e2e",
@@ -18,7 +18,7 @@
     "tests": 28,
     "passed": 28,
     "failed": 0,
-    "durationMs": 20400
+    "durationMs": 21000
   },
   "coverage": [
     "accessible semantic command projection",
@@ -46,7 +46,7 @@
     "raw splitter interaction frame capture and experimental guardrail"
   ],
   "sourceDigests": {
-    "e2e/demo.spec.ts": "59802f69d1256a1169dffe373ca2920feaffa061bb4a5f722dc7d7cfd74e7435",
+    "e2e/demo.spec.ts": "ad398f06c4d9fe5e036bde7b9a9ac959501946f58c4a888492dbde921b26eead",
     "e2e/performance.spec.ts": "2bbc7b6cb40fd2ad97ba33824b5b8a0a3cf43a82ce638e432f13d29c8db164f3",
     "e2e/performance-baseline.json": "128b4c7dc2c7fc03372224828417f675b279359ebbe9bab7408b172ad76b48a9",
     "playwright.config.ts": "1488b4ef7257ef5a6dc5505148550cbb6ed89e9488b2c9e39e874f15469cc245",
@@ -63,7 +63,7 @@
     "packages/motion/src/coordinator.ts": "b34a5428e17f0c715b50b45706fa078f77a4841eddf2ff6d357f181afea91715",
     "packages/motion/src/motion-dom-driver.ts": "57092ac380b7d666ed807c31d2f691fea906d63d9cdff9095f5c2bc32260323b",
     "packages/react/src/WorkspaceSurface.tsx": "d8ee17b9eb75d596ebd814ac362b3f2b1b6875b554c156d418cc3279ec143c7b",
-    "packages/react/src/panel-drag.tsx": "b856959070689054a28c51e3e79b21b9e981a703762f0b52f14aeef8d8e6b23d",
+    "packages/react/src/panel-drag.tsx": "ee14a96aaa569972e36b295af8bfdc255536eac04307a004014d796ab59d889b",
     "packages/react/src/panel-drop.ts": "b82ddb1686408e3a08073dba2e336dae9d5ed19a84988578ca7ee352b6780788",
     "packages/react/src/tab-reorder.ts": "c139803bc37c5f2c6fc6a17eb836784ff8d203b7bae8acebedcbf290cdabc599",
     "packages/react/src/messages.ts": "acc43a4f1af98a27d492247b9bbeeeb6b7aaf72463796d74c973fcbcfd006c75",

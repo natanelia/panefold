@@ -56,6 +56,31 @@ async function dragTabToGroup(
   return previewRect;
 }
 
+async function dragTabToWindowInlineEnd(page: Page, panelId: string, targetGroupId: string) {
+  const tab = page.locator(`[data-workspace-panel-tab="${panelId}"]`);
+  const group = page.locator(`[data-workspace-group="${targetGroupId}"]`);
+  await tab.scrollIntoViewIfNeeded();
+  const sourceBox = await requiredBox(tab);
+  const targetBox = await requiredBox(group);
+  const targetNodeId = await group.getAttribute("data-workspace-node");
+  expect(targetNodeId).not.toBeNull();
+  const viewportInlineEnd = await page.evaluate(() => window.innerWidth);
+
+  await page.mouse.move(sourceBox.x + sourceBox.width / 2, sourceBox.y + sourceBox.height / 2);
+  await page.mouse.down();
+  await page.mouse.move(viewportInlineEnd, targetBox.y + targetBox.height / 2, { steps: 10 });
+  const overlay = page.locator("[data-workspace-panel-drag]");
+  await expect(overlay).toHaveAttribute("data-workspace-drop-kind", "edge");
+  await expect(overlay).toHaveAttribute(
+    "data-workspace-drop-target",
+    `edge:${String(targetNodeId)}:inline-end`,
+  );
+  await expect(overlay).toHaveAttribute("data-workspace-drop-edge", "inline-end");
+  const previewRect = await requiredBox(overlay.locator(".pf-panel-drop-preview"));
+  await page.mouse.up();
+  return previewRect;
+}
+
 async function splitWorkspaceEditorFromMenu(page: Page, menuLabel: string) {
   const workspaceTab = page.getByRole("tab", { name: "workspace.ts" });
   if ((await workspaceTab.getAttribute("aria-selected")) !== "true") await workspaceTab.click();
@@ -599,7 +624,7 @@ test("allocates a fresh split identity from persisted topology after reload", as
   await expectRectToSettle(previewRect, notesGroup);
 });
 
-test("dragging a tab to a panel edge creates a new container in one transaction", async ({
+test("dragging a tab to the right browser edge creates a new container in one transaction", async ({
   page,
 }) => {
   await page.emulateMedia({ reducedMotion: "reduce" });
@@ -607,14 +632,18 @@ test("dragging a tab to a panel edge creates a new container in one transaction"
   await waitForGroupToFillWorkspaceBlock(page, "inspector");
   const before = await revisionOf(page);
 
-  const previewRect = await dragTabToGroup(page, "notes", "inspector", "inline-start");
+  const previewRect = await dragTabToWindowInlineEnd(page, "notes", "inspector");
 
   await expect.poll(() => revisionOf(page)).toBe(before + 1);
   await expect(page.locator("[data-workspace-group]")).toHaveCount(5);
   const notesTab = page.locator('[data-workspace-panel-tab="notes"]');
   await expect(notesTab).toBeVisible();
   const notesGroup = notesTab.locator("xpath=ancestor::*[@data-workspace-group][1]");
+  const inspector = page.locator('[data-workspace-group="inspector"]');
   await expect(notesGroup).not.toHaveAttribute("data-workspace-group", "inspector");
+  const notesBox = await requiredBox(notesGroup);
+  const inspectorBox = await requiredBox(inspector);
+  expect(notesBox.x + notesBox.width / 2).toBeGreaterThan(inspectorBox.x + inspectorBox.width / 2);
   await expectRectToSettle(previewRect, notesGroup);
 });
 
