@@ -681,6 +681,11 @@ function SourceControlPanel() {
             onChange={(event) => {
               setMessage(event.target.value);
             }}
+            onKeyDown={(event) => {
+              if (event.key !== "Enter" || !(event.metaKey || event.ctrlKey)) return;
+              event.preventDefault();
+              event.currentTarget.form?.requestSubmit();
+            }}
           />
         </label>
         <button
@@ -734,7 +739,6 @@ function terminalOutput(command: string): readonly string[] {
     return ["On branch main", "Changes not staged for commit:", "  modified: src/App.tsx"];
   if (command === "pnpm test" || command === "pnpm test --run")
     return ["✓ 18 tests passed in 1.42s"];
-  if (command === "clear") return [];
   return [`zsh: command not found: ${command.split(" ")[0] ?? command}`];
 }
 

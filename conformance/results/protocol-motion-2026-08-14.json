@@ -42,7 +42,7 @@
     "load planning drops decoration before spatial continuity and never degrades direct input tracking"
   ],
   "sourceDigests": {
-    "package.json": "cb7d0bf5b00ecb2c6280890e7ce444c6328dd1759282ad9966270165b6b10309",
+    "package.json": "5265b6d4fb55e26d18aeae269ab17c520516d0d296a6bb7b885716834b90a1db",
     "packages/motion/package.json": "39e7fa3a01054566b9eba9eebfc304aca294f877c9f39fe396d2fc4bfd321caf",
     "packages/motion/src/coordinator.ts": "b34a5428e17f0c715b50b45706fa078f77a4841eddf2ff6d357f181afea91715",
     "packages/motion/src/flip.ts": "ecb248cc9808cda1d88af5946ae372b4d963dca3bdabc323ac04c84704e663f6",
@@ -91,7 +91,7 @@
     "packages/react/src/panel-drag.tsx": "b856959070689054a28c51e3e79b21b9e981a703762f0b52f14aeef8d8e6b23d",
     "packages/react/src/panel-drop.ts": "b82ddb1686408e3a08073dba2e336dae9d5ed19a84988578ca7ee352b6780788",
     "packages/react/src/runtime-context.tsx": "1ed738fc2536846acb90e20afae73c7ee8b02fc7b1eef22cf1d8e336e1f8beaf",
-    "packages/react/src/styles.css": "7136b47545cbed525c242ded09786392fd22426a244e1a26644fd5793d959042",
+    "packages/react/src/styles.css": "7ad4e7c0f0718d214ef0f26df85ac08e1a32024239868c2bad9ee2b10d99d4ed",
     "packages/react/src/tab-presentation.ts": "eeeac41f560e89ed8db685a0df1d6190703ed306507e2cc3cff81f5f4e460143",
     "packages/react/src/tab-reorder.ts": "c139803bc37c5f2c6fc6a17eb836784ff8d203b7bae8acebedcbf290cdabc599",
     "packages/react/src/types.ts": "68d25fd772a4aa46d1491244b7e80aedd00abca0b4a1f3b91d2662adb10d7d82",

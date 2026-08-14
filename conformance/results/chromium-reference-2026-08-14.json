@@ -18,7 +18,7 @@
     "tests": 28,
     "passed": 28,
     "failed": 0,
-    "durationMs": 24800
+    "durationMs": 20400
   },
   "coverage": [
     "accessible semantic command projection",
@@ -50,11 +50,11 @@
     "e2e/performance.spec.ts": "2bbc7b6cb40fd2ad97ba33824b5b8a0a3cf43a82ce638e432f13d29c8db164f3",
     "e2e/performance-baseline.json": "128b4c7dc2c7fc03372224828417f675b279359ebbe9bab7408b172ad76b48a9",
     "playwright.config.ts": "1488b4ef7257ef5a6dc5505148550cbb6ed89e9488b2c9e39e874f15469cc245",
-    "apps/demo/index.html": "41bbd5a9154128bdd12fa77a323f0a60237b1ce2e66c12e3df34d7e30c88559e",
+    "apps/demo/index.html": "3bb528399fe75f380403babd1f08c0e325fe6e480a2e528cd2351e6902f67794",
     "apps/demo/vite.config.ts": "70dd28bb53e3ea556d4c750aee26762312fa7884b2052c9c0cb073a1584cc663",
-    "apps/demo/src/App.tsx": "16f4fd67483f033590857f79cdc2209a54885793cb87d06d43f0ea776429051c",
-    "apps/demo/src/styles.css": "1cb310a3b27e79a16efc5411e2384a1fadad869381b45fee561b9c5ec64541c3",
-    "apps/demo/src/demo-panels.tsx": "f7ef76da5d6b2fd0015f4761c83dbacc65a9be37a4f9d0508e08a6b6f15569e6",
+    "apps/demo/src/App.tsx": "5d54fa3f43dec172219010bc5f74cc9eb998d2a76a0e052183b0411d2d2cea12",
+    "apps/demo/src/styles.css": "b0011e622d0f57f74fe8aeee644feb12d62eac744a83dcb25bb19239e58c8430",
+    "apps/demo/src/demo-panels.tsx": "f971ebb4efbe9b5f111c50c03417e42615a3ce13af6fc0faa8164be76d1a24c1",
     "apps/demo/src/external-panels.ts": "fb54f45c1b28c0c7506b92434d66090b416bc0e4f0b347ba169f86f8710051ab",
     "apps/demo/src/runtime-session.ts": "1b09817f5f32bc10b8e574ac979f3bad472d5840ecb1c08bebdce6d62563c287",
     "apps/demo/src/workspace-config.ts": "4ad9209eba7b811ba081d398a8ac285b8ffbb98aa177a9ba6705ee1ac2a96d8f",
@@ -67,7 +67,7 @@
     "packages/react/src/panel-drop.ts": "b82ddb1686408e3a08073dba2e336dae9d5ed19a84988578ca7ee352b6780788",
     "packages/react/src/tab-reorder.ts": "c139803bc37c5f2c6fc6a17eb836784ff8d203b7bae8acebedcbf290cdabc599",
     "packages/react/src/messages.ts": "acc43a4f1af98a27d492247b9bbeeeb6b7aaf72463796d74c973fcbcfd006c75",
-    "packages/react/src/styles.css": "7136b47545cbed525c242ded09786392fd22426a244e1a26644fd5793d959042",
+    "packages/react/src/styles.css": "7ad4e7c0f0718d214ef0f26df85ac08e1a32024239868c2bad9ee2b10d99d4ed",
     "packages/react/src/types.ts": "68d25fd772a4aa46d1491244b7e80aedd00abca0b4a1f3b91d2662adb10d7d82",
     "packages/runtime/src/durable-runtime.ts": "6ad6e629017a3c4089fdc22f2eef868e3f7873416e9353a2c29825730df63634",
     "packages/surfaces/src/browser-adapter.ts": "1e452c51b94eb96d640defb858d05f28bad3c76550982a20bbcc1ab379cc2d42",

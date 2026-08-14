@@ -8,14 +8,14 @@ tools.** Panefold provides the semantic model, geometry, interactions, persisten
 adapters behind IDEs, map tools, operations consoles, and other panel-heavy products.
 
 [Website](https://natanelia.github.io/panefold/) ·
-[Live demo](https://natanelia.github.io/panefold/demo/) ·
+[Live demo](https://natanelia.github.io/panefold/workbench/) ·
 [Documentation](https://natanelia.github.io/panefold/docs/) ·
 [Source](https://github.com/natanelia/panefold)
 
-[![Open the interactive Panefold Code demo](apps/site/public/media/panefold-interactions-poster.jpg)](https://natanelia.github.io/panefold/demo/)
+[![Open the interactive Panefold Code demo](apps/site/public/media/panefold-interactions-poster.jpg)](https://natanelia.github.io/panefold/workbench/)
 
 **[Watch the interaction film](https://natanelia.github.io/panefold/media/panefold-interactions.webm)**
-· [Try the live workspace](https://natanelia.github.io/panefold/demo/)
+· [Try the live workspace](https://natanelia.github.io/panefold/workbench/)
 
 | Deterministic by design                                                                | Interaction craft                                                                   | Failure-aware foundations                                                                             |
 | -------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------- |
@@ -23,7 +23,7 @@ adapters behind IDEs, map tools, operations consoles, and other panel-heavy prod
 
 > **Use Panefold today**
 >
-> - **Explore:** open the [live Panefold Code demo](https://natanelia.github.io/panefold/demo/).
+> - **Explore:** open the [live Panefold Code demo](https://natanelia.github.io/panefold/workbench/).
 > - **Evaluate:** clone this repository and follow [Run the demo](#run-the-demo).
 > - **Install:** npm packages are **not published**. Version `0.1.0` is available from source and
 >   as private workspace packages only.

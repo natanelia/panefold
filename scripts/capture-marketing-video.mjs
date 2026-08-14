@@ -110,10 +110,12 @@ try {
   const splitGroup = page
     .locator('[data-workspace-panel-tab="notes"]')
     .locator("xpath=ancestor::*[@data-workspace-group][1]");
+  const splitGroupId = await splitGroup.getAttribute("data-workspace-group");
+  if (splitGroupId === null) throw new Error("Could not identify the split panel container");
   const removeContainer = splitGroup.getByRole("button", { name: /Remove panel container/ });
   await cue(removeContainer, "Remove · one atomic container merge");
   await removeContainer.click();
-  await page.locator("[data-workspace-group]").nth(4).waitFor({ state: "detached" });
+  await page.locator(`[data-workspace-group="${splitGroupId}"]`).waitFor({ state: "detached" });
   await delay(750);
 
   const settingsButton = page.getByRole("button", { name: "Workspace appearance" });

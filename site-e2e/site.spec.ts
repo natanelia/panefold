@@ -90,9 +90,11 @@ test("keeps the standalone workbench fixture out of search while sharing the dem
   expect(response.ok()).toBe(true);
   const html = await response.text();
   expect(html).toContain('<meta name="robots" content="noindex,follow"');
-  expect(html).toContain('<link rel="canonical" href="https://natanelia.github.io/panefold/demo/"');
   expect(html).toContain(
-    '<meta property="og:url" content="https://natanelia.github.io/panefold/demo/"',
+    '<link rel="canonical" href="https://natanelia.github.io/panefold/workbench/"',
+  );
+  expect(html).toContain(
+    '<meta property="og:url" content="https://natanelia.github.io/panefold/workbench/"',
   );
 
   const compatibilityAlias = await request.get("./atlas/");

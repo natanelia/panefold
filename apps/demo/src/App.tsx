@@ -62,14 +62,14 @@ const LazyCommandPalette = lazy(async () => {
 const marketingHomeUrl = new URL("../", document.baseURI).href;
 
 const applicationMenuItems = [
-  "File",
-  "Edit",
-  "Selection",
-  "View",
-  "Go",
-  "Run",
-  "Terminal",
-  "Help",
+  { label: "File" },
+  { label: "Edit" },
+  { label: "Selection", collapseAt: "medium" },
+  { label: "View" },
+  { label: "Go", collapseAt: "medium" },
+  { label: "Run", collapseAt: "narrow" },
+  { label: "Terminal", collapseAt: "narrow" },
+  { label: "Help", collapseAt: "medium" },
 ] as const;
 
 type WorkbenchIconName =
@@ -148,7 +148,6 @@ function CodeWorkspaceApp({ session }: { readonly session: DemoWorkspaceSession 
   const { theme, direction, motion, tabPlacement, tabContent } = preferences;
   const [inspectorOpen, setInspectorOpen] = useState(false);
   const [paletteOpen, setPaletteOpen] = useState(false);
-  const [activeActivityPanelId, setActiveActivityPanelId] = useState("route-explorer");
   const [compactGroupId, setCompactGroupId] = useState("primary");
   const [surfaceStatus, setSurfaceStatus] = useState(
     "Drag a tab to reorder, dock, split, or open it beyond the workspace",
@@ -259,11 +258,10 @@ function CodeWorkspaceApp({ session }: { readonly session: DemoWorkspaceSession 
       { type: "select-panel", panelId: panelId(id), activate: true },
       { origin: "menu", label: `Show ${label}` },
     );
-    setActiveActivityPanelId(id);
     setSurfaceStatus(`${label} focused`);
   };
 
-  const handleApplicationMenu = (item: (typeof applicationMenuItems)[number]) => {
+  const handleApplicationMenu = (item: (typeof applicationMenuItems)[number]["label"]) => {
     if (item === "Edit") {
       if (runtime.canUndo()) runtime.undo();
       else setSurfaceStatus("Nothing to undo");
@@ -300,13 +298,14 @@ function CodeWorkspaceApp({ session }: { readonly session: DemoWorkspaceSession 
           {applicationMenuItems.map((item) => (
             <button
               type="button"
-              key={item}
-              title={`${item} menu`}
+              key={item.label}
+              data-collapse-at={"collapseAt" in item ? item.collapseAt : undefined}
+              title={`${item.label} menu`}
               onClick={() => {
-                handleApplicationMenu(item);
+                handleApplicationMenu(item.label);
               }}
             >
-              {item}
+              {item.label}
             </button>
           ))}
         </nav>
@@ -382,7 +381,7 @@ function CodeWorkspaceApp({ session }: { readonly session: DemoWorkspaceSession 
       <main className="demo-main" ref={workspaceFrameRef}>
         <aside className="demo-activity-bar" aria-label="Activity bar">
           {activityItems.map((item) => {
-            const active = activeActivityPanelId === item.panelId;
+            const active = String(snapshot.activation.activePanelId ?? "") === item.panelId;
             const available = getEntity(snapshot.panels, panelId(item.panelId)) !== undefined;
             return (
               <button
