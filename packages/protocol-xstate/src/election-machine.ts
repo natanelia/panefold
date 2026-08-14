@@ -15,6 +15,7 @@ export type ElectionEvent =
   | { readonly type: "PROPOSE"; readonly epoch: number }
   | { readonly type: "WON"; readonly epoch: number }
   | { readonly type: "HIGHER_EPOCH"; readonly epoch: number }
+  | { readonly type: "CONFLICT" | "SERVER_AUTHORITY"; readonly epoch: number }
   | { readonly type: "STEP_DOWN" }
   | { readonly type: "STOP" };
 
@@ -59,6 +60,8 @@ export const coordinatorElectionMachine = setup({
         HEARTBEAT: { guard: "isCurrentOrNewer", actions: "acceptEpoch" },
         TIMEOUT: { target: "candidate" },
         HIGHER_EPOCH: { guard: "isCurrentOrNewer", actions: "acceptEpoch" },
+        CONFLICT: { guard: "isCurrentOrNewer", actions: "acceptEpoch" },
+        SERVER_AUTHORITY: { guard: "isCurrentOrNewer", actions: "acceptEpoch" },
         STOP: { target: "stale" },
       },
     },
@@ -68,6 +71,12 @@ export const coordinatorElectionMachine = setup({
         WON: { guard: "wonProposal", target: "leader", actions: "acceptEpoch" },
         HEARTBEAT: { guard: "isCurrentOrNewer", target: "follower", actions: "acceptEpoch" },
         HIGHER_EPOCH: { guard: "isCurrentOrNewer", target: "follower", actions: "acceptEpoch" },
+        CONFLICT: { guard: "isCurrentOrNewer", target: "follower", actions: "acceptEpoch" },
+        SERVER_AUTHORITY: {
+          guard: "isCurrentOrNewer",
+          target: "follower",
+          actions: "acceptEpoch",
+        },
         STOP: { target: "stale" },
       },
     },
@@ -75,6 +84,16 @@ export const coordinatorElectionMachine = setup({
       on: {
         HIGHER_EPOCH: {
           guard: "isNewer",
+          target: "stepping-down",
+          actions: "acceptEpoch",
+        },
+        CONFLICT: {
+          guard: "isCurrentOrNewer",
+          target: "stepping-down",
+          actions: "acceptEpoch",
+        },
+        SERVER_AUTHORITY: {
+          guard: "isCurrentOrNewer",
           target: "stepping-down",
           actions: "acceptEpoch",
         },

@@ -7,6 +7,10 @@ milestones, but no stable package-compatibility promise exists yet.
 
 ### Added
 
+- A reviewed twelve-actor protocol graph contract and deterministic bounded coverage report for all
+  84 states, 258 transition branches, 64 guarded branches with both outcomes observed, 146 path
+  obligations, 533 explored snapshots, 7,837 impossible-event checks, and 36 phase-specific timeout
+  scenarios with byte-equivalent replay.
 - Transaction-correlated immutable post-commit effect envelopes, an abortable bounded delivery
   controller with in-process duplicate suppression and explicit idempotent retry, plus an optional
   Effect bridge. Durable and shared sinks must namespace and persist effect IDs themselves.
@@ -16,6 +20,11 @@ milestones, but no stable package-compatibility promise exists yet.
 
 ### Changed
 
+- Scoped protocol actors now support replaceable typed phase deadlines through the same
+  addressed-event path used by ordinary actor input, with injectable FIFO virtual time and
+  exactly-once deadline cleanup on fire, cancellation, stop, or parent abort. Coverage performs 84
+  literal schedules: 72 firings across primary and replay runs plus 12 cancelled twins, with zero
+  pending handles.
 - Drag and splitter actors now exist only for active interactions; raw pointer samples, preview
   writes, tab-strip geometry, host updates, hit testing, and motion queues are bounded and
   frame-coalesced.

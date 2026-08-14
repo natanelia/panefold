@@ -26,6 +26,7 @@ export type KeyboardMoveEvent =
   | { readonly type: "TARGET_INVALIDATED"; readonly fallback?: KeyboardMoveTarget }
   | { readonly type: "COMMIT" | "ANNOUNCED" | "CANCEL" | "RESET" }
   | { readonly type: "COMMIT_OK"; readonly announcement: string }
+  | { readonly type: "REVISION_CONFLICT" }
   | { readonly type: "COMMIT_ERROR"; readonly message: string };
 
 export const keyboardMoveMachine = setup({
@@ -60,7 +61,9 @@ export const keyboardMoveMachine = setup({
     fail: assign(({ event }) =>
       event.type === "COMMIT_ERROR"
         ? { failure: event.message }
-        : { failure: "cancelled", target: undefined },
+        : event.type === "REVISION_CONFLICT"
+          ? { failure: "revision-conflict", target: undefined }
+          : { failure: "cancelled", target: undefined },
     ),
     reset: assign({
       baseRevision: undefined,
@@ -99,6 +102,7 @@ export const keyboardMoveMachine = setup({
       on: {
         COMMIT_OK: { target: "announcing", actions: "announce" },
         COMMIT_ERROR: { target: "cancelled", actions: "fail" },
+        REVISION_CONFLICT: { target: "cancelled", actions: "fail" },
         CANCEL: { target: "cancelled", actions: "fail" },
       },
     },

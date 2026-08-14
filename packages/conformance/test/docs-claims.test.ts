@@ -50,4 +50,22 @@ describe("published conformance claims", () => {
       await rm(temporaryDirectory, { recursive: true, force: true });
     }
   });
+
+  it("rejects protocol-coverage metric drift", async () => {
+    const temporaryDirectory = await mkdtemp(join(tmpdir(), "panefold-docs-claims-"));
+    try {
+      const source = await readFile(resolve(repositoryRoot, "docs/CONFORMANCE.md"), "utf8");
+      const drifted = source.replace("84/84 states, 258/258", "83/84 states, 258/258");
+      expect(drifted).not.toBe(source);
+      const document = resolve(temporaryDirectory, "CONFORMANCE.md");
+      await writeFile(document, drifted, "utf8");
+
+      const result = runChecker(document);
+
+      expect(result.status).toBe(1);
+      expect(result.stderr).toContain("Documentation claim drift for protocol coverage result");
+    } finally {
+      await rm(temporaryDirectory, { recursive: true, force: true });
+    }
+  });
 });

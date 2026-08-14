@@ -7,8 +7,11 @@ export interface PersistenceWorkerInput {
 export interface PersistenceWorkerContext {
   readonly queueLimit: number;
   readonly queueDepth: number;
+  readonly failureKind?: PersistenceFailureKind | undefined;
   readonly failure: string | undefined;
 }
+
+export type PersistenceFailureKind = "storage" | "quota" | "checksum";
 
 export type PersistenceWorkerEvent =
   | { readonly type: "ENQUEUE" }
@@ -18,7 +21,11 @@ export type PersistenceWorkerEvent =
   | { readonly type: "SNAPSHOT_WRITTEN" }
   | { readonly type: "COMPACT" }
   | { readonly type: "COMPACTED" }
-  | { readonly type: "STORAGE_ERROR"; readonly message: string }
+  | {
+      readonly type: "STORAGE_ERROR";
+      readonly message: string;
+      readonly kind?: PersistenceFailureKind;
+    }
   | { readonly type: "RETRY" }
   | { readonly type: "RECOVERED" }
   | { readonly type: "STOP" };
@@ -31,13 +38,16 @@ export const persistenceWorkerMachine = setup({
   },
   guards: {
     atCapacity: ({ context }) => context.queueDepth >= context.queueLimit,
-    hasPending: ({ context }) => context.queueDepth > 0,
   },
   actions: {
     enqueue: assign(({ context }) => ({ queueDepth: context.queueDepth + 1 })),
     clearQueue: assign({ queueDepth: 0 }),
-    fail: assign(({ event }) => (event.type === "STORAGE_ERROR" ? { failure: event.message } : {})),
-    clearFailure: assign({ failure: undefined }),
+    fail: assign(({ event }) =>
+      event.type === "STORAGE_ERROR"
+        ? { failure: event.message, failureKind: event.kind ?? ("storage" as const) }
+        : {},
+    ),
+    clearFailure: assign({ failure: undefined, failureKind: undefined }),
   },
 }).createMachine({
   id: "persistence-worker",
@@ -47,7 +57,7 @@ export const persistenceWorkerMachine = setup({
     if (!Number.isSafeInteger(queueLimit) || queueLimit < 0) {
       throw new RangeError("queueLimit must be a non-negative safe integer");
     }
-    return { queueLimit, queueDepth: 0, failure: undefined };
+    return { queueLimit, queueDepth: 0, failureKind: undefined, failure: undefined };
   },
   states: {
     idle: {
@@ -62,7 +72,10 @@ export const persistenceWorkerMachine = setup({
     batching: {
       on: {
         ENQUEUE: [{ guard: "atCapacity", target: "degraded" }, { actions: "enqueue" }],
-        FLUSH: { guard: "hasPending", target: "writing-journal" },
+        // Entering batching is itself proof that at least one item is queued.
+        // Keeping a permanently-true guard would create a formally
+        // untestable rejection branch in the published protocol graph.
+        FLUSH: { target: "writing-journal" },
         STORAGE_ERROR: { target: "degraded", actions: "fail" },
         STOP: { target: "stopped" },
       },
@@ -72,6 +85,7 @@ export const persistenceWorkerMachine = setup({
         JOURNAL_WRITTEN: { target: "idle", actions: "clearQueue" },
         SNAPSHOT_DUE: { target: "checkpointing" },
         STORAGE_ERROR: { target: "degraded", actions: "fail" },
+        STOP: { target: "stopped" },
       },
     },
     checkpointing: {
@@ -79,12 +93,14 @@ export const persistenceWorkerMachine = setup({
         SNAPSHOT_WRITTEN: { target: "idle", actions: "clearQueue" },
         COMPACT: { target: "compacting" },
         STORAGE_ERROR: { target: "degraded", actions: "fail" },
+        STOP: { target: "stopped" },
       },
     },
     compacting: {
       on: {
         COMPACTED: { target: "idle", actions: "clearQueue" },
         STORAGE_ERROR: { target: "degraded", actions: "fail" },
+        STOP: { target: "stopped" },
       },
     },
     degraded: {
@@ -94,6 +110,7 @@ export const persistenceWorkerMachine = setup({
       on: {
         RECOVERED: { target: "idle", actions: ["clearFailure", "clearQueue"] },
         STORAGE_ERROR: { target: "degraded", actions: "fail" },
+        STOP: { target: "stopped" },
       },
     },
     stopped: { type: "final" },

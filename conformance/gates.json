@@ -34,6 +34,7 @@
         "PER-008",
         "PRF-003",
         "TST-002",
+        "TST-003",
         "TXN-005"
       ],
       "profileIds": [
@@ -47,11 +48,13 @@
         "patch-replay-oracle",
         "independent-semantic-oracle",
         "independent-semantic-oracle-result",
+        "protocol-state-machine-coverage-source",
+        "protocol-state-machine-coverage-result",
         "kernel-post-commit-effects",
         "runtime-post-commit-effects",
         "post-commit-effects-decision"
       ],
-      "note": "The independent semantic oracle agrees with the reference in a bounded generated run, but it is not yet the retained optimized production kernel and the ten-million-command report is absent."
+      "note": "The bounded actor matrix has exact deterministic replay and deadline coverage, and the independent semantic oracle agrees with the reference in a bounded generated run; the retained optimized production kernel and ten-million-command report remain absent."
     },
     {
       "id": "atomicity",

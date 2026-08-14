@@ -6,7 +6,9 @@ export type ViewTransitionSkipReason =
   | "unsupported"
   | "duplicate-name"
   | "budget-rejected"
-  | "capture-failed";
+  | "capture-failed"
+  | "timed-out"
+  | "driver-failed";
 
 export interface ViewTransitionContext {
   readonly commitApplied: boolean;
@@ -22,7 +24,9 @@ export type ViewTransitionEvent =
         | "UNSUPPORTED"
         | "DUPLICATE_NAME"
         | "BUDGET_REJECTED"
-        | "CAPTURE_FAILED";
+        | "CAPTURE_FAILED"
+        | "TIMED_OUT"
+        | "DRIVER_FAILED";
     }
   | { readonly type: "FALLBACK_COMMITTED" | "COMPLETE_SKIP" };
 
@@ -38,11 +42,16 @@ export const viewTransitionMachine = setup({
     markCommitted: assign({ commitApplied: true }),
     skip: assign(({ event }) => {
       let skipReason: ViewTransitionSkipReason = "explicit-skip";
+      if (event.type === "SKIP" && isViewTransitionSkipReason(event.reason)) {
+        skipReason = event.reason;
+      }
       if (event.type === "HIGHER_PRIORITY_COMMAND") skipReason = "interrupted";
       if (event.type === "UNSUPPORTED") skipReason = "unsupported";
       if (event.type === "DUPLICATE_NAME") skipReason = "duplicate-name";
       if (event.type === "BUDGET_REJECTED") skipReason = "budget-rejected";
       if (event.type === "CAPTURE_FAILED") skipReason = "capture-failed";
+      if (event.type === "TIMED_OUT") skipReason = "timed-out";
+      if (event.type === "DRIVER_FAILED") skipReason = "driver-failed";
       return { skipReason };
     }),
   },
@@ -58,6 +67,8 @@ export const viewTransitionMachine = setup({
         UNSUPPORTED: { target: "skipped", actions: "skip" },
         BUDGET_REJECTED: { target: "skipped", actions: "skip" },
         HIGHER_PRIORITY_COMMAND: { target: "skipped", actions: "skip" },
+        TIMED_OUT: { target: "skipped", actions: "skip" },
+        DRIVER_FAILED: { target: "skipped", actions: "skip" },
       },
     },
     "capturing-old": {
@@ -67,6 +78,8 @@ export const viewTransitionMachine = setup({
         DUPLICATE_NAME: { target: "skipped", actions: "skip" },
         SKIP: { target: "skipped", actions: "skip" },
         HIGHER_PRIORITY_COMMAND: { target: "skipped", actions: "skip" },
+        TIMED_OUT: { target: "skipped", actions: "skip" },
+        DRIVER_FAILED: { target: "skipped", actions: "skip" },
       },
     },
     committing: {
@@ -75,6 +88,8 @@ export const viewTransitionMachine = setup({
         CAPTURE_FAILED: { target: "skipped", actions: "skip" },
         SKIP: { target: "skipped", actions: "skip" },
         HIGHER_PRIORITY_COMMAND: { target: "skipped", actions: "skip" },
+        TIMED_OUT: { target: "skipped", actions: "skip" },
+        DRIVER_FAILED: { target: "skipped", actions: "skip" },
       },
     },
     "capturing-new": {
@@ -84,6 +99,8 @@ export const viewTransitionMachine = setup({
         DUPLICATE_NAME: { target: "skipped", actions: "skip" },
         SKIP: { target: "skipped", actions: "skip" },
         HIGHER_PRIORITY_COMMAND: { target: "skipped", actions: "skip" },
+        TIMED_OUT: { target: "skipped", actions: "skip" },
+        DRIVER_FAILED: { target: "skipped", actions: "skip" },
       },
     },
     animating: {
@@ -91,6 +108,8 @@ export const viewTransitionMachine = setup({
         FINISHED: { target: "completed" },
         SKIP: { target: "skipped", actions: "skip" },
         HIGHER_PRIORITY_COMMAND: { target: "skipped", actions: "skip" },
+        TIMED_OUT: { target: "skipped", actions: "skip" },
+        DRIVER_FAILED: { target: "skipped", actions: "skip" },
       },
     },
     skipped: {
@@ -105,4 +124,19 @@ export const viewTransitionMachine = setup({
 
 export function createViewTransitionActor() {
   return createActor(viewTransitionMachine);
+}
+
+function isViewTransitionSkipReason(
+  reason: string | undefined,
+): reason is ViewTransitionSkipReason {
+  return (
+    reason === "explicit-skip" ||
+    reason === "interrupted" ||
+    reason === "unsupported" ||
+    reason === "duplicate-name" ||
+    reason === "budget-rejected" ||
+    reason === "capture-failed" ||
+    reason === "timed-out" ||
+    reason === "driver-failed"
+  );
 }

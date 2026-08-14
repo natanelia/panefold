@@ -288,6 +288,23 @@
       "note": "Content-addressed repository source artifact; it does not claim an executed environment result, manual assessment, or external certification."
     },
     {
+      "id": "protocol-state-machine-coverage-source",
+      "kind": "model-report",
+      "status": "verified",
+      "verificationClass": "code-verifiable",
+      "artifactRole": "source",
+      "uri": "repo://packages/protocol-xstate/test/protocol-coverage.test.ts",
+      "sha256": "fb832858be3156e183c95acd05c853c5c1738b5320cb50b14445ac58ccc1b637",
+      "producedAt": "2026-08-14T01:12:00Z",
+      "requirementIds": [
+        "TST-003"
+      ],
+      "profileIds": [
+        "compact-react-chromium-desktop"
+      ],
+      "note": "Content-addressed repository source artifact; it does not claim an executed environment result, manual assessment, or external certification."
+    },
+    {
       "id": "motion-primitives",
       "kind": "automated-test",
       "status": "verified",
@@ -838,7 +855,7 @@
       "verificationClass": "code-verifiable",
       "artifactRole": "source",
       "uri": "repo://docs/ARCHITECTURE.md",
-      "sha256": "9b33aed445967d86381b55176ed38a00a8e063acafaa637896b577899ed5c21c",
+      "sha256": "f969944d24da928bef5eef2a3ec4ab2091cdd207da6a4c720b1ed359667c4e40",
       "producedAt": "2026-08-13T11:49:00Z",
       "requirementIds": [
         "API-002",
@@ -884,7 +901,7 @@
       "verificationClass": "code-verifiable",
       "artifactRole": "source",
       "uri": "repo://docs/adr/0012-bounded-protocol-and-motion-lifecycles.md",
-      "sha256": "cf215bc1a4907adef9915346f0649bfa844597630850253cf632a0bacf1945b7",
+      "sha256": "1b10baf419d07d2a06d4bd609f00f66bb138c0ec15d624ea507369e9555c4133",
       "producedAt": "2026-08-13T11:49:00Z",
       "requirementIds": [
         "ARC-002",
@@ -963,7 +980,7 @@
       "artifactRole": "result",
       "uri": "repo://conformance/results/model-campaign-50000-2026-08-12.json",
       "sha256": "bc01310655ce931adb323dbd3dad65e1e4599c148f2fa0f35c0e3ae88f9b69e9",
-      "producedAt": "2026-08-13T11:49:00Z",
+      "producedAt": "2026-08-12T06:40:00Z",
       "requirementIds": [
         "MOD-004",
         "PRF-003",
@@ -983,7 +1000,7 @@
       "artifactRole": "result",
       "uri": "repo://conformance/results/chromium-reference-2026-08-13.json",
       "sha256": "f4f9552c7ab5c1287bc4eb3596b78411c0928850170b4323c1be2bc55e68e405",
-      "producedAt": "2026-08-13T11:49:00Z",
+      "producedAt": "2026-08-13T11:12:01.000Z",
       "requirementIds": [
         "A11Y-002",
         "A11Y-003",
@@ -1019,7 +1036,7 @@
       "artifactRole": "result",
       "uri": "repo://conformance/results/interaction-performance-2026-08-13.json",
       "sha256": "53e05740d5d6e144017b675622f4c47170d15020e56df1dadee1641819257e86",
-      "producedAt": "2026-08-13T11:49:00Z",
+      "producedAt": "2026-08-13T04:05:43.725Z",
       "requirementIds": [
         "PRF-001",
         "PRF-006",
@@ -1039,7 +1056,7 @@
       "artifactRole": "result",
       "uri": "repo://conformance/results/framework-contract-2026-08-12.json",
       "sha256": "2ea2778ce6de7bae5b8c9df3ef795033435c834557d1e720eda7bff9edf9b8e0",
-      "producedAt": "2026-08-13T11:49:00Z",
+      "producedAt": "2026-08-12T06:49:12Z",
       "requirementIds": [
         "FWK-001",
         "FWK-003"
@@ -1056,8 +1073,8 @@
       "verificationClass": "environment-verifiable",
       "artifactRole": "result",
       "uri": "repo://conformance/results/protocol-motion-2026-08-13.json",
-      "sha256": "f6b65fe8f216e368e0fb13ff8d0495b2bbf057ca3fe1cb725b3360684f3a5948",
-      "producedAt": "2026-08-13T11:49:00Z",
+      "sha256": "ed66c673c482d70c556a91344d1767b8c03ae45a142f3768405a761d5fba2791",
+      "producedAt": "2026-08-14T01:16:17.784Z",
       "requirementIds": [
         "A11Y-002",
         "ARC-002",
@@ -1084,14 +1101,31 @@
       "note": "Recorded execution result with an explicit experimental profile and limitations; it does not claim manual assessment or stable certification."
     },
     {
+      "id": "protocol-state-machine-coverage-result",
+      "kind": "model-report",
+      "status": "verified",
+      "verificationClass": "code-verifiable",
+      "artifactRole": "result",
+      "uri": "repo://conformance/results/protocol-state-machine-coverage-2026-08-14.json",
+      "sha256": "16eb7959026baecbd9fbf671d951d8d8d1f78ac6408aad182936503cfca32c41",
+      "producedAt": "2026-08-14T01:12:00Z",
+      "requirementIds": [
+        "TST-003"
+      ],
+      "profileIds": [
+        "compact-react-chromium-desktop"
+      ],
+      "note": "Recorded execution result with an explicit experimental profile and limitations; it does not claim manual assessment or stable certification."
+    },
+    {
       "id": "independent-semantic-oracle-result",
       "kind": "model-report",
       "status": "verified",
       "verificationClass": "code-verifiable",
       "artifactRole": "result",
       "uri": "repo://conformance/results/independent-semantic-oracle-2026-08-13.json",
-      "sha256": "2f24190ce4d37e44eb0c7607f12dc3d39722a97b28697391314dd828424e46ea",
-      "producedAt": "2026-08-13T11:49:00Z",
+      "sha256": "aba03109c43c7b40ac95d634e674c36ae77b241cf84fe707caa1ce7cfafec5be",
+      "producedAt": "2026-08-14T01:10:28Z",
       "requirementIds": [
         "MOD-004",
         "PRF-003",

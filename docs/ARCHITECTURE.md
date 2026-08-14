@@ -38,8 +38,9 @@ operational/driver packages and do not appear in serialized state.
 - `@panefold/runtime` composes model/kernel transactions, bounded queues, selectors, policy, and
   persistence contracts; `@panefold/runtime-effect` adds optional Effect/IndexedDB operations.
 - `@panefold/protocol` defines driver-neutral contracts and the twelve-protocol descriptor catalog;
-  `@panefold/protocol-xstate` supplies bounded actors plus identity/revision guards, injected clocks,
-  bounded traces, and abort-scoped disposal for those temporal workflows.
+  its reviewed graph contract pins state, transition, guard, and path obligations.
+  `@panefold/protocol-xstate` supplies bounded actors plus identity/revision guards, an injectable
+  deadline scheduler, bounded traces, and abort-scoped disposal for those temporal workflows.
 - `@panefold/surfaces` owns capability intersection, prepared ownership, and injected
   browser-window/Document-PiP adapters.
 - `@panefold/motion` owns motion plans, property channels, managed leases, scheduling, FLIP,
@@ -171,6 +172,31 @@ accessible names remain present when labels are visually hidden.
 
 React reads the runtime through `useSyncExternalStore`. Workspace state is not copied into a changing
 context value, and pointer frames do not cause a framework-wide semantic render loop.
+
+## Protocol coverage and deterministic time
+
+The twelve Appendix-C actors are checked against a reviewed graph contract rather than inferred
+from test names. For each actor the contract fixes the complete state set, a digest of its ordered
+transition branches, its guarded-transition count, and witnesses for adversarial, interruption,
+timeout, recovery, finalizer, and impossible-event behavior. A bounded breadth-first runner restores
+persisted machine snapshots, observes actual XState microsteps, drives both outcomes of every guard,
+and rejects graph drift, unreachable branches, missing witnesses, or unexpected states.
+
+The scoped actor accepts a scheduler and typed phase deadlines. A workflow can replace or cancel its
+current deadline while retaining the same addressed-event path; firing, cancellation, stop, or
+parent abort clears the handle exactly once. The same path uses the system clock in ordinary
+execution and a FIFO virtual clock in tests, so timeout coverage does not depend on sleeps. The
+checked-in compact-profile result reaches all 84 states and all 258 transition branches, observes
+both selection and rejection for all 64 guarded branches, satisfies all 146 declared obligations,
+explores 533 bounded snapshots, and ignores 7,837 impossible events safely. Its 36 phase-specific
+timeout scenarios perform 84 literal schedules: 72 firings across primary and byte-equivalent replay
+runs plus 12 cancelled twins, with zero pending handles.
+
+This is code-verifiable state-machine evidence for `TST-003`. Abstract failure events do not prove
+browser timers, popup/CSP/permission behavior, storage media, distributed hosting, process or
+monitor loss. The result also does not record the final authoritative location or placeholder for
+every panel in Appendix H, so `TST-009` and the recovery gate remain open. See
+[ADR-0012](adr/0012-bounded-protocol-and-motion-lifecycles.md).
 
 ## Panel lifecycle
 

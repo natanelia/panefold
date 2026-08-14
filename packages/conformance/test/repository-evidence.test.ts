@@ -59,6 +59,22 @@ describe("repository result evidence", () => {
       await rm(root, { recursive: true, force: true });
     }
   });
+
+  it("rejects an independent semantic result that omits the reviewed source closure", async () => {
+    const fixture = await createFixture();
+    try {
+      const evidence = fixture.evidence.map((record) => ({
+        ...record,
+        id: "independent-semantic-oracle-result",
+      }));
+
+      expect(await verifyRepositoryEvidence(evidence, { root: fixture.root })).toContain(
+        "Result sourceDigests for independent-semantic-oracle-result must bind the exact reviewed source closure.",
+      );
+    } finally {
+      await rm(fixture.root, { recursive: true, force: true });
+    }
+  });
 });
 
 async function createFixture() {

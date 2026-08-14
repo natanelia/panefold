@@ -19,6 +19,7 @@ const resultEvidenceIds = {
   chromium: "chromium-reference-result",
   framework: "framework-contract-result",
   protocolMotion: "protocol-motion-result",
+  protocolCoverage: "protocol-state-machine-coverage-result",
 };
 
 const readJson = async (path) => JSON.parse(await readFile(path, "utf8"));
@@ -119,7 +120,7 @@ function captureSingle(markdown, pattern, label, failures) {
     );
     return undefined;
   }
-  return matches[0].slice(1).map((value) => Number(value));
+  return matches[0].slice(1).map((value) => Number(value.replaceAll(",", "")));
 }
 
 function compareClaim(actual, expected, label, failures) {
@@ -231,6 +232,33 @@ function validatePublishedClaims(markdown, claims) {
     "protocol/motion result",
     failures,
   );
+  const protocolCoverage = captureSingle(
+    markdown,
+    /compact headless protocol result[\s\S]*?(\d+)\/(\d+) states,\s+(\d+)\/(\d+) transition branches, both outcomes for\s+(\d+)\/(\d+) guarded branches, and\s+(\d+)\/(\d+)[\s\S]*?obligations\. Its bounded\s+traversal explored\s+([\d,]+) snapshots and\s+([\d,]+) impossible-event cases\. Across\s+(\d+) phase-specific[\s\S]*?performs\s+(\d+) literal schedules:\s+(\d+) firings[\s\S]*?plus\s+(\d+) cancelled twins/gi,
+    "protocol coverage result",
+    failures,
+  );
+  compareClaim(
+    protocolCoverage,
+    [
+      claims.results.protocolCoverage.reachableStates,
+      claims.results.protocolCoverage.documentedStates,
+      claims.results.protocolCoverage.coveredTransitions,
+      claims.results.protocolCoverage.documentedTransitions,
+      claims.results.protocolCoverage.coveredGuardPasses,
+      claims.results.protocolCoverage.guardedTransitions,
+      claims.results.protocolCoverage.coveredObligations,
+      claims.results.protocolCoverage.obligations,
+      claims.results.protocolCoverage.exploredSnapshots,
+      claims.results.protocolCoverage.impossibleEventChecks,
+      claims.results.protocolCoverage.uniqueTimeoutScenarios,
+      claims.results.protocolCoverage.deadlinesScheduled,
+      claims.results.protocolCoverage.deadlinesFired,
+      claims.results.protocolCoverage.deadlinesCancelled,
+    ],
+    "protocol coverage result",
+    failures,
+  );
   return failures;
 }
 
@@ -275,14 +303,16 @@ async function main() {
     traces: requireArray(traceDocument.traces, "traces"),
     hardGates: requireArray(gateDocument.hardGates, "hardGates"),
   });
-  const [chromium, framework, protocolMotion] = await Promise.all([
+  const [chromium, framework, protocolMotion, protocolCoverage] = await Promise.all([
     readEvidenceResult(evidenceDocument, resultEvidenceIds.chromium),
     readEvidenceResult(evidenceDocument, resultEvidenceIds.framework),
     readEvidenceResult(evidenceDocument, resultEvidenceIds.protocolMotion),
+    readEvidenceResult(evidenceDocument, resultEvidenceIds.protocolCoverage),
   ]);
   const chromiumSummary = requireRecord(chromium.summary, "Chromium summary");
   const frameworkSummary = requireRecord(framework.summary, "framework summary");
   const protocolMotionSummary = requireRecord(protocolMotion.summary, "protocol/motion summary");
+  const protocolCoverageTotals = requireRecord(protocolCoverage.totals, "protocol coverage totals");
   const claims = {
     traces: collectTraceClaims(traceDocument),
     aggregate: {
@@ -314,6 +344,68 @@ async function main() {
         reactIntegrationTests: requireInteger(
           protocolMotionSummary.reactIntegrationTests,
           "React integration test count",
+        ),
+      },
+      protocolCoverage: {
+        reachableStates: requireInteger(
+          protocolCoverageTotals.reachableStates,
+          "protocol coverage reachable-state count",
+        ),
+        documentedStates: requireInteger(
+          protocolCoverageTotals.documentedStates,
+          "protocol coverage documented-state count",
+        ),
+        coveredTransitions: requireInteger(
+          protocolCoverageTotals.coveredTransitions,
+          "protocol coverage covered-transition count",
+        ),
+        documentedTransitions: requireInteger(
+          protocolCoverageTotals.documentedTransitions,
+          "protocol coverage documented-transition count",
+        ),
+        coveredGuardPasses: requireInteger(
+          protocolCoverageTotals.coveredGuardPasses,
+          "protocol coverage guard-pass count",
+        ),
+        coveredGuardRejections: requireInteger(
+          protocolCoverageTotals.coveredGuardRejections,
+          "protocol coverage guard-rejection count",
+        ),
+        guardedTransitions: requireInteger(
+          protocolCoverageTotals.guardedTransitions,
+          "protocol coverage guarded-transition count",
+        ),
+        coveredObligations: requireInteger(
+          protocolCoverageTotals.coveredObligations,
+          "protocol coverage covered-obligation count",
+        ),
+        obligations: requireInteger(
+          protocolCoverageTotals.obligations,
+          "protocol coverage obligation count",
+        ),
+        exploredSnapshots: requireInteger(
+          protocolCoverageTotals.exploredSnapshots,
+          "protocol coverage explored-snapshot count",
+        ),
+        impossibleEventChecks: requireInteger(
+          protocolCoverageTotals.impossibleEventChecks,
+          "protocol coverage impossible-event count",
+        ),
+        uniqueTimeoutScenarios: requireInteger(
+          protocolCoverageTotals.uniqueTimeoutScenarios,
+          "protocol coverage timeout-scenario count",
+        ),
+        deadlinesScheduled: requireInteger(
+          protocolCoverageTotals.deadlinesScheduled,
+          "protocol coverage scheduled-deadline count",
+        ),
+        deadlinesFired: requireInteger(
+          protocolCoverageTotals.deadlinesFired,
+          "protocol coverage fired-deadline count",
+        ),
+        deadlinesCancelled: requireInteger(
+          protocolCoverageTotals.deadlinesCancelled,
+          "protocol coverage cancelled-deadline count",
         ),
       },
     },

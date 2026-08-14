@@ -1,6 +1,6 @@
 # System-design implementation audit
 
-Audit date: 2026-08-13
+Audit date: 2026-08-14
 
 This is the durable cross-check between the 190 normative requirements in the
 [system design](spec/SYSTEM_DESIGN.md), the generated conformance register, and the repository
@@ -14,16 +14,16 @@ checked against those files by the conformance test suite.
 
 | Profile                            | Verified | Unresolved | Blocked |     N/A |   Total |
 | ---------------------------------- | -------: | ---------: | ------: | ------: | ------: |
-| `compact-react-chromium-desktop`   |      106 |         59 |      22 |       3 |     190 |
-| `framework-adapter-contract-jsdom` |        2 |         53 |      11 |     124 |     190 |
-| **Both profiles**                  |  **108** |    **112** |  **33** | **127** | **380** |
+| `compact-react-chromium-desktop`   |      107 |         58 |      22 |       3 |     190 |
+| `framework-adapter-contract-jsdom` |        2 |         52 |      11 |     125 |     190 |
+| **Both profiles**                  |  **109** |    **110** |  **33** | **128** | **380** |
 
 | Proof class                | Verified | Unresolved | Blocked | N/A | Total |
 | -------------------------- | -------: | ---------: | ------: | --: | ----: |
-| A — code-verifiable        |       88 |         56 |       0 |   0 |   144 |
+| A — code-verifiable        |       89 |         54 |       0 |   0 |   143 |
 | B — environment-verifiable |       20 |         56 |       0 |   0 |    76 |
 | C — manual/external        |        0 |          0 |      33 |   0 |    33 |
-| D — future scope           |        0 |          0 |       0 | 127 |   127 |
+| D — future scope           |        0 |          0 |       0 | 128 |   128 |
 
 `V` means verified for that exact experimental profile, `U` means unresolved, `B` means blocked on
 manual or external evidence, and `N/A` means the profile does not publish that capability.
@@ -209,7 +209,7 @@ manual or external evidence, and `N/A` means the profile does not publish that c
 | `THM-002`   | U                        | N/A                       |
 | `TST-001`   | U                        | U                         |
 | `TST-002`   | V                        | U                         |
-| `TST-003`   | U                        | U                         |
+| `TST-003`   | V                        | N/A                       |
 | `TST-004`   | V                        | U                         |
 | `TST-005`   | U                        | U                         |
 | `TST-006`   | U                        | U                         |
@@ -262,6 +262,18 @@ identities. The receipt ledger is deliberately process-local. Crash-durable or d
 exactly-once application remains outside this result and is recorded in
 [ADR-0014](adr/0014-post-commit-effect-delivery.md).
 
+`TST-003` is now verified only for the compact profile's twelve headless Appendix-C actors. A
+reviewed graph contract pins all states, ordered transition branches, guards, and named path
+obligations before execution counts as evidence. The checked-in deterministic result reaches 84/84
+states and 258/258 transitions, observes selection and rejection for all 64 guarded branches, covers
+146/146 adversarial/interruption/timeout/recovery/finalizer/impossible-event obligations, explores
+533 bounded snapshots, and performs 7,837 impossible-event checks. Its 36 phase-specific timeout
+scenarios perform 84 literal virtual-FIFO schedules: 72 firings across primary and byte-equivalent
+replay runs plus 12 cancelled twins, with zero pending handles. The framework adapter/JSDOM profile
+publishes no protocol actors, so its `TST-003` cell is N/A rather than an unrelated unresolved
+requirement. This result is not browser, OS, process-crash, distributed-host, physical-monitor, or
+manual recovery evidence, and it does not promote `TST-009`.
+
 ## Structural action parity audit
 
 `STRUCTURAL_ACTION_PARITY` previously mixed real renderer routes with aspirational core commands.
@@ -293,17 +305,17 @@ capabilities and route-specific tests; corrected declaration strings alone are n
 
 ### Repository-local code or deterministic proof
 
-The compact profile has 13 unresolved code-verifiable rows:
+The compact profile has 12 unresolved code-verifiable rows:
 
 `A11Y-002`, `COL-001`, `I18N-003`, `INT-002`, `INT-004`, `OBS-005`, `PKG-004`, `RSK-002`,
-`SCP-001`, `SEC-007`, `TST-001`, `TST-003`, and `TST-009`.
+`SCP-001`, `SEC-007`, `TST-001`, and `TST-009`.
 
 The most direct implementation work is the complete renderer route inventory/parity, locale-aware
 shortcut formatting, package compatibility policies, generated public capability classification,
-and broader deterministic protocol/recovery matrices. `TST-001` is a missing
-ten-million-operation artifact; `TST-003` and `TST-009` need broader deterministic protocol and
-recovery matrices. The remaining governance/security rows need the policies and artifacts named by
-their requirement, not a change of status by assertion.
+the ten-million-operation artifact required by `TST-001`, and the complete
+final-authority/placeholder recovery matrix required by `TST-009`. The remaining
+governance/security rows need the policies and artifacts named by their requirement, not a change of
+status by assertion.
 
 ### Implemented or partial behavior awaiting environment evidence
 
@@ -325,7 +337,7 @@ not promoted to executed environment evidence.
 The 33 blocked cells require evidence the repository cannot self-issue: manual assistive-technology
 and voice-control work, timed usability/DX studies, physical performance and resource traces,
 independent security review, third-party pilots, and signed stable-release approval. No blocked row
-was promoted by this audit. `COL-002`, `MOT-008`, and compact-profile `FWK-005`, plus the 124
+was promoted by this audit. `COL-002`, `MOT-008`, and compact-profile `FWK-005`, plus the 125
 adapter-profile rendering/product rows, remain explicitly outside the respective published profile.
 
 ## Tab-reorder design check
@@ -363,17 +375,17 @@ performance hard gate therefore remains blocked.
 
 <!-- BEGIN HARD GATE STATUS -->
 
-| Gate            | State      | Genuine closing evidence                                                        |
-| --------------- | ---------- | ------------------------------------------------------------------------------- |
-| Model integrity | Unresolved | Ten-million-operation report.                                                   |
-| Determinism     | Unresolved | Retained optimized-kernel campaign at the stable threshold.                     |
-| Atomicity       | Unresolved | Complete fallible persistence/surface operational matrix.                       |
-| Accessibility   | Blocked    | Signed real-system AT, zoom, forced-colors, and voice-control evidence.         |
-| Lifecycle       | Blocked    | Third-party heavy-content torture and resource-leak traces.                     |
-| Performance     | Blocked    | Controlled physical 60 Hz and 120 Hz traces with raw samples and intervals.     |
-| Recovery        | Blocked    | Real process, tab, window, quota/corruption, permission, and monitor-loss runs. |
-| Security        | Blocked    | Independent threat, protocol, dependency, provenance, and deployment review.    |
-| Migration       | Unresolved | Application-layout and panel-type migration corpus for published versions.      |
-| Public evidence | Unresolved | Remaining compatibility records, certifications, and signed approval.           |
+| Gate            | State      | Genuine closing evidence                                                                                      |
+| --------------- | ---------- | ------------------------------------------------------------------------------------------------------------- |
+| Model integrity | Unresolved | Ten-million-operation report.                                                                                 |
+| Determinism     | Unresolved | Protocol graph/deadline coverage passes; retained optimized-kernel campaign and ten-million threshold remain. |
+| Atomicity       | Unresolved | Complete fallible persistence/surface operational matrix.                                                     |
+| Accessibility   | Blocked    | Signed real-system AT, zoom, forced-colors, and voice-control evidence.                                       |
+| Lifecycle       | Blocked    | Third-party heavy-content torture and resource-leak traces.                                                   |
+| Performance     | Blocked    | Controlled physical 60 Hz and 120 Hz traces with raw samples and intervals.                                   |
+| Recovery        | Blocked    | Real process, tab, window, quota/corruption, permission, and monitor-loss runs.                               |
+| Security        | Blocked    | Independent threat, protocol, dependency, provenance, and deployment review.                                  |
+| Migration       | Unresolved | Application-layout and panel-type migration corpus for published versions.                                    |
+| Public evidence | Unresolved | Remaining compatibility records, certifications, and signed approval.                                         |
 
 <!-- END HARD GATE STATUS -->

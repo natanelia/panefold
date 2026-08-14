@@ -9,6 +9,7 @@ const requirements = requirementsDocument.requirements;
 const profileIds = manifest.profiles.map((profile) => profile.id);
 const compactProfile = "compact-react-chromium-desktop";
 const adapterProfile = "framework-adapter-contract-jsdom";
+const protocolCoverageProducedAt = "2026-08-14T01:12:00Z";
 
 const sourceDefinitions = [
   [
@@ -114,6 +115,13 @@ const sourceDefinitions = [
     "model-report",
     "packages/protocol-xstate/test/catalog-machines.test.ts",
     ["ARC-002", "INT-003", "TST-003"],
+    [compactProfile],
+  ],
+  [
+    "protocol-state-machine-coverage-source",
+    "model-report",
+    "packages/protocol-xstate/test/protocol-coverage.test.ts",
+    ["TST-003"],
     [compactProfile],
   ],
   [
@@ -496,6 +504,14 @@ const resultDefinitions = [
     "environment-verifiable",
   ],
   [
+    "protocol-state-machine-coverage-result",
+    "model-report",
+    "conformance/results/protocol-state-machine-coverage-2026-08-14.json",
+    ["TST-003"],
+    [compactProfile],
+    "code-verifiable",
+  ],
+  [
     "independent-semantic-oracle-result",
     "model-report",
     "conformance/results/independent-semantic-oracle-2026-08-13.json",
@@ -516,7 +532,8 @@ for (const [id, kind, path, requirementIds, evidenceProfiles] of sourceDefinitio
     artifactRole: "source",
     uri: `repo://${path}`,
     sha256: createHash("sha256").update(bytes).digest("hex"),
-    producedAt,
+    producedAt:
+      id === "protocol-state-machine-coverage-source" ? protocolCoverageProducedAt : producedAt,
     requirementIds,
     profileIds: evidenceProfiles,
     note: "Content-addressed repository source artifact; it does not claim an executed environment result, manual assessment, or external certification.",
@@ -531,6 +548,7 @@ for (const [
   verificationClass,
 ] of resultDefinitions) {
   const bytes = await readFile(path);
+  const resultProducedAt = JSON.parse(bytes.toString("utf8")).producedAt;
   evidence.push({
     id,
     kind,
@@ -539,7 +557,7 @@ for (const [
     artifactRole: "result",
     uri: `repo://${path}`,
     sha256: createHash("sha256").update(bytes).digest("hex"),
-    producedAt,
+    producedAt: typeof resultProducedAt === "string" ? resultProducedAt : producedAt,
     requirementIds,
     profileIds: evidenceProfiles,
     note: "Recorded execution result with an explicit experimental profile and limitations; it does not claim manual assessment or stable certification.",
@@ -716,6 +734,7 @@ const verifiedByProfile = {
     "TXN-006",
     "TXN-007",
     "TXN-008",
+    "TST-003",
     "TST-004",
     "TST-002",
     "LIF-007",
@@ -882,9 +901,10 @@ for (const profileId of profileIds) {
     );
     const adapterOutOfScope =
       profileId === adapterProfile &&
-      !new Set(["ACC", "API", "ARC", "EXT", "FWK", "GOV", "OBS", "QLT", "SCP", "SEC", "TST"]).has(
-        requirement.id.split("-")[0],
-      );
+      (requirement.id === "TST-003" ||
+        !new Set(["ACC", "API", "ARC", "EXT", "FWK", "GOV", "OBS", "QLT", "SCP", "SEC", "TST"]).has(
+          requirement.id.split("-")[0],
+        ));
     const verificationClass = classifyRequirement({
       profileId,
       requirementId: requirement.id,
@@ -901,7 +921,9 @@ for (const profileId of profileIds) {
         verificationClass,
         evidenceIds: [],
         rationale: adapterOutOfScope
-          ? "The framework store/lifecycle contract profile does not publish rendering, interaction, surface, or persistence support."
+          ? requirement.id === "TST-003"
+            ? "The framework store/lifecycle contract profile does not publish the bounded protocol actors governed by this requirement."
+            : "The framework store/lifecycle contract profile does not publish rendering, interaction, surface, or persistence support."
           : "The current profile does not publish the product capability governed by this requirement.",
       });
     } else if (
@@ -1034,13 +1056,17 @@ const capabilities = [
     [
       "protocol-models",
       "protocol-actor-catalog",
+      "protocol-state-machine-coverage-source",
+      "protocol-state-machine-coverage-result",
       "motion-primitives",
       "motion-lifecycle",
       "protocol-motion-decision",
       "protocol-motion-result",
       "react-integration",
     ],
-    ["No physical 60/120 Hz traces or complete platform interaction certification"],
+    [
+      "The exhaustive headless actor result is not browser timer, operating-system, process-crash, physical 60/120 Hz, or complete platform interaction certification",
+    ],
   ),
   capability(
     "durable-persistence",
@@ -1181,7 +1207,7 @@ const hardGates = [
   ),
   unresolvedGate(
     "determinism",
-    ["MOD-002", "MOD-004", "PER-008", "PRF-003", "TST-002", "TXN-005"],
+    ["MOD-002", "MOD-004", "PER-008", "PRF-003", "TST-002", "TST-003", "TXN-005"],
     [compactProfile],
     ["code-verifiable"],
     [
@@ -1189,11 +1215,13 @@ const hardGates = [
       "patch-replay-oracle",
       "independent-semantic-oracle",
       "independent-semantic-oracle-result",
+      "protocol-state-machine-coverage-source",
+      "protocol-state-machine-coverage-result",
       "kernel-post-commit-effects",
       "runtime-post-commit-effects",
       "post-commit-effects-decision",
     ],
-    "The independent semantic oracle agrees with the reference in a bounded generated run, but it is not yet the retained optimized production kernel and the ten-million-command report is absent.",
+    "The bounded actor matrix has exact deterministic replay and deadline coverage, and the independent semantic oracle agrees with the reference in a bounded generated run; the retained optimized production kernel and ten-million-command report remain absent.",
   ),
   unresolvedGate(
     "atomicity",
