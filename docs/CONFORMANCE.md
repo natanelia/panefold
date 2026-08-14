@@ -6,11 +6,11 @@ conformance to the [Panefold system design](spec/SYSTEM_DESIGN.md).
 The current machine report is structurally valid and intentionally reports **blocked**: all 36
 commands, all 190 Appendix A requirements, and all ten hard gates are present, but stable-release
 evidence is incomplete. On the two published experimental profiles, the 380 trace cells currently
-contain 109 verified, 110 unresolved, 33 blocked, and 128 not applicable results. A missing result
+contain 110 verified, 109 unresolved, 33 blocked, and 128 not applicable results. A missing result
 never becomes an implicit pass.
 
 The trace-cell taxonomy above is distinct from the aggregate validator report, which currently
-contains 42 blocked issues and 115 unresolved issues. Aggregate issues also include hard-gate and
+contains 42 blocked issues and 114 unresolved issues. Aggregate issues also include hard-gate and
 evidence findings, so those counts are not trace-cell totals.
 
 Because at least one hard gate remains open, the machine report applies a hard-gate multiplier of
@@ -27,7 +27,7 @@ Every trace and evidence record declares one proof class:
 | Class                      | Meaning                                                                                                | Current totals                               |
 | -------------------------- | ------------------------------------------------------------------------------------------------------ | -------------------------------------------- |
 | A — code-verifiable        | Repository implementation, model/property proof, source contract, or deterministic code result         | 89 verified, 54 unresolved, 0 blocked, 0 N/A |
-| B — environment-verifiable | Executed browser, framework, workload, recovery, or performance result with environment metadata       | 20 verified, 56 unresolved, 0 blocked, 0 N/A |
+| B — environment-verifiable | Executed browser, framework, workload, recovery, or performance result with environment metadata       | 21 verified, 55 unresolved, 0 blocked, 0 N/A |
 | C — manual/external        | Manual AT/physical evidence, independent review, adoption record, usability result, or signed approval | 0 verified, 0 unresolved, 33 blocked, 0 N/A  |
 | D — future scope           | Capability the specific experimental profile does not publish                                          | 0 verified, 0 unresolved, 0 blocked, 128 N/A |
 
@@ -73,8 +73,10 @@ the command output.
   save/reload/restore evidence, live same-origin popup transfer/redock/loss recovery, LTR/RTL resize,
   motion preference, stable-host lifecycle, all 17 panel classes, forced colors, touch projection,
   same-strip reorder in horizontal LTR, horizontal RTL, and vertical rails, bounded LTR/RTL
-  overflow autoscroll, one-action populated and empty panel-container removal, and raw
-  splitter-frame capture. The checked-in result records 28/28 passing browser tasks.
+  overflow autoscroll, one-action populated and empty panel-container removal, same-document
+  floating move/resize/minimize/maximize/restore/redock with compact sole-panel chrome, movable
+  minimized headers, stable live panel state, and raw splitter-frame capture.
+  The checked-in result records 29/29 passing browser tasks.
 - The framework JSDOM contract passed 20/20 tests across Vue, Svelte, Angular, and Web Components.
 - The compact headless protocol result matches the reviewed graphs for all 12 Appendix-C actors:
   84/84 states, 258/258 transition branches, both outcomes for 64/64 guarded branches, and 146/146
@@ -84,7 +86,7 @@ the command output.
   primary and byte-equivalent replay runs plus 12 cancelled twins, with zero pending handles. This
   is code evidence, not browser/OS/process failure certification or the per-panel final-authority
   matrix required by `TST-009`.
-- Protocol/motion validation passed 86/86 focused tests plus 72/72 React integration tests. It
+- Protocol/motion validation passed 86/86 focused tests plus 86/86 React integration tests. It
   covers the twelve-actor catalog, cancellation/revision conflicts, disposable motion leases,
   progressive View Transition fallback, and deterministic load degradation; these focused tests
   supplement rather than substitute for the exact graph result above.
@@ -94,10 +96,10 @@ the command output.
   state per command, not the retained optimized production kernel.
 - The earlier 50,000-attempt projection campaign completed with zero replay/projection divergence.
   It is below the ten-million stable threshold and its checked-in summary records the missing seed.
-- The container interaction capture retained 179 frame deltas at 9.3 ms p95 and 9.4 ms p99, with
-  two observed long tasks of 91 ms and 58 ms. The paired Node smoke run measured 50-panel reorder
-  at 0.9273 ms p95 and 500-panel reorder at 5.0729 ms p95; the latter missed its 5 ms design target
-  on that machine. These are experimental regression guards—not physical performance certification.
+- The local automated interaction capture retained 179 frame deltas at 10.11 ms p95 and 10.3 ms
+  p99, with one observed long task of 56 ms. The paired Node smoke run measured 50-panel reorder at
+  0.2946 ms p95 and 500-panel reorder at 2.1511 ms p95 on that machine. These are experimental
+  regression guards—not physical performance certification.
 
 ## Hard release gates
 

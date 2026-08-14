@@ -142,6 +142,23 @@ application can supply `solveLayout`; the projection solver uses the same exact-
 allocator as a constraint-free compatibility fallback. Pointer resize uses a sparse XState actor and
 frame-coalesced preview before one semantic commit.
 
+Same-document floating surfaces are projected as a small ordered view containing stable surface and
+root IDs, canonical bounds, and minimized/maximized state. React solves every visible surface root,
+merges those disjoint results into one read-only geometry projection, and renders non-modal frames in
+canonical back-to-front order. Structural motion is measured in each node's owning DOM surface
+coordinate space, so translating a floating frame does not independently animate its descendants.
+Titlebar move and edge/corner resize use the bounded floating actor and direct DOM preview; release
+creates one application-supplied semantic command. Move and resize capabilities are resolved
+separately: a minimized frame keeps its movable titlebar but exposes no resize handles. When a
+floating subtree is exactly one group containing one panel, the group projects its existing tab and
+panel controls through a frame-owned header slot, producing one chrome row without duplicating tab
+state or interaction logic; larger floating trees retain separate title and tab rows. The application
+adapter continues to own command representation, constraint policy, redock placement, semantic IDs,
+and whether manipulation also raises and activates in one atomic batch. Minimized surfaces have no
+visible group geometry, so their stable hosts remain mounted according to lifecycle policy but
+receive a suspended lease.
+Browser-window popouts do not use this path and remain prepared cross-document transfers.
+
 Direct panel placement uses the same geometry result. The renderer derives mutually exclusive
 center and logical-edge candidates, keeps pointer identity/candidate state in a bounded drag actor,
 and asks the application to pure-plan each candidate against one captured revision. The application
@@ -202,8 +219,8 @@ every panel in Appendix H, so `TST-009` and the recovery gate remain open. See
 
 Panel lifecycle policy is semantic data: hidden behavior, same-document movement, and cross-document
 movement are explicit. The React adapter keeps a host keyed by panel identity, portals content into
-that host, preserves the host across selection and same-document movement when policy requests it,
-and can cooperatively suspend hidden content.
+that host, preserves the host across selection, docking, and floating same-document movement when
+policy requests it, and can cooperatively suspend hidden or minimized content.
 
 Each `active`, `visible`, or `suspended` lifecycle delivery carries a fresh `AbortSignal`. The old
 lease is aborted before its replacement is delivered and the final lease is aborted on unmount.

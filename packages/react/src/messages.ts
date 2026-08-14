@@ -1,6 +1,8 @@
 import type { WorkspaceDispatchStatus } from "./types";
 
 export type WorkspacePhysicalEdge = "left" | "right" | "above" | "below";
+export type WorkspaceFloatingResizeEdge =
+  "top" | "right" | "bottom" | "left" | "top-left" | "top-right" | "bottom-right" | "bottom-left";
 
 /** Every user-visible string emitted by the reference React projection. */
 export interface WorkspaceMessageCatalog {
@@ -66,9 +68,26 @@ export interface WorkspaceMessageCatalog {
   movedTabBefore?(values: { readonly title: string; readonly anchor: string }): string;
   movedTabAfter?(values: { readonly title: string; readonly anchor: string }): string;
   keptTabPosition?(values: { readonly title: string }): string;
+  floatingSurface?(values: { readonly title: string }): string;
+  moveFloatingSurface?(values: { readonly title: string }): string;
+  movedFloatingSurface?(values: { readonly title: string }): string;
+  resizeFloatingSurface?(values: {
+    readonly title: string;
+    readonly edge: WorkspaceFloatingResizeEdge;
+  }): string;
+  resizedFloatingSurface?(values: { readonly title: string }): string;
+  minimizeFloatingSurface?(values: { readonly title: string }): string;
+  minimizedFloatingSurface?(values: { readonly title: string }): string;
+  maximizeFloatingSurface?(values: { readonly title: string }): string;
+  maximizedFloatingSurface?(values: { readonly title: string }): string;
+  restoreFloatingSurface?(values: { readonly title: string }): string;
+  restoredFloatingSurface?(values: { readonly title: string }): string;
+  redockFloatingSurface?(values: { readonly title: string }): string;
+  redockedFloatingSurface?(values: { readonly title: string }): string;
+  raisedFloatingSurface?(values: { readonly title: string }): string;
 }
 
-export const ENGLISH_WORKSPACE_MESSAGES = Object.freeze<WorkspaceMessageCatalog>({
+export const ENGLISH_WORKSPACE_MESSAGES = Object.freeze({
   workspaceLabel: () => "Workspace",
   panelGroupFallback: () => "Panel group",
   groupFallback: () => "group",
@@ -130,7 +149,22 @@ export const ENGLISH_WORKSPACE_MESSAGES = Object.freeze<WorkspaceMessageCatalog>
   movedTabBefore: ({ title, anchor }) => `Moved ${title} tab before ${anchor}`,
   movedTabAfter: ({ title, anchor }) => `Moved ${title} tab after ${anchor}`,
   keptTabPosition: ({ title }) => `${title} tab kept in place`,
-});
+  floatingSurface: ({ title }) => `${title} floating window`,
+  moveFloatingSurface: ({ title }) => `Move ${title} floating window`,
+  movedFloatingSurface: ({ title }) => `Moved ${title} floating window`,
+  resizeFloatingSurface: ({ title, edge }) =>
+    `Resize ${title} floating window from ${floatingResizeEdgeLabel(edge)}`,
+  resizedFloatingSurface: ({ title }) => `Resized ${title} floating window`,
+  minimizeFloatingSurface: ({ title }) => `Minimize ${title} floating window`,
+  minimizedFloatingSurface: ({ title }) => `Minimized ${title} floating window`,
+  maximizeFloatingSurface: ({ title }) => `Maximize ${title} floating window`,
+  maximizedFloatingSurface: ({ title }) => `Maximized ${title} floating window`,
+  restoreFloatingSurface: ({ title }) => `Restore ${title} floating window`,
+  restoredFloatingSurface: ({ title }) => `Restored ${title} floating window`,
+  redockFloatingSurface: ({ title }) => `Dock ${title} in the workspace`,
+  redockedFloatingSurface: ({ title }) => `Docked ${title} in the workspace`,
+  raisedFloatingSurface: ({ title }) => `Raised ${title} floating window`,
+} satisfies WorkspaceMessageCatalog);
 
 export interface ResolvedWorkspaceInteractionMessages {
   readonly movedPanelTo: (values: { readonly title: string; readonly group: string }) => string;
@@ -157,6 +191,23 @@ export interface ResolvedWorkspaceInteractionMessages {
   readonly movedTabBefore: (values: { readonly title: string; readonly anchor: string }) => string;
   readonly movedTabAfter: (values: { readonly title: string; readonly anchor: string }) => string;
   readonly keptTabPosition: (values: { readonly title: string }) => string;
+  readonly floatingSurface: (values: { readonly title: string }) => string;
+  readonly moveFloatingSurface: (values: { readonly title: string }) => string;
+  readonly movedFloatingSurface: (values: { readonly title: string }) => string;
+  readonly resizeFloatingSurface: (values: {
+    readonly title: string;
+    readonly edge: WorkspaceFloatingResizeEdge;
+  }) => string;
+  readonly resizedFloatingSurface: (values: { readonly title: string }) => string;
+  readonly minimizeFloatingSurface: (values: { readonly title: string }) => string;
+  readonly minimizedFloatingSurface: (values: { readonly title: string }) => string;
+  readonly maximizeFloatingSurface: (values: { readonly title: string }) => string;
+  readonly maximizedFloatingSurface: (values: { readonly title: string }) => string;
+  readonly restoreFloatingSurface: (values: { readonly title: string }) => string;
+  readonly restoredFloatingSurface: (values: { readonly title: string }) => string;
+  readonly redockFloatingSurface: (values: { readonly title: string }) => string;
+  readonly redockedFloatingSurface: (values: { readonly title: string }) => string;
+  readonly raisedFloatingSurface: (values: { readonly title: string }) => string;
 }
 
 export function resolveWorkspaceInteractionMessages(
@@ -202,5 +253,36 @@ export function resolveWorkspaceInteractionMessages(
     movedTabAfter:
       catalog.movedTabAfter ?? (({ title, anchor }) => `Moved ${title} tab after ${anchor}`),
     keptTabPosition: catalog.keptTabPosition ?? (({ title }) => `${title} tab kept in place`),
+    floatingSurface: catalog.floatingSurface ?? ENGLISH_WORKSPACE_MESSAGES.floatingSurface,
+    moveFloatingSurface:
+      catalog.moveFloatingSurface ?? ENGLISH_WORKSPACE_MESSAGES.moveFloatingSurface,
+    movedFloatingSurface:
+      catalog.movedFloatingSurface ?? ENGLISH_WORKSPACE_MESSAGES.movedFloatingSurface,
+    resizeFloatingSurface:
+      catalog.resizeFloatingSurface ?? ENGLISH_WORKSPACE_MESSAGES.resizeFloatingSurface,
+    resizedFloatingSurface:
+      catalog.resizedFloatingSurface ?? ENGLISH_WORKSPACE_MESSAGES.resizedFloatingSurface,
+    minimizeFloatingSurface:
+      catalog.minimizeFloatingSurface ?? ENGLISH_WORKSPACE_MESSAGES.minimizeFloatingSurface,
+    minimizedFloatingSurface:
+      catalog.minimizedFloatingSurface ?? ENGLISH_WORKSPACE_MESSAGES.minimizedFloatingSurface,
+    maximizeFloatingSurface:
+      catalog.maximizeFloatingSurface ?? ENGLISH_WORKSPACE_MESSAGES.maximizeFloatingSurface,
+    maximizedFloatingSurface:
+      catalog.maximizedFloatingSurface ?? ENGLISH_WORKSPACE_MESSAGES.maximizedFloatingSurface,
+    restoreFloatingSurface:
+      catalog.restoreFloatingSurface ?? ENGLISH_WORKSPACE_MESSAGES.restoreFloatingSurface,
+    restoredFloatingSurface:
+      catalog.restoredFloatingSurface ?? ENGLISH_WORKSPACE_MESSAGES.restoredFloatingSurface,
+    redockFloatingSurface:
+      catalog.redockFloatingSurface ?? ENGLISH_WORKSPACE_MESSAGES.redockFloatingSurface,
+    redockedFloatingSurface:
+      catalog.redockedFloatingSurface ?? ENGLISH_WORKSPACE_MESSAGES.redockedFloatingSurface,
+    raisedFloatingSurface:
+      catalog.raisedFloatingSurface ?? ENGLISH_WORKSPACE_MESSAGES.raisedFloatingSurface,
   };
+}
+
+function floatingResizeEdgeLabel(edge: WorkspaceFloatingResizeEdge): string {
+  return edge.replace("-", " ");
 }

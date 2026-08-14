@@ -16,11 +16,13 @@ import {
 } from "@panefold/motion";
 
 import {
+  ENGLISH_WORKSPACE_MESSAGES,
   WorkspaceRuntimeProvider,
   WorkspaceSurface,
   solveWorkspaceProjectionLayout,
   type WorkspaceMessageCatalog,
   type WorkspaceCommandAdapter,
+  type WorkspaceFloatingResizeEdge,
   type WorkspaceCommandOrigin,
   type WorkspacePanelRegistry,
   type WorkspacePanelDropRequest,
@@ -34,6 +36,7 @@ import {
   type WorkspaceTabPresentationResolver,
   type WorkspaceLayoutSolver,
 } from "../src";
+import { FLOATING_SURFACE_CHROME_SIZE } from "../src/floating-surface";
 
 const protocolActorInventory = vi.hoisted(() => ({
   drag: { created: 0, started: 0, stopped: 0, active: 0, pointerMoves: 0 },
@@ -137,7 +140,28 @@ type FixtureCommand =
       readonly beforePanelId?: string;
       readonly afterPanelId?: string;
     }
-  | { readonly type: "drop"; readonly request: WorkspacePanelDropRequest };
+  | { readonly type: "drop"; readonly request: WorkspacePanelDropRequest }
+  | {
+      readonly type: "move-floating";
+      readonly surfaceId: string;
+      readonly x: number;
+      readonly y: number;
+    }
+  | {
+      readonly type: "resize-floating";
+      readonly surfaceId: string;
+      readonly bounds: {
+        readonly x: number;
+        readonly y: number;
+        readonly width: number;
+        readonly height: number;
+      };
+    }
+  | { readonly type: "raise-floating"; readonly surfaceId: string }
+  | { readonly type: "maximize-floating"; readonly surfaceId: string }
+  | { readonly type: "restore-floating"; readonly surfaceId: string }
+  | { readonly type: "minimize-floating"; readonly surfaceId: string }
+  | { readonly type: "redock-floating"; readonly surfaceId: string };
 
 interface FixtureSnapshot {
   readonly projection: WorkspaceProjection;
@@ -192,6 +216,38 @@ const initialProjection: WorkspaceProjection = {
   activePanelId: "alpha",
 };
 
+const floatingProjection: WorkspaceProjection = {
+  ...initialProjection,
+  nodes: {
+    ...initialProjection.nodes,
+    "floating-node": { kind: "group", id: "floating-node", groupId: "floating-group" },
+  },
+  groups: {
+    ...initialProjection.groups,
+    "floating-group": {
+      id: "floating-group",
+      panelIds: ["delta"],
+      selectedPanelId: "delta",
+      label: "Floating tools",
+    },
+  },
+  panels: {
+    ...initialProjection.panels,
+    delta: panel("delta", "Delta"),
+  },
+  floatingSurfaces: [
+    {
+      id: "floating:delta",
+      rootNodeId: "floating-node",
+      bounds: { x: 100, y: 80, width: 320, height: 240 },
+      maximized: false,
+      label: "Floating tools",
+    },
+  ],
+  activePanelId: "delta",
+  activeSurfaceId: "floating:delta",
+};
+
 const commands: WorkspaceCommandAdapter<FixtureCommand> = {
   selectPanel: (panelId) => ({ type: "select", panelId }),
   activatePanel: (panelId) => ({ type: "activate", panelId }),
@@ -204,6 +260,25 @@ const commands: WorkspaceCommandAdapter<FixtureCommand> = {
     ...placement,
   }),
   movePanel: (panelId, groupId) => ({ type: "move", panelId, groupId }),
+};
+
+const floatingCommands: WorkspaceCommandAdapter<FixtureCommand> = {
+  ...commands,
+  moveFloatingSurface: (surfaceId, position) => ({
+    type: "move-floating",
+    surfaceId,
+    ...position,
+  }),
+  resizeFloatingSurface: (surfaceId, bounds) => ({
+    type: "resize-floating",
+    surfaceId,
+    bounds,
+  }),
+  raiseFloatingSurface: (surfaceId) => ({ type: "raise-floating", surfaceId }),
+  maximizeFloatingSurface: (surfaceId) => ({ type: "maximize-floating", surfaceId }),
+  restoreFloatingSurface: (surfaceId) => ({ type: "restore-floating", surfaceId }),
+  minimizeFloatingSurface: (surfaceId) => ({ type: "minimize-floating", surfaceId }),
+  redockFloatingSurface: (surfaceId) => ({ type: "redock-floating", surfaceId }),
 };
 
 const directManipulationCommands: WorkspaceCommandAdapter<FixtureCommand> = {
@@ -313,6 +388,390 @@ describe("WorkspaceSurface", () => {
     });
     expect(runtime.getSnapshot().projection.activePanelId).toBe("beta");
     expect(runtime.transactions.at(-1)?.origin).toBe("keyboard");
+  });
+
+  it("projects same-document floating surfaces without modal semantics", async () => {
+    const runtime = new FixtureRuntime(floatingProjection);
+    const user = userEvent.setup();
+    renderWorkspace(runtime, { commands: floatingCommands });
+
+    const frame = document.querySelector<HTMLElement>(
+      '[data-workspace-floating-surface="floating:delta"]',
+    );
+    expect(frame).not.toBeNull();
+    expect(frame?.getAttribute("role")).toBeNull();
+    expect(frame?.getAttribute("aria-modal")).toBeNull();
+    expect(frame?.style.left).toBe("100px");
+    expect(frame?.style.top).toBe("80px");
+    expect(frame?.style.width).toBe("320px");
+    expect(frame?.style.height).toBe("240px");
+    expect(screen.getByRole("tabpanel", { name: "Delta" })).toBeTruthy();
+    expect(document.querySelectorAll('[data-workspace-panel-host="delta"]')).toHaveLength(1);
+
+    screen.getByLabelText("Move Floating tools floating window").focus();
+    await user.tab({ shift: true });
+    expect(document.activeElement).not.toBe(document.body);
+    expect(document.activeElement?.closest("[data-workspace-floating-surface]")).toBeNull();
+  });
+
+  it("combines a sole floating panel tab and window chrome into one header row", () => {
+    const runtime = new FixtureRuntime(floatingProjection);
+    renderWorkspace(runtime, { commands: floatingCommands });
+
+    const frame = document.querySelector<HTMLElement>(
+      '[data-workspace-floating-surface="floating:delta"]',
+    );
+    const titlebar = frame?.querySelector(".pf-floating-titlebar");
+    const compactTabStrip = titlebar?.querySelector(".pf-tab-strip");
+    expect(frame?.getAttribute("data-compact-header")).toBe("true");
+    expect(compactTabStrip).not.toBeNull();
+    expect(
+      compactTabStrip?.querySelector('[role="tab"][data-workspace-panel-tab="delta"]'),
+    ).not.toBeNull();
+    expect(frame?.querySelectorAll(".pf-tab-strip")).toHaveLength(1);
+    expect(frame?.querySelector('[data-workspace-panel-controls="delta"]')).not.toBeNull();
+
+    const tab = compactTabStrip?.querySelector<HTMLElement>(
+      '[role="tab"][data-workspace-panel-tab="delta"]',
+    );
+    expect(tab).not.toBeNull();
+    if (tab !== null && tab !== undefined) {
+      installPointerCapture(tab);
+      fireEvent.pointerDown(tab, { button: 0, pointerId: 40, clientX: 120, clientY: 100 });
+      expect(frame?.dataset.floatingManipulation).toBe("idle");
+      fireEvent.pointerCancel(tab, { pointerId: 40 });
+    }
+  });
+
+  it("keeps separate floating title and tab rows when the window contains multiple panels", () => {
+    const floatingGroup = floatingProjection.groups["floating-group"];
+    if (floatingGroup === undefined) throw new Error("Expected the floating group fixture");
+    const runtime = new FixtureRuntime({
+      ...floatingProjection,
+      groups: {
+        ...floatingProjection.groups,
+        "floating-group": {
+          ...floatingGroup,
+          panelIds: ["delta", "epsilon"],
+        },
+      },
+      panels: {
+        ...floatingProjection.panels,
+        epsilon: panel("epsilon", "Epsilon"),
+      },
+    });
+    renderWorkspace(runtime, { commands: floatingCommands });
+
+    const frame = document.querySelector<HTMLElement>(
+      '[data-workspace-floating-surface="floating:delta"]',
+    );
+    expect(frame?.getAttribute("data-compact-header")).toBe("false");
+    expect(frame?.querySelector(".pf-floating-titlebar .pf-tab-strip")).toBeNull();
+    expect(frame?.querySelector(".pf-floating-content .pf-tab-strip")).not.toBeNull();
+    expect(frame?.querySelectorAll('[role="tab"]')).toHaveLength(2);
+  });
+
+  it("projects canonical z-order and raises a background float from the keyboard", async () => {
+    const projection: WorkspaceProjection = {
+      ...floatingProjection,
+      nodes: {
+        ...floatingProjection.nodes,
+        "epsilon-node": { kind: "group", id: "epsilon-node", groupId: "epsilon-group" },
+      },
+      groups: {
+        ...floatingProjection.groups,
+        "epsilon-group": {
+          id: "epsilon-group",
+          panelIds: ["epsilon"],
+          selectedPanelId: "epsilon",
+          label: "Epsilon tools",
+        },
+      },
+      panels: {
+        ...floatingProjection.panels,
+        epsilon: panel("epsilon", "Epsilon"),
+      },
+      floatingSurfaces: [
+        ...(floatingProjection.floatingSurfaces ?? []),
+        {
+          id: "floating:epsilon",
+          rootNodeId: "epsilon-node",
+          bounds: { x: 180, y: 140, width: 300, height: 220 },
+          maximized: false,
+          label: "Epsilon tools",
+        },
+      ],
+      activePanelId: "epsilon",
+      activeSurfaceId: "floating:epsilon",
+    };
+    const runtime = new FixtureRuntime(projection);
+    renderWorkspace(runtime, { commands: floatingCommands });
+    const deltaFrame = document.querySelector<HTMLElement>(
+      '[data-workspace-floating-surface="floating:delta"]',
+    );
+    const epsilonFrame = document.querySelector<HTMLElement>(
+      '[data-workspace-floating-surface="floating:epsilon"]',
+    );
+    expect(deltaFrame?.style.zIndex).toBe("1");
+    expect(epsilonFrame?.style.zIndex).toBe("2");
+
+    const deltaTitlebar = screen.getByLabelText("Move Floating tools floating window");
+    deltaTitlebar.focus();
+    await userEvent.keyboard("{Enter}");
+
+    expect(runtime.lastCommand).toEqual({
+      type: "raise-floating",
+      surfaceId: "floating:delta",
+    });
+    expect(runtime.transactions.at(-1)?.origin).toBe("keyboard");
+    expect(deltaFrame?.style.zIndex).toBe("2");
+  });
+
+  it("previews a floating titlebar drag and commits one semantic move", async () => {
+    const runtime = new FixtureRuntime(floatingProjection);
+    const frames = createManualFrameScheduler();
+    renderWorkspace(runtime, { commands: floatingCommands, frameScheduler: frames.scheduler });
+    const frame = document.querySelector<HTMLElement>(
+      '[data-workspace-floating-surface="floating:delta"]',
+    );
+    expect(frame).not.toBeNull();
+    const titlebar = screen.getByLabelText("Move Floating tools floating window");
+    installPointerCapture(titlebar);
+
+    fireEvent.pointerDown(titlebar, {
+      button: 0,
+      pointerId: 41,
+      clientX: 120,
+      clientY: 100,
+    });
+    fireEvent.pointerMove(titlebar, {
+      pointerId: 41,
+      clientX: 170,
+      clientY: 140,
+    });
+    expect(frame?.style.left).toBe("100px");
+    frames.flush();
+    expect(frame?.style.left).toBe("150px");
+    expect(frame?.style.top).toBe("120px");
+    fireEvent.pointerUp(titlebar, {
+      pointerId: 41,
+      clientX: 170,
+      clientY: 140,
+    });
+
+    expect(runtime.lastCommand).toEqual({
+      type: "move-floating",
+      surfaceId: "floating:delta",
+      x: 150,
+      y: 120,
+    });
+    expect(runtime.transactions).toHaveLength(1);
+    expect(runtime.transactions[0]?.origin).toBe("pointer");
+  });
+
+  it("moves a minimized floating surface from its titlebar without exposing resize handles", () => {
+    const runtime = new FixtureRuntime({
+      ...floatingProjection,
+      floatingSurfaces: (floatingProjection.floatingSurfaces ?? []).map((surface) => ({
+        ...surface,
+        minimized: true,
+      })),
+    });
+    const frames = createManualFrameScheduler();
+    renderWorkspace(runtime, { commands: floatingCommands, frameScheduler: frames.scheduler });
+    const frame = document.querySelector<HTMLElement>(
+      '[data-workspace-floating-surface="floating:delta"]',
+    );
+    expect(frame?.style.height).toBe(`${String(FLOATING_SURFACE_CHROME_SIZE)}px`);
+    expect(frame?.querySelector(".pf-floating-resize-handle")).toBeNull();
+    const titlebar = screen.getByLabelText("Move Floating tools floating window");
+    installPointerCapture(titlebar);
+
+    fireEvent.pointerDown(titlebar, {
+      button: 0,
+      pointerId: 42,
+      clientX: 120,
+      clientY: 95,
+    });
+    fireEvent.pointerMove(titlebar, {
+      pointerId: 42,
+      clientX: 170,
+      clientY: 125,
+    });
+    frames.flush();
+    expect(frame?.style.left).toBe("150px");
+    expect(frame?.style.top).toBe("110px");
+    fireEvent.pointerUp(titlebar, {
+      pointerId: 42,
+      clientX: 170,
+      clientY: 125,
+    });
+
+    expect(runtime.lastCommand).toEqual({
+      type: "move-floating",
+      surfaceId: "floating:delta",
+      x: 150,
+      y: 110,
+    });
+    expect(runtime.transactions.at(-1)?.origin).toBe("pointer");
+  });
+
+  it("does not structurally animate content when its floating frame moves", () => {
+    const runtime = new FixtureRuntime(floatingProjection);
+    const frames = createManualFrameScheduler();
+    const driver = new RecordingMotionDriver();
+    renderWorkspace(runtime, {
+      commands: floatingCommands,
+      frameScheduler: frames.scheduler,
+      motionDriver: driver,
+    });
+    const titlebar = screen.getByLabelText("Move Floating tools floating window");
+    installPointerCapture(titlebar);
+
+    fireEvent.pointerDown(titlebar, {
+      button: 0,
+      pointerId: 51,
+      clientX: 120,
+      clientY: 100,
+    });
+    fireEvent.pointerMove(titlebar, {
+      pointerId: 51,
+      clientX: 170,
+      clientY: 140,
+    });
+    frames.flush();
+    fireEvent.pointerUp(titlebar, {
+      pointerId: 51,
+      clientX: 170,
+      clientY: 140,
+    });
+
+    expect(driver.plans.map((plan) => plan.targetId)).not.toContain("floating-node");
+  });
+
+  it("cancels a floating gesture when its captured projection revision changes", () => {
+    const runtime = new FixtureRuntime(floatingProjection);
+    const frames = createManualFrameScheduler();
+    renderWorkspace(runtime, { commands: floatingCommands, frameScheduler: frames.scheduler });
+    const frame = document.querySelector<HTMLElement>(
+      '[data-workspace-floating-surface="floating:delta"]',
+    );
+    const titlebar = screen.getByLabelText("Move Floating tools floating window");
+    installPointerCapture(titlebar);
+
+    fireEvent.pointerDown(titlebar, {
+      button: 0,
+      pointerId: 52,
+      clientX: 120,
+      clientY: 100,
+    });
+    fireEvent.pointerMove(titlebar, {
+      pointerId: 52,
+      clientX: 180,
+      clientY: 150,
+    });
+    frames.flush();
+    expect(frame?.style.left).toBe("160px");
+
+    act(() => {
+      runtime.publishProjection({ ...floatingProjection, revision: "1" });
+    });
+    expect(frame?.style.left).toBe("100px");
+    fireEvent.pointerUp(titlebar, {
+      pointerId: 52,
+      clientX: 180,
+      clientY: 150,
+    });
+    expect(runtime.transactions).toHaveLength(0);
+  });
+
+  it("supports keyboard resize and floating minimize, maximize, restore, and redock controls", async () => {
+    const runtime = new FixtureRuntime(floatingProjection);
+    const user = userEvent.setup();
+    const resizeFloatingSurface = vi.fn(
+      ({ title, edge }: { readonly title: string; readonly edge: WorkspaceFloatingResizeEdge }) =>
+        `Ubah ukuran ${title} dari ${edge === "right" ? "kanan" : edge}`,
+    );
+    renderWorkspace(runtime, {
+      commands: floatingCommands,
+      messageCatalog: { ...ENGLISH_WORKSPACE_MESSAGES, resizeFloatingSurface },
+    });
+
+    const resizeHandle = await screen.findByRole("separator", {
+      name: "Ubah ukuran Floating tools dari kanan",
+    });
+    expect(resizeFloatingSurface).toHaveBeenCalledWith({ title: "Floating tools", edge: "right" });
+    expect(resizeHandle.getAttribute("aria-orientation")).toBe("vertical");
+    expect(resizeHandle.getAttribute("aria-valuemin")).toBe("0");
+    expect(resizeHandle.getAttribute("aria-valuemax")).toBe("100");
+    expect(resizeHandle.getAttribute("aria-valuenow")).toBe("42");
+    const frameBeforeResize = document.querySelector<HTMLElement>(
+      '[data-workspace-floating-surface="floating:delta"]',
+    );
+    expect(frameBeforeResize?.querySelectorAll('[role="separator"]')).toHaveLength(4);
+    expect(
+      frameBeforeResize?.querySelector('[data-resize-edge="bottom-right"]')?.getAttribute("role"),
+    ).toBeNull();
+    expect(
+      frameBeforeResize
+        ?.querySelector('[data-resize-edge="bottom-right"]')
+        ?.getAttribute("tabindex"),
+    ).toBeNull();
+
+    resizeHandle.focus();
+    await user.keyboard("{ArrowRight}");
+    expect(runtime.lastCommand).toMatchObject({
+      type: "resize-floating",
+      surfaceId: "floating:delta",
+      bounds: { width: 328, height: 240 },
+    });
+    expect(runtime.transactions.at(-1)?.origin).toBe("keyboard");
+
+    await user.click(
+      screen.getByRole("button", { name: "Maximize Floating tools floating window" }),
+    );
+    let frame = document.querySelector<HTMLElement>(
+      '[data-workspace-floating-surface="floating:delta"]',
+    );
+    expect(frame?.getAttribute("data-maximized")).toBe("true");
+    expect(frame?.style.width).toBe("1000px");
+    expect(frame?.style.height).toBe("700px");
+    expect(document.activeElement).toBe(
+      screen.getByRole("button", { name: "Restore Floating tools floating window" }),
+    );
+
+    await user.click(
+      screen.getByRole("button", { name: "Restore Floating tools floating window" }),
+    );
+    expect(document.activeElement).toBe(
+      screen.getByLabelText("Move Floating tools floating window"),
+    );
+    await user.click(
+      screen.getByRole("button", { name: "Minimize Floating tools floating window" }),
+    );
+    frame = document.querySelector<HTMLElement>(
+      '[data-workspace-floating-surface="floating:delta"]',
+    );
+    expect(frame?.getAttribute("data-minimized")).toBe("true");
+    expect(screen.queryByRole("tabpanel", { name: "Delta" })).toBeNull();
+    expect(document.activeElement).toBe(
+      screen.getByRole("button", { name: "Restore Floating tools floating window" }),
+    );
+    expect(
+      document.querySelector('[data-workspace-panel-host="delta"]')?.getAttribute("data-lifecycle"),
+    ).toBe("suspended");
+
+    await user.click(
+      screen.getByRole("button", { name: "Restore Floating tools floating window" }),
+    );
+    expect(screen.getByRole("tabpanel", { name: "Delta" })).toBeTruthy();
+    await user.click(screen.getByRole("button", { name: "Dock Floating tools in the workspace" }));
+    expect(document.querySelector('[data-workspace-floating-surface="floating:delta"]')).toBeNull();
+    expect(document.activeElement).toBe(screen.getByRole("tab", { name: "Delta" }));
+    expect(runtime.lastCommand).toEqual({
+      type: "redock-floating",
+      surfaceId: "floating:delta",
+    });
   });
 
   it("names an unlabeled tablist from the localized group fallback heading", async () => {
@@ -3072,6 +3531,82 @@ function reduceProjection(
       activePanelId: command.request.panel.id,
     };
   }
+  if (
+    command.type === "move-floating" ||
+    command.type === "resize-floating" ||
+    command.type === "raise-floating" ||
+    command.type === "maximize-floating" ||
+    command.type === "restore-floating" ||
+    command.type === "minimize-floating"
+  ) {
+    const surfaces = [...(projection.floatingSurfaces ?? [])];
+    const index = surfaces.findIndex((surface) => surface.id === command.surfaceId);
+    const surface = surfaces[index];
+    if (surface === undefined) return projection;
+    if (command.type === "raise-floating") {
+      surfaces.splice(index, 1);
+      surfaces.push(surface);
+    } else if (command.type === "move-floating") {
+      surfaces[index] = {
+        ...surface,
+        bounds: { ...surface.bounds, x: command.x, y: command.y },
+      };
+    } else if (command.type === "resize-floating") {
+      surfaces[index] = { ...surface, bounds: command.bounds };
+    } else if (command.type === "maximize-floating") {
+      surfaces[index] = { ...surface, maximized: true };
+    } else if (command.type === "minimize-floating") {
+      surfaces[index] = { ...surface, minimized: true };
+    } else if (surface.minimized === true) {
+      const { minimized: _minimized, ...restored } = surface;
+      void _minimized;
+      surfaces[index] = restored;
+    } else {
+      surfaces[index] = { ...surface, maximized: false };
+    }
+    return {
+      ...projection,
+      revision: nextRevision,
+      floatingSurfaces: surfaces,
+      ...(command.type === "minimize-floating"
+        ? { activePanelId: "alpha", activeSurfaceId: "main" }
+        : {}),
+    };
+  }
+  if (command.type === "redock-floating") {
+    const surface = projection.floatingSurfaces?.find((item) => item.id === command.surfaceId);
+    if (surface === undefined) return projection;
+    const sourceNode = projection.nodes[surface.rootNodeId];
+    const sourceGroup =
+      sourceNode?.kind === "group" ? projection.groups[sourceNode.groupId] : undefined;
+    const nodes = { ...projection.nodes };
+    const groups = { ...projection.groups };
+    delete nodes[surface.rootNodeId];
+    if (sourceGroup !== undefined) delete groups[sourceGroup.id];
+    const left = groups.left;
+    if (left !== undefined && sourceGroup !== undefined) {
+      groups.left = {
+        ...left,
+        panelIds: [...left.panelIds, ...sourceGroup.panelIds],
+        selectedPanelId: sourceGroup.selectedPanelId,
+      };
+    }
+    return {
+      ...projection,
+      revision: nextRevision,
+      nodes,
+      groups,
+      floatingSurfaces: (projection.floatingSurfaces ?? []).filter(
+        (item) => item.id !== command.surfaceId,
+      ),
+      ...(sourceGroup !== undefined
+        ? { activePanelId: sourceGroup.selectedPanelId }
+        : projection.activePanelId === undefined
+          ? {}
+          : { activePanelId: projection.activePanelId }),
+      activeSurfaceId: "main",
+    };
+  }
   if (command.type === "close") {
     const panels = { ...projection.panels };
     delete panels[command.panelId];
@@ -3119,6 +3654,7 @@ function renderWorkspace(
     readonly onExternalPanelRequest?: WorkspaceExternalPanelHandler;
     readonly externalPanelRequestTimeoutMs?: number;
     readonly onAnnouncement?: (message: string) => void;
+    readonly messageCatalog?: WorkspaceMessageCatalog;
     readonly interpretResult?: WorkspaceResultInterpreter<FixtureCommand, FixtureReceipt>;
   } = {},
 ) {
@@ -3131,6 +3667,9 @@ function renderWorkspace(
           panels={options.registry ?? panels}
           layoutBounds={{ inlineStart: 0, blockStart: 0, inlineSize: 1000, blockSize: 700 }}
           workspaceLabel="Fixture workspace"
+          {...(options.messageCatalog === undefined
+            ? {}
+            : { messageCatalog: options.messageCatalog })}
           {...(options.tabPresentation === undefined
             ? {}
             : { tabPresentation: options.tabPresentation })}
@@ -3191,6 +3730,14 @@ function cloneProjection(projection: WorkspaceProjection): WorkspaceProjection {
     nodes: { ...projection.nodes },
     groups: { ...projection.groups },
     panels: { ...projection.panels },
+    ...(projection.floatingSurfaces === undefined
+      ? {}
+      : {
+          floatingSurfaces: projection.floatingSurfaces.map((surface) => ({
+            ...surface,
+            bounds: { ...surface.bounds },
+          })),
+        }),
   };
 }
 

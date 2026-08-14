@@ -21,7 +21,7 @@ checked against those files by the conformance test suite.
 | Proof class                | Verified | Unresolved | Blocked | N/A | Total |
 | -------------------------- | -------: | ---------: | ------: | --: | ----: |
 | A — code-verifiable        |       89 |         54 |       0 |   0 |   143 |
-| B — environment-verifiable |       20 |         56 |       0 |   0 |    76 |
+| B — environment-verifiable |       21 |         55 |       0 |   0 |    76 |
 | C — manual/external        |        0 |          0 |      33 |   0 |    33 |
 | D — future scope           |        0 |          0 |       0 | 128 |   128 |
 
@@ -84,7 +84,7 @@ manual or external evidence, and `N/A` means the profile does not publish that c
 | `FOC-002`   | U                        | N/A                       |
 | `FOC-003`   | U                        | N/A                       |
 | `FOC-004`   | U                        | N/A                       |
-| `FOC-005`   | U                        | N/A                       |
+| `FOC-005`   | V                        | N/A                       |
 | `FOC-006`   | U                        | N/A                       |
 | `FWK-001`   | U                        | V                         |
 | `FWK-002`   | U                        | U                         |
@@ -293,12 +293,18 @@ complete Appendix G action set is covered.
 | `resize-split`               | Pointer splitter, keyboard splitter, programmatic adapter                        | No discrepancy for the declared routes.                                                                 |
 | `close-panels`               | Pointer close control, keyboard Delete/control activation, programmatic adapter  | No menu or command-palette route is claimed.                                                            |
 | `create-floating-surface`    | Optional menu action and core/programmatic command                               | No direct pointer route is claimed.                                                                     |
+| `move-floating-surface`      | Pointer titlebar drag, keyboard titlebar step, programmatic adapter              | Snap and tile routes are not claimed.                                                                   |
+| `resize-floating-surface`    | Pointer edge/corner drag, keyboard corner step, programmatic adapter             | Product-specific panel constraints remain application policy.                                           |
+| `raise-surface`              | Pointer activation, keyboard titlebar activation, programmatic adapter           | Platform window z-order is outside this in-page route.                                                  |
+| `maximize-surface`           | Pointer/keyboard control and programmatic adapter                                | Uses the current in-page workspace viewport.                                                            |
+| `restore-surface`            | Pointer/keyboard control and programmatic adapter                                | Restores minimized or maximized in-page state.                                                          |
+| `minimize-surface`           | Pointer/keyboard control and programmatic adapter                                | Minimized presentation remains in-page rather than an OS taskbar.                                       |
+| `redock-surface`             | Pointer/keyboard control and application-selected programmatic placement         | The application adapter owns the semantic target; external redock still uses ownership evidence.        |
 | `transfer-to-browser-window` | Pointer outside release, keyboard/menu action, application programmatic command  | The controlled same-origin Atlas profile is narrower than the generic core command.                     |
 
-Core-only floating movement/resize, surface state, move-group, and general redock commands are now
-omitted instead of being presented as renderer features. The inventory still does not cover all
-actions in Appendix G, such as reopen, merge, focus-next-group, switcher, undo, and preset
-application. The durable remaining fix is a renderer-owned route inventory generated from public
+Core-only move-group remains omitted instead of being presented as a renderer feature. The inventory
+still does not cover all actions in Appendix G, such as reopen, merge, focus-next-group, switcher,
+undo, and preset application. The durable remaining fix is a renderer-owned route inventory generated from public
 capabilities and route-specific tests; corrected declaration strings alone are not sufficient.
 
 ## Genuine remaining gaps
@@ -319,10 +325,10 @@ status by assertion.
 
 ### Implemented or partial behavior awaiting environment evidence
 
-The compact profile has 46 unresolved environment-verifiable rows:
+The compact profile has 45 unresolved environment-verifiable rows:
 
 `A11Y-005`, `A11Y-006`, `API-005`, `DOM-005`, `EXP-003`, `EXP-004`, `FOC-002`, `FOC-003`,
-`FOC-004`, `FOC-005`, `FOC-006`, `FWK-001`, `FWK-002`, `FWK-003`, `FWK-004`, `INT-001`,
+`FOC-004`, `FOC-006`, `FWK-001`, `FWK-002`, `FWK-003`, `FWK-004`, `INT-001`,
 `INT-006`, `INT-007`, `LAY-006`, `LIF-002`, `LIF-003`, `LIF-004`, `MOT-002`, `MOT-004`,
 `MOT-005`, `MOT-006`, `MOT-009`, `MOT-010`, `OBS-001`, `PRF-001`, `PRF-004`, `PRF-005`,
 `PRF-006`, `QLT-003`, `REN-002`, `RSP-002`, `SEC-003`, `SEC-005`, `SUR-005`, `SUR-006`,
@@ -363,13 +369,13 @@ protocol authority.
 The implementation uses stable external-store projection, active-only protocol actors, one frame
 scheduler for pointer visuals, precomputed reorder slots, binary slot lookup, constant-time cached
 geometry translation during same-slot autoscroll, and local DOM style writes. Those are useful
-design properties, not certification. The checked-in container capture retained 179 frame deltas
-with p95 9.3 ms, p99 9.4 ms, maximum 58.2 ms, and two observed long tasks of 91 ms and 58 ms. On the
-same Apple M1 Max machine, the Node smoke run measured 50-panel reorder at 0.9273 ms p95 and
-500-panel reorder at 5.0729 ms p95, missing the latter's 5 ms design target. The 100/500/1,000-node
-hit-test means were 4.622/21.389/44.874 microseconds, and 10,000 reference kernel operations had zero
-invariant violations. These single-container regression guards are neither a statistically
-separated history nor physical 60 Hz/120 Hz evidence. The performance hard gate therefore remains
+design properties, not certification. The checked-in local macOS capture retained 179 frame deltas
+with p95 10.11 ms, p99 10.3 ms, maximum 48.8 ms, and one observed long task of 56 ms. On the same
+Apple M1 Max machine, the Node smoke run measured 50-panel reorder at 0.2946 ms p95, 500-panel reorder
+at 2.1511 ms p95, 100/500/1,000-node hit testing at 3.201/17.61/38.067 microseconds mean, and 10,000
+reference kernel operations with zero invariant violations. These single-machine regression guards
+are neither a statistically separated history nor physical 60 Hz/120 Hz evidence. The performance
+hard gate therefore remains
 blocked.
 
 ## Hard-gate status

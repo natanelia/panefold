@@ -53,7 +53,9 @@ conformance, product certification, npm availability, or unrestricted browser-wi
 - A React projection that uses the geometry allocator, driver-isolated resize protocols,
   frame-coalesced previews, direct center/edge panel docking, accessible tabs and splitters, four-way
   keyboard/menu splitting, configurable logical tab rails and content, focus recovery, stable panel
-  hosts, lifecycle leases, and optional FLIP motion.
+  hosts, lifecycle leases, optional FLIP motion, and non-modal in-page floating windows with
+  canonical z-order, move, resize, movable minimized headers, compact sole-panel chrome,
+  maximize/restore, and redock controls.
 - A bounded synchronous runtime with transaction-correlated post-commit effect delivery and
   in-process duplicate suppression, plus versioned persistence codecs, atomic snapshot/journal
   contracts, deterministic schema migration, last-known-good recovery, a restore-before-render open
@@ -147,10 +149,11 @@ pnpm dev
 ```
 
 Open the URL printed by Vite. Panefold Code lets you drag an editor into another group, drop it on
-any logical edge to create a group, remove a container with its visible **⊠** action, drag it beyond
-the workspace into a controlled same-origin browser window, split from the keyboard/menu, resize
-splitters, choose top/bottom/vertical and icon/label tab chrome,
-and reload the canonical arrangement from IndexedDB. Stable panel-host identity, undo/redo, a mobile
+any logical edge to create a group, remove a container with its visible **⊠** action, float it into a
+movable and resizable in-page window, drag it beyond the workspace into a controlled same-origin
+browser window, split from the keyboard/menu, resize splitters, choose top/bottom/vertical and
+icon/label tab chrome, and reload the canonical arrangement from IndexedDB. Stable panel-host
+identity, undo/redo, a mobile
 single-region projection, and an optional 17-kind lifecycle lab remain observable in the same
 fixture. Panel-owned document content needs an application checkpoint codec; the demo does not imply
 support for every browser, input, framework, workload, or deployment.
@@ -166,11 +169,14 @@ support for every browser, input, framework, workload, or deployment.
 4. Choose the visible **⊠ Remove panel container** action to merge all tabs into the nearest
    container and collapse the split in one undoable transaction. It also works for empty retained
    containers.
-5. Drag a popout-capable editor beyond the workbench, or choose **Open in new window**, to move the
+5. Choose **Actions → Float workspace.ts** to move the live host into an in-page floating window. A
+   sole panel shares one row with the window controls; move it before or after minimizing, resize it
+   while expanded, maximize/restore, and redock it without losing editor state.
+6. Drag a popout-capable editor beyond the workbench, or choose **Open in new window**, to move the
    live host into a same-origin popup. Edit workspace.ts there, then return or close the popup to see
    recovery.
-6. Open **Workspace appearance** to select a logical tab rail and icon/label treatment.
-7. Wait for **Saved revision _n_ in IndexedDB**, reload, and inspect **Restored revision _n_** plus
+7. Open **Workspace appearance** to select a logical tab rail and icon/label treatment.
+8. Wait for **Saved revision _n_ in IndexedDB**, reload, and inspect **Restored revision _n_** plus
    the recovered layout.
 
 ## Verify the repository

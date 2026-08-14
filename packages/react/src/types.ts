@@ -69,12 +69,36 @@ export interface WorkspaceGroupNodeView {
 
 export type WorkspaceNodeView = WorkspaceSplitView | WorkspaceGroupNodeView;
 
+/** Coarse CSS-pixel geometry owned by the semantic floating-surface record. */
+export interface WorkspaceFloatingBounds {
+  readonly x: number;
+  readonly y: number;
+  readonly width: number;
+  readonly height: number;
+}
+
+/**
+ * Renderer projection for one same-document floating surface. Array order is
+ * back-to-front z-order; browser windows use the separate prepared-transfer
+ * interface and must never be projected here.
+ */
+export interface WorkspaceFloatingSurfaceView {
+  readonly id: string;
+  readonly rootNodeId: string;
+  readonly bounds: WorkspaceFloatingBounds;
+  readonly maximized: boolean;
+  readonly minimized?: boolean;
+  readonly label?: string;
+}
+
 export interface WorkspaceProjection {
   readonly revision: string;
   readonly rootNodeId: string;
   readonly nodes: Readonly<Record<string, WorkspaceNodeView>>;
   readonly groups: Readonly<Record<string, WorkspaceGroupView>>;
   readonly panels: Readonly<Record<string, WorkspacePanelView>>;
+  /** Same-document floating surfaces in canonical back-to-front order. */
+  readonly floatingSurfaces?: readonly WorkspaceFloatingSurfaceView[];
   readonly activePanelId?: string;
   readonly activeSurfaceId?: string;
   readonly diagnosticCount?: number;
@@ -217,6 +241,23 @@ export interface WorkspaceCommandAdapter<TCommand> {
   ) => TCommand;
   readonly floatPanel?: (panelId: string) => TCommand;
   /**
+   * Floating-surface factories remain model-agnostic. Applications may return
+   * an atomic batch that also raises the surface, applies constraints, or
+   * records product-specific activation policy; React only previews disposable geometry.
+   */
+  readonly moveFloatingSurface?: (
+    surfaceId: string,
+    position: Pick<WorkspaceFloatingBounds, "x" | "y">,
+  ) => TCommand;
+  readonly resizeFloatingSurface?: (surfaceId: string, bounds: WorkspaceFloatingBounds) => TCommand;
+  /** Should also encode application activation policy while preserving DOM focus. */
+  readonly raiseFloatingSurface?: (surfaceId: string) => TCommand;
+  readonly maximizeFloatingSurface?: (surfaceId: string) => TCommand;
+  readonly restoreFloatingSurface?: (surfaceId: string) => TCommand;
+  readonly minimizeFloatingSurface?: (surfaceId: string) => TCommand;
+  /** The application owns the semantic redock destination and placement policy. */
+  readonly redockFloatingSurface?: (surfaceId: string) => TCommand;
+  /**
    * Pure, revision-bound direct-manipulation plan. The application owns real
    * topology, IDs, constraints, policy, and command representation. The
    * renderer retains this exact command for pointerup.
@@ -228,6 +269,7 @@ export interface WorkspaceCommandAdapter<TCommand> {
 }
 
 export interface WorkspacePanelDropPlanContext {
+  /** Resolved root bounds of the same-document surface containing the target. */
   readonly bounds: LogicalRect;
   readonly targetRect: LogicalRect;
   readonly splitterSize: number;

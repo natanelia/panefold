@@ -23,6 +23,17 @@ export const STRUCTURAL_ACTION_PARITY: readonly StructuralActionParityEntry[] = 
   action("resize-split", "Resize split", ["pointer", "keyboard", "programmatic"]),
   action("close-panels", "Close panel", ["pointer", "keyboard", "programmatic"]),
   action("create-floating-surface", "Float panel", ["menu", "programmatic"]),
+  action("move-floating-surface", "Move floating window", ["pointer", "keyboard", "programmatic"]),
+  action("resize-floating-surface", "Resize floating window", [
+    "pointer",
+    "keyboard",
+    "programmatic",
+  ]),
+  action("raise-surface", "Raise floating window", ["pointer", "keyboard", "programmatic"]),
+  action("maximize-surface", "Maximize floating window", ["pointer", "keyboard", "programmatic"]),
+  action("restore-surface", "Restore floating window", ["pointer", "keyboard", "programmatic"]),
+  action("minimize-surface", "Minimize floating window", ["pointer", "keyboard", "programmatic"]),
+  action("redock-surface", "Redock floating window", ["pointer", "keyboard", "programmatic"]),
   action("transfer-to-browser-window", "Open panel in new window", [
     "pointer",
     "keyboard",

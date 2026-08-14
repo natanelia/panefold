@@ -8,7 +8,11 @@ export {
 export { WorkspaceSurface, type WorkspaceSurfaceProps } from "./WorkspaceSurface";
 export { ENGLISH_WORKSPACE_MESSAGES } from "./messages";
 export { DEFAULT_WORKSPACE_TAB_PRESENTATION } from "./tab-presentation";
-export type { WorkspaceMessageCatalog } from "./messages";
+export type {
+  WorkspaceFloatingResizeEdge,
+  WorkspaceMessageCatalog,
+  WorkspacePhysicalEdge,
+} from "./messages";
 export { solveWorkspaceProjectionLayout } from "./geometry";
 export type {
   ProjectionLayoutOptions,
@@ -30,6 +34,8 @@ export type {
   WorkspaceExternalPanelOutcome,
   WorkspaceExternalPanelPosition,
   WorkspaceExternalPanelRequest,
+  WorkspaceFloatingBounds,
+  WorkspaceFloatingSurfaceView,
   WorkspaceLogicalEdge,
   WorkspaceNodeView,
   WorkspacePanelDefinition,

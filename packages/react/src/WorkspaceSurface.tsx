@@ -33,6 +33,12 @@ import {
 } from "@panefold/motion";
 import { createResizeActor, type ResizeEvent } from "@panefold/protocol-xstate";
 
+import {
+  FloatingSurfaceFrame,
+  floatingSurfaceContentBounds,
+  resolveFloatingSurfaceBounds,
+  useFloatingSurfaceHeaderSlot,
+} from "./floating-surface";
 import { solveWorkspaceProjectionLayout, type WorkspaceLayoutSolver } from "./geometry";
 import {
   ENGLISH_WORKSPACE_MESSAGES,
@@ -40,6 +46,11 @@ import {
   type ResolvedWorkspaceInteractionMessages,
   type WorkspaceMessageCatalog,
 } from "./messages";
+import {
+  createWorkspaceNodeMotionSnapshot,
+  resolveWorkspaceNodeMotionTransition,
+  type WorkspaceNodeMotionSnapshot,
+} from "./node-motion";
 import {
   PanelDragOverlay,
   usePanelDrag,
@@ -55,6 +66,8 @@ import {
   panelsForGroup,
   planPanelDrop as resolvePanelDropPlan,
   splitLabel,
+  subtreeContainsNode,
+  surfaceLayoutBoundsForNode,
 } from "./panel-drop";
 import { useWorkspaceRuntime, useWorkspaceSnapshot } from "./runtime-context";
 import { resolveTabPresentation, tabOrientation } from "./tab-presentation";
@@ -67,6 +80,8 @@ import type {
   WorkspaceExternalPanelHandler,
   WorkspaceExternalPanelOutcome,
   WorkspaceExternalPanelPosition,
+  WorkspaceFloatingBounds,
+  WorkspaceFloatingSurfaceView,
   WorkspaceGroupView,
   WorkspaceNodeView,
   WorkspacePanelRegistry,
@@ -275,7 +290,10 @@ function SurfaceRenderer<TSnapshot, TCommand, TResult>({
     responsive === "auto" &&
     (coarsePointer ||
       (logicalBounds.inlineSize > 0 && logicalBounds.inlineSize < compactBreakpoint));
-  const compactGroups = useMemo(() => orderedGroups(projection), [projection]);
+  const compactGroups = useMemo(
+    () => orderedGroups(projection, projection.rootNodeId, false),
+    [projection],
+  );
   const effectiveCompactGroupId = compactGroupId ?? internalCompactGroupId;
   const requestedCompactGroup =
     effectiveCompactGroupId === undefined ? undefined : projection.groups[effectiveCompactGroupId];
@@ -298,6 +316,17 @@ function SurfaceRenderer<TSnapshot, TCommand, TResult>({
         : { ...projection, rootNodeId: renderedRootNodeId },
     [projection, renderedRootNodeId],
   );
+  const floatingSurfaces = projection.floatingSurfaces ?? EMPTY_FLOATING_SURFACES;
+  const floatingFrameBounds = useMemo(
+    () =>
+      Object.fromEntries(
+        floatingSurfaces.map((surface) => [
+          surface.id,
+          resolveFloatingSurfaceBounds(surface, logicalBounds.inlineSize, logicalBounds.blockSize),
+        ]),
+      ) as Readonly<Record<string, WorkspaceFloatingBounds>>,
+    [floatingSurfaces, logicalBounds.blockSize, logicalBounds.inlineSize],
+  );
   const surfaceScheduleKey = `${domIdPrefix}:geometry`;
   const scheduler = useMemo(
     () => frameScheduler ?? createBrowserFrameScheduler(),
@@ -310,26 +339,61 @@ function SurfaceRenderer<TSnapshot, TCommand, TResult>({
 
   const solveResolvedLayout = useCallback(
     (overrides: Readonly<Record<string, SplitLayoutOverride>>) => {
-      const request = {
-        projection: renderedProjection,
-        rootNodeId: renderedProjection.rootNodeId,
-        bounds: logicalBounds,
-        splitterSize,
-        splitOverrides: overrides,
-      };
-      return (
-        layoutSolver?.(snapshot, request) ??
-        solveWorkspaceProjectionLayout(renderedProjection, logicalBounds, {
+      const solveRoot = (rootNodeId: string, bounds: LogicalRect) => {
+        const request = {
+          projection: renderedProjection,
+          rootNodeId,
+          bounds,
           splitterSize,
           splitOverrides: overrides,
-        })
-      );
+        };
+        if (layoutSolver !== undefined) return layoutSolver(snapshot, request);
+        const rootProjection =
+          rootNodeId === renderedProjection.rootNodeId
+            ? renderedProjection
+            : { ...renderedProjection, rootNodeId };
+        return solveWorkspaceProjectionLayout(rootProjection, bounds, {
+          splitterSize,
+          splitOverrides: overrides,
+        });
+      };
+
+      const mainLayout = solveRoot(renderedProjection.rootNodeId, logicalBounds);
+      const floatingLayouts = floatingSurfaces.flatMap((surface) => {
+        if (surface.minimized === true) return [];
+        const frameBounds = floatingFrameBounds[surface.id];
+        if (frameBounds === undefined) return [];
+        return [
+          solveRoot(
+            surface.rootNodeId,
+            floatingSurfaceContentBounds(frameBounds, logicalBounds, direction),
+          ),
+        ];
+      });
+      return mergeResolvedLayouts(mainLayout, floatingLayouts);
     },
-    [layoutSolver, logicalBounds, renderedProjection, snapshot, splitterSize],
+    [
+      direction,
+      floatingFrameBounds,
+      floatingSurfaces,
+      layoutSolver,
+      logicalBounds,
+      renderedProjection,
+      snapshot,
+      splitterSize,
+    ],
   );
   const resolvedLayout = useMemo(
     () => solveResolvedLayout(EMPTY_SPLIT_OVERRIDES),
     [solveResolvedLayout],
+  );
+  const nodeMotionSnapshot = useMemo(
+    () => createWorkspaceNodeMotionSnapshot(renderedProjection, resolvedLayout),
+    [renderedProjection, resolvedLayout],
+  );
+  const visibleGroupIds = useMemo(
+    () => new Set(Object.keys(resolvedLayout.groupRects)),
+    [resolvedLayout.groupRects],
   );
 
   const previewSplit = useCallback(
@@ -508,14 +572,16 @@ function SurfaceRenderer<TSnapshot, TCommand, TResult>({
     [motionCoordinator],
   );
 
-  const previousLayoutRef = useRef<ResolvedLayout | undefined>(undefined);
+  const previousNodeMotionSnapshotRef = useRef<WorkspaceNodeMotionSnapshot | undefined>(undefined);
   const previousRevisionRef = useRef<string | undefined>(undefined);
   useLayoutEffect(() => {
-    const previousLayout = previousLayoutRef.current;
+    const previousNodeMotionSnapshot = previousNodeMotionSnapshotRef.current;
     const previousRevision = previousRevisionRef.current;
-    previousLayoutRef.current = resolvedLayout;
+    previousNodeMotionSnapshotRef.current = nodeMotionSnapshot;
     previousRevisionRef.current = projection.revision;
-    if (previousLayout === undefined || previousRevision === projection.revision) return;
+    if (previousNodeMotionSnapshot === undefined || previousRevision === projection.revision) {
+      return;
+    }
 
     const workspace = rootRef.current;
     if (workspace === null) return;
@@ -524,16 +590,21 @@ function SurfaceRenderer<TSnapshot, TCommand, TResult>({
     for (const element of elements) {
       const nodeId = element.dataset.workspaceNode;
       if (nodeId === undefined) continue;
-      const before = previousLayout.nodeRects[nodeId];
-      const after = resolvedLayout.nodeRects[nodeId];
-      if (before === undefined || after === undefined || sameLogicalRect(before, after)) continue;
+      const transition = resolveWorkspaceNodeMotionTransition(
+        nodeId,
+        previousNodeMotionSnapshot,
+        nodeMotionSnapshot,
+        logicalBounds,
+        direction,
+      );
+      if (transition === undefined) continue;
       motionCoordinator.play(
         element,
         createFlipPlan({
           targetId: nodeId,
           scopeId: domIdPrefix,
-          before: logicalRectToPhysical(before, logicalBounds, direction),
-          after: logicalRectToPhysical(after, logicalBounds, direction),
+          before: transition.before,
+          after: transition.after,
           strategy: "translate-and-clip",
         }),
       );
@@ -543,8 +614,8 @@ function SurfaceRenderer<TSnapshot, TCommand, TResult>({
     domIdPrefix,
     logicalBounds,
     motionCoordinator,
+    nodeMotionSnapshot,
     projection.revision,
-    resolvedLayout,
   ]);
 
   useEffect(() => {
@@ -594,7 +665,7 @@ function SurfaceRenderer<TSnapshot, TCommand, TResult>({
     void portalOwnershipRevision;
     const selectedGroupByPanelId = new Map<string, WorkspaceGroupView>();
     for (const group of Object.values(projection.groups)) {
-      if (group.selectedPanelId !== "") {
+      if (group.selectedPanelId !== "" && resolvedLayout.groupRects[group.id] !== undefined) {
         selectedGroupByPanelId.set(group.selectedPanelId, group);
       }
     }
@@ -636,7 +707,15 @@ function SurfaceRenderer<TSnapshot, TCommand, TResult>({
         selected: inExternalDocument ? true : selected,
       });
     }
-  }, [domIdPrefix, messages, portalHosts, portalOwnershipRevision, projection, renderedRootNodeId]);
+  }, [
+    domIdPrefix,
+    messages,
+    portalHosts,
+    portalOwnershipRevision,
+    projection,
+    renderedRootNodeId,
+    resolvedLayout.groupRects,
+  ]);
 
   const resolveOutcome = useCallback(
     (result: TResult, context: WorkspaceDispatchContext<TCommand>) =>
@@ -645,12 +724,12 @@ function SurfaceRenderer<TSnapshot, TCommand, TResult>({
   );
 
   const dispatch = useCallback(
-    (command: TCommand, label: string, origin: WorkspaceCommandOrigin) => {
+    (command: TCommand, label: string, origin: WorkspaceCommandOrigin, announceOutcome = true) => {
       const context = { command, label, origin } satisfies WorkspaceDispatchContext<TCommand>;
       const result = runtime.dispatch(command, { label, origin });
       const outcome = resolveOutcome(result, context);
       onCommandResult?.(result);
-      if (outcome.message !== undefined) announce(outcome.message);
+      if (announceOutcome && outcome.message !== undefined) announce(outcome.message);
       return { result, outcome } satisfies DispatchExecution<TResult>;
     },
     [announce, onCommandResult, resolveOutcome, runtime],
@@ -770,7 +849,18 @@ function SurfaceRenderer<TSnapshot, TCommand, TResult>({
       const targetRect = resolvedLayout.groupRects[request.targetGroup.id];
       const plan =
         plannedCommand === undefined && targetRect !== undefined
-          ? resolvePanelDropPlan(planner, request, targetRect, resolvedLayout, splitterSize)
+          ? resolvePanelDropPlan(
+              planner,
+              request,
+              targetRect,
+              resolvedLayout,
+              splitterSize,
+              surfaceLayoutBoundsForNode(
+                projectionRef.current,
+                resolvedLayout,
+                request.targetNodeId,
+              ),
+            )
           : undefined;
       const command = plannedCommand ?? plan?.command;
       if (command === undefined) {
@@ -993,6 +1083,179 @@ function SurfaceRenderer<TSnapshot, TCommand, TResult>({
         )}
       </div>
 
+      {floatingSurfaces.length === 0 ? null : (
+        <div className="pf-floating-layer" data-workspace-layer="floating-surfaces">
+          {floatingSurfaces.map((surface, surfaceIndex) => {
+            const floatingNode = renderedProjection.nodes[surface.rootNodeId];
+            const frameBounds = floatingFrameBounds[surface.id];
+            const moveSurface = commands.moveFloatingSurface;
+            const resizeSurface = commands.resizeFloatingSurface;
+            const raiseSurface = commands.raiseFloatingSurface;
+            const minimizeSurface = commands.minimizeFloatingSurface;
+            const maximizeSurface = commands.maximizeFloatingSurface;
+            const restoreSurface = commands.restoreFloatingSurface;
+            const redockSurface = commands.redockFloatingSurface;
+            if (frameBounds === undefined) return null;
+            const title = floatingSurfaceTitle(surface, projection, messages.panelGroupFallback());
+            const compactGroupId = singlePanelFloatingGroupId(surface, projection);
+            const redockPanelId = floatingSurfaceSelectedPanelId(surface, projection);
+            return (
+              <FloatingSurfaceFrame
+                key={surface.id}
+                surface={surface}
+                {...(compactGroupId === undefined ? {} : { compactGroupId })}
+                bounds={frameBounds}
+                projectionRevision={projection.revision}
+                title={title}
+                active={projection.activeSurfaceId === surface.id}
+                frontmost={surfaceIndex === floatingSurfaces.length - 1}
+                zIndex={surfaceIndex + 1}
+                viewportWidth={logicalBounds.inlineSize}
+                viewportHeight={logicalBounds.blockSize}
+                scheduler={scheduler}
+                scheduleKey={`${domIdPrefix}:floating:${surface.id}`}
+                messages={interactionMessages}
+                {...(moveSurface === undefined
+                  ? {}
+                  : {
+                      onMove: (
+                        nextBounds: WorkspaceFloatingBounds,
+                        origin: Extract<WorkspaceCommandOrigin, "pointer" | "keyboard">,
+                      ) =>
+                        dispatch(
+                          moveSurface(surface.id, {
+                            x: nextBounds.x,
+                            y: nextBounds.y,
+                          }),
+                          interactionMessages.movedFloatingSurface({ title }),
+                          origin,
+                        ).outcome,
+                    })}
+                {...(resizeSurface === undefined
+                  ? {}
+                  : {
+                      onResize: (
+                        nextBounds: WorkspaceFloatingBounds,
+                        origin: Extract<WorkspaceCommandOrigin, "pointer" | "keyboard">,
+                      ) =>
+                        dispatch(
+                          resizeSurface(surface.id, nextBounds),
+                          interactionMessages.resizedFloatingSurface({ title }),
+                          origin,
+                        ).outcome,
+                    })}
+                {...(raiseSurface === undefined
+                  ? {}
+                  : {
+                      onRaise: (
+                        origin: Extract<WorkspaceCommandOrigin, "pointer" | "keyboard">,
+                      ) => {
+                        dispatch(
+                          raiseSurface(surface.id),
+                          interactionMessages.raisedFloatingSurface({ title }),
+                          origin,
+                          false,
+                        );
+                      },
+                    })}
+                {...(minimizeSurface === undefined
+                  ? {}
+                  : {
+                      onMinimize: (
+                        origin: Extract<WorkspaceCommandOrigin, "pointer" | "keyboard">,
+                      ) =>
+                        dispatch(
+                          minimizeSurface(surface.id),
+                          interactionMessages.minimizedFloatingSurface({ title }),
+                          origin,
+                        ).outcome,
+                    })}
+                {...(maximizeSurface === undefined
+                  ? {}
+                  : {
+                      onMaximize: (
+                        origin: Extract<WorkspaceCommandOrigin, "pointer" | "keyboard">,
+                      ) =>
+                        dispatch(
+                          maximizeSurface(surface.id),
+                          interactionMessages.maximizedFloatingSurface({ title }),
+                          origin,
+                        ).outcome,
+                    })}
+                {...(restoreSurface === undefined
+                  ? {}
+                  : {
+                      onRestore: (
+                        origin: Extract<WorkspaceCommandOrigin, "pointer" | "keyboard">,
+                      ) =>
+                        dispatch(
+                          restoreSurface(surface.id),
+                          interactionMessages.restoredFloatingSurface({ title }),
+                          origin,
+                        ).outcome,
+                    })}
+                {...(redockSurface === undefined
+                  ? {}
+                  : {
+                      onRedock: (
+                        origin: Extract<WorkspaceCommandOrigin, "pointer" | "keyboard">,
+                      ) => {
+                        const outcome = dispatch(
+                          redockSurface(surface.id),
+                          interactionMessages.redockedFloatingSurface({ title }),
+                          origin,
+                        ).outcome;
+                        if (
+                          redockPanelId !== undefined &&
+                          (outcome.status === "committed" || outcome.status === "queued")
+                        ) {
+                          restorePanelTab(redockPanelId);
+                        }
+                        return outcome;
+                      },
+                    })}
+              >
+                {surface.minimized === true || floatingNode === undefined ? null : (
+                  <LayoutNode
+                    node={floatingNode}
+                    projection={renderedProjection}
+                    panels={panels}
+                    messages={messages}
+                    commands={commands}
+                    direction={direction}
+                    domIdPrefix={domIdPrefix}
+                    resolvedLayout={resolvedLayout}
+                    splitOverrides={EMPTY_SPLIT_OVERRIDES}
+                    projectionRevision={projection.revision}
+                    scheduler={scheduler}
+                    scheduleKey={`${surfaceScheduleKey}:${surface.id}`}
+                    previewSplit={previewSplit}
+                    commitSplit={commitSplit}
+                    clearSplitPreview={clearSplitPreview}
+                    dispatch={dispatch}
+                    selectPanel={selectPanel}
+                    closePanel={closePanel}
+                    registerSlot={(groupId, element) => {
+                      if (element === null) slotsRef.current.delete(groupId);
+                      else slotsRef.current.set(groupId, element);
+                    }}
+                    movePanelId={movePanelId}
+                    setMovePanelId={setMovePanelId}
+                    tabPresentation={tabPresentation}
+                    panelDrag={panelDrag}
+                    commitPanelDrop={commitPanelDrop}
+                    requestExternalPanel={requestExternalPanel}
+                    externalPanelAvailable={onExternalPanelRequest !== undefined}
+                    announce={announce}
+                    interactionMessages={interactionMessages}
+                  />
+                )}
+              </FloatingSurfaceFrame>
+            );
+          })}
+        </div>
+      )}
+
       <div
         ref={parkingRef}
         className="pf-content-parking"
@@ -1167,6 +1430,7 @@ function SurfaceRenderer<TSnapshot, TCommand, TResult>({
         messages={messages}
         ownershipRevision={portalOwnershipRevision}
         surfaceDocument={surfaceDocument}
+        visibleGroupIds={visibleGroupIds}
       />
 
       <div
@@ -1703,17 +1967,21 @@ function PanelGroup<TCommand, TResult>({
   const reorderFocusPanelRef = useRef<string | undefined>(undefined);
   const groupRef = useRef<HTMLElement>(null);
   const groupLabelId = useId();
+  const floatingHeaderTarget = useFloatingSurfaceHeaderSlot(group.id);
   const groupPanels = group.panelIds
     .map((id) => projection.panels[id])
     .filter((panel): panel is WorkspacePanelView => panel !== undefined);
   const selectedPanel = groupPanels.find((panel) => panel.id === group.selectedPanelId);
   const createMovePanelCommand = commands.movePanel;
   const createReorderPanelCommand = commands.reorderPanel;
-  const createFloatPanelCommand = commands.floatPanel;
+  const createFloatPanelCommand = groupBelongsToFloatingSurface(projection, group.id)
+    ? undefined
+    : commands.floatPanel;
   const createDropPanelCommand = commands.planPanelDrop;
   const createMergeGroupCommand = commands.mergeGroup;
   const presentation = resolveTabPresentation(tabPresentation, group, projection);
-  const orientation = tabOrientation(presentation);
+  const orientation =
+    floatingHeaderTarget === undefined ? tabOrientation(presentation) : "horizontal";
   const empty = groupPanels.length === 0;
   const groupRect = resolvedLayout.groupRects[group.id] ?? ZERO_LOGICAL_RECT;
   const rootRect = resolvedLayout.nodeRects[resolvedLayout.rootNodeId] ?? groupRect;
@@ -1929,270 +2197,279 @@ function PanelGroup<TCommand, TResult>({
           )}
         </div>
       ) : null}
-      <div className="pf-tab-strip">
-        <div
-          className="pf-tab-list"
-          role="tablist"
-          aria-labelledby={groupLabelId}
-          aria-orientation={orientation}
-        >
-          {groupPanels.map((panel, index) => {
-            const selected = group.selectedPanelId === panel.id;
-            const definition = panels[panel.type];
-            return (
-              <button
-                key={panel.id}
-                id={panelTabId(domIdPrefix, panel.id)}
-                className="pf-tab"
-                type="button"
-                role="tab"
-                tabIndex={selected ? 0 : -1}
-                aria-selected={selected}
-                aria-controls={panelContentId(domIdPrefix, panel.id)}
-                title={panel.title}
-                data-workspace-panel-tab={panel.id}
-                onClick={(event) => {
-                  if (panelDrag.consumeClick(panel.id)) return;
-                  selectPanel(panel, false, clickOrigin(event));
-                }}
-                onPointerDown={(event) => {
-                  pointerFocusPanelRef.current = panel.id;
-                  panelDrag.begin(panel, group, event);
-                }}
-                onPointerMove={panelDrag.move}
-                onPointerUp={panelDrag.finish}
-                onPointerCancel={panelDrag.cancel}
-                onLostPointerCapture={panelDrag.cancel}
-                onFocus={() => {
-                  if (reorderFocusPanelRef.current === panel.id) {
-                    reorderFocusPanelRef.current = undefined;
-                    return;
-                  }
-                  const origin = pointerFocusPanelRef.current === panel.id ? "pointer" : "keyboard";
-                  pointerFocusPanelRef.current = undefined;
-                  // Pointer focus belongs to the still revision-bound
-                  // drag/click gesture. A normal click selects after
-                  // pointerup; activating here would cancel a drag before
-                  // its first movement sample by advancing the revision.
-                  if (origin === "keyboard" && selected && projection.activePanelId !== panel.id) {
-                    dispatch(
-                      commands.activatePanel(panel.id),
-                      messages.activatedPanel({ title: panel.title }),
-                      origin,
-                    );
-                  }
-                }}
-                onKeyDown={(event) => {
-                  if (
-                    !event.nativeEvent.isComposing &&
-                    event.altKey &&
-                    !event.ctrlKey &&
-                    !event.metaKey &&
-                    !event.shiftKey
-                  ) {
-                    const visualPrevious =
-                      orientation === "vertical"
-                        ? "ArrowUp"
-                        : direction === "rtl"
-                          ? "ArrowRight"
-                          : "ArrowLeft";
-                    const visualNext =
-                      orientation === "vertical"
-                        ? "ArrowDown"
-                        : direction === "rtl"
-                          ? "ArrowLeft"
-                          : "ArrowRight";
-                    if (event.key === visualPrevious || event.key === visualNext) {
-                      event.preventDefault();
-                      reorderNeighbor(
-                        panel,
-                        index,
-                        event.key === visualPrevious ? -1 : 1,
-                        "keyboard",
-                      );
+      {placePanelGroupTabStrip(
+        <div className="pf-tab-strip">
+          <div
+            className="pf-tab-list"
+            role="tablist"
+            aria-labelledby={groupLabelId}
+            aria-orientation={orientation}
+          >
+            {groupPanels.map((panel, index) => {
+              const selected = group.selectedPanelId === panel.id;
+              const definition = panels[panel.type];
+              return (
+                <button
+                  key={panel.id}
+                  id={panelTabId(domIdPrefix, panel.id)}
+                  className="pf-tab"
+                  type="button"
+                  role="tab"
+                  tabIndex={selected ? 0 : -1}
+                  aria-selected={selected}
+                  aria-controls={panelContentId(domIdPrefix, panel.id)}
+                  title={panel.title}
+                  data-workspace-panel-tab={panel.id}
+                  onClick={(event) => {
+                    if (panelDrag.consumeClick(panel.id)) return;
+                    selectPanel(panel, false, clickOrigin(event));
+                  }}
+                  onPointerDown={(event) => {
+                    pointerFocusPanelRef.current = panel.id;
+                    panelDrag.begin(panel, group, event);
+                  }}
+                  onPointerMove={panelDrag.move}
+                  onPointerUp={panelDrag.finish}
+                  onPointerCancel={panelDrag.cancel}
+                  onLostPointerCapture={panelDrag.cancel}
+                  onFocus={() => {
+                    if (reorderFocusPanelRef.current === panel.id) {
+                      reorderFocusPanelRef.current = undefined;
                       return;
                     }
-                  }
-                  navigateTabs(event, index);
-                  panelDrag.keyDown(event);
-                  if (event.key === "Delete" && panel.closable !== false) {
-                    event.preventDefault();
-                    closePanel(panel, "keyboard");
-                  }
-                }}
-              >
-                {definition?.icon === undefined || presentation.content === "label-only" ? null : (
-                  <span className="pf-tab-icon" aria-hidden="true">
-                    {definition.icon}
-                  </span>
-                )}
-                <span
-                  className={[
-                    "pf-tab-title",
-                    presentation.content === "icon-only" && definition?.icon !== undefined
-                      ? "pf-visually-hidden"
-                      : "",
-                  ]
-                    .filter(Boolean)
-                    .join(" ")}
-                  dir="auto"
+                    const origin =
+                      pointerFocusPanelRef.current === panel.id ? "pointer" : "keyboard";
+                    pointerFocusPanelRef.current = undefined;
+                    // Pointer focus belongs to the still revision-bound
+                    // drag/click gesture. A normal click selects after
+                    // pointerup; activating here would cancel a drag before
+                    // its first movement sample by advancing the revision.
+                    if (
+                      origin === "keyboard" &&
+                      selected &&
+                      projection.activePanelId !== panel.id
+                    ) {
+                      dispatch(
+                        commands.activatePanel(panel.id),
+                        messages.activatedPanel({ title: panel.title }),
+                        origin,
+                      );
+                    }
+                  }}
+                  onKeyDown={(event) => {
+                    if (
+                      !event.nativeEvent.isComposing &&
+                      event.altKey &&
+                      !event.ctrlKey &&
+                      !event.metaKey &&
+                      !event.shiftKey
+                    ) {
+                      const visualPrevious =
+                        orientation === "vertical"
+                          ? "ArrowUp"
+                          : direction === "rtl"
+                            ? "ArrowRight"
+                            : "ArrowLeft";
+                      const visualNext =
+                        orientation === "vertical"
+                          ? "ArrowDown"
+                          : direction === "rtl"
+                            ? "ArrowLeft"
+                            : "ArrowRight";
+                      if (event.key === visualPrevious || event.key === visualNext) {
+                        event.preventDefault();
+                        reorderNeighbor(
+                          panel,
+                          index,
+                          event.key === visualPrevious ? -1 : 1,
+                          "keyboard",
+                        );
+                        return;
+                      }
+                    }
+                    navigateTabs(event, index);
+                    panelDrag.keyDown(event);
+                    if (event.key === "Delete" && panel.closable !== false) {
+                      event.preventDefault();
+                      closePanel(panel, "keyboard");
+                    }
+                  }}
                 >
-                  {panel.title}
-                </span>
-              </button>
-            );
-          })}
-        </div>
-        {selectedPanel === undefined ||
-        (selectedPanel.closable === false &&
-          createMovePanelCommand === undefined &&
-          createReorderPanelCommand === undefined &&
-          createFloatPanelCommand === undefined &&
-          createDropPanelCommand === undefined &&
-          removeContainerLabel === undefined &&
-          !externalPanelAvailable) ? null : (
-          <div
-            id={panelControlsId(domIdPrefix, selectedPanel.id)}
-            className="pf-tab-controls"
-            data-workspace-panel-controls={selectedPanel.id}
-          >
-            {selectedPanel.closable === false ? null : (
-              <button
-                className="pf-tab-close"
-                type="button"
-                aria-label={messages.closePanel({ title: selectedPanel.title })}
-                title={messages.closePanel({ title: selectedPanel.title })}
-                onClick={(event) => {
-                  closePanel(selectedPanel, clickOrigin(event));
-                }}
-              >
-                <span aria-hidden="true">×</span>
-              </button>
-            )}
-            {removeContainerLabel === undefined ? null : (
-              <button
-                className="pf-group-remove"
-                type="button"
-                aria-label={removeContainerLabel}
-                title={removeContainerLabel}
-                onClick={(event) => {
-                  removePanelContainer(clickOrigin(event));
-                }}
-              >
-                <span aria-hidden="true">⊠</span>
-              </button>
-            )}
-            {createMovePanelCommand === undefined &&
+                  {definition?.icon === undefined ||
+                  presentation.content === "label-only" ? null : (
+                    <span className="pf-tab-icon" aria-hidden="true">
+                      {definition.icon}
+                    </span>
+                  )}
+                  <span
+                    className={[
+                      "pf-tab-title",
+                      presentation.content === "icon-only" && definition?.icon !== undefined
+                        ? "pf-visually-hidden"
+                        : "",
+                    ]
+                      .filter(Boolean)
+                      .join(" ")}
+                    dir="auto"
+                  >
+                    {panel.title}
+                  </span>
+                </button>
+              );
+            })}
+          </div>
+          {selectedPanel === undefined ||
+          (selectedPanel.closable === false &&
+            createMovePanelCommand === undefined &&
             createReorderPanelCommand === undefined &&
             createFloatPanelCommand === undefined &&
             createDropPanelCommand === undefined &&
-            !externalPanelAvailable ? null : (
-              <TabActions
-                panel={selectedPanel}
-                groups={Object.values(projection.groups)}
-                messages={messages}
-                interactionMessages={interactionMessages}
-                triggerId={panelActionsId(domIdPrefix, selectedPanel.id)}
-                onReorderPrevious={
-                  createReorderPanelCommand === undefined ||
-                  groupPanels.indexOf(selectedPanel) === 0
-                    ? undefined
-                    : {
-                        label: interactionMessages.moveTabBefore({
-                          title: selectedPanel.title,
-                          anchor:
-                            groupPanels[groupPanels.indexOf(selectedPanel) - 1]?.title ??
-                            selectedPanel.title,
-                        }),
-                        select: () =>
-                          reorderNeighbor(
-                            selectedPanel,
-                            groupPanels.indexOf(selectedPanel),
-                            -1,
-                            "menu",
-                          ),
-                      }
-                }
-                onReorderNext={
-                  createReorderPanelCommand === undefined ||
-                  groupPanels.indexOf(selectedPanel) === groupPanels.length - 1
-                    ? undefined
-                    : {
-                        label: interactionMessages.moveTabAfter({
-                          title: selectedPanel.title,
-                          anchor:
-                            groupPanels[groupPanels.indexOf(selectedPanel) + 1]?.title ??
-                            selectedPanel.title,
-                        }),
-                        select: () =>
-                          reorderNeighbor(
-                            selectedPanel,
-                            groupPanels.indexOf(selectedPanel),
-                            1,
-                            "menu",
-                          ),
-                      }
-                }
-                onStartKeyboardMove={
-                  createMovePanelCommand === undefined && createDropPanelCommand === undefined
-                    ? undefined
-                    : () => {
-                        setMovePanelId(selectedPanel.id);
-                      }
-                }
-                onMove={
-                  createMovePanelCommand === undefined && createDropPanelCommand === undefined
-                    ? undefined
-                    : (targetGroupId) => {
-                        const targetGroup = projection.groups[targetGroupId];
-                        if (targetGroup === undefined) return;
-                        if (createDropPanelCommand !== undefined) {
-                          commitMenuDrop(selectedPanel, targetGroup, {
-                            kind: "center",
-                            ratio: 1,
+            removeContainerLabel === undefined &&
+            !externalPanelAvailable) ? null : (
+            <div
+              id={panelControlsId(domIdPrefix, selectedPanel.id)}
+              className="pf-tab-controls"
+              data-workspace-panel-controls={selectedPanel.id}
+            >
+              {selectedPanel.closable === false ? null : (
+                <button
+                  className="pf-tab-close"
+                  type="button"
+                  aria-label={messages.closePanel({ title: selectedPanel.title })}
+                  title={messages.closePanel({ title: selectedPanel.title })}
+                  onClick={(event) => {
+                    closePanel(selectedPanel, clickOrigin(event));
+                  }}
+                >
+                  <span aria-hidden="true">×</span>
+                </button>
+              )}
+              {removeContainerLabel === undefined ? null : (
+                <button
+                  className="pf-group-remove"
+                  type="button"
+                  aria-label={removeContainerLabel}
+                  title={removeContainerLabel}
+                  onClick={(event) => {
+                    removePanelContainer(clickOrigin(event));
+                  }}
+                >
+                  <span aria-hidden="true">⊠</span>
+                </button>
+              )}
+              {createMovePanelCommand === undefined &&
+              createReorderPanelCommand === undefined &&
+              createFloatPanelCommand === undefined &&
+              createDropPanelCommand === undefined &&
+              !externalPanelAvailable ? null : (
+                <TabActions
+                  panel={selectedPanel}
+                  groups={Object.values(projection.groups)}
+                  messages={messages}
+                  interactionMessages={interactionMessages}
+                  triggerId={panelActionsId(domIdPrefix, selectedPanel.id)}
+                  onReorderPrevious={
+                    createReorderPanelCommand === undefined ||
+                    groupPanels.indexOf(selectedPanel) === 0
+                      ? undefined
+                      : {
+                          label: interactionMessages.moveTabBefore({
+                            title: selectedPanel.title,
+                            anchor:
+                              groupPanels[groupPanels.indexOf(selectedPanel) - 1]?.title ??
+                              selectedPanel.title,
+                          }),
+                          select: () =>
+                            reorderNeighbor(
+                              selectedPanel,
+                              groupPanels.indexOf(selectedPanel),
+                              -1,
+                              "menu",
+                            ),
+                        }
+                  }
+                  onReorderNext={
+                    createReorderPanelCommand === undefined ||
+                    groupPanels.indexOf(selectedPanel) === groupPanels.length - 1
+                      ? undefined
+                      : {
+                          label: interactionMessages.moveTabAfter({
+                            title: selectedPanel.title,
+                            anchor:
+                              groupPanels[groupPanels.indexOf(selectedPanel) + 1]?.title ??
+                              selectedPanel.title,
+                          }),
+                          select: () =>
+                            reorderNeighbor(
+                              selectedPanel,
+                              groupPanels.indexOf(selectedPanel),
+                              1,
+                              "menu",
+                            ),
+                        }
+                  }
+                  onStartKeyboardMove={
+                    createMovePanelCommand === undefined && createDropPanelCommand === undefined
+                      ? undefined
+                      : () => {
+                          setMovePanelId(selectedPanel.id);
+                        }
+                  }
+                  onMove={
+                    createMovePanelCommand === undefined && createDropPanelCommand === undefined
+                      ? undefined
+                      : (targetGroupId) => {
+                          const targetGroup = projection.groups[targetGroupId];
+                          if (targetGroup === undefined) return;
+                          if (createDropPanelCommand !== undefined) {
+                            commitMenuDrop(selectedPanel, targetGroup, {
+                              kind: "center",
+                              ratio: 1,
+                            });
+                          } else if (createMovePanelCommand !== undefined) {
+                            dispatch(
+                              createMovePanelCommand(selectedPanel.id, targetGroupId),
+                              messages.movedPanel({ title: selectedPanel.title }),
+                              "menu",
+                            );
+                          }
+                        }
+                  }
+                  onSplit={
+                    createDropPanelCommand === undefined || group.panelIds.length <= 1
+                      ? undefined
+                      : (edge) => {
+                          commitMenuDrop(selectedPanel, group, {
+                            kind: "edge",
+                            edge,
+                            ratio: 0.5,
                           });
-                        } else if (createMovePanelCommand !== undefined) {
+                        }
+                  }
+                  direction={direction}
+                  onExternal={
+                    externalPanelAvailable
+                      ? (origin) => externalFromTab(selectedPanel, origin)
+                      : undefined
+                  }
+                  onFloat={
+                    createFloatPanelCommand === undefined
+                      ? undefined
+                      : () => {
                           dispatch(
-                            createMovePanelCommand(selectedPanel.id, targetGroupId),
-                            messages.movedPanel({ title: selectedPanel.title }),
+                            createFloatPanelCommand(selectedPanel.id),
+                            messages.floatedPanel({ title: selectedPanel.title }),
                             "menu",
                           );
                         }
-                      }
-                }
-                onSplit={
-                  createDropPanelCommand === undefined || group.panelIds.length <= 1
-                    ? undefined
-                    : (edge) => {
-                        commitMenuDrop(selectedPanel, group, {
-                          kind: "edge",
-                          edge,
-                          ratio: 0.5,
-                        });
-                      }
-                }
-                direction={direction}
-                onExternal={
-                  externalPanelAvailable
-                    ? (origin) => externalFromTab(selectedPanel, origin)
-                    : undefined
-                }
-                onFloat={
-                  createFloatPanelCommand === undefined
-                    ? undefined
-                    : () => {
-                        dispatch(
-                          createFloatPanelCommand(selectedPanel.id),
-                          messages.floatedPanel({ title: selectedPanel.title }),
-                          "menu",
-                        );
-                      }
-                }
-              />
-            )}
-          </div>
-        )}
-      </div>
+                  }
+                />
+              )}
+            </div>
+          )}
+        </div>,
+        floatingHeaderTarget,
+      )}
       <div
         ref={(element) => {
           registerSlot(group.id, element);
@@ -2202,6 +2479,18 @@ function PanelGroup<TCommand, TResult>({
       />
     </section>
   );
+}
+
+/**
+ * Undefined keeps the strip inline, null hides it while the compact-header ref
+ * resolves, and an element receives the existing strip through a portal.
+ */
+function placePanelGroupTabStrip(
+  tabStrip: ReactNode,
+  target: HTMLDivElement | null | undefined,
+): ReactNode {
+  if (target === undefined) return tabStrip;
+  return target === null ? null : createPortal(tabStrip, target);
 }
 
 interface TabActionsProps {
@@ -2607,6 +2896,7 @@ interface PanelPortalsProps {
   readonly messages: WorkspaceMessageCatalog;
   readonly ownershipRevision: number;
   readonly surfaceDocument: Document | undefined;
+  readonly visibleGroupIds: ReadonlySet<string>;
 }
 
 function PanelPortals({
@@ -2616,6 +2906,7 @@ function PanelPortals({
   messages,
   ownershipRevision,
   surfaceDocument,
+  visibleGroupIds,
 }: PanelPortalsProps) {
   // The revision is deliberately read here: adopting an existing portal host
   // does not itself participate in React reconciliation.
@@ -2636,7 +2927,11 @@ function PanelPortals({
         const group = groupByPanelId.get(panel.id);
         const inExternalDocument =
           surfaceDocument !== undefined && host.ownerDocument !== surfaceDocument;
-        const selected = inExternalDocument || group?.selectedPanelId === panel.id;
+        const selected =
+          inExternalDocument ||
+          (group !== undefined &&
+            visibleGroupIds.has(group.id) &&
+            group.selectedPanelId === panel.id);
         const active = projection.activePanelId === panel.id;
         const policy = panelLifecyclePolicy(panel);
         const lifecycle = panelLifecycle(selected, active, policy);
@@ -2903,6 +3198,7 @@ const ZERO_LOGICAL_RECT: LogicalRect = Object.freeze({
 });
 
 const EMPTY_SPLIT_OVERRIDES: Readonly<Record<string, SplitLayoutOverride>> = Object.freeze({});
+const EMPTY_FLOATING_SURFACES: readonly WorkspaceFloatingSurfaceView[] = Object.freeze([]);
 
 function createBrowserFrameScheduler(): SurfaceFrameScheduler {
   return new SurfaceFrameScheduler({
@@ -2929,6 +3225,21 @@ function sameLogicalRect(left: LogicalRect, right: LogicalRect): boolean {
     left.inlineSize === right.inlineSize &&
     left.blockSize === right.blockSize
   );
+}
+
+function mergeResolvedLayouts(
+  main: ResolvedLayout,
+  floating: readonly ResolvedLayout[],
+): ResolvedLayout {
+  const layouts = [main, ...floating];
+  return {
+    rootNodeId: main.rootNodeId,
+    nodeRects: Object.assign({}, ...layouts.map((layout) => layout.nodeRects)),
+    groupRects: Object.assign({}, ...layouts.map((layout) => layout.groupRects)),
+    splitters: layouts.flatMap((layout) => layout.splitters),
+    collapsedNodeIds: layouts.flatMap((layout) => layout.collapsedNodeIds),
+    diagnostics: layouts.flatMap((layout) => layout.diagnostics),
+  };
 }
 
 interface ResolvedLayoutPreviewTargets {
@@ -3038,25 +3349,6 @@ function subtreeHasEmptyGroup(
   if (node === undefined) return false;
   if (node.kind === "group") return projection.groups[node.groupId]?.panelIds.length === 0;
   return node.childIds.some((childId) => subtreeHasEmptyGroup(projection, childId, visited));
-}
-
-function logicalRectToPhysical(
-  rect: LogicalRect,
-  bounds: LogicalRect,
-  direction: WorkspaceDirection,
-) {
-  return {
-    x:
-      direction === "rtl"
-        ? bounds.inlineStart +
-          bounds.inlineSize -
-          (rect.inlineStart - bounds.inlineStart) -
-          rect.inlineSize
-        : rect.inlineStart,
-    y: rect.blockStart,
-    width: rect.inlineSize,
-    height: rect.blockSize,
-  };
 }
 
 function safeRevision(value: string) {
@@ -3307,7 +3599,11 @@ function findFocusSuccessor(
   return undefined;
 }
 
-function orderedGroups(projection: WorkspaceProjection): readonly WorkspaceGroupView[] {
+function orderedGroups(
+  projection: WorkspaceProjection,
+  rootNodeId = projection.rootNodeId,
+  includeUnreachable = true,
+): readonly WorkspaceGroupView[] {
   const ordered: WorkspaceGroupView[] = [];
   const visitedNodes = new Set<string>();
   const visit = (nodeId: string) => {
@@ -3323,11 +3619,59 @@ function orderedGroups(projection: WorkspaceProjection): readonly WorkspaceGroup
       for (const childId of node.childIds) visit(childId);
     }
   };
-  visit(projection.rootNodeId);
-  for (const group of Object.values(projection.groups)) {
-    if (!ordered.some((candidate) => candidate.id === group.id)) ordered.push(group);
+  visit(rootNodeId);
+  if (includeUnreachable) {
+    for (const group of Object.values(projection.groups)) {
+      if (!ordered.some((candidate) => candidate.id === group.id)) ordered.push(group);
+    }
   }
   return ordered;
+}
+
+function groupBelongsToFloatingSurface(projection: WorkspaceProjection, groupId: string): boolean {
+  const groupNode = Object.values(projection.nodes).find(
+    (node) => node.kind === "group" && node.groupId === groupId,
+  );
+  if (groupNode === undefined) return false;
+  return (projection.floatingSurfaces ?? EMPTY_FLOATING_SURFACES).some((surface) =>
+    subtreeContainsNode(projection, surface.rootNodeId, groupNode.id),
+  );
+}
+
+function floatingSurfaceTitle(
+  surface: WorkspaceFloatingSurfaceView,
+  projection: WorkspaceProjection,
+  fallback: string,
+): string {
+  if (surface.label?.trim()) return surface.label;
+  const groups = orderedGroups(projection, surface.rootNodeId, false);
+  if (groups.length === 1) {
+    const group = groups[0];
+    const panel = group === undefined ? undefined : projection.panels[group.selectedPanelId];
+    return panel?.title ?? group?.label ?? fallback;
+  }
+  return groups[0]?.label ?? fallback;
+}
+
+function singlePanelFloatingGroupId(
+  surface: WorkspaceFloatingSurfaceView,
+  projection: WorkspaceProjection,
+): string | undefined {
+  const groups = orderedGroups(projection, surface.rootNodeId, false);
+  const group = groups.length === 1 ? groups[0] : undefined;
+  const panelId = group?.panelIds.length === 1 ? group.panelIds[0] : undefined;
+  return group !== undefined && panelId !== undefined && projection.panels[panelId] !== undefined
+    ? group.id
+    : undefined;
+}
+
+function floatingSurfaceSelectedPanelId(
+  surface: WorkspaceFloatingSurfaceView,
+  projection: WorkspaceProjection,
+): string | undefined {
+  return orderedGroups(projection, surface.rootNodeId, false).find(
+    (group) => projection.panels[group.selectedPanelId] !== undefined,
+  )?.selectedPanelId;
 }
 
 function defaultResultInterpreter<TCommand, TResult>(

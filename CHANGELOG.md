@@ -17,6 +17,10 @@ milestones, but no stable package-compatibility promise exists yet.
 - Same-strip pointer tab reordering with relational insertion anchors, exact visual markers,
   horizontal LTR/RTL and vertical-rail support, bounded overflow autoscroll, plus equivalent
   keyboard and menu routes.
+- Same-document floating-window projection with canonical z-order, bounded titlebar and edge/corner
+  manipulation, keyboard movement/resize, movable minimized headers, single-row chrome for sole-panel
+  windows, maximize/restore, redock controls, stable panel-host preservation, and surface-local
+  structural motion.
 
 ### Changed
 

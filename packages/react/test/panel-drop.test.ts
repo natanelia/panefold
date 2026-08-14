@@ -174,6 +174,101 @@ describe("panel drop geometry", () => {
     }
   });
 
+  it("plans floating targets against their containing surface instead of the main root", () => {
+    const floatingSurfaceRect = {
+      inlineStart: 840,
+      blockStart: 70,
+      inlineSize: 280,
+      blockSize: 190,
+    };
+    const floatingTarget = { ...floatingSurfaceRect, inlineSize: 137 };
+    const floatingSibling = { ...floatingSurfaceRect, inlineStart: 983, inlineSize: 137 };
+    const floatingProjection: WorkspaceProjection = {
+      ...projection,
+      nodes: {
+        ...projection.nodes,
+        "floating-root": {
+          kind: "split",
+          id: "floating-root",
+          axis: "inline",
+          childIds: ["floating-node", "floating-sibling-node"],
+          weights: [1, 1],
+        },
+        "floating-node": { kind: "group", id: "floating-node", groupId: "floating" },
+        "floating-sibling-node": {
+          kind: "group",
+          id: "floating-sibling-node",
+          groupId: "floating-sibling",
+        },
+      },
+      groups: {
+        ...projection.groups,
+        floating: {
+          id: "floating",
+          panelIds: ["delta"],
+          selectedPanelId: "delta",
+          label: "Floating",
+        },
+        "floating-sibling": {
+          id: "floating-sibling",
+          panelIds: ["epsilon"],
+          selectedPanelId: "epsilon",
+          label: "Floating sibling",
+        },
+      },
+      panels: {
+        ...projection.panels,
+        delta: { id: "delta", type: "fixture", title: "Delta" },
+        epsilon: { id: "epsilon", type: "fixture", title: "Epsilon" },
+      },
+      floatingSurfaces: [
+        {
+          id: "surface:floating",
+          rootNodeId: "floating-root",
+          bounds: { x: 840, y: 36, width: 280, height: 224 },
+          maximized: false,
+        },
+      ],
+    };
+    const floatingLayout: ResolvedLayout = {
+      ...layout,
+      nodeRects: {
+        ...layout.nodeRects,
+        "floating-root": floatingSurfaceRect,
+        "floating-node": floatingTarget,
+        "floating-sibling-node": floatingSibling,
+      },
+      groupRects: {
+        ...layout.groupRects,
+        floating: floatingTarget,
+        "floating-sibling": floatingSibling,
+      },
+    };
+    let receivedBounds: WorkspacePanelDropPlanContext["bounds"] | undefined;
+    const candidates = createPanelDropCandidates(
+      floatingProjection,
+      floatingLayout,
+      "alpha",
+      "ltr",
+      0.25,
+      0.5,
+      6,
+      undefined,
+      (request, context) => {
+        if (request.targetGroup.id !== "floating" || request.target.kind !== "center") {
+          return undefined;
+        }
+        receivedBounds = context.bounds;
+        return { command: "float-drop", previewRect: context.targetRect };
+      },
+    );
+
+    expect(candidates.find((candidate) => candidate.id === "center:floating-node")).toBeTruthy();
+    expect(receivedBounds).toEqual(floatingSurfaceRect);
+    expect(receivedBounds).not.toEqual(floatingTarget);
+    expect(receivedBounds).not.toEqual(layout.nodeRects[layout.rootNodeId]);
+  });
+
   it("delivers frozen revision-bound request and geometry context to application policy", () => {
     let receivedRequest: WorkspacePanelDropRequest | undefined;
     let receivedContext: WorkspacePanelDropPlanContext | undefined;
