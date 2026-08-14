@@ -383,7 +383,7 @@
       "verificationClass": "code-verifiable",
       "artifactRole": "source",
       "uri": "repo://packages/react/test/WorkspaceSurface.test.tsx",
-      "sha256": "780445f35413e6d3c56948ce2aacca02eea7c230f87b0f20bae314583cbf9e49",
+      "sha256": "c526b845458fb2ddfa571bf013d64a2b4e12434eb65f57f164b0f3e84a65f1bd",
       "producedAt": "2026-08-13T11:49:00Z",
       "requirementIds": [
         "A11Y-003",
@@ -759,7 +759,7 @@
       "verificationClass": "code-verifiable",
       "artifactRole": "source",
       "uri": "repo://packages/react/test/WorkspaceSurface.test.tsx",
-      "sha256": "780445f35413e6d3c56948ce2aacca02eea7c230f87b0f20bae314583cbf9e49",
+      "sha256": "c526b845458fb2ddfa571bf013d64a2b4e12434eb65f57f164b0f3e84a65f1bd",
       "producedAt": "2026-08-13T11:49:00Z",
       "requirementIds": [
         "I18N-001",
