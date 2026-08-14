@@ -35,8 +35,12 @@ export type FloatingManipulationEvent =
   | { readonly type: "SNAP_ACQUIRED"; readonly candidate: FloatingSnapCandidate }
   | { readonly type: "SNAP_RELEASED" }
   | { readonly type: "VIEWPORT_CHANGED"; readonly version: number }
-  | { readonly type: "POINTER_END" | "CAPTURE_LOST"; readonly pointerId: number }
+  | {
+      readonly type: "POINTER_END" | "POINTER_CANCEL" | "CAPTURE_LOST";
+      readonly pointerId: number;
+    }
   | { readonly type: "COMMIT_OK" | "SETTLED" | "CANCEL" | "RECOVERED" }
+  | { readonly type: "REVISION_CONFLICT" }
   | { readonly type: "COMMIT_ERROR"; readonly message: string };
 
 function validPosition(position: FloatingPosition): boolean {
@@ -87,9 +91,11 @@ export const floatingManipulationMachine = setup({
         ? { viewportVersion: event.version }
         : {},
     ),
-    fail: assign(({ event }) =>
-      event.type === "COMMIT_ERROR" ? { failure: event.message } : { failure: "cancelled" },
-    ),
+    fail: assign(({ event }) => {
+      if (event.type === "COMMIT_ERROR") return { failure: event.message };
+      if (event.type === "REVISION_CONFLICT") return { failure: "revision-conflict" };
+      return { failure: "cancelled" };
+    }),
     reset: assign({
       mode: undefined,
       pointerId: undefined,
@@ -122,6 +128,7 @@ export const floatingManipulationMachine = setup({
         SNAP_ACQUIRED: { target: "snapping", actions: "acquireSnap" },
         VIEWPORT_CHANGED: { actions: "updateViewport" },
         POINTER_END: { guard: "matchingPointer", target: "committing" },
+        POINTER_CANCEL: { guard: "matchingPointer", target: "recovering", actions: "fail" },
         CAPTURE_LOST: { guard: "matchingPointer", target: "recovering", actions: "fail" },
         CANCEL: { target: "recovering", actions: "fail" },
       },
@@ -133,6 +140,7 @@ export const floatingManipulationMachine = setup({
         SNAP_RELEASED: { target: "manipulating", actions: "releaseSnap" },
         VIEWPORT_CHANGED: { target: "manipulating", actions: ["updateViewport", "releaseSnap"] },
         POINTER_END: { guard: "matchingPointer", target: "committing" },
+        POINTER_CANCEL: { guard: "matchingPointer", target: "recovering", actions: "fail" },
         CAPTURE_LOST: { guard: "matchingPointer", target: "recovering", actions: "fail" },
         CANCEL: { target: "recovering", actions: "fail" },
       },
@@ -141,6 +149,7 @@ export const floatingManipulationMachine = setup({
       on: {
         COMMIT_OK: { target: "settling" },
         COMMIT_ERROR: { target: "recovering", actions: "fail" },
+        REVISION_CONFLICT: { target: "recovering", actions: "fail" },
         CANCEL: { target: "recovering", actions: "fail" },
       },
     },

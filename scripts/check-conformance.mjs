@@ -8,6 +8,7 @@ import {
 } from "../packages/conformance/dist/index.js";
 import { WORKSPACE_COMMAND_TYPES } from "../packages/model/dist/index.js";
 import { verifyRepositoryEvidence } from "./verify-repository-evidence.mjs";
+import { verifyProtocolCoverageResult } from "./verify-protocol-coverage.mjs";
 
 const readJson = async (path) => JSON.parse(await readFile(path, "utf8"));
 
@@ -21,6 +22,7 @@ const [
   gateDocument,
   publishedManifestSchema,
   packageManifestSchema,
+  protocolCoverageResult,
 ] = await Promise.all([
   readJson("conformance/manifest.json"),
   readJson("conformance/commands.json"),
@@ -31,6 +33,7 @@ const [
   readJson("conformance/gates.json"),
   readJson("conformance/manifest.schema.json"),
   readJson("packages/conformance/schema/manifest.schema.json"),
+  readJson("conformance/results/protocol-state-machine-coverage-2026-08-14.json"),
 ]);
 
 if (!isDeepStrictEqual(publishedManifestSchema, packageManifestSchema)) {
@@ -74,6 +77,7 @@ const artifactFailures = await verifyRepositoryEvidence(report.evidence, {
   // Every other currently referenced result must bind the source tree it executed.
   allowMissingResultSourceDigestIds: ["model-campaign-50000-result"],
 });
+artifactFailures.push(...verifyProtocolCoverageResult(protocolCoverageResult));
 artifactFailures.forEach((failure) => process.stderr.write(`${failure}\n`));
 
 if (report.status === "invalid" || artifactFailures.length > 0) {

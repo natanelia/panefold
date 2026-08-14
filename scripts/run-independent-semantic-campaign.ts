@@ -1,5 +1,8 @@
 import { performance } from "node:perf_hooks";
 
+// The evidence bundle runs after package builds and intentionally uses the
+// generated model entry point. Root TypeScript uses a narrow declaration shim
+// beside this runner because package dist files are excluded from its project.
 import {
   createDifferentialCampaign,
   type DifferentialCampaignReport,

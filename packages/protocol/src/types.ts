@@ -44,6 +44,15 @@ export interface ProtocolClock {
   now(): number;
 }
 
+/**
+ * Injectable one-shot scheduling boundary for protocol deadlines. Implementations
+ * must preserve registration order when multiple callbacks share a deadline.
+ */
+export interface ProtocolScheduler extends ProtocolClock {
+  setTimeout(callback: () => void, delayMs: number): unknown;
+  clearTimeout(handle: unknown): void;
+}
+
 export interface ProtocolScope {
   readonly signal: AbortSignal;
   close(reason?: unknown): void;

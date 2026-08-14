@@ -5,6 +5,60 @@ import process from "node:process";
 
 const SHA_256 = /^[a-f0-9]{64}$/u;
 
+const REQUIRED_RESULT_SOURCE_PATHS = Object.freeze({
+  "independent-semantic-oracle-result": Object.freeze([
+    "package.json",
+    "pnpm-lock.yaml",
+    "pnpm-workspace.yaml",
+    "tsconfig.json",
+    "tsconfig.base.json",
+    "vitest.config.ts",
+    "scripts/model-dist.d.ts",
+    "scripts/run-independent-semantic-campaign.ts",
+    "packages/kernel-optimized/package.json",
+    "packages/kernel-optimized/tsconfig.json",
+    "packages/kernel-optimized/src/benchmark.ts",
+    "packages/kernel-optimized/src/candidate-provenance.ts",
+    "packages/kernel-optimized/src/differential.ts",
+    "packages/kernel-optimized/src/history.ts",
+    "packages/kernel-optimized/src/index.ts",
+    "packages/kernel-optimized/src/indexes.ts",
+    "packages/kernel-optimized/src/independent-reducer.ts",
+    "packages/kernel-optimized/src/independent-workspace.ts",
+    "packages/kernel-optimized/src/persistent-bucket-map.ts",
+    "packages/kernel-optimized/src/projection.ts",
+    "packages/kernel-optimized/test/benchmark.test.ts",
+    "packages/kernel-optimized/test/differential.test.ts",
+    "packages/kernel-optimized/test/independent-reducer.test.ts",
+    "packages/kernel-optimized/test/persistent-bucket-map.test.ts",
+    "packages/kernel-optimized/test/projection.test.ts",
+    "packages/kernel-optimized/test/fixtures.ts",
+    "packages/kernel/package.json",
+    "packages/kernel/tsconfig.json",
+    "packages/kernel/src/canonicalize.ts",
+    "packages/kernel/src/diff.ts",
+    "packages/kernel/src/execute.ts",
+    "packages/kernel/src/hash.ts",
+    "packages/kernel/src/index.ts",
+    "packages/kernel/src/internal.ts",
+    "packages/kernel/src/invariants.ts",
+    "packages/kernel/src/patches.ts",
+    "packages/kernel/src/plan-panel-drop.ts",
+    "packages/kernel/src/reducer.ts",
+    "packages/model/package.json",
+    "packages/model/tsconfig.json",
+    "packages/model/src/commands.ts",
+    "packages/model/src/effects.ts",
+    "packages/model/src/entities.ts",
+    "packages/model/src/factories.ts",
+    "packages/model/src/ids.ts",
+    "packages/model/src/index.ts",
+    "packages/model/src/json.ts",
+    "packages/model/src/panel-registry.ts",
+    "packages/model/src/results.ts",
+  ]),
+});
+
 export async function verifyRepositoryEvidence(evidence, options = {}) {
   const failures = [];
   const root = await realpath(options.root ?? process.cwd());
@@ -69,6 +123,12 @@ async function verifyResultSourceDigests({
     failures.push(`Result sourceDigests for ${evidenceId} must be a non-empty JSON object.`);
     return;
   }
+  const requiredPaths = REQUIRED_RESULT_SOURCE_PATHS[evidenceId];
+  if (requiredPaths !== undefined && !sameStringSet(Object.keys(sourceDigests), requiredPaths)) {
+    failures.push(
+      `Result sourceDigests for ${evidenceId} must bind the exact reviewed source closure.`,
+    );
+  }
   for (const [sourcePath, expected] of Object.entries(sourceDigests)) {
     if (typeof expected !== "string" || !SHA_256.test(expected)) {
       failures.push(
@@ -130,4 +190,8 @@ function escapesRoot(pathFromRoot) {
 
 function digest(bytes) {
   return createHash("sha256").update(bytes).digest("hex");
+}
+
+function sameStringSet(left, right) {
+  return left.length === right.length && left.every((value) => right.includes(value));
 }

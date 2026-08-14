@@ -72,6 +72,8 @@
       "evidenceIds": [
         "protocol-models",
         "protocol-actor-catalog",
+        "protocol-state-machine-coverage-source",
+        "protocol-state-machine-coverage-result",
         "motion-primitives",
         "motion-lifecycle",
         "protocol-motion-decision",
@@ -79,7 +81,7 @@
         "react-integration"
       ],
       "limitations": [
-        "No physical 60/120 Hz traces or complete platform interaction certification"
+        "The exhaustive headless actor result is not browser timer, operating-system, process-crash, physical 60/120 Hz, or complete platform interaction certification"
       ]
     },
     {

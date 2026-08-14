@@ -1745,14 +1745,15 @@
     {
       "requirementId": "TST-003",
       "profileId": "compact-react-chromium-desktop",
-      "status": "unresolved",
+      "status": "verified",
       "verificationClass": "code-verifiable",
       "evidenceIds": [
         "protocol-models",
         "protocol-actor-catalog",
-        "protocol-motion-result"
+        "protocol-state-machine-coverage-source",
+        "protocol-state-machine-coverage-result"
       ],
-      "rationale": "The repository implementation or its requirement-specific static/model proof is incomplete for this profile."
+      "rationale": "Covered by repository-local automated evidence for this experimental profile."
     },
     {
       "requirementId": "TST-004",
@@ -3359,10 +3360,10 @@
     {
       "requirementId": "TST-003",
       "profileId": "framework-adapter-contract-jsdom",
-      "status": "unresolved",
-      "verificationClass": "code-verifiable",
+      "status": "not-applicable",
+      "verificationClass": "future-scope",
       "evidenceIds": [],
-      "rationale": "The repository implementation or its requirement-specific static/model proof is incomplete for this profile."
+      "rationale": "The framework store/lifecycle contract profile does not publish the bounded protocol actors governed by this requirement."
     },
     {
       "requirementId": "TST-004",

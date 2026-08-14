@@ -34,6 +34,9 @@
     "security:check": "node scripts/security-check.mjs",
     "publication:check": "node scripts/check-workspace-publication.mjs",
     "performance:smoke": "node scripts/performance-smoke.mjs",
+    "protocol:coverage:build": "pnpm --filter @panefold/model --filter @panefold/protocol --filter @panefold/protocol-xstate run build",
+    "protocol:coverage:generate": "pnpm protocol:coverage:build && node scripts/run-protocol-coverage.mjs --write",
+    "protocol:coverage:check": "pnpm protocol:coverage:build && node scripts/run-protocol-coverage.mjs --check",
     "marketing:capture": "node scripts/capture-marketing-video.mjs",
     "marketing:social": "node scripts/capture-social-card.mjs",
     "requirements:generate": "node scripts/generate-requirements.mjs",
@@ -45,7 +48,7 @@
     "architecture:check": "depcruise packages --config .dependency-cruiser.cjs",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
-    "check": "pnpm format:check && pnpm lint && pnpm security:check && pnpm publication:check && pnpm requirements:check && pnpm conformance:data:check && pnpm build:packages && pnpm docs:claims:check && pnpm conformance:check && pnpm performance:smoke && tsc --noEmit -p tsconfig.json && vitest run && pnpm build:site"
+    "check": "pnpm format:check && pnpm lint && pnpm security:check && pnpm publication:check && pnpm requirements:check && pnpm conformance:data:check && pnpm build:packages && pnpm protocol:coverage:check && pnpm docs:claims:check && pnpm conformance:check && pnpm performance:smoke && tsc --noEmit -p tsconfig.json && vitest run && pnpm build:site"
   },
   "devDependencies": {
     "@eslint/js": "10.0.1",
