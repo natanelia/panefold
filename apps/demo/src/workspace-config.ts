@@ -7,6 +7,7 @@ import {
   nodeId,
   panelId,
   surfaceId,
+  type BatchableWorkspaceCommand,
   type GroupRecord,
   type LayoutNode,
   type PanelCapabilities,
@@ -226,7 +227,18 @@ export function projectWorkspace(snapshot: WorkspaceSnapshot): WorkspaceProjecti
     };
   }
 
-  const reachableNodeIds = collectReachableNodeIds(snapshot, mainSurface.rootNodeId);
+  const floatingSurfaces = snapshot.floatingOrder.flatMap((id) => {
+    const surface = getEntity(snapshot.surfaces, id);
+    return surface?.kind === "floating" && surface.bounds !== undefined
+      ? [{ ...surface, bounds: surface.bounds }]
+      : [];
+  });
+  const reachableNodeIds = [
+    mainSurface.rootNodeId,
+    ...floatingSurfaces.map((item) => item.rootNodeId),
+  ]
+    .flatMap((rootNodeId) => collectReachableNodeIds(snapshot, rootNodeId))
+    .filter((id, index, all) => all.indexOf(id) === index);
   const reachableGroupIds = new Set<string>();
   const projectedNodes: Record<string, WorkspaceProjection["nodes"][string]> = {};
   for (const id of reachableNodeIds) {
@@ -283,6 +295,13 @@ export function projectWorkspace(snapshot: WorkspaceSnapshot): WorkspaceProjecti
     nodes: projectedNodes,
     groups: projectedGroups,
     panels: projectedPanels,
+    floatingSurfaces: floatingSurfaces.map((surface) => ({
+      id: String(surface.id),
+      rootNodeId: String(surface.rootNodeId),
+      bounds: surface.bounds,
+      maximized: surface.maximized,
+      ...(surface.minimized === undefined ? {} : { minimized: surface.minimized }),
+    })),
     ...(snapshot.activation.activePanelId === undefined
       ? {}
       : { activePanelId: String(snapshot.activation.activePanelId) }),
@@ -363,8 +382,148 @@ export function createDemoCommands(
             ],
           };
     },
+    floatPanel: (id) => createDemoFloatPanelCommand(getSnapshot(), id),
+    moveFloatingSurface: (id, position) =>
+      createDemoFloatingBatch(getSnapshot(), id, [
+        { type: "move-floating-surface", surfaceId: surfaceId(id), ...position },
+      ]),
+    resizeFloatingSurface: (id, bounds) =>
+      createDemoFloatingBatch(getSnapshot(), id, [
+        { type: "resize-floating-surface", surfaceId: surfaceId(id), bounds },
+      ]),
+    raiseFloatingSurface: (id) => createDemoFloatingBatch(getSnapshot(), id, []),
+    maximizeFloatingSurface: (id) =>
+      createDemoFloatingBatch(getSnapshot(), id, [
+        { type: "maximize-surface", surfaceId: surfaceId(id) },
+      ]),
+    restoreFloatingSurface: (id) =>
+      createDemoFloatingBatch(getSnapshot(), id, [
+        { type: "restore-surface", surfaceId: surfaceId(id) },
+      ]),
+    minimizeFloatingSurface: (id) => ({
+      type: "minimize-surface",
+      surfaceId: surfaceId(id),
+    }),
+    redockFloatingSurface: (id) => ({
+      type: "redock-surface",
+      surfaceId: surfaceId(id),
+      target: { groupId: demoRedockTarget(getSnapshot()) },
+    }),
     planPanelDrop: (request, context) => planDemoPanelDrop(getSnapshot(), request, context),
   };
+}
+
+function createDemoFloatingBatch(
+  snapshot: WorkspaceSnapshot,
+  surfaceIdValue: string,
+  commands: readonly BatchableWorkspaceCommand[],
+): WorkspaceCommand {
+  const selectedPanelId = demoFloatingSelectedPanel(snapshot, surfaceIdValue);
+  return {
+    type: "batch",
+    commands: [
+      ...commands,
+      { type: "raise-surface", surfaceId: surfaceId(surfaceIdValue) },
+      ...(selectedPanelId === undefined
+        ? []
+        : [
+            {
+              type: "activate-panel" as const,
+              panelId: selectedPanelId,
+              focus: "keep-focus" as const,
+            },
+          ]),
+    ],
+  };
+}
+
+function demoFloatingSelectedPanel(snapshot: WorkspaceSnapshot, surfaceIdValue: string) {
+  const surface = getEntity(snapshot.surfaces, surfaceId(surfaceIdValue));
+  if (surface?.kind !== "floating") return undefined;
+  for (const id of collectReachableNodeIds(snapshot, surface.rootNodeId)) {
+    const node = getEntity(snapshot.nodes, id);
+    if (node?.kind !== "group") continue;
+    return getEntity(snapshot.groups, node.groupId)?.selectedPanelId;
+  }
+  return undefined;
+}
+
+function createDemoFloatPanelCommand(
+  snapshot: WorkspaceSnapshot,
+  panelIdValue: string,
+): WorkspaceCommand {
+  const sourceGroup = snapshot.groups.ids
+    .map((id) => getEntity(snapshot.groups, id))
+    .find((group) => group?.panelIds.includes(panelId(panelIdValue)));
+  const ids = allocateFloatingIds(snapshot, panelIdValue);
+  const offset = snapshot.floatingOrder.length * 28;
+  const bounds = {
+    x: 48 + (offset % 224),
+    y: 42 + (offset % 168),
+    width: 480,
+    height: 340,
+  };
+  if (sourceGroup === undefined || sourceGroup.panelIds.length <= 1) {
+    return {
+      type: "create-floating-surface",
+      groupId: sourceGroup?.id ?? groupId(`missing:${panelIdValue}`),
+      surfaceId: ids.surface,
+      bounds,
+    };
+  }
+  return {
+    type: "batch",
+    commands: [
+      {
+        type: "split-group",
+        targetGroupId: sourceGroup.id,
+        panelIds: [panelId(panelIdValue)],
+        newGroupId: ids.group,
+        newGroupNodeId: ids.groupNode,
+        splitNodeId: ids.splitNode,
+        edge: "inline-end",
+        ratio: 0.5,
+        ...(sourceGroup.region === undefined ? {} : { region: sourceGroup.region }),
+      },
+      {
+        type: "create-floating-surface",
+        groupId: ids.group,
+        surfaceId: ids.surface,
+        bounds,
+      },
+    ],
+  };
+}
+
+function demoRedockTarget(snapshot: WorkspaceSnapshot) {
+  const mainSurface = snapshot.surfaces.ids
+    .map((id) => getEntity(snapshot.surfaces, id))
+    .find((surface) => surface?.kind === "main");
+  if (mainSurface === undefined) return groupId("primary");
+  const groups = collectReachableNodeIds(snapshot, mainSurface.rootNodeId).flatMap((id) => {
+    const node = getEntity(snapshot.nodes, id);
+    return node?.kind === "group" ? [node.groupId] : [];
+  });
+  return groups.find((id) => String(id) === "primary") ?? groups[0] ?? groupId("primary");
+}
+
+function allocateFloatingIds(snapshot: WorkspaceSnapshot, panelIdValue: string) {
+  for (let candidate = 1; candidate < Number.MAX_SAFE_INTEGER; candidate += 1) {
+    const suffix = `${panelIdValue}:${String(candidate)}`;
+    const group = groupId(`float-group:${suffix}`);
+    const groupNode = nodeId(`float-node:${suffix}`);
+    const splitNode = nodeId(`float-split:${suffix}`);
+    const surface = surfaceId(`floating:${suffix}`);
+    if (
+      getEntity(snapshot.groups, group) === undefined &&
+      getEntity(snapshot.nodes, groupNode) === undefined &&
+      getEntity(snapshot.nodes, splitNode) === undefined &&
+      getEntity(snapshot.surfaces, surface) === undefined
+    ) {
+      return Object.freeze({ group, groupNode, splitNode, surface });
+    }
+  }
+  throw new Error(`No floating identity remains available for panel ${panelIdValue}`);
 }
 
 function planDemoPanelDrop(
@@ -403,16 +562,25 @@ function planDemoPanelDrop(
   if (!reduced.ok) return undefined;
   const next = canonicalizeWorkspace(reduced.snapshot).snapshot;
   if (validateWorkspace(next).length > 0) return undefined;
-  const mainSurface = next.surfaces.ids
-    .map((id) => getEntity(next.surfaces, id))
-    .find((surface) => surface?.kind === "main");
   const resultingGroups = next.groups.ids
     .map((id) => getEntity(next.groups, id))
     .filter((group) => group?.panelIds.includes(panelId(request.panel.id)));
-  if (mainSurface === undefined || resultingGroups.length !== 1) return undefined;
+  if (resultingGroups.length !== 1) return undefined;
   const resultingGroup = resultingGroups[0];
   if (resultingGroup === undefined) return undefined;
-  const layout = solveLayout(next, mainSurface.rootNodeId, context.bounds, {
+  const resultingNode = next.nodes.ids
+    .map((id) => getEntity(next.nodes, id))
+    .find((node) => node?.kind === "group" && node.groupId === resultingGroup.id);
+  const resultingSurface = next.surfaces.ids
+    .map((id) => getEntity(next.surfaces, id))
+    .find(
+      (surface) =>
+        surface !== undefined &&
+        resultingNode !== undefined &&
+        collectReachableNodeIds(next, surface.rootNodeId).includes(resultingNode.id),
+    );
+  if (resultingSurface === undefined) return undefined;
+  const layout = solveLayout(next, resultingSurface.rootNodeId, context.bounds, {
     splitterSize: context.splitterSize,
   });
   const previewRect = layout.groupRects[String(resultingGroup.id)];

@@ -30,6 +30,8 @@ export type {
   WorkspaceExternalPanelOutcome,
   WorkspaceExternalPanelPosition,
   WorkspaceExternalPanelRequest,
+  WorkspaceFloatingBounds,
+  WorkspaceFloatingSurfaceView,
   WorkspaceLogicalEdge,
   WorkspaceNodeView,
   WorkspacePanelDefinition,

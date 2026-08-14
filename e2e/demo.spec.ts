@@ -696,6 +696,142 @@ test("split menu, vertical rails, icon-only tabs, and pointer splitter remain us
     .toBeGreaterThan(beforeWidth + 45);
 });
 
+test("floats, moves, resizes, minimizes, maximizes, restores, and redocks a live panel", async ({
+  page,
+}) => {
+  await page.addInitScript(() => {
+    const animate = Element.prototype.animate;
+    Element.prototype.animate = function (...args) {
+      if (
+        this.hasAttribute("data-workspace-node") &&
+        this.closest("[data-workspace-floating-surface]") !== null
+      ) {
+        const root = this.ownerDocument.documentElement;
+        const count = Number(root.dataset.floatingNodeAnimationCount ?? "0");
+        root.dataset.floatingNodeAnimationCount = String(count + 1);
+      }
+      return animate.apply(this, args);
+    };
+  });
+  await page.goto("/");
+  await page.getByRole("tab", { name: "workspace.ts" }).click();
+  const notesHost = page.locator('[data-workspace-panel-host="notes"]');
+  const hostId = await notesHost.getAttribute("id");
+  const editor = notesHost.getByRole("textbox", { name: "workspace.ts editor" });
+  await editor.fill("Floating state remains live.");
+  const beforeFloat = await revisionOf(page);
+
+  await page.getByRole("button", { name: "Actions for workspace.ts" }).click();
+  await page.getByRole("menuitem", { name: "Float workspace.ts" }).click();
+
+  const frame = page.locator('[data-workspace-floating-surface^="floating:notes:"]');
+  await expect(frame).toBeVisible();
+  await expect(frame).toHaveAttribute("data-compact-header", "true");
+  await expect(frame.locator(".pf-floating-titlebar .pf-tab-strip")).toBeVisible();
+  await frame.getByRole("button", { name: "Actions for workspace.ts" }).click();
+  await expect(frame.getByRole("menu", { name: "workspace.ts actions" })).toBeVisible();
+  await page.keyboard.press("Escape");
+  await expect.poll(() => revisionOf(page)).toBe(beforeFloat + 1);
+  await expect(frame.locator('[data-workspace-panel-host="notes"]')).toHaveAttribute(
+    "id",
+    hostId ?? "",
+  );
+  await expect(editor).toHaveValue("Floating state remains live.");
+
+  await page.evaluate(() => {
+    document.documentElement.dataset.floatingNodeAnimationCount = "0";
+  });
+  const initialFrame = await requiredBox(frame);
+  const titlebar = frame.getByLabel("Move workspace.ts floating window");
+  const dragRegionBox = await requiredBox(frame.locator(".pf-floating-header-drag-region"));
+  await page.mouse.move(
+    dragRegionBox.x + dragRegionBox.width / 2,
+    dragRegionBox.y + dragRegionBox.height / 2,
+  );
+  await page.mouse.down();
+  await page.mouse.move(
+    dragRegionBox.x + dragRegionBox.width / 2 + 60,
+    dragRegionBox.y + dragRegionBox.height / 2 + 45,
+    { steps: 8 },
+  );
+  await page.mouse.up();
+  await expect
+    .poll(async () => {
+      const moved = await requiredBox(frame);
+      return { x: Math.round(moved.x), y: Math.round(moved.y) };
+    })
+    .toEqual({ x: Math.round(initialFrame.x + 60), y: Math.round(initialFrame.y + 45) });
+  expect(
+    await page.evaluate(() => document.documentElement.dataset.floatingNodeAnimationCount),
+  ).toBe("0");
+
+  const beforeResize = await requiredBox(frame);
+  const resizeHandle = frame.locator('[data-resize-edge="bottom-right"]');
+  const resizeBox = await requiredBox(resizeHandle);
+  await page.mouse.move(resizeBox.x + resizeBox.width / 2, resizeBox.y + resizeBox.height / 2);
+  await page.mouse.down();
+  await page.mouse.move(
+    resizeBox.x + resizeBox.width / 2 + 42,
+    resizeBox.y + resizeBox.height / 2 + 30,
+    { steps: 8 },
+  );
+  await page.mouse.up();
+  await expect
+    .poll(async () => {
+      const resized = await requiredBox(frame);
+      return { width: Math.round(resized.width), height: Math.round(resized.height) };
+    })
+    .toEqual({
+      width: Math.round(beforeResize.width + 42),
+      height: Math.round(beforeResize.height + 30),
+    });
+
+  await frame.getByRole("button", { name: "Maximize workspace.ts floating window" }).click();
+  await expect(frame).toHaveAttribute("data-maximized", "true");
+  const workspaceBounds = await requiredBox(page.getByLabel("Panefold Code workbench"));
+  await expectRectToSettle(workspaceBounds, frame);
+  await frame.getByRole("button", { name: "Restore workspace.ts floating window" }).click();
+
+  await frame.getByRole("button", { name: "Minimize workspace.ts floating window" }).click();
+  await expect(frame).toHaveAttribute("data-minimized", "true");
+  await expect(notesHost).toBeHidden();
+  await expect(frame.locator("[data-resize-edge]")).toHaveCount(0);
+  const minimizedBeforeMove = await requiredBox(frame);
+  const minimizedTitlebar = await requiredBox(titlebar);
+  await page.mouse.move(
+    minimizedTitlebar.x + 60,
+    minimizedTitlebar.y + minimizedTitlebar.height / 2,
+  );
+  await page.mouse.down();
+  await page.mouse.move(
+    minimizedTitlebar.x + 100,
+    minimizedTitlebar.y + minimizedTitlebar.height / 2 + 25,
+    { steps: 8 },
+  );
+  await page.mouse.up();
+  await expect
+    .poll(async () => {
+      const moved = await requiredBox(frame);
+      return { x: Math.round(moved.x), y: Math.round(moved.y) };
+    })
+    .toEqual({
+      x: Math.round(minimizedBeforeMove.x + 40),
+      y: Math.round(minimizedBeforeMove.y + 25),
+    });
+  await frame.getByRole("button", { name: "Restore workspace.ts floating window" }).click();
+  await expect(editor).toHaveValue("Floating state remains live.");
+
+  await frame.getByRole("button", { name: "Dock workspace.ts in the workspace" }).click();
+  await expect(frame).toHaveCount(0);
+  const redockedNotes = page.locator(
+    '[data-workspace-group="primary"] [data-workspace-panel-tab="notes"]',
+  );
+  await expect(redockedNotes).toBeVisible();
+  await expect(notesHost).toHaveAttribute("id", hostId ?? "");
+  await redockedNotes.click();
+  await expect(editor).toHaveValue("Floating state remains live.");
+});
+
 test("persists canonical panel configuration and view preferences across reload", async ({
   page,
 }) => {

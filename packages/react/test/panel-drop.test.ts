@@ -174,6 +174,64 @@ describe("panel drop geometry", () => {
     }
   });
 
+  it("plans floating targets against their containing surface instead of the main root", () => {
+    const floatingTarget = { inlineStart: 840, blockStart: 70, inlineSize: 280, blockSize: 190 };
+    const floatingProjection: WorkspaceProjection = {
+      ...projection,
+      nodes: {
+        ...projection.nodes,
+        "floating-node": { kind: "group", id: "floating-node", groupId: "floating" },
+      },
+      groups: {
+        ...projection.groups,
+        floating: {
+          id: "floating",
+          panelIds: ["delta"],
+          selectedPanelId: "delta",
+          label: "Floating",
+        },
+      },
+      panels: {
+        ...projection.panels,
+        delta: { id: "delta", type: "fixture", title: "Delta" },
+      },
+      floatingSurfaces: [
+        {
+          id: "surface:floating",
+          rootNodeId: "floating-node",
+          bounds: { x: 840, y: 36, width: 280, height: 224 },
+          maximized: false,
+        },
+      ],
+    };
+    const floatingLayout: ResolvedLayout = {
+      ...layout,
+      nodeRects: { ...layout.nodeRects, "floating-node": floatingTarget },
+      groupRects: { ...layout.groupRects, floating: floatingTarget },
+    };
+    let receivedBounds: WorkspacePanelDropPlanContext["bounds"] | undefined;
+    const candidates = createPanelDropCandidates(
+      floatingProjection,
+      floatingLayout,
+      "alpha",
+      "ltr",
+      0.25,
+      0.5,
+      6,
+      undefined,
+      (request, context) => {
+        if (request.targetGroup.id !== "floating" || request.target.kind !== "center") {
+          return undefined;
+        }
+        receivedBounds = context.bounds;
+        return { command: "float-drop", previewRect: context.targetRect };
+      },
+    );
+
+    expect(candidates.find((candidate) => candidate.id === "center:floating-node")).toBeTruthy();
+    expect(receivedBounds).toEqual(floatingTarget);
+  });
+
   it("delivers frozen revision-bound request and geometry context to application policy", () => {
     let receivedRequest: WorkspacePanelDropRequest | undefined;
     let receivedContext: WorkspacePanelDropPlanContext | undefined;

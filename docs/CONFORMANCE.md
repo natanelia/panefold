@@ -73,8 +73,10 @@ the command output.
   save/reload/restore evidence, live same-origin popup transfer/redock/loss recovery, LTR/RTL resize,
   motion preference, stable-host lifecycle, all 17 panel classes, forced colors, touch projection,
   same-strip reorder in horizontal LTR, horizontal RTL, and vertical rails, bounded LTR/RTL
-  overflow autoscroll, one-action populated and empty panel-container removal, and raw
-  splitter-frame capture. The checked-in result records 28/28 passing browser tasks.
+  overflow autoscroll, one-action populated and empty panel-container removal, same-document
+  floating move/resize/minimize/maximize/restore/redock with compact sole-panel chrome, movable
+  minimized headers, stable live panel state, and raw splitter-frame capture. The checked-in result
+  records 29/29 passing browser tasks.
 - The framework JSDOM contract passed 20/20 tests across Vue, Svelte, Angular, and Web Components.
 - The compact headless protocol result matches the reviewed graphs for all 12 Appendix-C actors:
   84/84 states, 258/258 transition branches, both outcomes for 64/64 guarded branches, and 146/146
@@ -84,7 +86,7 @@ the command output.
   primary and byte-equivalent replay runs plus 12 cancelled twins, with zero pending handles. This
   is code evidence, not browser/OS/process failure certification or the per-panel final-authority
   matrix required by `TST-009`.
-- Protocol/motion validation passed 86/86 focused tests plus 72/72 React integration tests. It
+- Protocol/motion validation passed 86/86 focused tests plus 92/92 React integration tests. It
   covers the twelve-actor catalog, cancellation/revision conflicts, disposable motion leases,
   progressive View Transition fallback, and deterministic load degradation; these focused tests
   supplement rather than substitute for the exact graph result above.

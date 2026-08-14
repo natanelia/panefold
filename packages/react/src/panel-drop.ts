@@ -131,7 +131,8 @@ export function createPanelDropCandidates<TCommand = unknown>(
       continue;
     }
 
-    const acquisitionRect = emptyGroupAcquisitionRect(group, rect, bounds);
+    const targetSurfaceBounds = surfaceLayoutBoundsForNode(projection, layout, node.id) ?? bounds;
+    const acquisitionRect = emptyGroupAcquisitionRect(group, rect, targetSurfaceBounds);
     if (acquisitionRect.inlineSize <= 0 || acquisitionRect.blockSize <= 0) continue;
 
     // Empty retained groups are destinations, not useful split anchors. Give
@@ -143,7 +144,14 @@ export function createPanelDropCandidates<TCommand = unknown>(
         ratio: 1,
       });
       if (request === undefined) continue;
-      const plan = planPanelDrop(planDrop, request, rect, layout, splitterSize);
+      const plan = planPanelDrop(
+        planDrop,
+        request,
+        rect,
+        layout,
+        splitterSize,
+        targetSurfaceBounds,
+      );
       if (plan === undefined) continue;
       candidates.push({
         id: `center:${node.id}`,
@@ -168,7 +176,14 @@ export function createPanelDropCandidates<TCommand = unknown>(
           ratio: 1,
         });
         if (request === undefined) continue;
-        const plan = planPanelDrop(planDrop, request, rect, layout, splitterSize);
+        const plan = planPanelDrop(
+          planDrop,
+          request,
+          rect,
+          layout,
+          splitterSize,
+          targetSurfaceBounds,
+        );
         if (plan === undefined) continue;
         candidates.push({
           id: `center:${node.id}`,
@@ -194,7 +209,14 @@ export function createPanelDropCandidates<TCommand = unknown>(
         ratio: clampRatio(splitRatio),
       });
       if (request === undefined) continue;
-      const plan = planPanelDrop(planDrop, request, rect, layout, splitterSize);
+      const plan = planPanelDrop(
+        planDrop,
+        request,
+        rect,
+        layout,
+        splitterSize,
+        targetSurfaceBounds,
+      );
       if (plan === undefined) continue;
       candidates.push({
         id: `edge:${node.id}:${target.edge}`,
@@ -222,9 +244,10 @@ export function planPanelDrop<TCommand>(
   targetRect: LogicalRect,
   layout: ResolvedLayout,
   splitterSize: number,
+  targetSurfaceBounds?: LogicalRect,
 ): WorkspacePanelDropPlan<TCommand> | undefined {
   if (planner === undefined) return undefined;
-  const bounds = layout.nodeRects[layout.rootNodeId];
+  const bounds = targetSurfaceBounds ?? layout.nodeRects[layout.rootNodeId];
   if (bounds === undefined) return undefined;
   const context = Object.freeze({
     bounds: Object.freeze({ ...bounds }),
@@ -313,6 +336,20 @@ export function nodeForGroup(projection: WorkspaceProjection, groupId: string): 
   )?.id;
 }
 
+/** Resolve the root geometry of the same-document surface containing a node. */
+export function surfaceLayoutBoundsForNode(
+  projection: WorkspaceProjection,
+  layout: ResolvedLayout,
+  nodeId: string,
+): LogicalRect | undefined {
+  for (const surface of projection.floatingSurfaces ?? []) {
+    if (subtreeContainsNode(projection, surface.rootNodeId, nodeId)) {
+      return layout.nodeRects[surface.rootNodeId];
+    }
+  }
+  return layout.nodeRects[layout.rootNodeId];
+}
+
 export function panelsForGroup(
   projection: WorkspaceProjection,
   group: WorkspaceGroupView,
@@ -383,6 +420,22 @@ function freezeDropRequest(request: WorkspacePanelDropRequest): WorkspacePanelDr
 
 function compareCodeUnits(left: string, right: string): number {
   return left < right ? -1 : left > right ? 1 : 0;
+}
+
+function subtreeContainsNode(
+  projection: WorkspaceProjection,
+  rootNodeId: string,
+  targetNodeId: string,
+  visited = new Set<string>(),
+): boolean {
+  if (rootNodeId === targetNodeId) return true;
+  if (visited.has(rootNodeId)) return false;
+  visited.add(rootNodeId);
+  const root = projection.nodes[rootNodeId];
+  return (
+    root?.kind === "split" &&
+    root.childIds.some((childId) => subtreeContainsNode(projection, childId, targetNodeId, visited))
+  );
 }
 
 function expandedAxis(

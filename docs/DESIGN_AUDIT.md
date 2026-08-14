@@ -293,12 +293,18 @@ complete Appendix G action set is covered.
 | `resize-split`               | Pointer splitter, keyboard splitter, programmatic adapter                        | No discrepancy for the declared routes.                                                                 |
 | `close-panels`               | Pointer close control, keyboard Delete/control activation, programmatic adapter  | No menu or command-palette route is claimed.                                                            |
 | `create-floating-surface`    | Optional menu action and core/programmatic command                               | No direct pointer route is claimed.                                                                     |
+| `move-floating-surface`      | Pointer titlebar drag, keyboard titlebar step, programmatic adapter              | Snap and tile routes are not claimed.                                                                   |
+| `resize-floating-surface`    | Pointer edge/corner drag, keyboard corner step, programmatic adapter             | Product-specific panel constraints remain application policy.                                           |
+| `raise-surface`              | Pointer activation, keyboard titlebar activation, programmatic adapter           | Platform window z-order is outside this in-page route.                                                  |
+| `maximize-surface`           | Pointer/keyboard control and programmatic adapter                                | Uses the current in-page workspace viewport.                                                            |
+| `restore-surface`            | Pointer/keyboard control and programmatic adapter                                | Restores minimized or maximized in-page state.                                                          |
+| `minimize-surface`           | Pointer/keyboard control and programmatic adapter                                | Minimized presentation remains in-page rather than an OS taskbar.                                       |
+| `redock-surface`             | Pointer/keyboard control and application-selected programmatic placement         | The application adapter owns the semantic target; external redock still uses ownership evidence.        |
 | `transfer-to-browser-window` | Pointer outside release, keyboard/menu action, application programmatic command  | The controlled same-origin Atlas profile is narrower than the generic core command.                     |
 
-Core-only floating movement/resize, surface state, move-group, and general redock commands are now
-omitted instead of being presented as renderer features. The inventory still does not cover all
-actions in Appendix G, such as reopen, merge, focus-next-group, switcher, undo, and preset
-application. The durable remaining fix is a renderer-owned route inventory generated from public
+Core-only move-group remains omitted instead of being presented as a renderer feature. The inventory
+still does not cover all actions in Appendix G, such as reopen, merge, focus-next-group, switcher,
+undo, and preset application. The durable remaining fix is a renderer-owned route inventory generated from public
 capabilities and route-specific tests; corrected declaration strings alone are not sufficient.
 
 ## Genuine remaining gaps
