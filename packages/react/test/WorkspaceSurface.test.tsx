@@ -2196,6 +2196,69 @@ describe("WorkspaceSurface", () => {
     }
   });
 
+  it.each([
+    {
+      boundary: "right in LTR",
+      direction: "ltr" as const,
+      clientX: 1000,
+      clientY: 350,
+      edge: "inline-end" as const,
+    },
+    {
+      boundary: "left in RTL",
+      direction: "rtl" as const,
+      clientX: 0,
+      clientY: 350,
+      edge: "inline-end" as const,
+    },
+    {
+      boundary: "bottom",
+      direction: "ltr" as const,
+      clientX: 750,
+      clientY: 700,
+      edge: "block-end" as const,
+    },
+  ])(
+    "keeps the exact physical $boundary boundary available for an edge drop",
+    async ({ direction, clientX, clientY, edge }) => {
+      const runtime = new FixtureRuntime(initialProjection);
+      const view = renderWorkspace(runtime, { commands: directManipulationCommands, direction });
+      const alpha = await screen.findByRole("tab", { name: "Alpha" });
+      installPointerCapture(alpha);
+
+      fireEvent.pointerDown(alpha, { button: 0, pointerId: 62, clientX: 100, clientY: 20 });
+      fireEvent.pointerMove(alpha, { pointerId: 62, clientX, clientY });
+      const overlay = await waitForElement(view.container, "[data-workspace-panel-drag]");
+      expect(overlay.dataset.workspaceDropKind).toBe("edge");
+      expect(overlay.dataset.workspaceDropEdge).toBe(edge);
+      expect(overlay.dataset.workspaceDropTarget).toBe(`edge:right-node:${edge}`);
+
+      fireEvent.pointerUp(alpha, { pointerId: 62, clientX, clientY });
+      expect(runtime.transactions).toHaveLength(1);
+      const command = runtime.lastCommand;
+      expect(command?.type).toBe("drop");
+      if (command?.type === "drop") {
+        expect(command.request.target).toEqual({ kind: "edge", edge, ratio: 0.5 });
+      }
+    },
+  );
+
+  it("falls back to an external target at an exact boundary without an internal drop plan", async () => {
+    const runtime = new FixtureRuntime(initialProjection);
+    const view = renderWorkspace(runtime, {
+      onExternalPanelRequest: () => ({ status: "rejected" }),
+    });
+    const alpha = await screen.findByRole("tab", { name: "Alpha" });
+    installPointerCapture(alpha);
+
+    fireEvent.pointerDown(alpha, { button: 0, pointerId: 63, clientX: 100, clientY: 20 });
+    fireEvent.pointerMove(alpha, { pointerId: 63, clientX: 1000, clientY: 350 });
+    const overlay = await waitForElement(view.container, "[data-workspace-panel-drag]");
+    expect(overlay.dataset.workspaceDropKind).toBe("external");
+
+    fireEvent.pointerCancel(alpha, { pointerId: 63, clientX: 1000, clientY: 350 });
+  });
+
   it("commits the exact command retained by the application preview plan", async () => {
     const runtime = new FixtureRuntime(initialProjection);
     let plannedCommand: FixtureCommand | undefined;

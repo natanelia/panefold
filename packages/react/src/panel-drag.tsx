@@ -365,9 +365,10 @@ export function usePanelDrag<TCommand>(
         return;
       }
       const rootRect = session.rootRect;
+      const positionOutside = outside(session.current, rootRect);
       const autoScrolled = Boolean(
         allowAutoScroll &&
-        !outside(session.current, rootRect) &&
+        !positionOutside &&
         autoScrollTabStrip(
           session.reorderScrollElement,
           session.reorderIndex?.orientation,
@@ -380,16 +381,7 @@ export function usePanelDrag<TCommand>(
       const scrollChanged = session.reorderScrollChanged;
       session.reorderScrollChanged = false;
       let target: ActiveCandidate<TCommand> | undefined;
-      if (outside(session.current, rootRect)) {
-        target = {
-          kind: "external",
-          id: "external",
-          label: options.externalAvailable
-            ? options.messages.openPanelInNewWindow({ title: session.panel.title })
-            : options.messages.newWindowUnavailable(),
-          available: options.externalAvailable,
-        };
-      } else {
+      if (!positionOutside) {
         const reorderIndex = session.reorderIndex;
         const reorderCandidate =
           reorderIndex === undefined
@@ -418,6 +410,19 @@ export function usePanelDrag<TCommand>(
           const candidate = hitTestPanelDropCandidates(session.candidates, logicalPoint);
           if (candidate !== undefined) target = { kind: "internal", candidate };
         }
+      }
+      if (
+        target === undefined &&
+        (positionOutside || atPhysicalEndBoundary(session.current, rootRect))
+      ) {
+        target = {
+          kind: "external",
+          id: "external",
+          label: options.externalAvailable
+            ? options.messages.openPanelInNewWindow({ title: session.panel.title })
+            : options.messages.newWindowUnavailable(),
+          available: options.externalAvailable,
+        };
       }
 
       const previousId = activeCandidateId(session.target);
@@ -1491,10 +1496,17 @@ function compareCodeUnits(left: string, right: string): number {
 function outside(position: WorkspaceExternalPanelPosition, rect: PhysicalRect): boolean {
   return (
     position.clientX < rect.left ||
-    position.clientX >= rect.left + rect.width ||
+    position.clientX > rect.left + rect.width ||
     position.clientY < rect.top ||
-    position.clientY >= rect.top + rect.height
+    position.clientY > rect.top + rect.height
   );
+}
+
+function atPhysicalEndBoundary(
+  position: WorkspaceExternalPanelPosition,
+  rect: PhysicalRect,
+): boolean {
+  return position.clientX === rect.left + rect.width || position.clientY === rect.top + rect.height;
 }
 
 function toLogicalPoint(
@@ -1503,20 +1515,22 @@ function toLogicalPoint(
   bounds: LogicalRect,
   direction: WorkspaceDirection,
 ) {
-  const physicalInline = rootRect.width <= 0 ? 0 : position.clientX - rootRect.left;
-  const inlineOffset =
-    rootRect.width <= 0 ? 0 : (physicalInline / rootRect.width) * bounds.inlineSize;
-  const blockOffset =
-    rootRect.height <= 0
-      ? 0
-      : ((position.clientY - rootRect.top) / rootRect.height) * bounds.blockSize;
+  const physicalInline =
+    direction === "rtl"
+      ? rootRect.left + rootRect.width - position.clientX
+      : position.clientX - rootRect.left;
   return {
-    inline:
-      direction === "rtl"
-        ? bounds.inlineStart + bounds.inlineSize - inlineOffset
-        : bounds.inlineStart + inlineOffset,
-    block: bounds.blockStart + blockOffset,
+    inline: bounds.inlineStart + halfOpenRatio(physicalInline, rootRect.width) * bounds.inlineSize,
+    block:
+      bounds.blockStart +
+      halfOpenRatio(position.clientY - rootRect.top, rootRect.height) * bounds.blockSize,
   };
+}
+
+/** Maps a closed physical boundary into the half-open logical geometry used by hit testing. */
+function halfOpenRatio(offset: number, size: number): number {
+  if (size <= 0) return 0;
+  return Math.min(1 - Number.EPSILON, Math.max(0, offset / size));
 }
 
 function toOverlayRect(
