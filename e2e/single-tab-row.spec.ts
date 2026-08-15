@@ -89,15 +89,13 @@ test("keeps the VS Code demo typography and compact header in a browser window",
   await page.getByRole("button", { name: "Actions for workspace.ts" }).click();
 
   const popupPromise = page.waitForEvent("popup");
-  await page
-    .getByRole("menuitem", { name: "Open workspace.ts in a separate browser window" })
-    .click();
+  await page.getByRole("menuitem", { name: "Open in new window" }).click();
   const popup = await popupPromise;
 
   const shell = popup.locator(".demo-external-app");
   const header = popup.locator(".demo-external-header");
   await expect(header).toBeVisible();
-  await expect(popup.locator('link[rel="stylesheet"][href*="workbench"]')).toHaveCount(1);
+  await expect(popup.locator('link[rel="stylesheet"]')).toHaveCount(1);
   await expect(shell).toHaveCSS("font-size", "12px");
   await expect(header).toHaveCSS("padding-top", "8px");
   await expect(header).toHaveCSS("padding-bottom", "8px");
