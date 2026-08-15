@@ -92,14 +92,14 @@
   }
 
   :where(.pf-hide-single-tab-row)
-    .pf-group
-    > .pf-tab-strip:has(> .pf-tab-list > .pf-tab:only-child)
+    .pf-tab-strip:has(> .pf-tab-list > .pf-tab:only-child)
     > .pf-tab-controls {
     position: absolute;
     inset-block-start: 0;
     inset-inline-end: 0;
     z-index: 8;
     opacity: 0;
+    pointer-events: none;
     transition: opacity var(--pf-motion-micro);
   }
 
@@ -129,14 +129,13 @@
   }
 
   :where(.pf-hide-single-tab-row)
-    .pf-group
-    > .pf-tab-strip:has(> .pf-tab-list > .pf-tab:only-child):hover
+    .pf-tab-strip:has(> .pf-tab-list > .pf-tab:only-child):hover
     > .pf-tab-controls,
   :where(.pf-hide-single-tab-row)
-    .pf-group
-    > .pf-tab-strip:has(> .pf-tab-list > .pf-tab:only-child)
+    .pf-tab-strip:has(> .pf-tab-list > .pf-tab:only-child)
     > .pf-tab-controls:is(:hover, :focus-within) {
     opacity: 1;
+    pointer-events: auto;
   }
 
   :where(.pf-hide-single-tab-row)
@@ -154,6 +153,15 @@
     > .pf-tab-list {
     flex: 0 0 var(--pf-single-tab-drag-handle-size);
     inline-size: var(--pf-single-tab-drag-handle-size);
+  }
+
+  :where(.pf-hide-single-tab-row)
+    .pf-floating-titlebar[data-compact-header="true"]
+    > .pf-floating-header-slot
+    > .pf-tab-strip:has(> .pf-tab-list > .pf-tab:only-child)
+    > .pf-tab-controls {
+    inset-inline-start: 100%;
+    inset-inline-end: auto;
   }
 
   :where(.pf-hide-single-tab-row)
