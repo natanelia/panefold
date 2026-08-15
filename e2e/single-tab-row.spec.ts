@@ -69,6 +69,7 @@ test("hides the compact floating tab while preserving panel redocking", async ({
   await expect(frame).toBeVisible();
   await expect(frame).toHaveAttribute("data-compact-header", "true");
   await expect(floatingTab).toHaveCSS("opacity", "0");
+  expect((await requiredBox(floatingTab)).width).toBeLessThanOrEqual(12);
   expect((await requiredBox(floatingTabList)).width).toBeLessThanOrEqual(12);
 
   await dragTabToGroup(page, floatingTab, "inspector");
