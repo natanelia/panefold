@@ -5,10 +5,15 @@ import { copyInlineStyles } from "./inline-styles";
 
 describe("copyInlineStyles", () => {
   it("copies Vite-injected styles into an external document in source order", () => {
-    document.head.innerHTML = [
-      '<style data-vite-dev-id="react.css">.pf-workspace { display: grid; }</style>',
-      '<style media="screen">.demo-external-header { display: flex; }</style>',
-    ].join("");
+    const firstStyle = document.createElement("style");
+    firstStyle.dataset.viteDevId = "react.css";
+    firstStyle.textContent = ".pf-workspace { display: grid; }";
+
+    const secondStyle = document.createElement("style");
+    secondStyle.media = "screen";
+    secondStyle.textContent = ".demo-external-header { display: flex; }";
+
+    document.head.replaceChildren(firstStyle, secondStyle);
     const destination = document.implementation.createHTMLDocument("External surface");
 
     copyInlineStyles(document, destination);
