@@ -466,13 +466,17 @@ export function FloatingSurfaceFrame({
           data-compact-header={String(compactHeader)}
           tabIndex={canMove && (onMove !== undefined || onRaise !== undefined) ? 0 : -1}
           aria-label={messages.moveFloatingSurface({ title })}
-          onPointerDown={(event) => begin("move", undefined, event)}
+          onPointerDown={(event) => {
+            if (eventStartsInsideTabStrip(event.target)) return;
+            begin("move", undefined, event);
+          }}
           onPointerMove={move}
           onPointerUp={finish}
           onPointerCancel={cancel}
           onLostPointerCapture={cancel}
           onKeyDown={moveByKeyboard}
-          onDoubleClick={() => {
+          onDoubleClick={(event) => {
+            if (eventStartsInsideTabStrip(event.target)) return;
             if (surface.maximized && onRestore !== undefined) {
               focusAfterStateChangeRef.current = "titlebar";
               const outcome = onRestore("pointer");
@@ -748,6 +752,10 @@ function floatingResizePositionPercent(
           ? bounds.y
           : bounds.y + bounds.height;
   return clamp(Math.round((position / extent) * 100), 0, 100);
+}
+
+function eventStartsInsideTabStrip(target: EventTarget): boolean {
+  return target instanceof Element && target.closest(".pf-tab-strip") !== null;
 }
 
 function acceptedOutcome(outcome: WorkspaceDispatchOutcome): boolean {
