@@ -53,9 +53,7 @@ test("hides a docked single-tab row without removing pointer docking", async ({ 
   await dragTabToGroup(page, appTab, "inspector");
 
   await expect(
-    page.locator(
-      '[data-workspace-group="inspector"] [data-workspace-panel-tab="map-canvas"]',
-    ),
+    page.locator('[data-workspace-group="inspector"] [data-workspace-panel-tab="map-canvas"]'),
   ).toHaveCount(1);
 });
 
