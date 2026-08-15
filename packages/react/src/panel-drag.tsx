@@ -541,17 +541,19 @@ export function usePanelDrag<TCommand>(
       group: WorkspaceGroupView,
       event: ReactPointerEvent<HTMLButtonElement>,
     ) => {
+      const root = options.getRoot();
       if (
         !options.enabled ||
         event.button !== 0 ||
         sessionRef.current !== null ||
-        actorRef.current !== null
+        actorRef.current !== null ||
+        (root?.dataset.groupDragState !== undefined && root.dataset.groupDragState !== "idle")
       ) {
         return;
       }
       const position = externalPosition(event);
       const tabElement = event.currentTarget;
-      const rootRect = measureRoot(options.getRoot(), options.logicalBounds);
+      const rootRect = measureRoot(root, options.logicalBounds);
       const reorderScrollElement = tabElement.closest<HTMLElement>("[role=tablist]") ?? undefined;
       const createReorderCommand = options.createReorderCommand;
       const measuredReorder =

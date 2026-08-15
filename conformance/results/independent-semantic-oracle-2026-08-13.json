@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "kind": "differential-model-result",
   "profile": "compact-react-chromium-desktop",
-  "producedAt": "2026-08-14T01:10:28Z",
+  "producedAt": "2026-08-14T10:13:30.480Z",
   "status": "passed-with-thresholds-unmet",
   "runner": "panefold-differential-campaign",
   "commands": {
@@ -12,8 +12,8 @@
     "suite": "pnpm exec vitest run packages/kernel-optimized/test/benchmark.test.ts packages/kernel-optimized/test/differential.test.ts packages/kernel-optimized/test/independent-reducer.test.ts packages/kernel-optimized/test/persistent-bucket-map.test.ts packages/kernel-optimized/test/projection.test.ts --reporter=json"
   },
   "environment": {
-    "operatingSystem": "Linux 6.18.35 x86_64",
-    "node": "24.14.0",
+    "operatingSystem": "Darwin 25.6.0 arm64",
+    "node": "22.21.0",
     "pnpm": "11.16.0"
   },
   "campaign": {
@@ -29,14 +29,14 @@
     "missingCommandTypes": [],
     "divergenceCount": 0,
     "finalHash": "fnv1a64-v1:a1f58a1b0c635ad1",
-    "elapsedMs": 54545
+    "elapsedMs": 34204
   },
   "suite": {
     "testFiles": 5,
     "tests": 25,
     "passed": 25,
     "failed": 0,
-    "durationMs": 14890
+    "durationMs": 9568
   },
   "checks": {
     "curatedCommandDiscriminants": 36,
@@ -88,7 +88,7 @@
     "packages/kernel/src/index.ts": "b748533828f258065aab94562da4003885a3b3ae47a567358910c37c63bb1e6f",
     "packages/kernel/src/internal.ts": "2572cf6a794c4d80f28255ce287037e8838187f8798caf5c6c8c09720fc8e98d",
     "packages/kernel/src/invariants.ts": "90f29c105afa762de85d1583eb22daebdcb4d66f22f626a1cceb81ddd88f396a",
-    "packages/kernel/src/plan-panel-drop.ts": "0e31fc1bacc61a5f3d7de20cffea99f746481e1c3c6be9c40549a75e1892bbe9",
+    "packages/kernel/src/plan-panel-drop.ts": "a108915c918bccfe8f4c2c95c8087df2c30107541c7e58134af95043df5d1fe9",
     "packages/kernel/src/reducer.ts": "210dc3c2521c50b877b401402cd09470e9659bab430e5ff49fb5088a7388a19f",
     "packages/kernel/src/patches.ts": "af7aa2879b5d5b4173f013a3de5fd3bee0cb9b8a5f27d5f97e246e369665487b",
     "packages/kernel/src/hash.ts": "2a84a392f95e694738839f8608474c2051ca3e3893c4c4ee01591344e9c93fca",

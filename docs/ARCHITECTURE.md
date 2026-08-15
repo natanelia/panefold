@@ -168,6 +168,13 @@ retains the selected candidate's exact command and preview, revalidates the revi
 that command on release. Preview state is neither persisted nor entered into history; one accepted
 gesture publishes one transaction. Menu and keyboard routes use the same planner.
 
+Whole-container placement follows the same authority boundary through `planGroupDrop`. A dedicated,
+keyboard-focusable group handle starts a bounded drag without turning the selected tab into the
+source. Center acquisition pure-plans `swap-groups`; logical-edge acquisition pure-plans
+`move-group`. The adapter reduces the exact command and returns the resulting source-group rectangle,
+so every tab, the group identity, stable hosts, preview, one-command commit, and undo boundary move
+together. Keyboard activation of the handle uses the same retained candidate plans.
+
 Same-strip tab reorder uses relational `beforePanelId`/`afterPanelId` placement rather than pointer
 coordinates or array indexes. The adapter measures a horizontal LTR, horizontal RTL, or vertical
 strip once, performs logarithmic slot lookup, creates only the selected command at commit, and

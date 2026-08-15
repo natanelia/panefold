@@ -30,7 +30,11 @@ initial truths.
    pure-reduces that command against the captured snapshot and solves the resulting layout to return
    the committed group rectangle. React never constructs the model command union or substitutes a
    generic half-split preview.
-4. Menu and keyboard split/move routes use the same request and planner as pointer interaction.
+4. Menu and keyboard panel split/move routes use the same request and planner as pointer interaction.
+   Whole-container placement uses a separate model-agnostic `planGroupDrop` boundary: center
+   acquisition plans an intact group swap, edge acquisition plans one group move, and keyboard
+   activation of dedicated group chrome uses the same retained plans. Group identity, ordered tabs,
+   stable hosts, and the undo boundary remain together.
 5. Same-strip tab reorder is a direct-placement branch, not a second ownership protocol. The React
    adapter measures the current strip, resolves logical insertion slots for horizontal LTR, RTL,
    and vertical rails, and keeps pointer coordinates and array indexes out of canonical state. The
@@ -63,7 +67,9 @@ initial truths.
 ## Consequences
 
 - One completed in-page drop remains one semantic transaction and one undo entry even when it needs
-  a batch. External ownership transitions are explicit barriers with no replayable history entry.
+  a batch. A whole-container drop similarly commits one `move-group` or `swap-groups` command without
+  decomposing its tabs. External ownership transitions are explicit barriers with no replayable
+  history entry.
 - Preview geometry, pointer coordinates, DOM hosts, popup handles, and view preferences never become
   canonical workspace ownership.
 - Same-strip reorder stores stable relational intent and creates one semantic history entry; tab

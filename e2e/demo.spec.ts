@@ -56,6 +56,51 @@ async function dragTabToGroup(
   return previewRect;
 }
 
+async function dragGroupToGroup(
+  page: Page,
+  sourceGroupId: string,
+  targetGroupId: string,
+  position: DropPosition,
+) {
+  const sourceGroup = page.locator(`[data-workspace-group="${sourceGroupId}"]`);
+  const handle = sourceGroup.locator(`[data-workspace-group-drag-handle="${sourceGroupId}"]`);
+  const targetGroup = page.locator(`[data-workspace-group="${targetGroupId}"]`);
+  const sourceBox = await requiredBox(handle);
+  const targetBox = await requiredBox(targetGroup);
+  const targetNodeId = await targetGroup.getAttribute("data-workspace-node");
+  expect(targetNodeId).not.toBeNull();
+  const inset = 8;
+  const target =
+    position === "center"
+      ? { x: targetBox.x + targetBox.width / 2, y: targetBox.y + targetBox.height / 2 }
+      : position === "inline-start"
+        ? { x: targetBox.x + inset, y: targetBox.y + targetBox.height / 2 }
+        : position === "inline-end"
+          ? { x: targetBox.x + targetBox.width - inset, y: targetBox.y + targetBox.height / 2 }
+          : position === "block-start"
+            ? { x: targetBox.x + targetBox.width / 2, y: targetBox.y + inset }
+            : { x: targetBox.x + targetBox.width / 2, y: targetBox.y + targetBox.height - inset };
+
+  await handle.scrollIntoViewIfNeeded();
+  await page.mouse.move(sourceBox.x + sourceBox.width / 2, sourceBox.y + sourceBox.height / 2);
+  await page.mouse.down();
+  await page.mouse.move(target.x, target.y, { steps: 10 });
+  const overlay = page.locator("[data-workspace-group-drag]");
+  await expect(overlay).toHaveAttribute(
+    "data-workspace-drop-kind",
+    position === "center" ? "swap" : "edge",
+  );
+  await expect(overlay).toHaveAttribute(
+    "data-workspace-drop-target",
+    position === "center"
+      ? `swap:${String(targetNodeId)}`
+      : `edge:${String(targetNodeId)}:${position}`,
+  );
+  const previewRect = await requiredBox(overlay.locator(".pf-panel-drop-preview"));
+  await page.mouse.up();
+  return previewRect;
+}
+
 async function dragTabToWindowInlineEnd(page: Page, panelId: string, targetGroupId: string) {
   const tab = page.locator(`[data-workspace-panel-tab="${panelId}"]`);
   const group = page.locator(`[data-workspace-group="${targetGroupId}"]`);
@@ -329,6 +374,47 @@ test("drags a stateful panel into another container and undoes it atomically", a
     page.locator('[data-workspace-group="primary"]').locator('[data-workspace-panel-tab="notes"]'),
   ).toBeVisible();
   await expect(editor).toHaveValue("export const stableHost = true;");
+});
+
+test("moves a whole multi-tab panel container in one undoable drag", async ({ page }) => {
+  await page.emulateMedia({ reducedMotion: "reduce" });
+  await page.goto("/");
+  const primary = page.locator('[data-workspace-group="primary"]');
+  const inspector = page.locator('[data-workspace-group="inspector"]');
+  const notesTab = primary.locator('[data-workspace-panel-tab="notes"]');
+  await notesTab.click();
+  const notesHost = page.locator('[data-workspace-panel-host="notes"]');
+  const hostId = await notesHost.getAttribute("id");
+  const editor = notesHost.getByRole("textbox", { name: "workspace.ts editor" });
+  await editor.fill("The whole container keeps every live tab.");
+  const sourceBefore = await requiredBox(primary);
+  const before = await revisionOf(page);
+
+  const preview = await dragGroupToGroup(page, "primary", "inspector", "block-start");
+
+  await expect.poll(() => revisionOf(page)).toBe(before + 1);
+  await expect(primary.locator('[data-workspace-panel-tab="map-canvas"]')).toBeVisible();
+  await expect(primary.locator('[data-workspace-panel-tab="notes"]')).toBeVisible();
+  await expect(primary.getByRole("tab")).toHaveCount(2);
+  await expect(page.locator("[data-workspace-group]")).toHaveCount(4);
+  await expect(notesHost).toHaveAttribute("id", hostId ?? "");
+  await expect(editor).toHaveValue("The whole container keeps every live tab.");
+  const sourceAfter = await requiredBox(primary);
+  const targetAfter = await requiredBox(inspector);
+  expect(sourceAfter.x).toBeGreaterThan(sourceBefore.x);
+  expect(sourceAfter.y + sourceAfter.height / 2).toBeLessThan(
+    targetAfter.y + targetAfter.height / 2,
+  );
+  expect(Math.abs(preview.x - sourceAfter.x)).toBeLessThanOrEqual(1);
+  expect(Math.abs(preview.y - sourceAfter.y)).toBeLessThanOrEqual(1);
+
+  await page.getByRole("button", { name: "Undo layout change" }).click();
+  await expect.poll(() => revisionOf(page)).toBe(before + 2);
+  await expect(primary.locator('[data-workspace-panel-tab="map-canvas"]')).toBeVisible();
+  await expect(primary.locator('[data-workspace-panel-tab="notes"]')).toBeVisible();
+  await expect(editor).toHaveValue("The whole container keeps every live tab.");
+  const restored = await requiredBox(primary);
+  expect(Math.abs(restored.x - sourceBefore.x)).toBeLessThanOrEqual(1);
 });
 
 test("reorders tabs by drag in horizontal LTR, RTL, and vertical rails without remounting", async ({

@@ -19,31 +19,35 @@
   "sampleCount": 179,
   "summary": {
     "minimum": 6.5,
-    "maximum": 48.8,
-    "mean": 8.566,
+    "maximum": 56.7,
+    "mean": 8.613,
     "median": 8.3,
-    "p95": 10.11,
-    "p99": 10.3
+    "p95": 10.1,
+    "p99": 10.222
   },
   "rawFrameDeltasMs": [
-    48.8, 9.4, 7.7, 7.5, 8.3, 10.2, 7.2, 8.6, 8.9, 8.3, 8.3, 7.4, 9.6, 6.7, 9.4, 8.7, 7.7, 9, 7.6,
-    9.1, 7.3, 8.3, 9.5, 8, 7.5, 9.5, 8.1, 8.3, 6.9, 10.1, 6.5, 9.2, 7.3, 8.5, 8.8, 9.2, 7.5, 8.9,
-    7.7, 9.5, 7.2, 9.6, 6.9, 8.1, 8.2, 9.9, 7.2, 9.8, 7.6, 8.9, 6.9, 9.9, 7.9, 8.5, 8.3, 8.4, 8.3,
-    8.3, 7.1, 9.9, 7.1, 9.5, 8, 8.4, 8.3, 8.3, 7.3, 9.7, 8, 6.8, 10.3, 7.3, 9.2, 8.1, 8.4, 7.2, 9.7,
-    8, 8.4, 8.3, 6.8, 10.2, 7.9, 8.5, 8.3, 6.8, 10.2, 7.9, 8.5, 7.1, 9.8, 8, 8.3, 8.1, 7, 9.2, 9.3,
-    8, 8.5, 8.3, 8.3, 8.4, 6.8, 10.2, 7.9, 8.4, 8.4, 8.3, 8.3, 8.4, 8.3, 8.3, 6.8, 8.6, 8.2, 10.1,
-    7.9, 8.4, 8.3, 7.1, 9.9, 8, 6.8, 8.3, 10.3, 7.9, 8.4, 8.2, 8.1, 8.8, 7.6, 9.2, 8.1, 8.4, 8.1,
-    8.6, 7.5, 9.2, 7.8, 8.1, 9, 8.4, 7.8, 8, 7.6, 10.2, 7.9, 8.5, 7.5, 9.3, 8.1, 8.4, 7.7, 9.1, 8.1,
-    8.4, 8.2, 8.5, 7.3, 9.5, 6.7, 8.3, 10, 8.1, 8.3, 8.4, 8.4, 8.3, 8.3, 8.3, 8.4, 8.3, 8.3, 8.4,
-    8.3, 6.7, 10.3, 6.9, 9.5
+    56.7, 10, 6.9, 9.8, 6.9, 9.8, 8, 8.7, 6.9, 9.4, 7.7, 9.4, 7.6, 8, 9.5, 8.1, 7.1, 9.6, 6.9, 9.8,
+    7.8, 8.7, 8.3, 7.2, 9.6, 6.7, 8.4, 8.6, 8.6, 7.9, 9.8, 8.3, 6.7, 10.3, 7.6, 8.9, 7.2, 7.8, 8.4,
+    10.1, 8, 7.4, 8.9, 8.9, 7.8, 7.2, 10.2, 7.8, 7.2, 9.9, 7.9, 8.6, 7.1, 9.8, 7.9, 8.4, 8.4, 7.4,
+    7.7, 8.7, 9.8, 6.9, 9.7, 8, 7.1, 10, 7, 9.6, 8, 8.4, 6.9, 10.1, 6.8, 9.9, 7.9, 8.4, 7.8, 9, 7.1,
+    8.9, 8.9, 8.3, 6.8, 9.4, 8.9, 6.7, 10.2, 7.3, 9.3, 7.2, 9.4, 6.7, 10.1, 7.9, 8.5, 8.3, 8.3, 8.4,
+    6.9, 10.1, 7.9, 8.4, 6.7, 10.2, 7.1, 9.6, 6.8, 9.9, 6.9, 9.1, 8.7, 7.1, 9.2, 7.4, 10, 7.9, 7,
+    9.9, 8.1, 7.1, 9.9, 6.9, 9.4, 8.4, 8.4, 8.3, 6.9, 10, 7.5, 7.4, 10.2, 6.7, 10, 6.5, 10.2, 7.9,
+    8.1, 8, 8.9, 8.1, 8.7, 7.8, 8.8, 8.3, 7.8, 7.3, 10.1, 8.1, 7.7, 9.1, 8.2, 8.3, 8.3, 8.5, 8.2,
+    8.4, 8.3, 8.3, 8.4, 8.3, 8.3, 8.4, 8.3, 8.4, 8.3, 7.6, 9.2, 7.1, 9.7, 8, 8.4, 8.4, 8.3, 7.1,
+    9.8, 6.9, 9.8, 7.9, 8.4
   ],
   "longTasks": [
     {
-      "startTime": 195.7999999821186,
-      "duration": 56
+      "startTime": 85.09999999403954,
+      "duration": 58
+    },
+    {
+      "startTime": 232.59999999403954,
+      "duration": 60
     }
   ],
-  "producedAt": "2026-08-14T07:19:51.074Z",
+  "producedAt": "2026-08-14T10:12:13.897Z",
   "guardrail": {
     "schemaVersion": 1,
     "profile": "compact-react-chromium-desktop",
@@ -64,20 +68,20 @@
     },
     "kernel": {
       "iterations": 10000,
-      "elapsedMs": 1208.76
+      "elapsedMs": 1210.38
     },
     "geometry": {
       "iterations": 100000,
-      "elapsedMs": 176.81
+      "elapsedMs": 187.38
     },
     "reorderProfiles": [
       {
         "panelCount": 50,
         "warmupCount": 250,
         "sampleCount": 2000,
-        "medianMs": 0.1906,
-        "p95Ms": 0.2946,
-        "p99Ms": 0.3986,
+        "medianMs": 0.1838,
+        "p95Ms": 0.2723,
+        "p99Ms": 0.3504,
         "designTargetMs": 1,
         "withinDesignTargetOnThisMachine": true,
         "invariantViolations": 0
@@ -86,9 +90,9 @@
         "panelCount": 500,
         "warmupCount": 100,
         "sampleCount": 1000,
-        "medianMs": 1.7979,
-        "p95Ms": 2.1511,
-        "p99Ms": 2.315,
+        "medianMs": 1.7408,
+        "p95Ms": 2.0215,
+        "p99Ms": 2.2692,
         "designTargetMs": 5,
         "withinDesignTargetOnThisMachine": true,
         "invariantViolations": 0
@@ -98,23 +102,23 @@
       {
         "nodeCount": 100,
         "sampleCount": 10000,
-        "elapsedMs": 32.01,
-        "meanMicroseconds": 3.201
+        "elapsedMs": 32.79,
+        "meanMicroseconds": 3.279
       },
       {
         "nodeCount": 500,
         "sampleCount": 10000,
-        "elapsedMs": 176.1,
-        "meanMicroseconds": 17.61
+        "elapsedMs": 180.1,
+        "meanMicroseconds": 18.01
       },
       {
         "nodeCount": 1000,
         "sampleCount": 10000,
-        "elapsedMs": 380.67,
-        "meanMicroseconds": 38.067
+        "elapsedMs": 378.53,
+        "meanMicroseconds": 37.853
       }
     ],
-    "totalElapsedMs": 4511.24,
+    "totalElapsedMs": 4433.6,
     "finalRevision": "10000",
     "invariantViolations": 0
   },
@@ -122,14 +126,18 @@
     "e2e/performance.spec.ts": "2bbc7b6cb40fd2ad97ba33824b5b8a0a3cf43a82ce638e432f13d29c8db164f3",
     "e2e/performance-baseline.json": "128b4c7dc2c7fc03372224828417f675b279359ebbe9bab7408b172ad76b48a9",
     "scripts/performance-smoke.mjs": "fc0d8ce5df966b75312b5d9fae367e07b5ce4f8215afa724d03a7a6cb17fdc95",
-    "packages/react/src/WorkspaceSurface.tsx": "c42d1f47b939e82ea173db1b026c4d14819fbbabef40a876a7aba909adf4e326",
-    "packages/react/src/panel-drag.tsx": "ee14a96aaa569972e36b295af8bfdc255536eac04307a004014d796ab59d889b",
+    "packages/react/src/WorkspaceSurface.tsx": "db679f1562e2723a95a1222bc71e7ad26ecaa6cd8b1037e92fceeaa47ac15972",
+    "packages/react/src/panel-drag.tsx": "9d999afcc5fbe6206a16890a0dbda9841c1a468be286ccd2801a7fa42f185d1c",
     "packages/geometry/src/hit-test.ts": "2da9ca42d97c135f37d599bbaebed8f758343fa4e52fd647c05a4b179340c121",
     "packages/geometry/src/invalidation.ts": "dfe873cb6df480d8ce023688e199463489877527b5b1c5155c4a7d1e234d4f1b",
     "packages/kernel-optimized/src/indexes.ts": "c6d962626b3c0cac8d7d89f156aed383b1e313a201f7c3ce5f228d97959ac0a8",
     "packages/motion/src/coordinator.ts": "b34a5428e17f0c715b50b45706fa078f77a4841eddf2ff6d357f181afea91715",
     "packages/react/src/floating-surface.tsx": "8a7ba92606652f126d666faa2600467fb7a11827a86d70f80a641f78d9a1ea12",
-    "packages/react/src/node-motion.ts": "5f7efe09d09573ea1c2baa44744627d34fabe60cc6978f287da83e6b02ed52bb"
+    "packages/react/src/node-motion.ts": "5f7efe09d09573ea1c2baa44744627d34fabe60cc6978f287da83e6b02ed52bb",
+    "packages/react/src/group-drag.tsx": "cb49ae2e3e3633ee7a77b1604b7e502733eac38af64193a8955497145400f608",
+    "packages/react/src/group-drop.ts": "5f8cf5b0575142ecd7941dbcb9e10b6139d13aad3e4e7e28198f78b31d991796",
+    "packages/react/src/messages.ts": "1f93df3330344c32bf35f3107b57561df260f2b229aa9f5f25aed6efe130af52",
+    "packages/react/src/styles.css": "4edc8272bd4e1d95219387f85c775b9dd73992c0437a9811c159f9a7fef6f1f7"
   },
   "limitations": [
     "This macOS result is an automated regression guard, not a physical 60 Hz or 120 Hz certification.",

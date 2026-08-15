@@ -562,6 +562,7 @@
   }
 
   .pf-tab-close,
+  .pf-group-move,
   .pf-group-remove,
   .pf-tab-more {
     display: grid;
@@ -581,6 +582,11 @@
     font-size: 18px;
   }
 
+  .pf-group-move {
+    font-size: 15px;
+    touch-action: none;
+  }
+
   .pf-group-remove {
     font-size: 14px;
   }
@@ -590,10 +596,22 @@
   }
 
   .pf-tab-close:hover,
+  .pf-group-move:hover,
   .pf-group-remove:hover,
   .pf-tab-more:hover {
     color: var(--pf-text);
     background: var(--pf-surface-soft);
+  }
+
+  @media (hover: hover) and (pointer: fine) {
+    .pf-workspace[data-group-drop-enabled="true"] .pf-group-move {
+      cursor: grab;
+    }
+
+    .pf-workspace:is([data-group-drag-state="armed"], [data-group-drag-state="dragging"])
+      .pf-group-move {
+      cursor: grabbing;
+    }
   }
 
   .pf-tab-controls {
@@ -876,6 +894,7 @@
 
   .pf-keyboard-move-dots {
     display: flex;
+    flex-wrap: wrap;
     gap: 6px;
   }
 
@@ -938,6 +957,7 @@
     }
 
     .pf-tab-close,
+    .pf-group-move,
     .pf-group-remove,
     .pf-empty-group-remove,
     .pf-tab-more {
@@ -946,8 +966,8 @@
     }
 
     .pf-group[data-tab-content="icon-only"][data-tab-orientation="vertical"] {
-      /* Three adjacent controls retain full 44px touch targets without flex shrink. */
-      --pf-tab-inline-size: 148px;
+      /* Four adjacent controls retain full 44px touch targets without flex shrink. */
+      --pf-tab-inline-size: 192px;
     }
   }
 

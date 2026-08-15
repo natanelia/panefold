@@ -24,6 +24,8 @@ import {
   type WorkspaceCommandAdapter,
   type WorkspaceFloatingResizeEdge,
   type WorkspaceCommandOrigin,
+  type WorkspaceGroupDropRequest,
+  type WorkspaceGroupDropPlanContext,
   type WorkspacePanelRegistry,
   type WorkspacePanelDropRequest,
   type WorkspacePanelDropPlanContext,
@@ -141,6 +143,7 @@ type FixtureCommand =
       readonly afterPanelId?: string;
     }
   | { readonly type: "drop"; readonly request: WorkspacePanelDropRequest }
+  | { readonly type: "group-drop"; readonly request: WorkspaceGroupDropRequest }
   | {
       readonly type: "move-floating";
       readonly surfaceId: string;
@@ -286,6 +289,10 @@ const directManipulationCommands: WorkspaceCommandAdapter<FixtureCommand> = {
   planPanelDrop: (request, context) => ({
     command: { type: "drop", request },
     previewRect: fixtureDropPreview(request, context),
+  }),
+  planGroupDrop: (request, context) => ({
+    command: { type: "group-drop", request },
+    previewRect: fixtureGroupDropPreview(request, context),
   }),
 };
 
@@ -1743,6 +1750,87 @@ describe("WorkspaceSurface", () => {
     expect(runtime.transactions[0]?.type).toBe("drop");
     expect(runtime.getSnapshot().projection.groups.right?.panelIds).toContain("alpha");
     expect(view.container.querySelector("[data-workspace-panel-drag]")).toBeNull();
+  });
+
+  it("drags an intact panel container through one revision-bound group drop", async () => {
+    const runtime = new FixtureRuntime(initialProjection);
+    const view = renderWorkspace(runtime, { commands: directManipulationCommands });
+    const handle = await screen.findByRole("button", { name: "Move Left panel container" });
+    installPointerCapture(handle);
+
+    fireEvent.pointerDown(handle, {
+      button: 0,
+      pointerId: 141,
+      pointerType: "mouse",
+      clientX: 480,
+      clientY: 20,
+    });
+    fireEvent.pointerMove(handle, {
+      pointerId: 141,
+      pointerType: "mouse",
+      clientX: 750,
+      clientY: 350,
+    });
+
+    const overlay = await waitForElement(view.container, "[data-workspace-group-drag]");
+    expect(overlay.dataset.workspaceDropKind).toBe("swap");
+    expect(overlay.dataset.workspaceDropTarget).toBe("swap:right-node");
+
+    fireEvent.pointerUp(handle, {
+      pointerId: 141,
+      pointerType: "mouse",
+      clientX: 750,
+      clientY: 350,
+    });
+
+    expect(runtime.transactions).toEqual([
+      expect.objectContaining({ type: "group-drop", origin: "pointer" }),
+    ]);
+    expect(runtime.lastCommand?.type).toBe("group-drop");
+    if (runtime.lastCommand?.type === "group-drop") {
+      expect(runtime.lastCommand.request.sourceGroup.id).toBe("left");
+      expect(runtime.lastCommand.request.sourcePanels.map((panel) => panel.id)).toEqual([
+        "alpha",
+        "beta",
+      ]);
+      expect(runtime.lastCommand.request.target).toEqual({ kind: "swap" });
+    }
+    expect(runtime.getSnapshot().projection.groups.left?.panelIds).toEqual(["alpha", "beta"]);
+    expect(runtime.getSnapshot().projection.nodes.root).toMatchObject({
+      kind: "split",
+      childIds: ["right-node", "left-node"],
+    });
+    expect(view.container.querySelector("[data-workspace-group-drag]")).toBeNull();
+    expect(screen.queryByRole("dialog", { name: "Move Left panel container" })).toBeNull();
+    await waitFor(() => {
+      expect(screen.getByRole("button", { name: "Move Left panel container" })).toBe(
+        document.activeElement,
+      );
+    });
+  });
+
+  it("moves a panel container from its keyboard-accessible group chrome", async () => {
+    const runtime = new FixtureRuntime(initialProjection);
+    renderWorkspace(runtime, { commands: directManipulationCommands });
+    const user = userEvent.setup();
+    const handle = await screen.findByRole("button", { name: "Move Left panel container" });
+
+    await user.click(handle);
+    const dialog = screen.getByRole("dialog", { name: "Move Left panel container" });
+    expect(dialog.textContent).toContain("Swap Left and Right panel containers");
+    await user.keyboard("{Shift>}{Tab}{/Shift}");
+    expect(dialog.textContent).toContain("Move Left below Right");
+    await user.keyboard("{Tab}{Enter}");
+
+    expect(runtime.transactions).toEqual([
+      expect.objectContaining({ type: "group-drop", origin: "keyboard" }),
+    ]);
+    expect(runtime.getSnapshot().projection.groups.left?.panelIds).toEqual(["alpha", "beta"]);
+    await waitFor(() => {
+      expect(screen.getByRole("button", { name: "Move Left panel container" })).toBe(
+        document.activeElement,
+      );
+    });
   });
 
   it("keeps pointer candidate hover silent and announces only the final drop result", async () => {
@@ -3517,6 +3605,34 @@ function reduceProjection(
       },
     };
   }
+  if (command.type === "group-drop") {
+    if (command.request.target.kind !== "swap") {
+      return { ...projection, revision: nextRevision };
+    }
+    const sourceNodeId = command.request.sourceNodeId;
+    const targetNodeId = command.request.targetNodeId;
+    return {
+      ...projection,
+      revision: nextRevision,
+      nodes: Object.fromEntries(
+        Object.entries(projection.nodes).map(([id, node]) => [
+          id,
+          node.kind !== "split"
+            ? node
+            : {
+                ...node,
+                childIds: node.childIds.map((childId) =>
+                  childId === sourceNodeId
+                    ? targetNodeId
+                    : childId === targetNodeId
+                      ? sourceNodeId
+                      : childId,
+                ),
+              },
+        ]),
+      ),
+    };
+  }
   if (command.type === "drop") {
     if (command.request.target.kind === "center") {
       return reduceProjection(projection, {
@@ -3713,6 +3829,22 @@ function fixtureDropPreview(
   context: WorkspacePanelDropPlanContext,
 ) {
   if (request.target.kind === "center") return context.targetRect;
+  const rect = context.targetRect;
+  const inlineSize = Math.round((rect.inlineSize - context.splitterSize) * request.target.ratio);
+  const blockSize = Math.round((rect.blockSize - context.splitterSize) * request.target.ratio);
+  if (request.target.edge === "inline-start") return { ...rect, inlineSize };
+  if (request.target.edge === "inline-end") {
+    return { ...rect, inlineStart: rect.inlineStart + rect.inlineSize - inlineSize, inlineSize };
+  }
+  if (request.target.edge === "block-start") return { ...rect, blockSize };
+  return { ...rect, blockStart: rect.blockStart + rect.blockSize - blockSize, blockSize };
+}
+
+function fixtureGroupDropPreview(
+  request: WorkspaceGroupDropRequest,
+  context: WorkspaceGroupDropPlanContext,
+) {
+  if (request.target.kind === "swap") return context.targetRect;
   const rect = context.targetRect;
   const inlineSize = Math.round((rect.inlineSize - context.splitterSize) * request.target.ratio);
   const blockSize = Math.round((rect.blockSize - context.splitterSize) * request.target.ratio);

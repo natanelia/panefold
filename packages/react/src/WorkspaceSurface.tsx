@@ -40,6 +40,12 @@ import {
   useFloatingSurfaceHeaderSlot,
 } from "./floating-surface";
 import { solveWorkspaceProjectionLayout, type WorkspaceLayoutSolver } from "./geometry";
+import { GroupDragOverlay, useGroupDrag, type GroupDragController } from "./group-drag";
+import {
+  createGroupDropCandidates,
+  planGroupDrop as resolveGroupDropPlan,
+  type GroupDropCandidate,
+} from "./group-drop";
 import {
   ENGLISH_WORKSPACE_MESSAGES,
   resolveWorkspaceInteractionMessages,
@@ -82,6 +88,7 @@ import type {
   WorkspaceExternalPanelPosition,
   WorkspaceFloatingBounds,
   WorkspaceFloatingSurfaceView,
+  WorkspaceGroupDropRequest,
   WorkspaceGroupView,
   WorkspaceNodeView,
   WorkspacePanelRegistry,
@@ -278,6 +285,7 @@ function SurfaceRenderer<TSnapshot, TCommand, TResult>({
   const pendingExternalControllersRef = useRef(new Set<AbortController>());
   const surfaceMountedRef = useRef(true);
   const [movePanelId, setMovePanelId] = useState<string>();
+  const [moveGroupId, setMoveGroupId] = useState<string>();
   const [systemReducedMotion, setSystemReducedMotion] = useState(false);
   const [coarsePointer, setCoarsePointer] = useState(false);
   const [internalCompactGroupId, setInternalCompactGroupId] = useState<string>();
@@ -828,6 +836,20 @@ function SurfaceRenderer<TSnapshot, TCommand, TResult>({
     [domIdPrefix],
   );
 
+  const restoreGroupMoveHandle = useCallback(
+    (groupId: string) => {
+      queueMicrotask(() => {
+        const workspace = rootRef.current;
+        if (workspace === null) return;
+        const handle = workspace.ownerDocument.getElementById(
+          groupMoveHandleId(domIdPrefix, groupId),
+        );
+        (handle ?? workspace).focus();
+      });
+    },
+    [domIdPrefix],
+  );
+
   const commitPanelDrop = useCallback(
     (
       request: WorkspacePanelDropRequest,
@@ -865,6 +887,45 @@ function SurfaceRenderer<TSnapshot, TCommand, TResult>({
       const command = plannedCommand ?? plan?.command;
       if (command === undefined) {
         const message = interactionMessages.panelPlacementUnavailable();
+        announce(message);
+        return { status: "rejected", message };
+      }
+      return dispatch(command, label, origin).outcome;
+    },
+    [announce, commands, dispatch, interactionMessages, resolvedLayout, splitterSize],
+  );
+
+  const commitGroupDrop = useCallback(
+    (
+      request: WorkspaceGroupDropRequest,
+      label: string,
+      origin: Extract<WorkspaceCommandOrigin, "pointer" | "keyboard" | "menu">,
+      plannedCommand?: TCommand,
+    ): WorkspaceDispatchOutcome => {
+      if (projectionRef.current.revision !== request.revision) {
+        const message = interactionMessages.workspaceChangedBeforeGroupMove();
+        announce(message);
+        return { status: "rejected", message };
+      }
+      const planner = commands.planGroupDrop;
+      if (planner === undefined) {
+        const message = interactionMessages.directGroupPlacementUnsupported();
+        announce(message);
+        return { status: "rejected", message };
+      }
+      const targetRect = resolvedLayout.groupRects[request.targetGroup.id];
+      const bounds = surfaceLayoutBoundsForNode(
+        projectionRef.current,
+        resolvedLayout,
+        request.targetNodeId,
+      );
+      const plan =
+        plannedCommand === undefined && targetRect !== undefined && bounds !== undefined
+          ? resolveGroupDropPlan(planner, request, targetRect, bounds, splitterSize)
+          : undefined;
+      const command = plannedCommand ?? plan?.command;
+      if (command === undefined) {
+        const message = interactionMessages.groupPlacementUnavailable();
         announce(message);
         return { status: "rejected", message };
       }
@@ -996,6 +1057,52 @@ function SurfaceRenderer<TSnapshot, TCommand, TResult>({
     restoreFocus: restorePanelTab,
   });
 
+  const groupDrag = useGroupDrag({
+    projection,
+    resolvedLayout,
+    logicalBounds,
+    direction,
+    messages: interactionMessages,
+    enabled: commands.planGroupDrop !== undefined,
+    splitterSize,
+    frameScheduler: scheduler,
+    scheduleKey: `${domIdPrefix}:group-drag`,
+    planDrop: commands.planGroupDrop,
+    getRoot: () => rootRef.current,
+    announce,
+    commitDrop: commitGroupDrop,
+    restoreFocus: restoreGroupMoveHandle,
+  });
+
+  const keyboardGroupDropCandidates = useMemo(
+    () =>
+      moveGroupId === undefined
+        ? []
+        : createGroupDropCandidates(
+            projection,
+            resolvedLayout,
+            moveGroupId,
+            direction,
+            0.25,
+            0.5,
+            splitterSize,
+            {
+              swapPanelContainers: interactionMessages.swapPanelContainers,
+              movePanelContainerBeside: interactionMessages.movePanelContainerBeside,
+            },
+            commands.planGroupDrop,
+          ),
+    [
+      commands.planGroupDrop,
+      direction,
+      interactionMessages,
+      moveGroupId,
+      projection,
+      resolvedLayout,
+      splitterSize,
+    ],
+  );
+
   const node = renderedProjection.nodes[renderedProjection.rootNodeId];
 
   return (
@@ -1009,6 +1116,8 @@ function SurfaceRenderer<TSnapshot, TCommand, TResult>({
       data-geometry-mode={layoutSolver === undefined ? "projection" : "model"}
       data-responsive-projection={compact ? "single-region" : "full-layout"}
       data-panel-drag-state="idle"
+      data-group-drag-state="idle"
+      data-group-drop-enabled={String(commands.planGroupDrop !== undefined)}
       data-panel-drop-enabled={String(
         commands.planPanelDrop !== undefined ||
           commands.reorderPanel !== undefined ||
@@ -1072,8 +1181,10 @@ function SurfaceRenderer<TSnapshot, TCommand, TResult>({
             }}
             movePanelId={movePanelId}
             setMovePanelId={setMovePanelId}
+            setMoveGroupId={setMoveGroupId}
             tabPresentation={tabPresentation}
             panelDrag={panelDrag}
+            groupDrag={groupDrag}
             commitPanelDrop={commitPanelDrop}
             requestExternalPanel={requestExternalPanel}
             externalPanelAvailable={onExternalPanelRequest !== undefined}
@@ -1241,8 +1352,10 @@ function SurfaceRenderer<TSnapshot, TCommand, TResult>({
                     }}
                     movePanelId={movePanelId}
                     setMovePanelId={setMovePanelId}
+                    setMoveGroupId={setMoveGroupId}
                     tabPresentation={tabPresentation}
                     panelDrag={panelDrag}
+                    groupDrag={groupDrag}
                     commitPanelDrop={commitPanelDrop}
                     requestExternalPanel={requestExternalPanel}
                     externalPanelAvailable={onExternalPanelRequest !== undefined}
@@ -1265,6 +1378,7 @@ function SurfaceRenderer<TSnapshot, TCommand, TResult>({
 
       <div className="pf-overlay-layer" data-workspace-layer="overlay">
         <PanelDragOverlay overlayRef={panelDrag.overlayRef} />
+        <GroupDragOverlay overlayRef={groupDrag.overlayRef} />
         {movePanelId !== undefined ? (
           <KeyboardMoveOverlay
             panel={projection.panels[movePanelId]}
@@ -1421,6 +1535,31 @@ function SurfaceRenderer<TSnapshot, TCommand, TResult>({
             }}
           />
         ) : null}
+        {moveGroupId !== undefined ? (
+          <KeyboardGroupMoveOverlay
+            group={projection.groups[moveGroupId]}
+            candidates={keyboardGroupDropCandidates}
+            messages={messages}
+            announce={announce}
+            onMove={(candidate) => {
+              const groupId = moveGroupId;
+              commitGroupDrop(
+                candidate.request,
+                candidate.label,
+                "keyboard",
+                candidate.plan.command,
+              );
+              setMoveGroupId(undefined);
+              restoreGroupMoveHandle(groupId);
+            }}
+            onCancel={() => {
+              const groupId = moveGroupId;
+              setMoveGroupId(undefined);
+              announce(messages.moveCancelled());
+              restoreGroupMoveHandle(groupId);
+            }}
+          />
+        ) : null}
       </div>
 
       <PanelPortals
@@ -1478,8 +1617,10 @@ interface LayoutNodeProps<TCommand, TResult> {
   readonly registerSlot: (groupId: string, element: HTMLDivElement | null) => void;
   readonly movePanelId: string | undefined;
   readonly setMovePanelId: (panelId: string | undefined) => void;
+  readonly setMoveGroupId: (groupId: string | undefined) => void;
   readonly tabPresentation: WorkspaceTabPresentation | WorkspaceTabPresentationResolver | undefined;
   readonly panelDrag: PanelDragController;
+  readonly groupDrag: GroupDragController;
   readonly commitPanelDrop: (
     request: WorkspacePanelDropRequest,
     label: string,
@@ -1953,8 +2094,10 @@ function PanelGroup<TCommand, TResult>({
   closePanel,
   registerSlot,
   setMovePanelId,
+  setMoveGroupId,
   tabPresentation,
   panelDrag,
+  groupDrag,
   commitPanelDrop,
   requestExternalPanel,
   externalPanelAvailable,
@@ -1978,6 +2121,7 @@ function PanelGroup<TCommand, TResult>({
     ? undefined
     : commands.floatPanel;
   const createDropPanelCommand = commands.planPanelDrop;
+  const createDropGroupCommand = commands.planGroupDrop;
   const createMergeGroupCommand = commands.mergeGroup;
   const presentation = resolveTabPresentation(tabPresentation, group, projection);
   const orientation =
@@ -1987,6 +2131,13 @@ function PanelGroup<TCommand, TResult>({
   const rootRect = resolvedLayout.nodeRects[resolvedLayout.rootNodeId] ?? groupRect;
   const acquisitionRect = emptyGroupAcquisitionRect(group, groupRect, rootRect);
   const emptyGroupLabel = group.label ?? messages.panelGroupFallback();
+  const hasVisibleGroupDropTarget = Object.keys(resolvedLayout.groupRects).some(
+    (groupId) => groupId !== group.id,
+  );
+  const moveContainerLabel =
+    createDropGroupCommand === undefined || empty || !hasVisibleGroupDropTarget
+      ? undefined
+      : interactionMessages.movePanelContainer({ group: emptyGroupLabel });
   const mergeTarget =
     createMergeGroupCommand === undefined ? undefined : adjacentGroupForNode(projection, nodeId);
   const mergeTargetLabel = mergeTarget?.label ?? messages.groupFallback();
@@ -2324,6 +2475,7 @@ function PanelGroup<TCommand, TResult>({
             createReorderPanelCommand === undefined &&
             createFloatPanelCommand === undefined &&
             createDropPanelCommand === undefined &&
+            moveContainerLabel === undefined &&
             removeContainerLabel === undefined &&
             !externalPanelAvailable) ? null : (
             <div
@@ -2331,6 +2483,30 @@ function PanelGroup<TCommand, TResult>({
               className="pf-tab-controls"
               data-workspace-panel-controls={selectedPanel.id}
             >
+              {moveContainerLabel === undefined ? null : (
+                <button
+                  id={groupMoveHandleId(domIdPrefix, group.id)}
+                  className="pf-group-move"
+                  type="button"
+                  aria-label={moveContainerLabel}
+                  title={moveContainerLabel}
+                  data-workspace-group-drag-handle={group.id}
+                  onClick={() => {
+                    if (groupDrag.consumeClick(group.id)) return;
+                    setMoveGroupId(group.id);
+                  }}
+                  onPointerDown={(event) => {
+                    groupDrag.begin(group, event);
+                  }}
+                  onPointerMove={groupDrag.move}
+                  onPointerUp={groupDrag.finish}
+                  onPointerCancel={groupDrag.cancel}
+                  onLostPointerCapture={groupDrag.cancel}
+                  onKeyDown={groupDrag.keyDown}
+                >
+                  <span aria-hidden="true">⠿</span>
+                </button>
+              )}
               {selectedPanel.closable === false ? null : (
                 <button
                   className="pf-tab-close"
@@ -2859,6 +3035,105 @@ function KeyboardMoveOverlay({
   );
 }
 
+interface KeyboardGroupMoveOverlayProps<TCommand> {
+  readonly group: WorkspaceGroupView | undefined;
+  readonly candidates: readonly GroupDropCandidate<TCommand>[];
+  readonly messages: WorkspaceMessageCatalog;
+  readonly announce: (message: string) => void;
+  readonly onMove: (candidate: GroupDropCandidate<TCommand>) => void;
+  readonly onCancel: () => void;
+}
+
+function KeyboardGroupMoveOverlay<TCommand>({
+  group,
+  candidates,
+  messages,
+  announce,
+  onMove,
+  onCancel,
+}: KeyboardGroupMoveOverlayProps<TCommand>) {
+  const [index, setIndex] = useState(0);
+  const overlayRef = useRef<HTMLDivElement>(null);
+  const announcedDestinationIdRef = useRef<string | undefined>(undefined);
+  const interactionMessages = resolveWorkspaceInteractionMessages(messages);
+  const normalizedIndex = candidates.length === 0 ? 0 : Math.min(index, candidates.length - 1);
+  const selectedCandidate = candidates[normalizedIndex];
+
+  useEffect(() => {
+    overlayRef.current?.focus();
+  }, []);
+
+  useEffect(() => {
+    if (
+      selectedCandidate === undefined ||
+      announcedDestinationIdRef.current === selectedCandidate.id
+    ) {
+      return;
+    }
+    announcedDestinationIdRef.current = selectedCandidate.id;
+    announce(selectedCandidate.label);
+  }, [announce, selectedCandidate]);
+
+  return (
+    <div
+      ref={overlayRef}
+      className="pf-keyboard-move"
+      role="dialog"
+      aria-label={interactionMessages.movePanelContainer({
+        group: group?.label ?? messages.panelGroupFallback(),
+      })}
+      tabIndex={-1}
+      onKeyDown={(event) => {
+        if (event.key === "Escape") {
+          event.preventDefault();
+          onCancel();
+          return;
+        }
+        if (event.key === "ArrowRight" || event.key === "ArrowDown" || event.key === "Tab") {
+          event.preventDefault();
+          const delta = event.key === "Tab" && event.shiftKey ? -1 : 1;
+          setIndex(
+            (value) =>
+              (value + delta + Math.max(1, candidates.length)) % Math.max(1, candidates.length),
+          );
+          return;
+        }
+        if (event.key === "ArrowLeft" || event.key === "ArrowUp") {
+          event.preventDefault();
+          setIndex(
+            (value) =>
+              (value - 1 + Math.max(1, candidates.length)) % Math.max(1, candidates.length),
+          );
+          return;
+        }
+        if (event.key === "Home" && candidates.length > 0) {
+          event.preventDefault();
+          setIndex(0);
+          return;
+        }
+        if (event.key === "End" && candidates.length > 0) {
+          event.preventDefault();
+          setIndex(candidates.length - 1);
+          return;
+        }
+        if (event.key === "Enter" && selectedCandidate !== undefined) {
+          event.preventDefault();
+          onMove(selectedCandidate);
+        }
+      }}
+    >
+      <p className="pf-keyboard-move-eyebrow">{messages.chooseDestination()}</p>
+      <strong>{selectedCandidate?.label ?? messages.noAvailableGroup()}</strong>
+      <p>{messages.moveInstructions()}</p>
+      <div className="pf-keyboard-move-dots" aria-hidden="true">
+        {candidates.map((candidate, candidateIndex) => (
+          <span key={candidate.id} data-current={String(candidateIndex === normalizedIndex)} />
+        ))}
+      </div>
+    </div>
+  );
+}
+
 interface KeyboardPanelDestination {
   readonly id: string;
   readonly kind: "group" | "edge" | "external";
@@ -3156,6 +3431,10 @@ function panelControlsId(prefix: string, panelId: string) {
 
 function panelActionsId(prefix: string, panelId: string) {
   return `${prefix}-actions-${encodeDomId(panelId)}`;
+}
+
+function groupMoveHandleId(prefix: string, groupId: string) {
+  return `${prefix}-group-move-${encodeDomId(groupId)}`;
 }
 
 function menuItems(menu: HTMLDivElement | null) {
