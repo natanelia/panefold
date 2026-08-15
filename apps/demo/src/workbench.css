@@ -1,3 +1,5 @@
+@layer workspace, demo, workspace-single-tab-row;
+
 @import "@panefold/react/styles.css";
 @import "./styles.css";
 @import "@panefold/react/hide-single-tab-row.css";
