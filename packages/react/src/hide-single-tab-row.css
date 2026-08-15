@@ -10,8 +10,7 @@
     position: relative;
   }
 
-  :where(.pf-hide-single-tab-row)
-    .pf-tab-strip:has(> .pf-tab-list > .pf-tab:only-child) {
+  :where(.pf-hide-single-tab-row) .pf-tab-strip:has(> .pf-tab-list > .pf-tab:only-child) {
     position: relative;
     min-inline-size: 0;
     min-block-size: 0;
@@ -142,9 +141,7 @@
 
   :where(.pf-hide-single-tab-row)
     .pf-floating-titlebar[data-compact-header="true"]
-    > .pf-floating-header-slot:has(
-      > .pf-tab-strip > .pf-tab-list > .pf-tab:only-child
-    ) {
+    > .pf-floating-header-slot:has(> .pf-tab-strip > .pf-tab-list > .pf-tab:only-child) {
     flex: 0 1 auto;
     min-inline-size: 0;
     margin-inline-start: 12px;
