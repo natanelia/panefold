@@ -1000,7 +1000,7 @@
       "verificationClass": "environment-verifiable",
       "artifactRole": "result",
       "uri": "repo://conformance/results/chromium-reference-2026-08-14.json",
-      "sha256": "6b876b0e3ffbbe693aadce22bead3511937b5d5e90ff3fa883833c8e56225192",
+      "sha256": "5a360c0541bf57b1b438f43062e6cb91bcc2680a3f30b2aca4ba6f59428b9ec6",
       "producedAt": "2026-08-14T07:19:51.074Z",
       "requirementIds": [
         "A11Y-002",
