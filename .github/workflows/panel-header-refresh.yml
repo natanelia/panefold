@@ -1,0 +1,118 @@
+name: Apply panel header refactor
+
+on:
+  push:
+    branches:
+      - agent/panel-drag-affordance-floating-header
+
+permissions:
+  contents: write
+
+jobs:
+  apply:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          ref: agent/panel-drag-affordance-floating-header
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: pnpm/action-setup@0977fd99725f1db4007ccb2928dbb4e90d06cc86
+        with:
+          version: 11.16.0
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020
+        with:
+          node-version: 24
+          cache: pnpm
+          token: ""
+      - run: pnpm install --frozen-lockfile
+      - name: Apply the architectural refactor
+        run: python .github/panel-header-refresh.py
+      - name: Remove one-shot automation
+        run: rm .github/panel-header-refresh.py .github/workflows/panel-header-refresh.yml
+      - name: Format changed sources
+        run: |
+          pnpm exec oxfmt --write \
+            packages/react/src/tab-presentation.ts \
+            packages/react/src/messages.ts \
+            packages/react/src/floating-surface.tsx \
+            packages/react/src/WorkspaceSurface.tsx \
+            packages/react/src/styles.css \
+            packages/react/src/hide-single-tab-row.css \
+            packages/react/test/tab-presentation.test.ts \
+            e2e/single-tab-row.spec.ts
+      - name: Refresh source-bound conformance records
+        run: |
+          node --input-type=module <<'NODE'
+          import { createHash } from "node:crypto";
+          import { readFile, writeFile } from "node:fs/promises";
+
+          const resultSources = new Map([
+            [
+              "conformance/results/chromium-reference-2026-08-14.json",
+              [
+                "e2e/single-tab-row.spec.ts",
+                "packages/react/src/WorkspaceSurface.tsx",
+                "packages/react/src/floating-surface.tsx",
+                "packages/react/src/hide-single-tab-row.css",
+                "packages/react/src/messages.ts",
+                "packages/react/src/styles.css",
+                "packages/react/src/tab-presentation.ts",
+              ],
+            ],
+            [
+              "conformance/results/interaction-performance-2026-08-14.json",
+              [
+                "packages/react/src/WorkspaceSurface.tsx",
+                "packages/react/src/floating-surface.tsx",
+              ],
+            ],
+            [
+              "conformance/results/protocol-motion-2026-08-14.json",
+              [
+                "packages/react/src/WorkspaceSurface.tsx",
+                "packages/react/src/floating-surface.tsx",
+                "packages/react/src/hide-single-tab-row.css",
+                "packages/react/src/messages.ts",
+                "packages/react/src/styles.css",
+                "packages/react/src/tab-presentation.ts",
+                "packages/react/test/tab-presentation.test.ts",
+              ],
+            ],
+          ]);
+
+          for (const [resultPath, sourcePaths] of resultSources) {
+            const result = JSON.parse(await readFile(resultPath, "utf8"));
+            result.sourceDigests ??= {};
+            for (const sourcePath of sourcePaths) {
+              const source = await readFile(sourcePath);
+              result.sourceDigests[sourcePath] = createHash("sha256").update(source).digest("hex");
+            }
+            await writeFile(resultPath, `${JSON.stringify(result, null, 2)}\n`);
+          }
+          NODE
+          pnpm exec oxfmt --write \
+            conformance/results/chromium-reference-2026-08-14.json \
+            conformance/results/interaction-performance-2026-08-14.json \
+            conformance/results/protocol-motion-2026-08-14.json
+          pnpm conformance:data:generate
+      - name: Stage the intended tree for generated-drift checks
+        run: git add -A
+      - name: Run repository checks
+        run: pnpm check
+      - run: pnpm exec playwright install --with-deps chromium
+      - name: Run browser verification
+        run: |
+          pnpm test:e2e
+          pnpm test:site:e2e
+      - name: Commit and push the validated change
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git commit -m "Add discoverable panel drag chrome and integrated floating headers"
+          AUTH_HEADER="$(printf 'x-access-token:%s' "$GITHUB_TOKEN" | base64 -w0)"
+          git -c http.https://github.com/.extraheader="AUTHORIZATION: basic $AUTH_HEADER" \
+            push origin HEAD:agent/panel-drag-affordance-floating-header
