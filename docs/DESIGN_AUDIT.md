@@ -283,29 +283,32 @@ shape; route-specific React and browser tests are the behavioral evidence. Conse
 and `INT-004` remain unresolved until every listed route is machine-bound to those tests and the
 complete Appendix G action set is covered.
 
-| Declared command             | Renderer-backed routes found                                                     | Material discrepancy                                                                                    |
-| ---------------------------- | -------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------- |
-| `select-panel`               | Pointer, keyboard, programmatic adapter                                          | No discrepancy for the declared routes.                                                                 |
-| `activate-panel`             | Keyboard and programmatic adapter                                                | Pointer clicks select; they do not claim a distinct `activate-panel` route.                             |
-| `reorder-panels`             | Pointer drag, keyboard neighbor step, menu neighbor action, programmatic adapter | Focused tests bind all four routes; the global parity requirements remain open because other rows fail. |
-| `move-panel`                 | Pointer center drop, keyboard move dialog, menu target, programmatic adapter     | No command-palette route is claimed.                                                                    |
-| `split-group`                | Pointer edge drop, keyboard move dialog, menu edge, programmatic drop plan       | No command-palette route is claimed.                                                                    |
-| `resize-split`               | Pointer splitter, keyboard splitter, programmatic adapter                        | No discrepancy for the declared routes.                                                                 |
-| `close-panels`               | Pointer close control, keyboard Delete/control activation, programmatic adapter  | No menu or command-palette route is claimed.                                                            |
-| `create-floating-surface`    | Optional menu action and core/programmatic command                               | No direct pointer route is claimed.                                                                     |
-| `move-floating-surface`      | Pointer titlebar drag, keyboard titlebar step, programmatic adapter              | Snap and tile routes are not claimed.                                                                   |
-| `resize-floating-surface`    | Pointer edge/corner drag, keyboard corner step, programmatic adapter             | Product-specific panel constraints remain application policy.                                           |
-| `raise-surface`              | Pointer activation, keyboard titlebar activation, programmatic adapter           | Platform window z-order is outside this in-page route.                                                  |
-| `maximize-surface`           | Pointer/keyboard control and programmatic adapter                                | Uses the current in-page workspace viewport.                                                            |
-| `restore-surface`            | Pointer/keyboard control and programmatic adapter                                | Restores minimized or maximized in-page state.                                                          |
-| `minimize-surface`           | Pointer/keyboard control and programmatic adapter                                | Minimized presentation remains in-page rather than an OS taskbar.                                       |
-| `redock-surface`             | Pointer/keyboard control and application-selected programmatic placement         | The application adapter owns the semantic target; external redock still uses ownership evidence.        |
-| `transfer-to-browser-window` | Pointer outside release, keyboard/menu action, application programmatic command  | The controlled same-origin Atlas profile is narrower than the generic core command.                     |
+| Declared command             | Renderer-backed routes found                                                             | Material discrepancy                                                                                        |
+| ---------------------------- | ---------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------- |
+| `select-panel`               | Pointer, keyboard, programmatic adapter                                                  | No discrepancy for the declared routes.                                                                     |
+| `activate-panel`             | Keyboard and programmatic adapter                                                        | Pointer clicks select; they do not claim a distinct `activate-panel` route.                                 |
+| `reorder-panels`             | Pointer drag, keyboard neighbor step, menu neighbor action, programmatic adapter         | Focused tests bind all four routes; the global parity requirements remain open because other rows fail.     |
+| `move-panel`                 | Pointer center drop, keyboard move dialog, menu target, programmatic adapter             | No command-palette route is claimed.                                                                        |
+| `move-group`                 | Pointer edge drop, keyboard or Actions-menu destination dialog, programmatic drop plan   | Whole-container placement retains group identity and all ordered tabs; no command-palette route is claimed. |
+| `swap-groups`                | Pointer center drop, keyboard or Actions-menu destination dialog, programmatic drop plan | Center placement swaps intact containers; no command-palette route is claimed.                              |
+| `split-group`                | Pointer edge drop, keyboard move dialog, menu edge, programmatic drop plan               | No command-palette route is claimed.                                                                        |
+| `resize-split`               | Pointer splitter, keyboard splitter, programmatic adapter                                | No discrepancy for the declared routes.                                                                     |
+| `close-panels`               | Pointer close control, keyboard Delete/control activation, programmatic adapter          | No menu or command-palette route is claimed.                                                                |
+| `create-floating-surface`    | Optional menu action and core/programmatic command                                       | No direct pointer route is claimed.                                                                         |
+| `move-floating-surface`      | Pointer titlebar drag, keyboard titlebar step, programmatic adapter                      | Snap and tile routes are not claimed.                                                                       |
+| `resize-floating-surface`    | Pointer edge/corner drag, keyboard corner step, programmatic adapter                     | Product-specific panel constraints remain application policy.                                               |
+| `raise-surface`              | Pointer activation, keyboard titlebar activation, programmatic adapter                   | Platform window z-order is outside this in-page route.                                                      |
+| `maximize-surface`           | Pointer/keyboard control and programmatic adapter                                        | Uses the current in-page workspace viewport.                                                                |
+| `restore-surface`            | Pointer/keyboard control and programmatic adapter                                        | Restores minimized or maximized in-page state.                                                              |
+| `minimize-surface`           | Pointer/keyboard control and programmatic adapter                                        | Minimized presentation remains in-page rather than an OS taskbar.                                           |
+| `redock-surface`             | Pointer/keyboard control and application-selected programmatic placement                 | The application adapter owns the semantic target; external redock still uses ownership evidence.            |
+| `transfer-to-browser-window` | Pointer outside release, keyboard/menu action, application programmatic command          | The controlled same-origin Atlas profile is narrower than the generic core command.                         |
 
-Core-only move-group remains omitted instead of being presented as a renderer feature. The inventory
-still does not cover all actions in Appendix G, such as reopen, merge, focus-next-group, switcher,
-undo, and preset application. The durable remaining fix is a renderer-owned route inventory generated from public
-capabilities and route-specific tests; corrected declaration strings alone are not sufficient.
+Whole-container `move-group` and `swap-groups` are now renderer-backed rather than core-only. The
+inventory still does not cover all actions in Appendix G, such as reopen, merge, focus-next-group,
+switcher, undo, and preset application. The durable remaining fix is a renderer-owned route inventory
+generated from public capabilities and route-specific tests; corrected declaration strings alone
+are not sufficient.
 
 ## Genuine remaining gaps
 

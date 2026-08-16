@@ -49,6 +49,11 @@ describe("structural action parity", () => {
     for (const entry of STRUCTURAL_ACTION_PARITY) {
       expect(WORKSPACE_COMMAND_TYPES).toContain(entry.commandType);
     }
+    for (const commandType of ["move-group", "swap-groups"] as const) {
+      expect(
+        STRUCTURAL_ACTION_PARITY.find((entry) => entry.commandType === commandType)?.routes,
+      ).toContain("menu");
+    }
   });
 });
 
