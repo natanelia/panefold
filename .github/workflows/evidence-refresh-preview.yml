@@ -54,8 +54,14 @@ jobs:
           NODE
       - name: Regenerate derived evidence
         run: |
+          result_paths=(
+            conformance/results/chromium-reference-2026-08-14.json
+            conformance/results/interaction-performance-2026-08-14.json
+            conformance/results/protocol-motion-2026-08-14.json
+          )
+          pnpm exec prettier --write "${result_paths[@]}"
           pnpm conformance:data:generate
-          pnpm format:check
+          pnpm exec prettier --check "${result_paths[@]}" conformance/evidence.json
           git diff --check
       - name: Commit generated evidence
         env:
