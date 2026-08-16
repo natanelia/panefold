@@ -1,0 +1,36 @@
+@layer workspace, demo, workspace-single-tab-row;
+
+@import "@panefold/react/styles.css";
+@import "./styles.css";
+@import "@panefold/react/hide-single-tab-row.css";
+
+@layer demo {
+  .demo-external-app {
+    font-size: 12px;
+  }
+
+  .demo-external-header {
+    gap: 8px;
+    padding: 8px 12px;
+  }
+
+  .demo-external-header div {
+    gap: 1px;
+  }
+
+  .demo-external-header span {
+    font-size: 9px;
+    line-height: 1.2;
+  }
+
+  .demo-external-header strong {
+    font-size: 12px;
+    line-height: 1.25;
+  }
+
+  .demo-external-header button {
+    padding: 4px 8px;
+    font-size: 11px;
+    line-height: 1.25;
+  }
+}

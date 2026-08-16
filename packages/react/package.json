@@ -4,18 +4,21 @@
   "private": true,
   "type": "module",
   "sideEffects": [
-    "./src/styles.css"
+    "./src/styles.css",
+    "./src/hide-single-tab-row.css"
   ],
   "files": [
     "dist",
-    "src/styles.css"
+    "src/styles.css",
+    "src/hide-single-tab-row.css"
   ],
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
       "import": "./dist/index.js"
     },
-    "./styles.css": "./src/styles.css"
+    "./styles.css": "./src/styles.css",
+    "./hide-single-tab-row.css": "./src/hide-single-tab-row.css"
   },
   "peerDependencies": {
     "react": ">=19",
