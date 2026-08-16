@@ -154,7 +154,21 @@ jobs:
       - name: Stage the intended tree for generated-drift checks
         run: git add -A
       - name: Run repository checks
-        run: pnpm check
+        run: |
+          set +e
+          pnpm check > /tmp/panefold-check.log 2>&1
+          status=$?
+          set -e
+          if [ "$status" -ne 0 ]; then
+            echo "::group::Failure summary"
+            grep -nE "(FAIL|Error|error|failed|ELIFECYCLE|✗|×)" /tmp/panefold-check.log | tail -n 100 || true
+            echo "::endgroup::"
+            echo "::group::Last 260 lines of pnpm check"
+            tail -n 260 /tmp/panefold-check.log
+            echo "::endgroup::"
+            exit "$status"
+          fi
+          cat /tmp/panefold-check.log
       - run: pnpm exec playwright install --with-deps chromium
       - name: Run browser verification
         run: |
