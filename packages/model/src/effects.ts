@@ -2,7 +2,10 @@ import { isWorkspaceCommandType, type CommandOrigin, type WorkspaceCommandType }
 import { effectIntentId, type CommandId, type EffectIntentId, type Revision } from "./ids";
 
 export type EffectIntentClass =
-  "prepare" | "post-commit-idempotent" | "compensatable" | "observational";
+  | "prepare"
+  | "post-commit-idempotent"
+  | "compensatable"
+  | "observational";
 
 export interface TransactionCommittedEffectPayload {
   readonly commandType: WorkspaceCommandType;

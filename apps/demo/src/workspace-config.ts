@@ -17,15 +17,19 @@ import {
   type WorkspaceCommand,
   type WorkspaceSnapshot,
 } from "@panefold/model";
-import { solveLayout } from "@panefold/geometry";
+import { solveLayout, type LogicalRect } from "@panefold/geometry";
 import {
   canonicalizeWorkspace,
+  planGroupDropCommand,
   planPanelDropCommand,
   reduceWorkspace,
   validateWorkspace,
 } from "@panefold/kernel";
 import type {
   WorkspaceCommandAdapter,
+  WorkspaceGroupDropRequest,
+  WorkspaceGroupDropPlan,
+  WorkspaceGroupDropPlanContext,
   WorkspacePanelDropRequest,
   WorkspacePanelDropPlan,
   WorkspacePanelDropPlanContext,
@@ -410,6 +414,7 @@ export function createDemoCommands(
       target: { groupId: demoRedockTarget(getSnapshot()) },
     }),
     planPanelDrop: (request, context) => planDemoPanelDrop(getSnapshot(), request, context),
+    planGroupDrop: (request, context) => planDemoGroupDrop(getSnapshot(), request, context),
   };
 }
 
@@ -555,18 +560,67 @@ function planDemoPanelDrop(
   );
   if (!plan.ok) return undefined;
 
+  return previewDemoDrop(
+    snapshot,
+    plan.command,
+    (next) => {
+      const resultingGroups = next.groups.ids
+        .map((id) => getEntity(next.groups, id))
+        .filter((group) => group?.panelIds.includes(panelId(request.panel.id)));
+      return resultingGroups.length === 1 ? resultingGroups[0] : undefined;
+    },
+    context,
+  );
+}
+
+function planDemoGroupDrop(
+  snapshot: WorkspaceSnapshot,
+  request: WorkspaceGroupDropRequest,
+  context: WorkspaceGroupDropPlanContext,
+): WorkspaceGroupDropPlan<WorkspaceCommand> | undefined {
+  if (request.revision !== snapshot.revision.toString()) return undefined;
+  const plan = planGroupDropCommand(
+    snapshot,
+    {
+      groupId: groupId(request.sourceGroup.id),
+      target:
+        request.target.kind === "swap"
+          ? { kind: "swap", groupId: groupId(request.targetGroup.id) }
+          : {
+              kind: "edge",
+              groupId: groupId(request.targetGroup.id),
+              edge: request.target.edge,
+              ratio: request.target.ratio,
+            },
+    },
+    { splitNodeId: allocateGroupDropSplitId(snapshot, request.sourceGroup.id) },
+  );
+  if (!plan.ok) return undefined;
+  return previewDemoDrop(
+    snapshot,
+    plan.command,
+    (next) => getEntity(next.groups, groupId(request.sourceGroup.id)),
+    context,
+  );
+}
+
+function previewDemoDrop<TCommand extends WorkspaceCommand>(
+  snapshot: WorkspaceSnapshot,
+  command: TCommand,
+  findResultingGroup: (snapshot: WorkspaceSnapshot) => GroupRecord | undefined,
+  context: {
+    readonly bounds: LogicalRect;
+    readonly splitterSize: number;
+  },
+): { readonly command: TCommand; readonly previewRect: LogicalRect } | undefined {
   // Preview the exact semantic command retained for pointerup. Reducing and
   // canonicalizing against the same immutable revision mirrors kernel
   // execution without dispatching or mutating the live runtime.
-  const reduced = reduceWorkspace(snapshot, plan.command);
+  const reduced = reduceWorkspace(snapshot, command);
   if (!reduced.ok) return undefined;
   const next = canonicalizeWorkspace(reduced.snapshot).snapshot;
   if (validateWorkspace(next).length > 0) return undefined;
-  const resultingGroups = next.groups.ids
-    .map((id) => getEntity(next.groups, id))
-    .filter((group) => group?.panelIds.includes(panelId(request.panel.id)));
-  if (resultingGroups.length !== 1) return undefined;
-  const resultingGroup = resultingGroups[0];
+  const resultingGroup = findResultingGroup(next);
   if (resultingGroup === undefined) return undefined;
   const resultingNode = next.nodes.ids
     .map((id) => getEntity(next.nodes, id))
@@ -585,7 +639,7 @@ function planDemoPanelDrop(
   });
   const previewRect = layout.groupRects[String(resultingGroup.id)];
   if (previewRect === undefined) return undefined;
-  return Object.freeze({ command: plan.command, previewRect: Object.freeze({ ...previewRect }) });
+  return Object.freeze({ command, previewRect: Object.freeze({ ...previewRect }) });
 }
 
 /**
@@ -608,6 +662,14 @@ function allocateDropIds(snapshot: WorkspaceSnapshot, panelIdValue: string) {
     }
   }
   throw new Error(`No placement identity remains available for panel ${panelIdValue}`);
+}
+
+function allocateGroupDropSplitId(snapshot: WorkspaceSnapshot, groupIdValue: string) {
+  for (let candidate = 1; candidate < Number.MAX_SAFE_INTEGER; candidate += 1) {
+    const splitNodeId = nodeId(`group-drag-split:${groupIdValue}:${String(candidate)}`);
+    if (getEntity(snapshot.nodes, splitNodeId) === undefined) return splitNodeId;
+  }
+  throw new Error(`No group-drop identity remains available for group ${groupIdValue}`);
 }
 
 function collectReachableNodeIds(

@@ -122,7 +122,11 @@ export interface WorkspacePanelRenderProps {
 
 export type WorkspacePanelLifecycle = "active" | "visible" | "suspended";
 export type WorkspacePanelLifecycleReason =
-  "mount" | "activation" | "selection" | "same-document-move" | "policy-change";
+  | "mount"
+  | "activation"
+  | "selection"
+  | "same-document-move"
+  | "policy-change";
 
 export interface WorkspacePanelLifecycleChange {
   readonly panelId: string;
@@ -158,6 +162,26 @@ export interface WorkspacePanelDropRequest {
   readonly targetNodeId: string;
   readonly target:
     | { readonly kind: "center"; readonly ratio: 1 }
+    | {
+        readonly kind: "edge";
+        readonly edge: WorkspaceLogicalEdge;
+        readonly ratio: number;
+      };
+}
+
+export interface WorkspaceGroupDropRequest {
+  /** Projection revision whose geometry and group context produced this request. */
+  readonly revision: string;
+  /** Immutable source container and ordered panels from the previewed revision. */
+  readonly sourceGroup: WorkspaceGroupView;
+  readonly sourcePanels: readonly WorkspacePanelView[];
+  readonly sourceNodeId: string;
+  /** Immutable target container and ordered panels from the previewed revision. */
+  readonly targetGroup: WorkspaceGroupView;
+  readonly targetPanels: readonly WorkspacePanelView[];
+  readonly targetNodeId: string;
+  readonly target:
+    | { readonly kind: "swap" }
     | {
         readonly kind: "edge";
         readonly edge: WorkspaceLogicalEdge;
@@ -266,6 +290,15 @@ export interface WorkspaceCommandAdapter<TCommand> {
     request: WorkspacePanelDropRequest,
     context: WorkspacePanelDropPlanContext,
   ) => WorkspacePanelDropPlan<TCommand> | undefined;
+  /**
+   * Pure, revision-bound whole-container plan. A center target swaps intact
+   * groups; an edge target moves the source group beside the target. The
+   * application retains ownership of topology, IDs, constraints, and policy.
+   */
+  readonly planGroupDrop?: (
+    request: WorkspaceGroupDropRequest,
+    context: WorkspaceGroupDropPlanContext,
+  ) => WorkspaceGroupDropPlan<TCommand> | undefined;
 }
 
 export interface WorkspacePanelDropPlanContext {
@@ -277,6 +310,19 @@ export interface WorkspacePanelDropPlanContext {
 
 export interface WorkspacePanelDropPlan<TCommand> {
   readonly command: TCommand;
+  readonly previewRect: LogicalRect;
+}
+
+export interface WorkspaceGroupDropPlanContext {
+  /** Resolved root bounds of the same-document surface containing the target. */
+  readonly bounds: LogicalRect;
+  readonly targetRect: LogicalRect;
+  readonly splitterSize: number;
+}
+
+export interface WorkspaceGroupDropPlan<TCommand> {
+  readonly command: TCommand;
+  /** Exact resulting rectangle of the moved source container. */
   readonly previewRect: LogicalRect;
 }
 

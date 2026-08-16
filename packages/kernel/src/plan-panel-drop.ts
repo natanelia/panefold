@@ -9,6 +9,7 @@ import {
   type PanelId,
   type SplitGroupCommand,
   type SurfaceRecord,
+  type SwapGroupsCommand,
   type WorkspaceSnapshot,
 } from "@panefold/model";
 
@@ -41,10 +42,16 @@ export interface PanelDropIds {
 }
 
 export type PanelDropPlannedCommand =
-  MovePanelCommand | MoveGroupCommand | SplitGroupCommand | BatchWorkspaceCommand;
+  | MovePanelCommand
+  | MoveGroupCommand
+  | SplitGroupCommand
+  | BatchWorkspaceCommand;
 
 export type PanelDropPlanRejectionCode =
-  "PANEL_NOT_FOUND" | "SOURCE_GROUP_NOT_FOUND" | "TARGET_GROUP_NOT_FOUND" | "INVALID_DROP";
+  | "PANEL_NOT_FOUND"
+  | "SOURCE_GROUP_NOT_FOUND"
+  | "TARGET_GROUP_NOT_FOUND"
+  | "INVALID_DROP";
 
 export type PanelDropPlanResult =
   | { readonly ok: true; readonly command: PanelDropPlannedCommand }
@@ -54,12 +61,48 @@ export type PanelDropPlanResult =
       readonly message: string;
     };
 
-function rejected(code: PanelDropPlanRejectionCode, message: string): PanelDropPlanResult {
-  return Object.freeze({ ok: false, code, message });
+export type GroupDropTarget =
+  | { readonly kind: "swap"; readonly groupId: GroupId }
+  | {
+      readonly kind: "edge";
+      readonly groupId: GroupId;
+      readonly edge: LogicalEdge;
+      readonly ratio: number;
+    };
+
+export interface GroupDropIntent {
+  readonly groupId: GroupId;
+  readonly target: GroupDropTarget;
 }
 
-function accepted(command: PanelDropPlannedCommand): PanelDropPlanResult {
-  return Object.freeze({ ok: true, command: cloneAndFreeze(command) });
+/** Caller-owned identity keeps edge-move planning pure, deterministic, and replayable. */
+export interface GroupDropIds {
+  readonly splitNodeId: NodeId;
+}
+
+export type GroupDropPlannedCommand = MoveGroupCommand | SwapGroupsCommand;
+
+export type GroupDropPlanRejectionCode =
+  | "SOURCE_GROUP_NOT_FOUND"
+  | "TARGET_GROUP_NOT_FOUND"
+  | "INVALID_DROP";
+
+export type GroupDropPlanResult =
+  | { readonly ok: true; readonly command: GroupDropPlannedCommand }
+  | {
+      readonly ok: false;
+      readonly code: GroupDropPlanRejectionCode;
+      readonly message: string;
+    };
+
+function rejected<TCode extends string>(code: TCode, message: string) {
+  return Object.freeze({ ok: false as const, code, message });
+}
+
+function accepted<TCommand extends PanelDropPlannedCommand | GroupDropPlannedCommand>(
+  command: TCommand,
+) {
+  return Object.freeze({ ok: true as const, command: cloneAndFreeze(command) });
 }
 
 function surfaceForGroup(snapshot: WorkspaceSnapshot, groupId: GroupId): SurfaceRecord | undefined {
@@ -85,6 +128,17 @@ function surfaceForGroup(snapshot: WorkspaceSnapshot, groupId: GroupId): Surface
       return false;
     });
   return owners.length === 1 ? owners[0] : undefined;
+}
+
+function isMainSurfaceRootGroup(snapshot: WorkspaceSnapshot, groupId: GroupId): boolean {
+  const groupNode = snapshot.nodes.ids
+    .map((id) => snapshot.nodes.byId[String(id)])
+    .find((node) => node?.kind === "group" && node.groupId === groupId);
+  if (groupNode === undefined) return false;
+  return snapshot.surfaces.ids.some((id) => {
+    const surface = snapshot.surfaces.byId[String(id)];
+    return surface?.kind === "main" && surface.rootNodeId === groupNode.id;
+  });
 }
 
 function crossesDocumentBoundary(
@@ -220,6 +274,12 @@ export function planPanelDropCommand(
   }
 
   if (source.panelIds.length === 1) {
+    if (isMainSurfaceRootGroup(snapshot, source.id)) {
+      return rejected(
+        "INVALID_DROP",
+        "The main surface root cannot move beside a group on another surface.",
+      );
+    }
     if (!validNewMoveGroupSplitId(snapshot, ids.splitNodeId)) {
       return rejected("INVALID_DROP", "The edge drop requires an unused split node ID.");
     }
@@ -263,5 +323,81 @@ export function planPanelDropCommand(
         ratio: intent.target.ratio,
       },
     ],
+  });
+}
+
+/**
+ * Plans a whole-container drop without converting its tabs into individual
+ * panel moves. Center acquisition swaps two intact groups; edge acquisition
+ * repositions the source group beside the target.
+ */
+export function planGroupDropCommand(
+  snapshot: WorkspaceSnapshot,
+  intent: GroupDropIntent,
+  ids: GroupDropIds,
+): GroupDropPlanResult {
+  const source = snapshot.groups.byId[String(intent.groupId)];
+  if (source === undefined) {
+    return rejected(
+      "SOURCE_GROUP_NOT_FOUND",
+      `Source group "${String(intent.groupId)}" does not exist.`,
+    );
+  }
+  const target = snapshot.groups.byId[String(intent.target.groupId)];
+  if (target === undefined) {
+    return rejected(
+      "TARGET_GROUP_NOT_FOUND",
+      `Target group "${String(intent.target.groupId)}" does not exist.`,
+    );
+  }
+  if (source.id === target.id) {
+    return rejected("INVALID_DROP", "A group cannot be dropped onto itself.");
+  }
+
+  const crossesDocument = crossesDocumentBoundary(snapshot, source.id, target.id);
+  if (crossesDocument === undefined) {
+    return rejected("INVALID_DROP", "The source or target group has no authoritative surface.");
+  }
+  if (crossesDocument) {
+    return rejected(
+      "INVALID_DROP",
+      "A group drop cannot cross a document ownership boundary without a prepared transfer.",
+    );
+  }
+
+  if (intent.target.kind === "swap") {
+    return accepted({
+      type: "swap-groups",
+      firstGroupId: source.id,
+      secondGroupId: target.id,
+    });
+  }
+
+  if (source.panelIds.length === 0) {
+    return rejected("INVALID_DROP", "An empty placeholder group cannot be moved beside a target.");
+  }
+  if (isMainSurfaceRootGroup(snapshot, source.id)) {
+    return rejected(
+      "INVALID_DROP",
+      "The main surface root cannot move beside a group on another surface.",
+    );
+  }
+  if (!hasRepresentableRatio(intent.target.ratio)) {
+    return rejected(
+      "INVALID_DROP",
+      "The edge drop ratio cannot be represented by positive canonical split weights.",
+    );
+  }
+  if (!validNewMoveGroupSplitId(snapshot, ids.splitNodeId)) {
+    return rejected("INVALID_DROP", "The edge drop requires an unused split node ID.");
+  }
+
+  return accepted({
+    type: "move-group",
+    groupId: source.id,
+    targetGroupId: target.id,
+    edge: intent.target.edge,
+    splitNodeId: ids.splitNodeId,
+    ratio: intent.target.ratio,
   });
 }

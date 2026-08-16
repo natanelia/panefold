@@ -1847,7 +1847,6 @@
 
     .demo-app .pf-group[data-tab-orientation="vertical"] .pf-tab,
     .demo-app .pf-tab-close,
-    .demo-app .pf-group-remove,
     .demo-app .pf-tab-more {
       min-inline-size: 44px;
       min-block-size: 44px;
@@ -2192,10 +2191,9 @@
   }
 
   .demo-app .pf-tab-close,
-  .demo-app .pf-group-remove,
   .demo-app .pf-tab-more {
-    inline-size: 22px;
-    block-size: 22px;
+    inline-size: 24px;
+    block-size: 24px;
     border-radius: 3px;
   }
 
@@ -3122,7 +3120,6 @@
 
     .demo-app .pf-tab,
     .demo-app .pf-tab-close,
-    .demo-app .pf-group-remove,
     .demo-app .pf-tab-more {
       min-inline-size: 44px;
       min-block-size: 44px;

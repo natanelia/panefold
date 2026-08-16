@@ -19,6 +19,8 @@ export const STRUCTURAL_ACTION_PARITY: readonly StructuralActionParityEntry[] = 
   action("activate-panel", "Activate panel", ["keyboard", "programmatic"]),
   action("reorder-panels", "Reorder tab", ["pointer", "keyboard", "menu", "programmatic"]),
   action("move-panel", "Move panel", ["pointer", "keyboard", "menu", "programmatic"]),
+  action("move-group", "Move panel container", ["pointer", "keyboard", "menu", "programmatic"]),
+  action("swap-groups", "Swap panel containers", ["pointer", "keyboard", "menu", "programmatic"]),
   action("split-group", "Split group", ["pointer", "keyboard", "menu", "programmatic"]),
   action("resize-split", "Resize split", ["pointer", "keyboard", "programmatic"]),
   action("close-panels", "Close panel", ["pointer", "keyboard", "programmatic"]),

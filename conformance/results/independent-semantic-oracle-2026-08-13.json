@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "kind": "differential-model-result",
   "profile": "compact-react-chromium-desktop",
-  "producedAt": "2026-08-14T01:10:28Z",
+  "producedAt": "2026-08-14T10:13:30.480Z",
   "status": "passed-with-thresholds-unmet",
   "runner": "panefold-differential-campaign",
   "commands": {
@@ -12,8 +12,8 @@
     "suite": "pnpm exec vitest run packages/kernel-optimized/test/benchmark.test.ts packages/kernel-optimized/test/differential.test.ts packages/kernel-optimized/test/independent-reducer.test.ts packages/kernel-optimized/test/persistent-bucket-map.test.ts packages/kernel-optimized/test/projection.test.ts --reporter=json"
   },
   "environment": {
-    "operatingSystem": "Linux 6.18.35 x86_64",
-    "node": "24.14.0",
+    "operatingSystem": "Darwin 25.6.0 arm64",
+    "node": "22.21.0",
     "pnpm": "11.16.0"
   },
   "campaign": {
@@ -29,14 +29,14 @@
     "missingCommandTypes": [],
     "divergenceCount": 0,
     "finalHash": "fnv1a64-v1:a1f58a1b0c635ad1",
-    "elapsedMs": 54545
+    "elapsedMs": 34204
   },
   "suite": {
     "testFiles": 5,
     "tests": 25,
     "passed": 25,
     "failed": 0,
-    "durationMs": 14890
+    "durationMs": 9568
   },
   "checks": {
     "curatedCommandDiscriminants": 36,
@@ -59,9 +59,9 @@
     "generatedOperationTargetMet": false
   },
   "sourceDigests": {
-    "package.json": "5265b6d4fb55e26d18aeae269ab17c520516d0d296a6bb7b885716834b90a1db",
-    "pnpm-lock.yaml": "dce38aee0e6e7d90983daba3fcc585995cd7e0013d2276e7978b409b450f6acf",
-    "pnpm-workspace.yaml": "d6246289194ea6cb29e933f89eccb242ec1c450eec6c65b3350c3fedfa20a519",
+    "package.json": "acd970060c8df0d628cada8c1762111b9c3587031dbdc0e5815fb1e6159147ee",
+    "pnpm-lock.yaml": "e659e90970ee34935228595f2297da307495a7a7b01202ecfa67deaf1ac53209",
+    "pnpm-workspace.yaml": "d51950e32647c121ad667b578a448b703ea5f74637fd91524b7012dd53167169",
     "tsconfig.json": "b80805434d59ff95a362cfbff728ceab0e6313f80ea3c23853cb564c1dfc9a65",
     "tsconfig.base.json": "6a5180d481cd767365ec8da2257e5573e498c5802ce56bda99e0ac218baca818",
     "vitest.config.ts": "6f743b2639e8e091bdc454a4aaa6336a538b889e70af8814ee7d1f27c7a8769e",
@@ -88,7 +88,7 @@
     "packages/kernel/src/index.ts": "b748533828f258065aab94562da4003885a3b3ae47a567358910c37c63bb1e6f",
     "packages/kernel/src/internal.ts": "2572cf6a794c4d80f28255ce287037e8838187f8798caf5c6c8c09720fc8e98d",
     "packages/kernel/src/invariants.ts": "90f29c105afa762de85d1583eb22daebdcb4d66f22f626a1cceb81ddd88f396a",
-    "packages/kernel/src/plan-panel-drop.ts": "0e31fc1bacc61a5f3d7de20cffea99f746481e1c3c6be9c40549a75e1892bbe9",
+    "packages/kernel/src/plan-panel-drop.ts": "61725af35d608d44bdbc6ec6a7079e7e41a9d39e7fcaccb3fae1477cca4df93f",
     "packages/kernel/src/reducer.ts": "210dc3c2521c50b877b401402cd09470e9659bab430e5ff49fb5088a7388a19f",
     "packages/kernel/src/patches.ts": "af7aa2879b5d5b4173f013a3de5fd3bee0cb9b8a5f27d5f97e246e369665487b",
     "packages/kernel/src/hash.ts": "2a84a392f95e694738839f8608474c2051ca3e3893c4c4ee01591344e9c93fca",
@@ -96,11 +96,11 @@
     "packages/model/tsconfig.json": "49477f7be8bc9f2976c250a0297c34809aed00c7d9e57115eaa4ad1722897e9c",
     "packages/model/src/commands.ts": "e4d1dd8edd3fde607ae8f5640a2e9c9b7a4d571724b4847ab945d599d3fa32b7",
     "packages/model/src/entities.ts": "2f8461c6ced824a4d99258dfc3f35e983161cef641779b0d4bcaa72e04d0fd2b",
-    "packages/model/src/effects.ts": "553e13bb20b3da33a97a473734c6b0e053705cb8e7a5d3bb5346f7f552e174cd",
+    "packages/model/src/effects.ts": "1bed7b3eab6289f407357379f2bfa0cc1611dd3f2ef4aec1eb5835bdf811ff8c",
     "packages/model/src/factories.ts": "efb2d00d14f7f93fc249daae477a22e1b3dea8541d9cffc1cb2e1e04651c6b98",
     "packages/model/src/ids.ts": "cbf1947c1c8ed51447a6e3b5d77b04734e0b6b59e588099f442b99c3bde953c1",
     "packages/model/src/index.ts": "894f6d22e3e7612e4ae3ce186e244452247d6111196270901edfbd3544684f0a",
-    "packages/model/src/json.ts": "da96a28fe2302084638cecca527d7f181d4ce088c38d04b371409217dc7ded8c",
+    "packages/model/src/json.ts": "71b1008440a2511a701e7ff4484e0373fd0f0dfac78a39eb099da31f0ee389f5",
     "packages/model/src/panel-registry.ts": "0a84a2ea260b55bf2c8efaa8462aae4e698045865f533d6e937a93ab8af9af5c",
     "packages/model/src/results.ts": "f66a7e790365153a33f72df22e7961890d74f0e1723cf9ed2f13fcdd58c50fec",
     "packages/kernel-optimized/test/benchmark.test.ts": "1ed3acf97650eb802217931c29ec14021f14ffb7134873345975cf370ba6587c",

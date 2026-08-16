@@ -2,7 +2,14 @@ import type { WorkspaceDispatchStatus } from "./types";
 
 export type WorkspacePhysicalEdge = "left" | "right" | "above" | "below";
 export type WorkspaceFloatingResizeEdge =
-  "top" | "right" | "bottom" | "left" | "top-left" | "top-right" | "bottom-right" | "bottom-left";
+  | "top"
+  | "right"
+  | "bottom"
+  | "left"
+  | "top-left"
+  | "top-right"
+  | "bottom-right"
+  | "bottom-left";
 
 /** Every user-visible string emitted by the reference React projection. */
 export interface WorkspaceMessageCatalog {
@@ -35,6 +42,18 @@ export interface WorkspaceMessageCatalog {
   /** Optional group-container strings; omitted methods use the English fallback. */
   removePanelContainer?(values: { readonly target: string }): string;
   removedPanelContainer?(values: { readonly group: string; readonly target: string }): string;
+  movePanelContainer?(values: { readonly group: string }): string;
+  swapPanelContainers?(values: { readonly source: string; readonly target: string }): string;
+  movePanelContainerBeside?(values: {
+    readonly source: string;
+    readonly edge: WorkspacePhysicalEdge;
+    readonly target: string;
+  }): string;
+  groupMoveCancelledNoDestination?(): string;
+  groupMoveRejected?(): string;
+  workspaceChangedBeforeGroupMove?(): string;
+  directGroupPlacementUnsupported?(): string;
+  groupPlacementUnavailable?(): string;
   movePanelDialog(values: { readonly title: string }): string;
   noAvailableGroup(): string;
   moveInstructions(): string;
@@ -118,6 +137,18 @@ export const ENGLISH_WORKSPACE_MESSAGES = Object.freeze({
   removePanelContainer: ({ target }) => `Remove panel container (merge into ${target})`,
   removedPanelContainer: ({ group, target }) =>
     `Removed ${group} panel container and moved its tabs to ${target}`,
+  movePanelContainer: ({ group }) => `Move ${group} panel container`,
+  swapPanelContainers: ({ source, target }) => `Swap ${source} and ${target} panel containers`,
+  movePanelContainerBeside: ({ source, edge, target }) =>
+    `Move ${source} ${physicalEdgeRelation(edge, target)}`,
+  groupMoveCancelledNoDestination: () =>
+    "Panel container move cancelled. No destination was selected.",
+  groupMoveRejected: () => "Panel container move was rejected.",
+  workspaceChangedBeforeGroupMove: () =>
+    "The workspace changed before the panel container could be moved.",
+  directGroupPlacementUnsupported: () =>
+    "This workspace does not support direct panel container placement.",
+  groupPlacementUnavailable: () => "The panel container placement is no longer available.",
   movePanelDialog: ({ title }) => `Move ${title}`,
   noAvailableGroup: () => "No available group",
   moveInstructions: () => "Use arrow keys to preview, Enter to move, or Escape to cancel.",
@@ -167,8 +198,24 @@ export const ENGLISH_WORKSPACE_MESSAGES = Object.freeze({
 } satisfies WorkspaceMessageCatalog);
 
 export interface ResolvedWorkspaceInteractionMessages {
+  readonly panelGroupFallback: () => string;
   readonly movedPanelTo: (values: { readonly title: string; readonly group: string }) => string;
   readonly moveCancelled: () => string;
+  readonly movePanelContainer: (values: { readonly group: string }) => string;
+  readonly swapPanelContainers: (values: {
+    readonly source: string;
+    readonly target: string;
+  }) => string;
+  readonly movePanelContainerBeside: (values: {
+    readonly source: string;
+    readonly edge: WorkspacePhysicalEdge;
+    readonly target: string;
+  }) => string;
+  readonly groupMoveCancelledNoDestination: () => string;
+  readonly groupMoveRejected: () => string;
+  readonly workspaceChangedBeforeGroupMove: () => string;
+  readonly directGroupPlacementUnsupported: () => string;
+  readonly groupPlacementUnavailable: () => string;
   readonly splitPanel: (values: {
     readonly title: string;
     readonly edge: WorkspacePhysicalEdge;
@@ -214,8 +261,26 @@ export function resolveWorkspaceInteractionMessages(
   catalog: WorkspaceMessageCatalog,
 ): ResolvedWorkspaceInteractionMessages {
   return {
+    panelGroupFallback: catalog.panelGroupFallback,
     movedPanelTo: catalog.movedPanelTo,
     moveCancelled: catalog.moveCancelled,
+    movePanelContainer: catalog.movePanelContainer ?? ENGLISH_WORKSPACE_MESSAGES.movePanelContainer,
+    swapPanelContainers:
+      catalog.swapPanelContainers ?? ENGLISH_WORKSPACE_MESSAGES.swapPanelContainers,
+    movePanelContainerBeside:
+      catalog.movePanelContainerBeside ?? ENGLISH_WORKSPACE_MESSAGES.movePanelContainerBeside,
+    groupMoveCancelledNoDestination:
+      catalog.groupMoveCancelledNoDestination ??
+      ENGLISH_WORKSPACE_MESSAGES.groupMoveCancelledNoDestination,
+    groupMoveRejected: catalog.groupMoveRejected ?? ENGLISH_WORKSPACE_MESSAGES.groupMoveRejected,
+    workspaceChangedBeforeGroupMove:
+      catalog.workspaceChangedBeforeGroupMove ??
+      ENGLISH_WORKSPACE_MESSAGES.workspaceChangedBeforeGroupMove,
+    directGroupPlacementUnsupported:
+      catalog.directGroupPlacementUnsupported ??
+      ENGLISH_WORKSPACE_MESSAGES.directGroupPlacementUnsupported,
+    groupPlacementUnavailable:
+      catalog.groupPlacementUnavailable ?? ENGLISH_WORKSPACE_MESSAGES.groupPlacementUnavailable,
     splitPanel:
       catalog.splitPanel ?? (({ title, edge, group }) => `Split ${title} ${edge} of ${group}`),
     splitEdge: catalog.splitEdge ?? (({ edge }) => `Split ${edge}`),
@@ -281,6 +346,10 @@ export function resolveWorkspaceInteractionMessages(
     raisedFloatingSurface:
       catalog.raisedFloatingSurface ?? ENGLISH_WORKSPACE_MESSAGES.raisedFloatingSurface,
   };
+}
+
+function physicalEdgeRelation(edge: WorkspacePhysicalEdge, target: string): string {
+  return edge === "left" || edge === "right" ? `${edge} of ${target}` : `${edge} ${target}`;
 }
 
 function floatingResizeEdgeLabel(edge: WorkspaceFloatingResizeEdge): string {

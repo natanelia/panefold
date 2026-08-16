@@ -24,6 +24,8 @@ import {
   type WorkspaceCommandAdapter,
   type WorkspaceFloatingResizeEdge,
   type WorkspaceCommandOrigin,
+  type WorkspaceGroupDropRequest,
+  type WorkspaceGroupDropPlanContext,
   type WorkspacePanelRegistry,
   type WorkspacePanelDropRequest,
   type WorkspacePanelDropPlanContext,
@@ -141,6 +143,7 @@ type FixtureCommand =
       readonly afterPanelId?: string;
     }
   | { readonly type: "drop"; readonly request: WorkspacePanelDropRequest }
+  | { readonly type: "group-drop"; readonly request: WorkspaceGroupDropRequest }
   | {
       readonly type: "move-floating";
       readonly surfaceId: string;
@@ -287,6 +290,10 @@ const directManipulationCommands: WorkspaceCommandAdapter<FixtureCommand> = {
     command: { type: "drop", request },
     previewRect: fixtureDropPreview(request, context),
   }),
+  planGroupDrop: (request, context) => ({
+    command: { type: "group-drop", request },
+    previewRect: fixtureGroupDropPreview(request, context),
+  }),
 };
 
 const panels: WorkspacePanelRegistry = {
@@ -368,7 +375,11 @@ describe("WorkspaceSurface", () => {
 
     await user.click(screen.getByRole("tab", { name: "Beta" }));
     expect(announcements.at(-1)).toBe("Memilih Beta");
-    await user.click(screen.getByRole("button", { name: "Tutup Beta" }));
+    await user.click(
+      requiredElement(
+        screen.getByRole("tab", { name: "Beta" }).querySelector('[title="Tutup Beta"]'),
+      ),
+    );
     expect(announcements.at(-1)).toBe("Menutup Beta ditolak: Denied by fixture policy");
   });
 
@@ -794,7 +805,7 @@ describe("WorkspaceSurface", () => {
     expect(document.getElementById(headingId ?? "")?.textContent).toBe("Panel group");
   });
 
-  it("keeps panel controls outside the tablist accessibility structure", async () => {
+  it("keeps close affordances in their tabs without breaking tablist semantics", async () => {
     const runtime = new FixtureRuntime(initialProjection);
     renderWorkspace(runtime);
 
@@ -803,9 +814,19 @@ describe("WorkspaceSurface", () => {
       "tab",
       "tab",
     ]);
-    expect(tablist.querySelector('button:not([role="tab"])')).toBeNull();
-    expect(screen.getByRole("button", { name: "Close Alpha" })).toBeTruthy();
-    expect(screen.getByRole("button", { name: "Actions for Alpha" })).toBeTruthy();
+    const alpha = screen.getByRole("tab", { name: "Alpha" });
+    const beta = screen.getByRole("tab", { name: "Beta" });
+    expect(alpha.getAttribute("aria-keyshortcuts")).toBe("Delete");
+    expect(beta.querySelector('[data-workspace-tab-close="beta"]')?.textContent).toBe("×");
+    expect(
+      screen.getByRole("button", { name: "Actions for Alpha" }).closest("[role=tablist]"),
+    ).toBeNull();
+
+    fireEvent.click(requiredElement(beta.querySelector('[data-workspace-tab-close="beta"]')), {
+      detail: 1,
+    });
+    expect(runtime.lastCommand).toEqual({ type: "close", panelId: "beta" });
+    expect(runtime.transactions.at(-1)?.origin).toBe("pointer");
   });
 
   it("commits semantic splitter steps with keyboard origin and useful scale", async () => {
@@ -1376,6 +1397,31 @@ describe("WorkspaceSurface", () => {
     });
   });
 
+  it("keeps every available panel and container action in the ellipsis menu", async () => {
+    const user = userEvent.setup();
+    const runtime = new FixtureRuntime(initialProjection);
+    renderWorkspace(runtime, { commands: directManipulationCommands });
+
+    await user.click(await screen.findByRole("button", { name: "Actions for Alpha" }));
+
+    expect(screen.getByRole("menuitem", { name: "Move Alpha tab after Beta" })).toBeTruthy();
+    expect(screen.getByRole("menuitem", { name: /Choose destination/ })).toBeTruthy();
+    expect(screen.getByRole("menuitem", { name: "Split left" })).toBeTruthy();
+    expect(screen.getByRole("menuitem", { name: "Close Alpha" })).toBeTruthy();
+    const moveContainer = screen.getByRole("menuitem", {
+      name: "Move Left panel container",
+    });
+    expect(moveContainer).toBeTruthy();
+
+    await user.click(moveContainer);
+    expect(screen.getByRole("dialog", { name: "Move Left panel container" })).toBeTruthy();
+    await user.keyboard("{Enter}");
+    expect(runtime.lastCommand).toMatchObject({
+      type: "group-drop",
+      request: { sourceGroup: { id: "left" }, target: { kind: "swap" } },
+    });
+  });
+
   it("provides arrow, boundary, and Escape behavior for panel action menus", async () => {
     const user = userEvent.setup();
     const runtime = new FixtureRuntime(initialProjection);
@@ -1743,6 +1789,130 @@ describe("WorkspaceSurface", () => {
     expect(runtime.transactions[0]?.type).toBe("drop");
     expect(runtime.getSnapshot().projection.groups.right?.panelIds).toContain("alpha");
     expect(view.container.querySelector("[data-workspace-panel-drag]")).toBeNull();
+  });
+
+  it("drags an intact panel container from accessible empty tab-strip space", async () => {
+    const runtime = new FixtureRuntime(initialProjection);
+    const view = renderWorkspace(runtime, { commands: directManipulationCommands });
+    const handle = await screen.findByRole("button", { name: "Move Left panel container" });
+    expect(handle.classList.contains("pf-group-drag-region")).toBe(true);
+    expect(handle.textContent).toBe("");
+    expect(handle.parentElement?.classList.contains("pf-tab-strip")).toBe(true);
+    expect(handle.closest('[role="tablist"]')).toBeNull();
+    installPointerCapture(handle);
+
+    fireEvent.pointerDown(handle, {
+      button: 0,
+      pointerId: 141,
+      pointerType: "mouse",
+      clientX: 480,
+      clientY: 20,
+    });
+    fireEvent.pointerMove(handle, {
+      pointerId: 141,
+      pointerType: "mouse",
+      clientX: 750,
+      clientY: 350,
+    });
+
+    const overlay = await waitForElement(view.container, "[data-workspace-group-drag]");
+    expect(overlay.dataset.workspaceDropKind).toBe("swap");
+    expect(overlay.dataset.workspaceDropTarget).toBe("swap:right-node");
+
+    fireEvent.pointerUp(handle, {
+      pointerId: 141,
+      pointerType: "mouse",
+      clientX: 750,
+      clientY: 350,
+    });
+
+    expect(runtime.transactions).toEqual([
+      expect.objectContaining({ type: "group-drop", origin: "pointer" }),
+    ]);
+    expect(runtime.lastCommand?.type).toBe("group-drop");
+    if (runtime.lastCommand?.type === "group-drop") {
+      expect(runtime.lastCommand.request.sourceGroup.id).toBe("left");
+      expect(runtime.lastCommand.request.sourcePanels.map((panel) => panel.id)).toEqual([
+        "alpha",
+        "beta",
+      ]);
+      expect(runtime.lastCommand.request.target).toEqual({ kind: "swap" });
+    }
+    expect(runtime.getSnapshot().projection.groups.left?.panelIds).toEqual(["alpha", "beta"]);
+    expect(runtime.getSnapshot().projection.nodes.root).toMatchObject({
+      kind: "split",
+      childIds: ["right-node", "left-node"],
+    });
+    expect(view.container.querySelector("[data-workspace-group-drag]")).toBeNull();
+    expect(screen.queryByRole("dialog", { name: "Move Left panel container" })).toBeNull();
+    await waitFor(() => {
+      expect(screen.getByRole("button", { name: "Move Left panel container" })).toBe(
+        document.activeElement,
+      );
+    });
+  });
+
+  it("localizes the fallback group label in the container drag ghost", async () => {
+    const projection: WorkspaceProjection = {
+      ...initialProjection,
+      groups: {
+        ...initialProjection.groups,
+        left: {
+          id: "left",
+          panelIds: ["alpha", "beta"],
+          selectedPanelId: "alpha",
+        },
+      },
+    };
+    const view = renderWorkspace(new FixtureRuntime(projection), {
+      commands: directManipulationCommands,
+      messageCatalog: INDONESIAN_MESSAGES,
+    });
+    const handle = requiredElement(
+      view.container.querySelector('[data-workspace-group-drag-handle="left"]'),
+    );
+    installPointerCapture(handle);
+
+    fireEvent.pointerDown(handle, {
+      button: 0,
+      pointerId: 142,
+      pointerType: "mouse",
+      clientX: 480,
+      clientY: 20,
+    });
+    fireEvent.pointerMove(handle, {
+      pointerId: 142,
+      pointerType: "mouse",
+      clientX: 750,
+      clientY: 350,
+    });
+
+    const overlay = await waitForElement(view.container, "[data-workspace-group-drag]");
+    expect(overlay.querySelector(".pf-group-drag-ghost strong")?.textContent).toBe("Grup panel");
+  });
+
+  it("moves a panel container from keyboard-accessible empty tab-strip space", async () => {
+    const runtime = new FixtureRuntime(initialProjection);
+    renderWorkspace(runtime, { commands: directManipulationCommands });
+    const user = userEvent.setup();
+    const handle = await screen.findByRole("button", { name: "Move Left panel container" });
+
+    await user.click(handle);
+    const dialog = screen.getByRole("dialog", { name: "Move Left panel container" });
+    expect(dialog.textContent).toContain("Swap Left and Right panel containers");
+    await user.keyboard("{Shift>}{Tab}{/Shift}");
+    expect(dialog.textContent).toContain("Move Left below Right");
+    await user.keyboard("{Tab}{Enter}");
+
+    expect(runtime.transactions).toEqual([
+      expect.objectContaining({ type: "group-drop", origin: "keyboard" }),
+    ]);
+    expect(runtime.getSnapshot().projection.groups.left?.panelIds).toEqual(["alpha", "beta"]);
+    await waitFor(() => {
+      expect(screen.getByRole("button", { name: "Move Left panel container" })).toBe(
+        document.activeElement,
+      );
+    });
   });
 
   it("keeps pointer candidate hover silent and announces only the final drop result", async () => {
@@ -3274,7 +3444,8 @@ describe("WorkspaceSurface", () => {
     const controls = group?.querySelector<HTMLElement>(".pf-tab-controls");
     expect(group?.dataset.tabContent).toBe("icon-only");
     expect(group?.dataset.tabOrientation).toBe("vertical");
-    expect(controls?.querySelectorAll(".pf-tab-close, .pf-tab-more")).toHaveLength(2);
+    expect(controls?.querySelectorAll(".pf-tab-more")).toHaveLength(1);
+    expect(group?.querySelectorAll(".pf-tab .pf-tab-close")).toHaveLength(2);
 
     alpha.focus();
     await userEvent.keyboard("{ArrowDown}");
@@ -3517,6 +3688,34 @@ function reduceProjection(
       },
     };
   }
+  if (command.type === "group-drop") {
+    if (command.request.target.kind !== "swap") {
+      return { ...projection, revision: nextRevision };
+    }
+    const sourceNodeId = command.request.sourceNodeId;
+    const targetNodeId = command.request.targetNodeId;
+    return {
+      ...projection,
+      revision: nextRevision,
+      nodes: Object.fromEntries(
+        Object.entries(projection.nodes).map(([id, node]) => [
+          id,
+          node.kind !== "split"
+            ? node
+            : {
+                ...node,
+                childIds: node.childIds.map((childId) =>
+                  childId === sourceNodeId
+                    ? targetNodeId
+                    : childId === targetNodeId
+                      ? sourceNodeId
+                      : childId,
+                ),
+              },
+        ]),
+      ),
+    };
+  }
   if (command.type === "drop") {
     if (command.request.target.kind === "center") {
       return reduceProjection(projection, {
@@ -3713,6 +3912,22 @@ function fixtureDropPreview(
   context: WorkspacePanelDropPlanContext,
 ) {
   if (request.target.kind === "center") return context.targetRect;
+  const rect = context.targetRect;
+  const inlineSize = Math.round((rect.inlineSize - context.splitterSize) * request.target.ratio);
+  const blockSize = Math.round((rect.blockSize - context.splitterSize) * request.target.ratio);
+  if (request.target.edge === "inline-start") return { ...rect, inlineSize };
+  if (request.target.edge === "inline-end") {
+    return { ...rect, inlineStart: rect.inlineStart + rect.inlineSize - inlineSize, inlineSize };
+  }
+  if (request.target.edge === "block-start") return { ...rect, blockSize };
+  return { ...rect, blockStart: rect.blockStart + rect.blockSize - blockSize, blockSize };
+}
+
+function fixtureGroupDropPreview(
+  request: WorkspaceGroupDropRequest,
+  context: WorkspaceGroupDropPlanContext,
+) {
+  if (request.target.kind === "swap") return context.targetRect;
   const rect = context.targetRect;
   const inlineSize = Math.round((rect.inlineSize - context.splitterSize) * request.target.ratio);
   const blockSize = Math.round((rect.blockSize - context.splitterSize) * request.target.ratio);

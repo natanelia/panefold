@@ -36,14 +36,14 @@
     "packages/protocol-xstate/test/catalog-machines.test.ts": "3d33e4ca3ea49b32e0a98e7749184d73ad5d93fd20b4ceff749c16156407142d",
     "packages/protocol-xstate/test/drag-machine.test.ts": "8f7fb758af84a1970141cc7b82d593551ea94164b9153e9d9a6a50ff61a691e5",
     "packages/protocol-xstate/test/protocol-machines.test.ts": "b473558c7f1a64c17e58e0d1ebb1503f05734f4ba7e194d53b9b8b780c7d23ce",
-    "packages/motion/test/motion-lifecycle.test.ts": "c2fd1527a2ebc5b96d9bb89d289e9fbeca223b4114412df7eed587b5ba9a5b40",
+    "packages/motion/test/motion-lifecycle.test.ts": "1cedfcdecfc3ba2ae9bd55b650ba2b69992efc0626c5a7a7d1addebe61b74964",
     "packages/motion/test/motion.test.ts": "02b6068c1abaa54b4433da29c0a7bb430254b24082385541e5617abfccc22ed8",
-    "packages/react/src/WorkspaceSurface.tsx": "193954099cce7fa25902acac84266699e246cf8e7c7938b22f89216ed744fa4c",
-    "packages/react/src/messages.ts": "c3577ea017fcebfa86409864b578e181b49208f196c99bd632df8181376bfb81",
-    "packages/react/src/panel-drop.ts": "cb9b838f642373c1c35f0de5f18a22fbf47fe863a73ee95ea07c03c9f5f92fc7",
-    "packages/react/src/types.ts": "ec2ecf19e49f2825ed2bec7869f87be8caf9bc15520933798c9d22ec152fb7be",
-    "packages/react/test/WorkspaceSurface.test.tsx": "55d1ea9924acd99e87dfb355e1f1a94d92b684fbbef3ddeb51b9fc0214025c21",
-    "packages/react/test/panel-drop.test.ts": "fffd4ee07c0e4216f10b1d809372a039850181b33f4c88cd2458b614d6108780"
+    "packages/react/src/WorkspaceSurface.tsx": "59b15c8cc063d2f6678a1d3474efe2ffea46bd1a23024e2d0e7e0e3f14e4af75",
+    "packages/react/src/messages.ts": "1074ad78d0c80a9f6606c7fd82850a030945334ee30707e5413e757ae479a76d",
+    "packages/react/src/panel-drop.ts": "7d3d109e790f19bc31fcb2bafad1acaeaf4c517fa241253fe5f6371a330c893e",
+    "packages/react/src/types.ts": "88e649420be6c0de3e82bc60bfa995653eca4eade6be8b8a7a27057b427e8f4a",
+    "packages/react/test/WorkspaceSurface.test.tsx": "3ceab1754f0915e47a5a62e3d4c9a6bf6a5b2a38371357587f6bcee2ac8b2ee9",
+    "packages/react/test/panel-drop.test.ts": "ac67679e7da0fc483a20f8aa6857b47e9daa053e9a0844e009699d7514fca9fc"
   },
   "limitations": [
     "The catalog/state checks do not constitute exhaustive generated transition, timeout, and recovery-path coverage.",

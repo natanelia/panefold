@@ -50,7 +50,12 @@ export interface WorkspaceJournalPort {
 }
 
 export type JournalCommitStep =
-  "read" | "checkpoint" | "journal" | "snapshot" | "compact" | "publish";
+  | "read"
+  | "checkpoint"
+  | "journal"
+  | "snapshot"
+  | "compact"
+  | "publish";
 
 export interface MemoryWorkspaceJournalOptions {
   readonly journalLimit?: number;

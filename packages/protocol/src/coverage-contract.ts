@@ -1,7 +1,12 @@
 import type { WorkspaceProtocolKind } from "./types";
 
 export type ProtocolCoverageObligationKind =
-  "adversarial" | "interruption" | "timeout" | "recovery" | "finalizer" | "impossible-event";
+  | "adversarial"
+  | "interruption"
+  | "timeout"
+  | "recovery"
+  | "finalizer"
+  | "impossible-event";
 
 export interface ProtocolCoverageObligation {
   readonly id: string;
