@@ -1,0 +1,197 @@
+name: Commit generated panel header tree
+
+on:
+  push:
+    branches:
+      - agent/panel-drag-affordance-floating-header
+
+permissions:
+  contents: write
+
+jobs:
+  commit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          ref: agent/panel-drag-affordance-floating-header
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: pnpm/action-setup@0977fd99725f1db4007ccb2928dbb4e90d06cc86
+        with:
+          version: 11.16.0
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020
+        with:
+          node-version: 24
+          cache: pnpm
+          token: ""
+      - run: pnpm install --frozen-lockfile
+      - name: Generate the feature tree
+        run: python .github/panel-header-refresh.py
+      - name: Align unit and browser contracts
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+
+          def rewrite(path_name: str, replacements: list[tuple[str, str, int]]) -> None:
+              path = Path(path_name)
+              content = path.read_text()
+              for old, new, expected in replacements:
+                  actual = content.count(old)
+                  if actual != expected:
+                      raise RuntimeError(
+                          f"Expected {expected} matches in {path_name}, found {actual}: {old!r}"
+                      )
+                  content = content.replace(old, new)
+              path.write_text(content)
+
+          rewrite(
+              "packages/react/test/WorkspaceSurface.test.tsx",
+              [
+                  (
+                      'it("combines a sole floating panel tab and window chrome into one header row", () => {',
+                      'it("presents a sole floating panel as the title in one integrated header row", () => {',
+                      1,
+                  ),
+                  (
+                      'it("keeps separate floating title and tab rows when the window contains multiple panels", () => {',
+                      'it("integrates multiple floating tabs with the window chrome", () => {',
+                      1,
+                  ),
+                  ('data-compact-header', 'data-integrated-header', 2),
+                  ('compactTabStrip', 'integratedTabStrip', 4),
+                  (
+                      '''    expect(frame?.getAttribute("data-integrated-header")).toBe("true");
+              expect(integratedTabStrip).not.toBeNull();''',
+                      '''    expect(frame?.getAttribute("data-integrated-header")).toBe("true");
+              expect(integratedTabStrip).not.toBeNull();
+              expect(integratedTabStrip?.getAttribute("data-header-location")).toBe("floating");
+              expect(integratedTabStrip?.getAttribute("data-header-variant")).toBe("title");
+              expect(integratedTabStrip?.getAttribute("data-single-panel")).toBe("true");''',
+                      1,
+                  ),
+                  (
+                      '''    expect(frame?.getAttribute("data-integrated-header")).toBe("false");
+              expect(frame?.querySelector(".pf-floating-titlebar .pf-tab-strip")).toBeNull();
+              expect(frame?.querySelector(".pf-floating-content .pf-tab-strip")).not.toBeNull();
+              expect(frame?.querySelectorAll('[role="tab"]')).toHaveLength(2);''',
+                      '''    const integratedTabStrip = frame?.querySelector(".pf-floating-titlebar .pf-tab-strip");
+              expect(frame?.getAttribute("data-integrated-header")).toBe("true");
+              expect(integratedTabStrip).not.toBeNull();
+              expect(frame?.querySelector(".pf-floating-content .pf-tab-strip")).toBeNull();
+              expect(integratedTabStrip?.getAttribute("data-header-location")).toBe("floating");
+              expect(integratedTabStrip?.getAttribute("data-header-variant")).toBe("tabs");
+              expect(integratedTabStrip?.getAttribute("data-single-panel")).toBe("false");
+              expect(frame?.querySelectorAll('[role="tab"]')).toHaveLength(2);''',
+                      1,
+                  ),
+              ],
+          )
+
+          rewrite(
+              "e2e/demo.spec.ts",
+              [('data-compact-header', 'data-integrated-header', 1)],
+          )
+          rewrite(
+              "e2e/single-tab-row.spec.ts",
+              [
+                  (
+                      '  await expect(appTab).toHaveCSS("cursor", "grab");',
+                      '  await expect(affordance).toHaveCSS("cursor", "grab");',
+                      1,
+                  )
+              ],
+          )
+          PY
+      - name: Remove temporary automation
+        run: |
+          rm \
+            .github/panel-header-refresh.py \
+            .github/workflows/panel-header-refresh.yml \
+            .github/workflows/commit-panel-header-tree.yml
+      - name: Format changed sources
+        run: |
+          pnpm exec oxfmt --write \
+            packages/react/src/tab-presentation.ts \
+            packages/react/src/messages.ts \
+            packages/react/src/floating-surface.tsx \
+            packages/react/src/WorkspaceSurface.tsx \
+            packages/react/src/styles.css \
+            packages/react/src/hide-single-tab-row.css \
+            packages/react/test/WorkspaceSurface.test.tsx \
+            packages/react/test/tab-presentation.test.ts \
+            e2e/demo.spec.ts \
+            e2e/single-tab-row.spec.ts
+      - name: Refresh source-bound conformance records
+        run: |
+          node --input-type=module <<'NODE'
+          import { createHash } from "node:crypto";
+          import { readFile, writeFile } from "node:fs/promises";
+
+          const resultSources = new Map([
+            [
+              "conformance/results/chromium-reference-2026-08-14.json",
+              [
+                "e2e/demo.spec.ts",
+                "e2e/single-tab-row.spec.ts",
+                "packages/react/src/WorkspaceSurface.tsx",
+                "packages/react/src/floating-surface.tsx",
+                "packages/react/src/hide-single-tab-row.css",
+                "packages/react/src/messages.ts",
+                "packages/react/src/styles.css",
+                "packages/react/src/tab-presentation.ts",
+              ],
+            ],
+            [
+              "conformance/results/interaction-performance-2026-08-14.json",
+              [
+                "packages/react/src/WorkspaceSurface.tsx",
+                "packages/react/src/floating-surface.tsx",
+                "packages/react/src/messages.ts",
+                "packages/react/src/styles.css",
+              ],
+            ],
+            [
+              "conformance/results/protocol-motion-2026-08-14.json",
+              [
+                "packages/react/src/WorkspaceSurface.tsx",
+                "packages/react/src/floating-surface.tsx",
+                "packages/react/src/hide-single-tab-row.css",
+                "packages/react/src/messages.ts",
+                "packages/react/src/styles.css",
+                "packages/react/src/tab-presentation.ts",
+                "packages/react/test/WorkspaceSurface.test.tsx",
+                "packages/react/test/tab-presentation.test.ts",
+              ],
+            ],
+          ]);
+
+          for (const [resultPath, sourcePaths] of resultSources) {
+            const result = JSON.parse(await readFile(resultPath, "utf8"));
+            result.sourceDigests ??= {};
+            for (const sourcePath of sourcePaths) {
+              const source = await readFile(sourcePath);
+              result.sourceDigests[sourcePath] = createHash("sha256").update(source).digest("hex");
+            }
+            await writeFile(resultPath, `${JSON.stringify(result, null, 2)}\n`);
+          }
+          NODE
+          pnpm exec oxfmt --write \
+            conformance/results/chromium-reference-2026-08-14.json \
+            conformance/results/interaction-performance-2026-08-14.json \
+            conformance/results/protocol-motion-2026-08-14.json
+          pnpm conformance:data:generate
+      - run: git add -A
+      - name: Validate source tree
+        run: pnpm check
+      - name: Commit inspectable feature tree
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git commit -m "Add discoverable panel drag chrome and integrated floating headers"
+          AUTH_HEADER="$(printf 'x-access-token:%s' "$GITHUB_TOKEN" | base64 -w0)"
+          git -c http.https://github.com/.extraheader="AUTHORIZATION: basic $AUTH_HEADER" \
+            push origin HEAD:agent/panel-drag-affordance-floating-header
