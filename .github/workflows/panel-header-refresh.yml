@@ -131,6 +131,7 @@ jobs:
                 "packages/react/src/messages.ts",
                 "packages/react/src/styles.css",
                 "packages/react/src/tab-presentation.ts",
+                "packages/react/test/WorkspaceSurface.test.tsx",
                 "packages/react/test/tab-presentation.test.ts",
               ],
             ],
@@ -161,7 +162,14 @@ jobs:
           set -e
           if [ "$status" -ne 0 ]; then
             echo "::group::Failure summary"
-            grep -nE "(FAIL|Error|error|failed|ELIFECYCLE|✗|×)" /tmp/panefold-check.log | tail -n 100 || true
+            grep -niE "(mismatch|digest|received|invalid|missing|unknown|FAIL|Error|error|failed|ELIFECYCLE|✗|×)" /tmp/panefold-check.log | tail -n 140 || true
+            echo "::endgroup::"
+            echo "::group::Conformance check start"
+            start=$(grep -nF '$ node scripts/check-conformance.mjs' /tmp/panefold-check.log | tail -n 1 | cut -d: -f1 || true)
+            if [ -n "$start" ]; then
+              end=$((start + 60))
+              sed -n "${start},${end}p" /tmp/panefold-check.log
+            fi
             echo "::endgroup::"
             echo "::group::Last 260 lines of pnpm check"
             tail -n 260 /tmp/panefold-check.log
