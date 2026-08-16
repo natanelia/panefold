@@ -61,6 +61,11 @@ jobs:
             conformance/results/interaction-performance-2026-08-14.json \
             conformance/results/protocol-motion-2026-08-14.json
           pnpm conformance:data:generate
+      - name: Stage generated conformance state for drift checks
+        run: |
+          git add \
+            .github/workflows/pr14-refresh.yml \
+            conformance
       - name: Verify the complete repository gate
         run: pnpm check
       - run: pnpm exec playwright install --with-deps chromium
