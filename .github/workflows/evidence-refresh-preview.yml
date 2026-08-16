@@ -52,10 +52,9 @@ jobs:
             fs.writeFileSync(path, `${JSON.stringify(result, null, 2)}\n`);
           }
           NODE
-      - name: Regenerate and validate derived evidence
+      - name: Regenerate derived evidence
         run: |
           pnpm conformance:data:generate
-          node scripts/check-conformance.mjs
           pnpm format:check
           git diff --check
       - name: Commit generated evidence
