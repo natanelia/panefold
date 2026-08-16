@@ -43,7 +43,7 @@ jobs:
             ],
             [
               "conformance/results/protocol-motion-2026-08-14.json",
-              ["packages/react/package.json"],
+              ["packages/react/package.json", "packages/react/src/floating-surface.tsx"],
             ],
           ]);
 
