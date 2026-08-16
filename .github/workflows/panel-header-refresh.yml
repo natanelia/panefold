@@ -29,6 +29,57 @@ jobs:
       - run: pnpm install --frozen-lockfile
       - name: Apply the architectural refactor
         run: python .github/panel-header-refresh.py
+      - name: Align floating-header unit tests with the integrated contract
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+
+          path = Path("packages/react/test/WorkspaceSurface.test.tsx")
+          content = path.read_text()
+
+          def replace_exact(old: str, new: str, expected: int = 1) -> None:
+              global content
+              actual = content.count(old)
+              if actual != expected:
+                  raise RuntimeError(f"Expected {expected} matches, found {actual}: {old!r}")
+              content = content.replace(old, new)
+
+          replace_exact(
+              'it("combines a sole floating panel tab and window chrome into one header row", () => {',
+              'it("presents a sole floating panel as the title in one integrated header row", () => {',
+          )
+          replace_exact(
+              'it("keeps separate floating title and tab rows when the window contains multiple panels", () => {',
+              'it("integrates multiple floating tabs with the window chrome", () => {',
+          )
+          replace_exact('data-compact-header', 'data-integrated-header', expected=2)
+          replace_exact('compactTabStrip', 'integratedTabStrip', expected=4)
+          replace_exact(
+              '''    expect(frame?.getAttribute("data-integrated-header")).toBe("true");
+              expect(integratedTabStrip).not.toBeNull();''',
+              '''    expect(frame?.getAttribute("data-integrated-header")).toBe("true");
+              expect(integratedTabStrip).not.toBeNull();
+              expect(integratedTabStrip?.getAttribute("data-header-location")).toBe("floating");
+              expect(integratedTabStrip?.getAttribute("data-header-variant")).toBe("title");
+              expect(integratedTabStrip?.getAttribute("data-single-panel")).toBe("true");''',
+          )
+          replace_exact(
+              '''    expect(frame?.getAttribute("data-integrated-header")).toBe("false");
+              expect(frame?.querySelector(".pf-floating-titlebar .pf-tab-strip")).toBeNull();
+              expect(frame?.querySelector(".pf-floating-content .pf-tab-strip")).not.toBeNull();
+              expect(frame?.querySelectorAll('[role="tab"]')).toHaveLength(2);''',
+              '''    const integratedTabStrip = frame?.querySelector(".pf-floating-titlebar .pf-tab-strip");
+              expect(frame?.getAttribute("data-integrated-header")).toBe("true");
+              expect(integratedTabStrip).not.toBeNull();
+              expect(frame?.querySelector(".pf-floating-content .pf-tab-strip")).toBeNull();
+              expect(integratedTabStrip?.getAttribute("data-header-location")).toBe("floating");
+              expect(integratedTabStrip?.getAttribute("data-header-variant")).toBe("tabs");
+              expect(integratedTabStrip?.getAttribute("data-single-panel")).toBe("false");
+              expect(frame?.querySelectorAll('[role="tab"]')).toHaveLength(2);''',
+          )
+
+          path.write_text(content)
+          PY
       - name: Remove one-shot automation
         run: rm .github/panel-header-refresh.py .github/workflows/panel-header-refresh.yml
       - name: Format changed sources
@@ -40,6 +91,7 @@ jobs:
             packages/react/src/WorkspaceSurface.tsx \
             packages/react/src/styles.css \
             packages/react/src/hide-single-tab-row.css \
+            packages/react/test/WorkspaceSurface.test.tsx \
             packages/react/test/tab-presentation.test.ts \
             e2e/single-tab-row.spec.ts
       - name: Refresh source-bound conformance records
