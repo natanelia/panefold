@@ -41,10 +41,16 @@ export interface PanelDropIds {
 }
 
 export type PanelDropPlannedCommand =
-  MovePanelCommand | MoveGroupCommand | SplitGroupCommand | BatchWorkspaceCommand;
+  | MovePanelCommand
+  | MoveGroupCommand
+  | SplitGroupCommand
+  | BatchWorkspaceCommand;
 
 export type PanelDropPlanRejectionCode =
-  "PANEL_NOT_FOUND" | "SOURCE_GROUP_NOT_FOUND" | "TARGET_GROUP_NOT_FOUND" | "INVALID_DROP";
+  | "PANEL_NOT_FOUND"
+  | "SOURCE_GROUP_NOT_FOUND"
+  | "TARGET_GROUP_NOT_FOUND"
+  | "INVALID_DROP";
 
 export type PanelDropPlanResult =
   | { readonly ok: true; readonly command: PanelDropPlannedCommand }

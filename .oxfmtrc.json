@@ -1,0 +1,21 @@
+{
+  "$schema": "./node_modules/oxfmt/configuration_schema.json",
+  "printWidth": 100,
+  "semi": true,
+  "singleQuote": false,
+  "trailingComma": "all",
+  "sortPackageJson": false,
+  "ignorePatterns": [
+    "dist",
+    "coverage",
+    "playwright-report",
+    "test-results",
+    "pnpm-lock.yaml",
+    "docs/spec/SYSTEM_DESIGN.md",
+    "conformance/capabilities.json",
+    "conformance/evidence.json",
+    "conformance/gates.json",
+    "conformance/requirements.json",
+    "conformance/traces.json"
+  ]
+}

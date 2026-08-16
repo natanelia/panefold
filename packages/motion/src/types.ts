@@ -1,5 +1,11 @@
 export type MotionChannel =
-  "layout" | "gesture" | "presence" | "clip" | "emphasis" | "scroll" | "surface";
+  | "layout"
+  | "gesture"
+  | "presence"
+  | "clip"
+  | "emphasis"
+  | "scroll"
+  | "surface";
 
 export type MotionProfile = "off" | "reduced" | "productive" | "expressive";
 
@@ -36,7 +42,13 @@ export interface MotionHandle {
 }
 
 export type MotionLeaseStatus =
-  "queued" | "running" | "finished" | "cancelled" | "skipped" | "disposed" | "failed";
+  | "queued"
+  | "running"
+  | "finished"
+  | "cancelled"
+  | "skipped"
+  | "disposed"
+  | "failed";
 
 /** Exactly-once coordinator lease returned for every admitted motion. */
 export interface MotionLease extends MotionHandle {

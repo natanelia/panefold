@@ -21,7 +21,13 @@ export type ViewTransitionFallbackReason =
   | "scope-disposed";
 
 export type ProgressiveViewTransitionStatus =
-  "capturing" | "animating" | "fallback" | "completed" | "skipped" | "disposed" | "failed";
+  | "capturing"
+  | "animating"
+  | "fallback"
+  | "completed"
+  | "skipped"
+  | "disposed"
+  | "failed";
 
 export interface ProgressiveViewTransitionDiagnostic {
   readonly reason: ViewTransitionFallbackReason | "commit-rejected" | "fallback-failed";

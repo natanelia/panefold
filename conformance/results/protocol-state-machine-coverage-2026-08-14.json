@@ -44,12 +44,30 @@
         "covered": 15,
         "missing": [],
         "byKind": {
-          "adversarial": { "documented": 7, "covered": 7 },
-          "interruption": { "documented": 1, "covered": 1 },
-          "timeout": { "documented": 4, "covered": 4 },
-          "recovery": { "documented": 1, "covered": 1 },
-          "finalizer": { "documented": 1, "covered": 1 },
-          "impossible-event": { "documented": 1, "covered": 1 }
+          "adversarial": {
+            "documented": 7,
+            "covered": 7
+          },
+          "interruption": {
+            "documented": 1,
+            "covered": 1
+          },
+          "timeout": {
+            "documented": 4,
+            "covered": 4
+          },
+          "recovery": {
+            "documented": 1,
+            "covered": 1
+          },
+          "finalizer": {
+            "documented": 1,
+            "covered": 1
+          },
+          "impossible-event": {
+            "documented": 1,
+            "covered": 1
+          }
         }
       },
       "exploredSnapshots": 48,
@@ -71,7 +89,10 @@
         "replayEquivalent": true,
         "transitioned": true
       },
-      "finalizer": { "scopeAbortStopsOnce": true, "lateEventIgnored": true }
+      "finalizer": {
+        "scopeAbortStopsOnce": true,
+        "lateEventIgnored": true
+      }
     },
     {
       "kind": "splitter-resize",
@@ -103,12 +124,30 @@
         "covered": 14,
         "missing": [],
         "byKind": {
-          "adversarial": { "documented": 6, "covered": 6 },
-          "interruption": { "documented": 1, "covered": 1 },
-          "timeout": { "documented": 4, "covered": 4 },
-          "recovery": { "documented": 1, "covered": 1 },
-          "finalizer": { "documented": 1, "covered": 1 },
-          "impossible-event": { "documented": 1, "covered": 1 }
+          "adversarial": {
+            "documented": 6,
+            "covered": 6
+          },
+          "interruption": {
+            "documented": 1,
+            "covered": 1
+          },
+          "timeout": {
+            "documented": 4,
+            "covered": 4
+          },
+          "recovery": {
+            "documented": 1,
+            "covered": 1
+          },
+          "finalizer": {
+            "documented": 1,
+            "covered": 1
+          },
+          "impossible-event": {
+            "documented": 1,
+            "covered": 1
+          }
         }
       },
       "exploredSnapshots": 100,
@@ -130,7 +169,10 @@
         "replayEquivalent": true,
         "transitioned": true
       },
-      "finalizer": { "scopeAbortStopsOnce": true, "lateEventIgnored": true }
+      "finalizer": {
+        "scopeAbortStopsOnce": true,
+        "lateEventIgnored": true
+      }
     },
     {
       "kind": "floating-manipulation",
@@ -162,12 +204,30 @@
         "covered": 13,
         "missing": [],
         "byKind": {
-          "adversarial": { "documented": 5, "covered": 5 },
-          "interruption": { "documented": 1, "covered": 1 },
-          "timeout": { "documented": 4, "covered": 4 },
-          "recovery": { "documented": 1, "covered": 1 },
-          "finalizer": { "documented": 1, "covered": 1 },
-          "impossible-event": { "documented": 1, "covered": 1 }
+          "adversarial": {
+            "documented": 5,
+            "covered": 5
+          },
+          "interruption": {
+            "documented": 1,
+            "covered": 1
+          },
+          "timeout": {
+            "documented": 4,
+            "covered": 4
+          },
+          "recovery": {
+            "documented": 1,
+            "covered": 1
+          },
+          "finalizer": {
+            "documented": 1,
+            "covered": 1
+          },
+          "impossible-event": {
+            "documented": 1,
+            "covered": 1
+          }
         }
       },
       "exploredSnapshots": 98,
@@ -189,7 +249,10 @@
         "replayEquivalent": true,
         "transitioned": true
       },
-      "finalizer": { "scopeAbortStopsOnce": true, "lateEventIgnored": true }
+      "finalizer": {
+        "scopeAbortStopsOnce": true,
+        "lateEventIgnored": true
+      }
     },
     {
       "kind": "keyboard-move",
@@ -221,12 +284,30 @@
         "covered": 12,
         "missing": [],
         "byKind": {
-          "adversarial": { "documented": 5, "covered": 5 },
-          "interruption": { "documented": 1, "covered": 1 },
-          "timeout": { "documented": 3, "covered": 3 },
-          "recovery": { "documented": 1, "covered": 1 },
-          "finalizer": { "documented": 1, "covered": 1 },
-          "impossible-event": { "documented": 1, "covered": 1 }
+          "adversarial": {
+            "documented": 5,
+            "covered": 5
+          },
+          "interruption": {
+            "documented": 1,
+            "covered": 1
+          },
+          "timeout": {
+            "documented": 3,
+            "covered": 3
+          },
+          "recovery": {
+            "documented": 1,
+            "covered": 1
+          },
+          "finalizer": {
+            "documented": 1,
+            "covered": 1
+          },
+          "impossible-event": {
+            "documented": 1,
+            "covered": 1
+          }
         }
       },
       "exploredSnapshots": 29,
@@ -248,7 +329,10 @@
         "replayEquivalent": true,
         "transitioned": true
       },
-      "finalizer": { "scopeAbortStopsOnce": true, "lateEventIgnored": true }
+      "finalizer": {
+        "scopeAbortStopsOnce": true,
+        "lateEventIgnored": true
+      }
     },
     {
       "kind": "close",
@@ -280,12 +364,30 @@
         "covered": 11,
         "missing": [],
         "byKind": {
-          "adversarial": { "documented": 6, "covered": 6 },
-          "interruption": { "documented": 1, "covered": 1 },
-          "timeout": { "documented": 1, "covered": 1 },
-          "recovery": { "documented": 1, "covered": 1 },
-          "finalizer": { "documented": 1, "covered": 1 },
-          "impossible-event": { "documented": 1, "covered": 1 }
+          "adversarial": {
+            "documented": 6,
+            "covered": 6
+          },
+          "interruption": {
+            "documented": 1,
+            "covered": 1
+          },
+          "timeout": {
+            "documented": 1,
+            "covered": 1
+          },
+          "recovery": {
+            "documented": 1,
+            "covered": 1
+          },
+          "finalizer": {
+            "documented": 1,
+            "covered": 1
+          },
+          "impossible-event": {
+            "documented": 1,
+            "covered": 1
+          }
         }
       },
       "exploredSnapshots": 83,
@@ -307,7 +409,10 @@
         "replayEquivalent": true,
         "transitioned": true
       },
-      "finalizer": { "scopeAbortStopsOnce": true, "lateEventIgnored": true }
+      "finalizer": {
+        "scopeAbortStopsOnce": true,
+        "lateEventIgnored": true
+      }
     },
     {
       "kind": "suspend-resume",
@@ -339,12 +444,30 @@
         "covered": 12,
         "missing": [],
         "byKind": {
-          "adversarial": { "documented": 6, "covered": 6 },
-          "interruption": { "documented": 1, "covered": 1 },
-          "timeout": { "documented": 2, "covered": 2 },
-          "recovery": { "documented": 1, "covered": 1 },
-          "finalizer": { "documented": 1, "covered": 1 },
-          "impossible-event": { "documented": 1, "covered": 1 }
+          "adversarial": {
+            "documented": 6,
+            "covered": 6
+          },
+          "interruption": {
+            "documented": 1,
+            "covered": 1
+          },
+          "timeout": {
+            "documented": 2,
+            "covered": 2
+          },
+          "recovery": {
+            "documented": 1,
+            "covered": 1
+          },
+          "finalizer": {
+            "documented": 1,
+            "covered": 1
+          },
+          "impossible-event": {
+            "documented": 1,
+            "covered": 1
+          }
         }
       },
       "exploredSnapshots": 16,
@@ -366,7 +489,10 @@
         "replayEquivalent": true,
         "transitioned": true
       },
-      "finalizer": { "scopeAbortStopsOnce": true, "lateEventIgnored": true }
+      "finalizer": {
+        "scopeAbortStopsOnce": true,
+        "lateEventIgnored": true
+      }
     },
     {
       "kind": "surface-transfer",
@@ -398,12 +524,30 @@
         "covered": 17,
         "missing": [],
         "byKind": {
-          "adversarial": { "documented": 4, "covered": 4 },
-          "interruption": { "documented": 1, "covered": 1 },
-          "timeout": { "documented": 9, "covered": 9 },
-          "recovery": { "documented": 1, "covered": 1 },
-          "finalizer": { "documented": 1, "covered": 1 },
-          "impossible-event": { "documented": 1, "covered": 1 }
+          "adversarial": {
+            "documented": 4,
+            "covered": 4
+          },
+          "interruption": {
+            "documented": 1,
+            "covered": 1
+          },
+          "timeout": {
+            "documented": 9,
+            "covered": 9
+          },
+          "recovery": {
+            "documented": 1,
+            "covered": 1
+          },
+          "finalizer": {
+            "documented": 1,
+            "covered": 1
+          },
+          "impossible-event": {
+            "documented": 1,
+            "covered": 1
+          }
         }
       },
       "exploredSnapshots": 29,
@@ -425,7 +569,10 @@
         "replayEquivalent": true,
         "transitioned": true
       },
-      "finalizer": { "scopeAbortStopsOnce": true, "lateEventIgnored": true }
+      "finalizer": {
+        "scopeAbortStopsOnce": true,
+        "lateEventIgnored": true
+      }
     },
     {
       "kind": "surface-recovery",
@@ -457,12 +604,30 @@
         "covered": 9,
         "missing": [],
         "byKind": {
-          "adversarial": { "documented": 4, "covered": 4 },
-          "interruption": { "documented": 1, "covered": 1 },
-          "timeout": { "documented": 1, "covered": 1 },
-          "recovery": { "documented": 1, "covered": 1 },
-          "finalizer": { "documented": 1, "covered": 1 },
-          "impossible-event": { "documented": 1, "covered": 1 }
+          "adversarial": {
+            "documented": 4,
+            "covered": 4
+          },
+          "interruption": {
+            "documented": 1,
+            "covered": 1
+          },
+          "timeout": {
+            "documented": 1,
+            "covered": 1
+          },
+          "recovery": {
+            "documented": 1,
+            "covered": 1
+          },
+          "finalizer": {
+            "documented": 1,
+            "covered": 1
+          },
+          "impossible-event": {
+            "documented": 1,
+            "covered": 1
+          }
         }
       },
       "exploredSnapshots": 16,
@@ -484,7 +649,10 @@
         "replayEquivalent": true,
         "transitioned": true
       },
-      "finalizer": { "scopeAbortStopsOnce": true, "lateEventIgnored": true }
+      "finalizer": {
+        "scopeAbortStopsOnce": true,
+        "lateEventIgnored": true
+      }
     },
     {
       "kind": "persistence-worker",
@@ -516,12 +684,30 @@
         "covered": 11,
         "missing": [],
         "byKind": {
-          "adversarial": { "documented": 6, "covered": 6 },
-          "interruption": { "documented": 1, "covered": 1 },
-          "timeout": { "documented": 1, "covered": 1 },
-          "recovery": { "documented": 1, "covered": 1 },
-          "finalizer": { "documented": 1, "covered": 1 },
-          "impossible-event": { "documented": 1, "covered": 1 }
+          "adversarial": {
+            "documented": 6,
+            "covered": 6
+          },
+          "interruption": {
+            "documented": 1,
+            "covered": 1
+          },
+          "timeout": {
+            "documented": 1,
+            "covered": 1
+          },
+          "recovery": {
+            "documented": 1,
+            "covered": 1
+          },
+          "finalizer": {
+            "documented": 1,
+            "covered": 1
+          },
+          "impossible-event": {
+            "documented": 1,
+            "covered": 1
+          }
         }
       },
       "exploredSnapshots": 54,
@@ -543,7 +729,10 @@
         "replayEquivalent": true,
         "transitioned": true
       },
-      "finalizer": { "scopeAbortStopsOnce": true, "lateEventIgnored": true }
+      "finalizer": {
+        "scopeAbortStopsOnce": true,
+        "lateEventIgnored": true
+      }
     },
     {
       "kind": "plugin-load",
@@ -575,12 +764,30 @@
         "covered": 10,
         "missing": [],
         "byKind": {
-          "adversarial": { "documented": 5, "covered": 5 },
-          "interruption": { "documented": 1, "covered": 1 },
-          "timeout": { "documented": 1, "covered": 1 },
-          "recovery": { "documented": 1, "covered": 1 },
-          "finalizer": { "documented": 1, "covered": 1 },
-          "impossible-event": { "documented": 1, "covered": 1 }
+          "adversarial": {
+            "documented": 5,
+            "covered": 5
+          },
+          "interruption": {
+            "documented": 1,
+            "covered": 1
+          },
+          "timeout": {
+            "documented": 1,
+            "covered": 1
+          },
+          "recovery": {
+            "documented": 1,
+            "covered": 1
+          },
+          "finalizer": {
+            "documented": 1,
+            "covered": 1
+          },
+          "impossible-event": {
+            "documented": 1,
+            "covered": 1
+          }
         }
       },
       "exploredSnapshots": 20,
@@ -602,7 +809,10 @@
         "replayEquivalent": true,
         "transitioned": true
       },
-      "finalizer": { "scopeAbortStopsOnce": true, "lateEventIgnored": true }
+      "finalizer": {
+        "scopeAbortStopsOnce": true,
+        "lateEventIgnored": true
+      }
     },
     {
       "kind": "view-transition",
@@ -634,12 +844,30 @@
         "covered": 13,
         "missing": [],
         "byKind": {
-          "adversarial": { "documented": 4, "covered": 4 },
-          "interruption": { "documented": 1, "covered": 1 },
-          "timeout": { "documented": 5, "covered": 5 },
-          "recovery": { "documented": 1, "covered": 1 },
-          "finalizer": { "documented": 1, "covered": 1 },
-          "impossible-event": { "documented": 1, "covered": 1 }
+          "adversarial": {
+            "documented": 4,
+            "covered": 4
+          },
+          "interruption": {
+            "documented": 1,
+            "covered": 1
+          },
+          "timeout": {
+            "documented": 5,
+            "covered": 5
+          },
+          "recovery": {
+            "documented": 1,
+            "covered": 1
+          },
+          "finalizer": {
+            "documented": 1,
+            "covered": 1
+          },
+          "impossible-event": {
+            "documented": 1,
+            "covered": 1
+          }
         }
       },
       "exploredSnapshots": 28,
@@ -661,7 +889,10 @@
         "replayEquivalent": true,
         "transitioned": true
       },
-      "finalizer": { "scopeAbortStopsOnce": true, "lateEventIgnored": true }
+      "finalizer": {
+        "scopeAbortStopsOnce": true,
+        "lateEventIgnored": true
+      }
     },
     {
       "kind": "coordinator-election",
@@ -693,12 +924,30 @@
         "covered": 9,
         "missing": [],
         "byKind": {
-          "adversarial": { "documented": 4, "covered": 4 },
-          "interruption": { "documented": 1, "covered": 1 },
-          "timeout": { "documented": 1, "covered": 1 },
-          "recovery": { "documented": 1, "covered": 1 },
-          "finalizer": { "documented": 1, "covered": 1 },
-          "impossible-event": { "documented": 1, "covered": 1 }
+          "adversarial": {
+            "documented": 4,
+            "covered": 4
+          },
+          "interruption": {
+            "documented": 1,
+            "covered": 1
+          },
+          "timeout": {
+            "documented": 1,
+            "covered": 1
+          },
+          "recovery": {
+            "documented": 1,
+            "covered": 1
+          },
+          "finalizer": {
+            "documented": 1,
+            "covered": 1
+          },
+          "impossible-event": {
+            "documented": 1,
+            "covered": 1
+          }
         }
       },
       "exploredSnapshots": 12,
@@ -720,7 +969,10 @@
         "replayEquivalent": true,
         "transitioned": true
       },
-      "finalizer": { "scopeAbortStopsOnce": true, "lateEventIgnored": true }
+      "finalizer": {
+        "scopeAbortStopsOnce": true,
+        "lateEventIgnored": true
+      }
     }
   ],
   "totals": {
@@ -746,23 +998,23 @@
     "pendingDeadlineHandles": 0
   },
   "sourceDigests": {
-    "package.json": "5265b6d4fb55e26d18aeae269ab17c520516d0d296a6bb7b885716834b90a1db",
-    "pnpm-workspace.yaml": "d6246289194ea6cb29e933f89eccb242ec1c450eec6c65b3350c3fedfa20a519",
+    "package.json": "acd970060c8df0d628cada8c1762111b9c3587031dbdc0e5815fb1e6159147ee",
+    "pnpm-workspace.yaml": "d51950e32647c121ad667b578a448b703ea5f74637fd91524b7012dd53167169",
     "tsconfig.json": "b80805434d59ff95a362cfbff728ceab0e6313f80ea3c23853cb564c1dfc9a65",
     "tsconfig.base.json": "6a5180d481cd767365ec8da2257e5573e498c5802ce56bda99e0ac218baca818",
     "packages/model/package.json": "15e5054eb50fc8a0c54fcd593a9dfb71a4c10c2091e0af0477598a2b98f88f90",
     "packages/model/tsconfig.json": "49477f7be8bc9f2976c250a0297c34809aed00c7d9e57115eaa4ad1722897e9c",
     "packages/model/src/commands.ts": "e4d1dd8edd3fde607ae8f5640a2e9c9b7a4d571724b4847ab945d599d3fa32b7",
-    "packages/model/src/effects.ts": "553e13bb20b3da33a97a473734c6b0e053705cb8e7a5d3bb5346f7f552e174cd",
+    "packages/model/src/effects.ts": "1bed7b3eab6289f407357379f2bfa0cc1611dd3f2ef4aec1eb5835bdf811ff8c",
     "packages/model/src/entities.ts": "2f8461c6ced824a4d99258dfc3f35e983161cef641779b0d4bcaa72e04d0fd2b",
     "packages/model/src/factories.ts": "efb2d00d14f7f93fc249daae477a22e1b3dea8541d9cffc1cb2e1e04651c6b98",
     "packages/model/src/ids.ts": "cbf1947c1c8ed51447a6e3b5d77b04734e0b6b59e588099f442b99c3bde953c1",
     "packages/model/src/index.ts": "894f6d22e3e7612e4ae3ce186e244452247d6111196270901edfbd3544684f0a",
-    "packages/model/src/json.ts": "da96a28fe2302084638cecca527d7f181d4ce088c38d04b371409217dc7ded8c",
+    "packages/model/src/json.ts": "71b1008440a2511a701e7ff4484e0373fd0f0dfac78a39eb099da31f0ee389f5",
     "packages/model/src/panel-registry.ts": "0a84a2ea260b55bf2c8efaa8462aae4e698045865f533d6e937a93ab8af9af5c",
     "packages/model/src/results.ts": "f66a7e790365153a33f72df22e7961890d74f0e1723cf9ed2f13fcdd58c50fec",
     "packages/protocol/src/catalog.ts": "8f9a79fa206045cf16903e6727892517796a16dee4e13998dd828c1d36b1121a",
-    "packages/protocol/src/coverage-contract.ts": "f6db8c0080b74422213d1dc92d20f38b32ae3c31cb4658177f8f5f0759fdc249",
+    "packages/protocol/src/coverage-contract.ts": "539dc24685d0eea7df47be5e6cfd9333b1a1fe4dfb73153d5ee53e4846fc7f61",
     "packages/protocol/src/index.ts": "8181f9009c395ff6c9f0f3fde9f34577558e8978f66c08e384174247d8a3ffab",
     "packages/protocol/src/trace.ts": "67e029b806bde573978ca8f37b7d088fbeff4ccdfc40a9632b950c3a4932a308",
     "packages/protocol/src/types.ts": "7b8fbdfa15ba81da62581764bb2f28434d10ecb9beefdc49513d650e1e05eeb0",
@@ -774,7 +1026,7 @@
     "packages/protocol-xstate/src/floating-machine.ts": "58684925d7d1b18b0a2115bd9610a07bc730ef679d50d566fd94a92d70cb3801",
     "packages/protocol-xstate/src/keyboard-move-machine.ts": "f0dcfa7b07a8e7a8a2903b0e562305b0df0a664d2019609c404916f70eb7c492",
     "packages/protocol-xstate/src/persistence-machine.ts": "3d32357ea4617591a2dd8932a56757ebcb5a53d43582c63275e8980836feba20",
-    "packages/protocol-xstate/src/plugin-load-machine.ts": "87819d21727a9cadb1660264c6c1ab8722963a362bf428b7c92625b7af3ebbb6",
+    "packages/protocol-xstate/src/plugin-load-machine.ts": "e1c67aa19aec5b73c9260db63c08c774f6eaa7fd2b913f95d5f9a6e2942b181e",
     "packages/protocol-xstate/src/resize-machine.ts": "fcebf707e4caf240b158e8b21a161f78395d0e0553fccab8d3fba3eb1db970f6",
     "packages/protocol-xstate/src/scoped-actor.ts": "30183e00fbd9d128b75d51f52726d4c3419509ce00efb36c75cebeaf309379b8",
     "packages/protocol-xstate/src/surface-recovery-machine.ts": "b04ec8dae0d13b7a772f28d6685132e7460d50d15723cba4fc341fd62521bfd5",
@@ -788,10 +1040,10 @@
     "packages/protocol-xstate/test/scoped-actor-deadline.test.ts": "20b91125192c90210413398d65a1818dfaaf54569b22349d0f6dbababccb17e7",
     "scripts/protocol-coverage-lib.d.mts": "ad9778fdda16883ddc6d8c8f366e119453673c61db21abc5a058e648f39e33ca",
     "scripts/protocol-coverage-lib.mjs": "a6172fbdc67ad48298c7866f47ff25895d255dcbb47976f65e7098825a758f8e",
-    "scripts/run-protocol-coverage.mjs": "3ae98fea84123e4d14e50cc6365b88e2ddb6e8e872e0c95ca9a0b72dd28a9eb0",
+    "scripts/run-protocol-coverage.mjs": "51345937f17b41822986377ed74a6b6f52a88dcc1ac1482fc1580af9a8a0eb9a",
     "scripts/verify-protocol-coverage.d.mts": "353a5ec6ec45b69ccdac52b7f1d4cc5d308e9360fa7627241c178b52684643cf",
     "scripts/verify-protocol-coverage.mjs": "e6659c6d19bb29abd6ba2b9942639a9b9b3e83a2535ccf80e2d7a296b6805fc9",
-    "pnpm-lock.yaml": "dce38aee0e6e7d90983daba3fcc585995cd7e0013d2276e7978b409b450f6acf"
+    "pnpm-lock.yaml": "e659e90970ee34935228595f2297da307495a7a7b01202ecfa67deaf1ac53209"
   },
   "limitations": [
     "This result covers the twelve headless Appendix-C XState actors and the real scoped deadline delivery path; it is not browser timer, operating-system, or process-crash certification.",

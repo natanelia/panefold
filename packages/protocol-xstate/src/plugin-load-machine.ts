@@ -4,7 +4,13 @@ export interface PluginLoadContext {
   readonly pluginId: string | undefined;
   readonly version: string | undefined;
   readonly failureKind:
-    "manifest" | "version" | "load" | "registration" | "renderer" | "migration" | undefined;
+    | "manifest"
+    | "version"
+    | "load"
+    | "registration"
+    | "renderer"
+    | "migration"
+    | undefined;
   readonly failure: string | undefined;
 }
 

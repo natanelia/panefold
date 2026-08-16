@@ -122,14 +122,15 @@ describe("extended command catalog", () => {
     constraints.hardMinInline = 999;
 
     const stored = getEntity(committed.panels, suppliedPanel.id);
+    const storedParameters = stored?.parameters;
     expect(stored?.title).toBe("Before");
-    expect(stored?.parameters).toEqual({ nested: { values: [1, 2] } });
+    expect(storedParameters).toEqual({ nested: { values: [1, 2] } });
     expect(stored?.constraints.hardMinInline).toBe(90);
     expect(stored).not.toBe(suppliedPanel);
     expect(Object.isFrozen(stored)).toBe(true);
     expect(
       Object.isFrozen(
-        (stored?.parameters as { readonly nested: { readonly values: readonly number[] } }).nested
+        (storedParameters as { readonly nested: { readonly values: readonly number[] } }).nested
           .values,
       ),
     ).toBe(true);

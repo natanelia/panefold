@@ -1367,7 +1367,8 @@ function SurfaceRenderer<TSnapshot, TCommand, TResult>({
                       const clientY = (rootRect?.top ?? 0) + (rootRect?.height ?? 0) / 2;
                       const ownerWindow = rootRef.current?.ownerDocument.defaultView;
                       let outcome:
-                        WorkspaceExternalPanelOutcome | Promise<WorkspaceExternalPanelOutcome>;
+                        | WorkspaceExternalPanelOutcome
+                        | Promise<WorkspaceExternalPanelOutcome>;
                       const controller = new AbortController();
                       try {
                         outcome = requestExternalPanel({

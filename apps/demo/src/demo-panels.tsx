@@ -7,7 +7,14 @@ const LazyHeavyContentFixturePanel = lazy(async () => {
 });
 
 type GlyphName =
-  "code" | "explorer" | "file" | "outline" | "problems" | "search" | "source" | "terminal";
+  | "code"
+  | "explorer"
+  | "file"
+  | "outline"
+  | "problems"
+  | "search"
+  | "source"
+  | "terminal";
 
 export function Glyph({ name }: { readonly name: GlyphName }) {
   const common = {
