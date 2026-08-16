@@ -17,9 +17,9 @@ milestones, but no stable package-compatibility promise exists yet.
 - Same-strip pointer tab reordering with relational insertion anchors, exact visual markers,
   horizontal LTR/RTL and vertical-rail support, bounded overflow autoscroll, plus equivalent
   keyboard and menu routes.
-- Whole panel-container movement from dedicated group chrome: center drops swap intact containers,
-  edge drops reposition every tab together, keyboard placement exposes the same revision-bound
-  plans, and one completed gesture creates one undo entry.
+- Whole panel-container movement from accessible empty tab-strip space: center drops swap intact
+  containers, edge drops reposition every tab together, the Actions menu exposes the same
+  revision-bound keyboard placement plans, and one completed gesture creates one undo entry.
 - Same-document floating-window projection with canonical z-order, bounded titlebar and edge/corner
   manipulation, keyboard movement/resize, movable minimized headers, single-row chrome for sole-panel
   windows, maximize/restore, redock controls, stable panel-host preservation, and surface-local

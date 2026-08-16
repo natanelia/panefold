@@ -33,7 +33,7 @@ initial truths.
 4. Menu and keyboard panel split/move routes use the same request and planner as pointer interaction.
    Whole-container placement uses a separate model-agnostic `planGroupDrop` boundary: center
    acquisition plans an intact group swap, edge acquisition plans one group move, and keyboard
-   activation of dedicated group chrome uses the same retained plans. Group identity, ordered tabs,
+   activation of the named empty tab-strip region or Actions menu uses the same retained plans. Group identity, ordered tabs,
    stable hosts, and the undo boundary remain together.
 5. Same-strip tab reorder is a direct-placement branch, not a second ownership protocol. The React
    adapter measures the current strip, resolves logical insertion slots for horizontal LTR, RTL,

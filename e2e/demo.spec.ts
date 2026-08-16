@@ -254,7 +254,7 @@ test("projects semantic commands through accessible workspace chrome", async ({ 
   await expect(workspaceTab).toHaveAttribute("aria-selected", "true");
   await expect(page.getByText("Active: workspace.ts")).toBeVisible();
 
-  await page.getByRole("button", { name: "Close workspace.ts" }).click();
+  await workspaceTab.locator('[title="Close workspace.ts"]').click();
   await expect(workspaceTab).toHaveCount(0);
   await page.getByRole("button", { name: "Undo layout change" }).click();
   await expect(page.getByRole("tab", { name: "workspace.ts" })).toBeVisible();
@@ -610,7 +610,8 @@ test("removes a split panel container in one undoable action", async ({ page }) 
   const before = await revisionOf(page);
   const workspaceTab = page.locator('[data-workspace-panel-tab="notes"]');
   const splitGroup = workspaceTab.locator("xpath=ancestor::*[@data-workspace-group][1]");
-  await splitGroup.getByRole("button", { name: /Remove panel container/ }).click();
+  await splitGroup.getByRole("button", { name: "Actions for workspace.ts" }).click();
+  await splitGroup.getByRole("menuitem", { name: /Remove panel container/ }).click();
 
   await expect.poll(() => revisionOf(page)).toBe(before + 1);
   await expect(page.locator("[data-workspace-group]")).toHaveCount(4);

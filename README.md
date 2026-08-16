@@ -149,8 +149,8 @@ pnpm dev
 ```
 
 Open the URL printed by Vite. Panefold Code lets you drag an editor into another group, drop it on
-any logical edge to create a group, drag the visible **⠿** group handle to move every tab in a panel
-container together, remove a container with its visible **⊠** action, float it into a movable and
+any logical edge to create a group, drag empty tab-strip space to move every tab in a panel container
+together, remove a populated container from its **Actions** menu, float it into a movable and
 resizable in-page window, drag it beyond the workspace into a controlled same-origin browser window,
 split from the keyboard/menu, resize splitters, choose top/bottom/vertical and
 icon/label tab chrome, and reload the canonical arrangement from IndexedDB. Stable panel-host
@@ -167,12 +167,13 @@ support for every browser, input, framework, workload, or deployment.
    the Actions menu expose the same operation.
 3. Drag a tab onto a group edge—or use **Actions → Split left/right/above/below**—to create a new
    container in one undoable transaction.
-4. Drag a container's visible **⠿ Move panel container** handle onto another container. Drop in the
-   center to swap both intact containers, or on an edge to reposition the source with all its tabs;
-   activate the same handle from the keyboard for the equivalent destination dialog.
-5. Choose the visible **⊠ Remove panel container** action to merge all tabs into the nearest
-   container and collapse the split in one undoable transaction. It also works for empty retained
-   containers.
+4. Drag a container's empty tab-strip space onto another container. Drop in the center to swap both
+   intact containers, or on an edge to reposition the source with all its tabs. The empty space is a
+   named keyboard control, and **Actions → Move panel container** opens the equivalent destination
+   dialog.
+5. Choose **Actions → Remove panel container** to merge all tabs into the nearest container and
+   collapse the split in one undoable transaction. Empty retained containers expose the same removal
+   action in their empty-state fallback.
 6. Choose **Actions → Float workspace.ts** to move the live host into an in-page floating window. A
    sole panel shares one row with the window controls; move it before or after minimizing, resize it
    while expanded, maximize/restore, and redock it without losing editor state.

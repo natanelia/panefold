@@ -375,7 +375,11 @@ describe("WorkspaceSurface", () => {
 
     await user.click(screen.getByRole("tab", { name: "Beta" }));
     expect(announcements.at(-1)).toBe("Memilih Beta");
-    await user.click(screen.getByRole("button", { name: "Tutup Beta" }));
+    await user.click(
+      requiredElement(
+        screen.getByRole("tab", { name: "Beta" }).querySelector('[title="Tutup Beta"]'),
+      ),
+    );
     expect(announcements.at(-1)).toBe("Menutup Beta ditolak: Denied by fixture policy");
   });
 
@@ -801,7 +805,7 @@ describe("WorkspaceSurface", () => {
     expect(document.getElementById(headingId ?? "")?.textContent).toBe("Panel group");
   });
 
-  it("keeps panel controls outside the tablist accessibility structure", async () => {
+  it("keeps close affordances in their tabs without breaking tablist semantics", async () => {
     const runtime = new FixtureRuntime(initialProjection);
     renderWorkspace(runtime);
 
@@ -810,9 +814,19 @@ describe("WorkspaceSurface", () => {
       "tab",
       "tab",
     ]);
-    expect(tablist.querySelector('button:not([role="tab"])')).toBeNull();
-    expect(screen.getByRole("button", { name: "Close Alpha" })).toBeTruthy();
-    expect(screen.getByRole("button", { name: "Actions for Alpha" })).toBeTruthy();
+    const alpha = screen.getByRole("tab", { name: "Alpha" });
+    const beta = screen.getByRole("tab", { name: "Beta" });
+    expect(alpha.getAttribute("aria-keyshortcuts")).toBe("Delete");
+    expect(beta.querySelector('[data-workspace-tab-close="beta"]')?.textContent).toBe("×");
+    expect(
+      screen.getByRole("button", { name: "Actions for Alpha" }).closest("[role=tablist]"),
+    ).toBeNull();
+
+    fireEvent.click(requiredElement(beta.querySelector('[data-workspace-tab-close="beta"]')), {
+      detail: 1,
+    });
+    expect(runtime.lastCommand).toEqual({ type: "close", panelId: "beta" });
+    expect(runtime.transactions.at(-1)?.origin).toBe("pointer");
   });
 
   it("commits semantic splitter steps with keyboard origin and useful scale", async () => {
@@ -1383,6 +1397,26 @@ describe("WorkspaceSurface", () => {
     });
   });
 
+  it("keeps every available panel and container action in the ellipsis menu", async () => {
+    const user = userEvent.setup();
+    const runtime = new FixtureRuntime(initialProjection);
+    renderWorkspace(runtime, { commands: directManipulationCommands });
+
+    await user.click(await screen.findByRole("button", { name: "Actions for Alpha" }));
+
+    expect(screen.getByRole("menuitem", { name: "Move Alpha tab after Beta" })).toBeTruthy();
+    expect(screen.getByRole("menuitem", { name: /Choose destination/ })).toBeTruthy();
+    expect(screen.getByRole("menuitem", { name: "Split left" })).toBeTruthy();
+    expect(screen.getByRole("menuitem", { name: "Close Alpha" })).toBeTruthy();
+    const moveContainer = screen.getByRole("menuitem", {
+      name: "Move Left panel container",
+    });
+    expect(moveContainer).toBeTruthy();
+
+    await user.click(moveContainer);
+    expect(screen.getByRole("dialog", { name: "Move Left panel container" })).toBeTruthy();
+  });
+
   it("provides arrow, boundary, and Escape behavior for panel action menus", async () => {
     const user = userEvent.setup();
     const runtime = new FixtureRuntime(initialProjection);
@@ -1752,10 +1786,14 @@ describe("WorkspaceSurface", () => {
     expect(view.container.querySelector("[data-workspace-panel-drag]")).toBeNull();
   });
 
-  it("drags an intact panel container through one revision-bound group drop", async () => {
+  it("drags an intact panel container from accessible empty tab-strip space", async () => {
     const runtime = new FixtureRuntime(initialProjection);
     const view = renderWorkspace(runtime, { commands: directManipulationCommands });
     const handle = await screen.findByRole("button", { name: "Move Left panel container" });
+    expect(handle.classList.contains("pf-group-drag-region")).toBe(true);
+    expect(handle.textContent).toBe("");
+    expect(handle.parentElement?.classList.contains("pf-tab-strip")).toBe(true);
+    expect(handle.closest('[role="tablist"]')).toBeNull();
     installPointerCapture(handle);
 
     fireEvent.pointerDown(handle, {
@@ -1809,7 +1847,7 @@ describe("WorkspaceSurface", () => {
     });
   });
 
-  it("moves a panel container from its keyboard-accessible group chrome", async () => {
+  it("moves a panel container from keyboard-accessible empty tab-strip space", async () => {
     const runtime = new FixtureRuntime(initialProjection);
     renderWorkspace(runtime, { commands: directManipulationCommands });
     const user = userEvent.setup();
@@ -3362,7 +3400,8 @@ describe("WorkspaceSurface", () => {
     const controls = group?.querySelector<HTMLElement>(".pf-tab-controls");
     expect(group?.dataset.tabContent).toBe("icon-only");
     expect(group?.dataset.tabOrientation).toBe("vertical");
-    expect(controls?.querySelectorAll(".pf-tab-close, .pf-tab-more")).toHaveLength(2);
+    expect(controls?.querySelectorAll(".pf-tab-more")).toHaveLength(1);
+    expect(group?.querySelectorAll(".pf-tab .pf-tab-close")).toHaveLength(2);
 
     alpha.focus();
     await userEvent.keyboard("{ArrowDown}");

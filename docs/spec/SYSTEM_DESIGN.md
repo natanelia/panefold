@@ -988,7 +988,7 @@ Snap acquisition uses separate acquire and release distances, velocity bias, ent
 
 The command registry supplies keyboard, menu, palette, and assistive-technology routes. Default key bindings are platform-sensitive, rebindable, scoped, and conflict-aware. Workspace commands do not fire during IME composition and do not steal commands claimed by an embedded editor.
 
-> **1.** Focus a panel tab or group chrome.
+> **1.** Focus a panel tab or the empty tab-strip move region.
 >
 > **2.** Invoke Move panel or Move group.
 >

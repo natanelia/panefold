@@ -383,7 +383,7 @@
       "verificationClass": "code-verifiable",
       "artifactRole": "source",
       "uri": "repo://packages/react/test/WorkspaceSurface.test.tsx",
-      "sha256": "a8379fc3581cf365580b768b817b8a8f458eeefebbc3589793bfd910030bd023",
+      "sha256": "568f6dee8db8355f87c67d1653e2e954f9697a749e1abe96f322010e6fe25a22",
       "producedAt": "2026-08-14T07:19:51.074Z",
       "requirementIds": [
         "A11Y-003",
@@ -760,7 +760,7 @@
       "verificationClass": "code-verifiable",
       "artifactRole": "source",
       "uri": "repo://packages/react/test/WorkspaceSurface.test.tsx",
-      "sha256": "a8379fc3581cf365580b768b817b8a8f458eeefebbc3589793bfd910030bd023",
+      "sha256": "568f6dee8db8355f87c67d1653e2e954f9697a749e1abe96f322010e6fe25a22",
       "producedAt": "2026-08-14T07:19:51.074Z",
       "requirementIds": [
         "I18N-001",
@@ -924,7 +924,7 @@
       "verificationClass": "code-verifiable",
       "artifactRole": "source",
       "uri": "repo://docs/adr/0013-direct-placement-durable-demo.md",
-      "sha256": "45f8f730ad0c91f7a9b1f9c3c068ca8881b5c5dcf46f9b101510aeb16edbcf5c",
+      "sha256": "9d050f1eea2f0816aa954efcad2d6adde5f93fde849f81feeb70f7d07220a476",
       "producedAt": "2026-08-14T07:19:51.074Z",
       "requirementIds": [
         "EXP-002",

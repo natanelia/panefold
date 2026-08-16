@@ -268,8 +268,8 @@ export function HomePage({ navigate }: { readonly navigate: (path: string) => vo
                 {[
                   "Drag a tab to a group center to dock it.",
                   "Drop on any edge to create a new container.",
-                  "Drag ⠿ to move every tab in a container together.",
-                  "Use ⊠ to remove a container in one undoable merge.",
+                  "Drag empty tab-strip space to move a container.",
+                  "Use Actions to remove a container in one undoable merge.",
                   "Drag beyond the workspace to open a live popup.",
                   "Reload — the canonical layout returns from IndexedDB.",
                 ].map((step, index) => (

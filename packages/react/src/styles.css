@@ -485,13 +485,14 @@
   }
 
   .pf-tab {
+    position: relative;
     display: inline-flex;
     flex: 0 1 180px;
     align-items: center;
     gap: 7px;
     min-inline-size: 84px;
     min-block-size: var(--pf-target-size);
-    padding-inline: 10px;
+    padding-inline: 10px 32px;
     border: 0;
     border-inline-end: 1px solid var(--pf-border);
     border-block-end: 2px solid transparent;
@@ -562,8 +563,6 @@
   }
 
   .pf-tab-close,
-  .pf-group-move,
-  .pf-group-remove,
   .pf-tab-more {
     display: grid;
     flex: 0 0 auto;
@@ -579,16 +578,26 @@
   }
 
   .pf-tab-close {
+    position: absolute;
+    inset-inline-end: 4px;
+    inset-block-start: 50%;
+    z-index: 1;
+    opacity: 0;
     font-size: 18px;
+    pointer-events: none;
+    translate: 0 -50%;
   }
 
-  .pf-group-move {
-    font-size: 15px;
-    touch-action: none;
+  .pf-tab[aria-selected="true"] .pf-tab-close {
+    opacity: 1;
+    pointer-events: auto;
   }
 
-  .pf-group-remove {
-    font-size: 14px;
+  @media (hover: hover) {
+    .pf-tab:hover .pf-tab-close {
+      opacity: 1;
+      pointer-events: auto;
+    }
   }
 
   .pf-tab-more {
@@ -596,20 +605,35 @@
   }
 
   .pf-tab-close:hover,
-  .pf-group-move:hover,
-  .pf-group-remove:hover,
   .pf-tab-more:hover {
     color: var(--pf-text);
     background: var(--pf-surface-soft);
   }
 
+  .pf-group-drag-region {
+    flex: 1 1 0;
+    min-inline-size: 0;
+    min-block-size: var(--pf-target-size);
+    padding: 0;
+    border: 0;
+    color: transparent;
+    background: transparent;
+    touch-action: none;
+  }
+
+  .pf-group-drag-region:focus-visible {
+    outline: 2px solid var(--pf-focus);
+    outline-offset: -3px;
+    background: color-mix(in srgb, var(--pf-accent-soft) 42%, transparent);
+  }
+
   @media (hover: hover) and (pointer: fine) {
-    .pf-workspace[data-group-drop-enabled="true"] .pf-group-move {
+    .pf-workspace[data-group-drop-enabled="true"] .pf-group-drag-region {
       cursor: grab;
     }
 
     .pf-workspace:is([data-group-drag-state="armed"], [data-group-drag-state="dragging"])
-      .pf-group-move {
+      .pf-group-drag-region {
       cursor: grabbing;
     }
   }
@@ -661,6 +685,12 @@
 
   .pf-menu button:hover {
     background: var(--pf-accent-soft);
+  }
+
+  .pf-menu-separator {
+    block-size: 1px;
+    margin: 5px 4px;
+    background: var(--pf-border);
   }
 
   .pf-panel-slot,
@@ -730,6 +760,11 @@
     min-inline-size: 0;
     border-block-end: 1px solid var(--pf-border);
     border-inline-end: 2px solid transparent;
+  }
+
+  .pf-group[data-tab-orientation="vertical"] .pf-group-drag-region {
+    min-inline-size: 100%;
+    min-block-size: 0;
   }
 
   .pf-group[data-tab-placement="inline-end"] .pf-tab {
@@ -957,17 +992,18 @@
     }
 
     .pf-tab-close,
-    .pf-group-move,
-    .pf-group-remove,
     .pf-empty-group-remove,
     .pf-tab-more {
       inline-size: var(--pf-target-size);
       block-size: var(--pf-target-size);
     }
 
+    .pf-tab {
+      padding-inline-end: 48px;
+    }
+
     .pf-group[data-tab-content="icon-only"][data-tab-orientation="vertical"] {
-      /* Four adjacent controls retain full 44px touch targets without flex shrink. */
-      --pf-tab-inline-size: 192px;
+      --pf-tab-inline-size: 96px;
     }
   }
 

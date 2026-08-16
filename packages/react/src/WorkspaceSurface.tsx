@@ -2157,7 +2157,7 @@ function PanelGroup<TCommand, TResult>({
     : undefined;
 
   const removePanelContainer = (
-    origin: Extract<WorkspaceCommandOrigin, "pointer" | "keyboard">,
+    origin: Extract<WorkspaceCommandOrigin, "pointer" | "keyboard" | "menu">,
   ) => {
     if (createMergeGroupCommand === undefined || mergeTarget === undefined) return;
     const ownerDocument = groupRef.current?.ownerDocument;
@@ -2369,13 +2369,19 @@ function PanelGroup<TCommand, TResult>({
                   tabIndex={selected ? 0 : -1}
                   aria-selected={selected}
                   aria-controls={panelContentId(domIdPrefix, panel.id)}
+                  aria-keyshortcuts={panel.closable === false ? undefined : "Delete"}
                   title={panel.title}
                   data-workspace-panel-tab={panel.id}
                   onClick={(event) => {
+                    if (isTabCloseAffordance(event.target)) {
+                      if (panel.closable !== false) closePanel(panel, clickOrigin(event));
+                      return;
+                    }
                     if (panelDrag.consumeClick(panel.id)) return;
                     selectPanel(panel, false, clickOrigin(event));
                   }}
                   onPointerDown={(event) => {
+                    if (isTabCloseAffordance(event.target)) return;
                     pointerFocusPanelRef.current = panel.id;
                     panelDrag.begin(panel, group, event);
                   }}
@@ -2465,10 +2471,42 @@ function PanelGroup<TCommand, TResult>({
                   >
                     {panel.title}
                   </span>
+                  {panel.closable === false ? null : (
+                    <span
+                      className="pf-tab-close"
+                      data-workspace-tab-close={panel.id}
+                      title={messages.closePanel({ title: panel.title })}
+                      aria-hidden="true"
+                    >
+                      ×
+                    </span>
+                  )}
                 </button>
               );
             })}
           </div>
+          {moveContainerLabel === undefined ? null : (
+            <button
+              id={groupMoveHandleId(domIdPrefix, group.id)}
+              className="pf-group-drag-region"
+              type="button"
+              aria-label={moveContainerLabel}
+              title={moveContainerLabel}
+              data-workspace-group-drag-handle={group.id}
+              onClick={() => {
+                if (groupDrag.consumeClick(group.id)) return;
+                setMoveGroupId(group.id);
+              }}
+              onPointerDown={(event) => {
+                groupDrag.begin(group, event);
+              }}
+              onPointerMove={groupDrag.move}
+              onPointerUp={groupDrag.finish}
+              onPointerCancel={groupDrag.cancel}
+              onLostPointerCapture={groupDrag.cancel}
+              onKeyDown={groupDrag.keyDown}
+            />
+          )}
           {selectedPanel === undefined ||
           (selectedPanel.closable === false &&
             createMovePanelCommand === undefined &&
@@ -2483,164 +2521,125 @@ function PanelGroup<TCommand, TResult>({
               className="pf-tab-controls"
               data-workspace-panel-controls={selectedPanel.id}
             >
-              {moveContainerLabel === undefined ? null : (
-                <button
-                  id={groupMoveHandleId(domIdPrefix, group.id)}
-                  className="pf-group-move"
-                  type="button"
-                  aria-label={moveContainerLabel}
-                  title={moveContainerLabel}
-                  data-workspace-group-drag-handle={group.id}
-                  onClick={() => {
-                    if (groupDrag.consumeClick(group.id)) return;
-                    setMoveGroupId(group.id);
-                  }}
-                  onPointerDown={(event) => {
-                    groupDrag.begin(group, event);
-                  }}
-                  onPointerMove={groupDrag.move}
-                  onPointerUp={groupDrag.finish}
-                  onPointerCancel={groupDrag.cancel}
-                  onLostPointerCapture={groupDrag.cancel}
-                  onKeyDown={groupDrag.keyDown}
-                >
-                  <span aria-hidden="true">⠿</span>
-                </button>
-              )}
-              {selectedPanel.closable === false ? null : (
-                <button
-                  className="pf-tab-close"
-                  type="button"
-                  aria-label={messages.closePanel({ title: selectedPanel.title })}
-                  title={messages.closePanel({ title: selectedPanel.title })}
-                  onClick={(event) => {
-                    closePanel(selectedPanel, clickOrigin(event));
-                  }}
-                >
-                  <span aria-hidden="true">×</span>
-                </button>
-              )}
-              {removeContainerLabel === undefined ? null : (
-                <button
-                  className="pf-group-remove"
-                  type="button"
-                  aria-label={removeContainerLabel}
-                  title={removeContainerLabel}
-                  onClick={(event) => {
-                    removePanelContainer(clickOrigin(event));
-                  }}
-                >
-                  <span aria-hidden="true">⊠</span>
-                </button>
-              )}
-              {createMovePanelCommand === undefined &&
-              createReorderPanelCommand === undefined &&
-              createFloatPanelCommand === undefined &&
-              createDropPanelCommand === undefined &&
-              !externalPanelAvailable ? null : (
-                <TabActions
-                  panel={selectedPanel}
-                  groups={Object.values(projection.groups)}
-                  messages={messages}
-                  interactionMessages={interactionMessages}
-                  triggerId={panelActionsId(domIdPrefix, selectedPanel.id)}
-                  onReorderPrevious={
-                    createReorderPanelCommand === undefined ||
-                    groupPanels.indexOf(selectedPanel) === 0
-                      ? undefined
-                      : {
-                          label: interactionMessages.moveTabBefore({
-                            title: selectedPanel.title,
-                            anchor:
-                              groupPanels[groupPanels.indexOf(selectedPanel) - 1]?.title ??
-                              selectedPanel.title,
-                          }),
-                          select: () =>
-                            reorderNeighbor(
-                              selectedPanel,
-                              groupPanels.indexOf(selectedPanel),
-                              -1,
-                              "menu",
-                            ),
-                        }
-                  }
-                  onReorderNext={
-                    createReorderPanelCommand === undefined ||
-                    groupPanels.indexOf(selectedPanel) === groupPanels.length - 1
-                      ? undefined
-                      : {
-                          label: interactionMessages.moveTabAfter({
-                            title: selectedPanel.title,
-                            anchor:
-                              groupPanels[groupPanels.indexOf(selectedPanel) + 1]?.title ??
-                              selectedPanel.title,
-                          }),
-                          select: () =>
-                            reorderNeighbor(
-                              selectedPanel,
-                              groupPanels.indexOf(selectedPanel),
-                              1,
-                              "menu",
-                            ),
-                        }
-                  }
-                  onStartKeyboardMove={
-                    createMovePanelCommand === undefined && createDropPanelCommand === undefined
-                      ? undefined
-                      : () => {
-                          setMovePanelId(selectedPanel.id);
-                        }
-                  }
-                  onMove={
-                    createMovePanelCommand === undefined && createDropPanelCommand === undefined
-                      ? undefined
-                      : (targetGroupId) => {
-                          const targetGroup = projection.groups[targetGroupId];
-                          if (targetGroup === undefined) return;
-                          if (createDropPanelCommand !== undefined) {
-                            commitMenuDrop(selectedPanel, targetGroup, {
-                              kind: "center",
-                              ratio: 1,
-                            });
-                          } else if (createMovePanelCommand !== undefined) {
-                            dispatch(
-                              createMovePanelCommand(selectedPanel.id, targetGroupId),
-                              messages.movedPanel({ title: selectedPanel.title }),
-                              "menu",
-                            );
-                          }
-                        }
-                  }
-                  onSplit={
-                    createDropPanelCommand === undefined || group.panelIds.length <= 1
-                      ? undefined
-                      : (edge) => {
-                          commitMenuDrop(selectedPanel, group, {
-                            kind: "edge",
-                            edge,
-                            ratio: 0.5,
+              <TabActions
+                panel={selectedPanel}
+                groups={Object.values(projection.groups)}
+                messages={messages}
+                interactionMessages={interactionMessages}
+                triggerId={panelActionsId(domIdPrefix, selectedPanel.id)}
+                onReorderPrevious={
+                  createReorderPanelCommand === undefined ||
+                  groupPanels.indexOf(selectedPanel) === 0
+                    ? undefined
+                    : {
+                        label: interactionMessages.moveTabBefore({
+                          title: selectedPanel.title,
+                          anchor:
+                            groupPanels[groupPanels.indexOf(selectedPanel) - 1]?.title ??
+                            selectedPanel.title,
+                        }),
+                        select: () =>
+                          reorderNeighbor(
+                            selectedPanel,
+                            groupPanels.indexOf(selectedPanel),
+                            -1,
+                            "menu",
+                          ),
+                      }
+                }
+                onReorderNext={
+                  createReorderPanelCommand === undefined ||
+                  groupPanels.indexOf(selectedPanel) === groupPanels.length - 1
+                    ? undefined
+                    : {
+                        label: interactionMessages.moveTabAfter({
+                          title: selectedPanel.title,
+                          anchor:
+                            groupPanels[groupPanels.indexOf(selectedPanel) + 1]?.title ??
+                            selectedPanel.title,
+                        }),
+                        select: () =>
+                          reorderNeighbor(
+                            selectedPanel,
+                            groupPanels.indexOf(selectedPanel),
+                            1,
+                            "menu",
+                          ),
+                      }
+                }
+                onStartKeyboardMove={
+                  createMovePanelCommand === undefined && createDropPanelCommand === undefined
+                    ? undefined
+                    : () => {
+                        setMovePanelId(selectedPanel.id);
+                      }
+                }
+                onMove={
+                  createMovePanelCommand === undefined && createDropPanelCommand === undefined
+                    ? undefined
+                    : (targetGroupId) => {
+                        const targetGroup = projection.groups[targetGroupId];
+                        if (targetGroup === undefined) return;
+                        if (createDropPanelCommand !== undefined) {
+                          commitMenuDrop(selectedPanel, targetGroup, {
+                            kind: "center",
+                            ratio: 1,
                           });
-                        }
-                  }
-                  direction={direction}
-                  onExternal={
-                    externalPanelAvailable
-                      ? (origin) => externalFromTab(selectedPanel, origin)
-                      : undefined
-                  }
-                  onFloat={
-                    createFloatPanelCommand === undefined
-                      ? undefined
-                      : () => {
+                        } else if (createMovePanelCommand !== undefined) {
                           dispatch(
-                            createFloatPanelCommand(selectedPanel.id),
-                            messages.floatedPanel({ title: selectedPanel.title }),
+                            createMovePanelCommand(selectedPanel.id, targetGroupId),
+                            messages.movedPanel({ title: selectedPanel.title }),
                             "menu",
                           );
                         }
-                  }
-                />
-              )}
+                      }
+                }
+                onSplit={
+                  createDropPanelCommand === undefined || group.panelIds.length <= 1
+                    ? undefined
+                    : (edge) => {
+                        commitMenuDrop(selectedPanel, group, {
+                          kind: "edge",
+                          edge,
+                          ratio: 0.5,
+                        });
+                      }
+                }
+                direction={direction}
+                onExternal={
+                  externalPanelAvailable
+                    ? (origin) => externalFromTab(selectedPanel, origin)
+                    : undefined
+                }
+                onFloat={
+                  createFloatPanelCommand === undefined
+                    ? undefined
+                    : () => {
+                        dispatch(
+                          createFloatPanelCommand(selectedPanel.id),
+                          messages.floatedPanel({ title: selectedPanel.title }),
+                          "menu",
+                        );
+                      }
+                }
+                onClose={
+                  selectedPanel.closable === false
+                    ? undefined
+                    : () => closePanel(selectedPanel, "menu")
+                }
+                onStartKeyboardGroupMove={
+                  moveContainerLabel === undefined ? undefined : () => setMoveGroupId(group.id)
+                }
+                moveContainerLabel={moveContainerLabel}
+                removeContainerAction={
+                  removeContainerLabel === undefined
+                    ? undefined
+                    : {
+                        label: removeContainerLabel,
+                        select: () => removePanelContainer("menu"),
+                      }
+                }
+              />
             </div>
           )}
         </div>,
@@ -2683,6 +2682,10 @@ interface TabActionsProps {
   readonly onSplit: ((edge: WorkspaceLogicalEdge) => void) | undefined;
   readonly direction: WorkspaceDirection;
   readonly onExternal: ((origin: "keyboard" | "menu") => void) | undefined;
+  readonly onClose: (() => void) | undefined;
+  readonly onStartKeyboardGroupMove: (() => void) | undefined;
+  readonly moveContainerLabel: string | undefined;
+  readonly removeContainerAction: TabReorderMenuAction | undefined;
 }
 
 interface TabReorderMenuAction {
@@ -2704,6 +2707,10 @@ function TabActions({
   onSplit,
   direction,
   onExternal,
+  onClose,
+  onStartKeyboardGroupMove,
+  moveContainerLabel,
+  removeContainerAction,
 }: TabActionsProps) {
   const [open, setOpen] = useState(false);
   const actionsRef = useRef<HTMLDivElement>(null);
@@ -2896,6 +2903,45 @@ function TabActions({
               }}
             >
               {messages.floatPanel({ title: panel.title })}
+            </button>
+          )}
+          {onClose === undefined ? null : (
+            <button
+              role="menuitem"
+              type="button"
+              onClick={() => {
+                setOpen(false);
+                onClose();
+              }}
+            >
+              {messages.closePanel({ title: panel.title })}
+            </button>
+          )}
+          {moveContainerLabel === undefined && removeContainerAction === undefined ? null : (
+            <div className="pf-menu-separator" role="separator" />
+          )}
+          {moveContainerLabel === undefined || onStartKeyboardGroupMove === undefined ? null : (
+            <button
+              role="menuitem"
+              type="button"
+              onClick={() => {
+                setOpen(false);
+                onStartKeyboardGroupMove();
+              }}
+            >
+              {moveContainerLabel}
+            </button>
+          )}
+          {removeContainerAction === undefined ? null : (
+            <button
+              role="menuitem"
+              type="button"
+              onClick={() => {
+                setOpen(false);
+                removeContainerAction.select();
+              }}
+            >
+              {removeContainerAction.label}
             </button>
           )}
         </div>
@@ -3845,6 +3891,10 @@ function lifecycleTransitionReason(
 
 function clickOrigin(event: ReactMouseEvent<HTMLElement>): "keyboard" | "pointer" {
   return event.detail === 0 ? "keyboard" : "pointer";
+}
+
+function isTabCloseAffordance(target: EventTarget): boolean {
+  return target instanceof Element && target.closest("[data-workspace-tab-close]") !== null;
 }
 
 function findFocusSuccessor(
