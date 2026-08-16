@@ -83,7 +83,7 @@
     "packages/protocol/src/trace.ts": "67e029b806bde573978ca8f37b7d088fbeff4ccdfc40a9632b950c3a4932a308",
     "packages/protocol/src/types.ts": "7b8fbdfa15ba81da62581764bb2f28434d10ecb9beefdc49513d650e1e05eeb0",
     "packages/protocol/test/protocol.test.ts": "dd118363496c22c9df3110c3a3ab05e7b1bee643fe0c613c75503c2f2262fd4f",
-    "packages/react/package.json": "cd9787253d833aad7519a247013a2ef46d0e49477c6fd63673dccf85eeebfe39",
+    "packages/react/package.json": "f3398780b1ec9266b02c73f85393d7bfab6fa8d782120698f420852b3eb62209",
     "packages/react/src/WorkspaceSurface.tsx": "c42d1f47b939e82ea173db1b026c4d14819fbbabef40a876a7aba909adf4e326",
     "packages/react/src/geometry.ts": "2b43bf5f4968b75708abcaf539b18e130a36852fca0fbe84b2d42f8837b25f57",
     "packages/react/src/index.ts": "86044a6df6ea6a81a338793964213ff244194b074fb273df9283c2f374c61b0d",
@@ -128,7 +128,7 @@
     "packages/model/src/factories.ts": "efb2d00d14f7f93fc249daae477a22e1b3dea8541d9cffc1cb2e1e04651c6b98",
     "packages/model/src/entities.ts": "2f8461c6ced824a4d99258dfc3f35e983161cef641779b0d4bcaa72e04d0fd2b",
     "packages/model/src/index.ts": "894f6d22e3e7612e4ae3ce186e244452247d6111196270901edfbd3544684f0a",
-    "packages/react/src/floating-surface.tsx": "8a7ba92606652f126d666faa2600467fb7a11827a86d70f80a641f78d9a1ea12",
+    "packages/react/src/floating-surface.tsx": "ce26f0641e9fea4d2349255feae86f0d9b3158a6cb8812d09d96b8c55481835c",
     "packages/react/src/node-motion.ts": "5f7efe09d09573ea1c2baa44744627d34fabe60cc6978f287da83e6b02ed52bb",
     "packages/react/test/node-motion.test.ts": "7c826c0b7f309830af7fd78b0db89cae76c7d06ebeb95e18b1e0bebbd4f3e42d"
   },
