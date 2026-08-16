@@ -12,17 +12,19 @@ jobs:
   refresh:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
         with:
           ref: agent/hide-single-tab-row-and-popup-styles
           fetch-depth: 0
-      - uses: pnpm/action-setup@v6
+          persist-credentials: false
+      - uses: pnpm/action-setup@0977fd99725f1db4007ccb2928dbb4e90d06cc86
         with:
           version: 11.16.0
-      - uses: actions/setup-node@v7
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020
         with:
           node-version: 24
           cache: pnpm
+          token: ""
       - run: pnpm install --frozen-lockfile
       - name: Remove this one-shot workflow from the resulting commit
         run: rm .github/workflows/pr14-refresh.yml
@@ -136,12 +138,13 @@ jobs:
           pnpm exec playwright test e2e/pr14-capture.spec.ts --project=chromium --workers=1
           rm e2e/pr14-capture.spec.ts
       - name: Commit generated evidence and screenshots
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add -A \
-            .github/workflows/pr14-refresh.yml \
-            conformance \
-            docs/pr-assets
+          git add -A -- conformance docs/pr-assets
           git commit -m "Refresh conformance evidence and add PR screenshots"
-          git push origin HEAD:agent/hide-single-tab-row-and-popup-styles
+          AUTH_HEADER="$(printf 'x-access-token:%s' "$GITHUB_TOKEN" | base64 -w0)"
+          git -c http.https://github.com/.extraheader="AUTHORIZATION: basic $AUTH_HEADER" \
+            push origin HEAD:agent/hide-single-tab-row-and-popup-styles
