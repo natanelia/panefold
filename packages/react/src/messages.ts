@@ -2,7 +2,14 @@ import type { WorkspaceDispatchStatus } from "./types";
 
 export type WorkspacePhysicalEdge = "left" | "right" | "above" | "below";
 export type WorkspaceFloatingResizeEdge =
-  "top" | "right" | "bottom" | "left" | "top-left" | "top-right" | "bottom-right" | "bottom-left";
+  | "top"
+  | "right"
+  | "bottom"
+  | "left"
+  | "top-left"
+  | "top-right"
+  | "bottom-right"
+  | "bottom-left";
 
 /** Every user-visible string emitted by the reference React projection. */
 export interface WorkspaceMessageCatalog {

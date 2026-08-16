@@ -1190,6 +1190,7 @@ test("drags a live panel beyond the workspace into a popup and redocks it", asyn
   const popup = await popupPromise;
 
   await expect(popup.getByText("Panefold browser surface")).toBeVisible();
+  await expect(popup.locator(".demo-external-header")).toHaveCSS("display", "flex");
   await expect(popup.locator("header").getByText("workspace.ts", { exact: true })).toBeVisible();
   await expect(popup.locator("#panefold-surface-root")).toHaveAttribute(
     "data-panefold-ready",

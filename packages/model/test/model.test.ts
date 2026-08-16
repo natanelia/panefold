@@ -201,8 +201,9 @@ describe("normalized model factories", () => {
     remoteReceipt.actorId = "actor:after";
 
     const storedPanel = getEntity(snapshot.panels, mutablePanel.id);
+    const storedParameters = storedPanel?.parameters;
     expect(storedPanel?.type).toBe("mutable");
-    expect(storedPanel?.parameters).toEqual({ nested: { values: [1, 2] } });
+    expect(storedParameters).toEqual({ nested: { values: [1, 2] } });
     expect(storedPanel?.constraints.hardMinInline).toBe(100);
     expect(getEntity(snapshot.groups, mutableGroup.id)?.panelIds).toEqual([mutablePanel.id]);
     expect(getEntity(snapshot.nodes, split.id)).toMatchObject({
@@ -216,8 +217,8 @@ describe("normalized model factories", () => {
     expect(Object.isFrozen(storedPanel)).toBe(true);
     expect(
       Object.isFrozen(
-        (storedPanel?.parameters as { readonly nested: { readonly values: readonly number[] } })
-          .nested.values,
+        (storedParameters as { readonly nested: { readonly values: readonly number[] } }).nested
+          .values,
       ),
     ).toBe(true);
     expect(Object.isFrozen(snapshot.recoverableClosedPanels[0]?.panel)).toBe(true);

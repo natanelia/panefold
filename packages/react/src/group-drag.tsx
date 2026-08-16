@@ -28,7 +28,13 @@ import type {
 } from "./types";
 
 type DragActorState =
-  "idle" | "armed" | "dragging" | "committing" | "settling" | "cancelling" | "recovering";
+  | "idle"
+  | "armed"
+  | "dragging"
+  | "committing"
+  | "settling"
+  | "cancelling"
+  | "recovering";
 type DragActor = ReturnType<typeof createDragActor>;
 
 interface PointerPosition {

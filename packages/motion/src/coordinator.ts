@@ -30,7 +30,8 @@ export class MotionCoordinator {
   readonly #running = new Map<string, MotionEntry>();
   readonly #queues = new Map<string, MotionEntry[]>();
   readonly #onMotionError:
-    ((input: { readonly plan: MotionPlan; readonly cause: unknown }) => void) | undefined;
+    | ((input: { readonly plan: MotionPlan; readonly cause: unknown }) => void)
+    | undefined;
   readonly #queueLimit: number;
   #profile: MotionProfile;
   #nextQueueOrder = 0;

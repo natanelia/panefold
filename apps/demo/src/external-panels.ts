@@ -13,6 +13,8 @@ import {
   type WorkspaceCommand,
   type WorkspaceSnapshot,
 } from "@panefold/model";
+import { copyInlineStyles } from "./inline-styles";
+
 import type {
   WorkspaceExternalPanelHandler,
   WorkspaceExternalPanelOutcome,
@@ -259,6 +261,7 @@ export class DemoExternalPanelController {
     context: BrowserSurfaceMountContext<DemoPanelCheckpoint>,
   ) {
     lease.handle = context.handle;
+    copyInlineStyles(document, context.document);
     const shell = context.document.createElement("section");
     shell.className = "demo-app demo-external-app pf-workspace";
     shell.dataset.theme = this.#options.getTheme();

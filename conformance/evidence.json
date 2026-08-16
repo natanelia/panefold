@@ -29,7 +29,7 @@
       "verificationClass": "code-verifiable",
       "artifactRole": "source",
       "uri": "repo://packages/model/test/model.test.ts",
-      "sha256": "8fa37646d33a7b3059b046f6057f3475003f3f0a4d5b4bfa0087f57a70f0f43c",
+      "sha256": "9739c0daa55e4ff790e8445298c3b723265957d9f172d216a8376da733e07b9f",
       "producedAt": "2026-08-14T07:19:51.074Z",
       "requirementIds": [
         "API-003",
@@ -576,7 +576,7 @@
       "verificationClass": "code-verifiable",
       "artifactRole": "source",
       "uri": "repo://pnpm-lock.yaml",
-      "sha256": "dce38aee0e6e7d90983daba3fcc585995cd7e0013d2276e7978b409b450f6acf",
+      "sha256": "e659e90970ee34935228595f2297da307495a7a7b01202ecfa67deaf1ac53209",
       "producedAt": "2026-08-14T07:19:51.074Z",
       "requirementIds": [
         "ARC-005",
@@ -1109,7 +1109,7 @@
       "verificationClass": "code-verifiable",
       "artifactRole": "result",
       "uri": "repo://conformance/results/protocol-state-machine-coverage-2026-08-14.json",
-      "sha256": "04abc3b3bf6afb15ec4dcf298cc89550506fe0e7b54f33cc829514ec126ffa5b",
+      "sha256": "f9521eed79a6ea9dec9bc4b1e7a46180e2cc4759e3cae398afd4c3cc62d30bb6",
       "producedAt": "2026-08-14T01:12:00Z",
       "requirementIds": [
         "TST-003"

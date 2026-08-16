@@ -29,7 +29,10 @@ export interface PostCommitEffectPort {
 }
 
 export type PostCommitEffectFailureCode =
-  "DELIVERY_FAILED" | "DELIVERY_CAPACITY_EXCEEDED" | "IDENTITY_MISMATCH" | "DELIVERY_CANCELLED";
+  | "DELIVERY_FAILED"
+  | "DELIVERY_CAPACITY_EXCEEDED"
+  | "IDENTITY_MISMATCH"
+  | "DELIVERY_CANCELLED";
 
 interface PostCommitEffectReceiptBase {
   readonly effectId: EffectIntentId;
@@ -66,7 +69,10 @@ export interface PostCommitEffectFailure {
 }
 
 export type PostCommitEffectRetryRejection =
-  "NOT_FOUND" | "NOT_FAILED" | "NOT_RETRYABLE" | "CONTROLLER_DISPOSED";
+  | "NOT_FOUND"
+  | "NOT_FAILED"
+  | "NOT_RETRYABLE"
+  | "CONTROLLER_DISPOSED";
 
 export type PostCommitEffectRetryResult =
   | {
