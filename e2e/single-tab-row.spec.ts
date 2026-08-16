@@ -40,8 +40,9 @@ test("hides a docked single-tab row without removing pointer docking", async ({ 
   await page.emulateMedia({ reducedMotion: "reduce" });
   await page.goto("/");
 
-  await page.getByRole("tab", { name: "workspace.ts" }).click();
-  await page.getByRole("button", { name: "Close workspace.ts" }).click();
+  const workspaceTab = page.getByRole("tab", { name: "workspace.ts" });
+  await workspaceTab.click();
+  await workspaceTab.locator('[data-workspace-tab-close="notes"]').click();
 
   const primaryGroup = page.locator('[data-workspace-group="primary"]');
   const appTab = primaryGroup.locator('[data-workspace-panel-tab="map-canvas"]');
