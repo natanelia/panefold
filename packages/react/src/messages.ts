@@ -28,6 +28,8 @@ export interface WorkspaceMessageCatalog {
   movedPanelTo(values: { readonly title: string; readonly group: string }): string;
   floatedPanel(values: { readonly title: string }): string;
   floatPanel(values: { readonly title: string }): string;
+  /** Optional visual discovery hint for collapsed single-panel chrome. */
+  dragPanelToMove?(values: { readonly title: string }): string;
   moveCancelled(): string;
   workspaceRegions(): string;
   currentWorkspaceRegion(): string;
@@ -122,6 +124,7 @@ export const ENGLISH_WORKSPACE_MESSAGES = Object.freeze({
   movedPanelTo: ({ title, group }) => `Moved ${title} to ${group}`,
   floatedPanel: ({ title }) => `Floated ${title}`,
   floatPanel: ({ title }) => `Float ${title}`,
+  dragPanelToMove: ({ title }) => `Drag to move ${title}`,
   moveCancelled: () => "Move cancelled",
   workspaceRegions: () => "Workspace regions",
   currentWorkspaceRegion: () => "Current workspace region",
@@ -200,6 +203,7 @@ export const ENGLISH_WORKSPACE_MESSAGES = Object.freeze({
 export interface ResolvedWorkspaceInteractionMessages {
   readonly panelGroupFallback: () => string;
   readonly movedPanelTo: (values: { readonly title: string; readonly group: string }) => string;
+  readonly dragPanelToMove: (values: { readonly title: string }) => string;
   readonly moveCancelled: () => string;
   readonly movePanelContainer: (values: { readonly group: string }) => string;
   readonly swapPanelContainers: (values: {
@@ -263,6 +267,7 @@ export function resolveWorkspaceInteractionMessages(
   return {
     panelGroupFallback: catalog.panelGroupFallback,
     movedPanelTo: catalog.movedPanelTo,
+    dragPanelToMove: catalog.dragPanelToMove ?? ENGLISH_WORKSPACE_MESSAGES.dragPanelToMove,
     moveCancelled: catalog.moveCancelled,
     movePanelContainer: catalog.movePanelContainer ?? ENGLISH_WORKSPACE_MESSAGES.movePanelContainer,
     swapPanelContainers:

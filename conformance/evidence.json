@@ -383,7 +383,7 @@
       "verificationClass": "code-verifiable",
       "artifactRole": "source",
       "uri": "repo://packages/react/test/WorkspaceSurface.test.tsx",
-      "sha256": "5f5bf556058e91d6d5d707cc77ff740dd288659137c1004d54cd7cbd9650bb82",
+      "sha256": "cf012c5a4755977ae939012dc8aa951ea3e4b62f5e1d26b016fe77d583a806d0",
       "producedAt": "2026-08-14T07:19:51.074Z",
       "requirementIds": [
         "A11Y-003",
@@ -760,7 +760,7 @@
       "verificationClass": "code-verifiable",
       "artifactRole": "source",
       "uri": "repo://packages/react/test/WorkspaceSurface.test.tsx",
-      "sha256": "5f5bf556058e91d6d5d707cc77ff740dd288659137c1004d54cd7cbd9650bb82",
+      "sha256": "cf012c5a4755977ae939012dc8aa951ea3e4b62f5e1d26b016fe77d583a806d0",
       "producedAt": "2026-08-14T07:19:51.074Z",
       "requirementIds": [
         "I18N-001",
@@ -1000,7 +1000,7 @@
       "verificationClass": "environment-verifiable",
       "artifactRole": "result",
       "uri": "repo://conformance/results/chromium-reference-2026-08-14.json",
-      "sha256": "026f7e4b3c9f21a3aa7230d5a5373c3503821a113279286f2337b2e3ce4aac5c",
+      "sha256": "2b54ac50673fdbacecc0aab5f286ed8bfa8f93e5fab8e1aeb00cc980485f2555",
       "producedAt": "2026-08-14T10:12:13.897Z",
       "requirementIds": [
         "A11Y-002",
@@ -1037,7 +1037,7 @@
       "verificationClass": "environment-verifiable",
       "artifactRole": "result",
       "uri": "repo://conformance/results/interaction-performance-2026-08-14.json",
-      "sha256": "662e31b568ac164be5225e5c3e92f0508e645adca81f63a603912d35d75c408f",
+      "sha256": "c875fdbb51a4a79d3e6fc6fedb3e0b7e14c5401316a35ccd0e4f52a9328f803b",
       "producedAt": "2026-08-14T10:12:13.897Z",
       "requirementIds": [
         "PRF-001",
@@ -1075,7 +1075,7 @@
       "verificationClass": "environment-verifiable",
       "artifactRole": "result",
       "uri": "repo://conformance/results/protocol-motion-2026-08-14.json",
-      "sha256": "488ec92d52477219a5fdab513cf45a1da7ea1ee9bd9e32b4cee84f61074528ac",
+      "sha256": "ce80d09c2f5a0c21dfb3bd414da81e47fc92f958386eea2208a27bb6e46a637c",
       "producedAt": "2026-08-14T10:12:37.726Z",
       "requirementIds": [
         "A11Y-002",

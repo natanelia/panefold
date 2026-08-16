@@ -67,7 +67,7 @@ const FloatingSurfaceHeaderSlotContext = createContext<FloatingSurfaceHeaderSlot
   undefined,
 );
 
-/** Resolves the titlebar portal owned by a compact single-group floating frame. */
+/** Resolves the titlebar portal owned by a single-group floating frame. */
 export function useFloatingSurfaceHeaderSlot(groupId: string): HTMLDivElement | null | undefined {
   const slot = useContext(FloatingSurfaceHeaderSlotContext);
   return slot?.groupId === groupId ? slot.target : undefined;
@@ -75,7 +75,7 @@ export function useFloatingSurfaceHeaderSlot(groupId: string): HTMLDivElement | 
 
 export interface FloatingSurfaceFrameProps {
   readonly surface: WorkspaceFloatingSurfaceView;
-  readonly compactGroupId?: string;
+  readonly headerGroupId?: string;
   readonly bounds: WorkspaceFloatingBounds;
   readonly projectionRevision: string;
   readonly title: string;
@@ -118,7 +118,7 @@ export interface FloatingSurfaceFrameProps {
  */
 export function FloatingSurfaceFrame({
   surface,
-  compactGroupId,
+  headerGroupId,
   bounds,
   projectionRevision,
   title,
@@ -155,13 +155,13 @@ export function FloatingSurfaceFrame({
   const minimized = surface.minimized === true;
   const canMove = !surface.maximized;
   const canResize = canMove && !minimized;
-  const compactHeader = compactGroupId !== undefined && !minimized;
+  const integratedHeader = headerGroupId !== undefined;
   const headerSlot = useMemo<FloatingSurfaceHeaderSlot | undefined>(
     () =>
-      compactHeader && compactGroupId !== undefined
-        ? { groupId: compactGroupId, target: headerSlotTarget }
+      integratedHeader && headerGroupId !== undefined
+        ? { groupId: headerGroupId, target: headerSlotTarget }
         : undefined,
-    [compactGroupId, compactHeader, headerSlotTarget],
+    [headerGroupId, integratedHeader, headerSlotTarget],
   );
 
   const applyPreview = useCallback(
@@ -453,7 +453,7 @@ export function FloatingSurfaceFrame({
         data-frontmost={String(frontmost)}
         data-maximized={String(surface.maximized)}
         data-minimized={String(minimized)}
-        data-compact-header={String(compactGroupId !== undefined)}
+        data-integrated-header={String(headerGroupId !== undefined)}
         data-floating-manipulation="idle"
         style={frameStyle}
         onPointerDown={() => {
@@ -463,7 +463,7 @@ export function FloatingSurfaceFrame({
         <header
           ref={titlebarRef}
           className="pf-floating-titlebar"
-          data-compact-header={String(compactHeader)}
+          data-integrated-header={String(integratedHeader)}
           tabIndex={canMove && (onMove !== undefined || onRaise !== undefined) ? 0 : -1}
           aria-label={messages.moveFloatingSurface({ title })}
           onPointerDown={(event) => {
@@ -490,17 +490,21 @@ export function FloatingSurfaceFrame({
         >
           <strong
             id={titleId}
-            className={compactHeader ? "pf-visually-hidden" : "pf-floating-title"}
+            className={integratedHeader ? "pf-visually-hidden" : "pf-floating-title"}
             dir="auto"
           >
             {title}
           </strong>
-          {compactHeader ? (
-            <>
-              <div ref={setHeaderSlotTarget} className="pf-floating-header-slot" />
-              <span className="pf-floating-header-drag-region" aria-hidden="true" />
-            </>
+          {integratedHeader ? (
+            <div ref={setHeaderSlotTarget} className="pf-floating-header-slot" />
           ) : null}
+          <span
+            className="pf-floating-header-drag-region"
+            data-drag-tooltip={messages.moveFloatingSurface({ title })}
+            aria-hidden="true"
+          >
+            <span className="pf-floating-header-drag-grip" />
+          </span>
           <div
             className="pf-floating-controls"
             onPointerDown={(event) => {
@@ -563,7 +567,9 @@ export function FloatingSurfaceFrame({
             )}
           </div>
         </header>
-        {minimized ? null : <div className="pf-floating-content">{children}</div>}
+        <div className="pf-floating-content" hidden={minimized}>
+          {children}
+        </div>
         {!canResize || onResize === undefined
           ? null
           : FLOATING_RESIZE_EDGES.map((edge) => {

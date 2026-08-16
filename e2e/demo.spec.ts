@@ -813,7 +813,7 @@ test("floats, moves, resizes, minimizes, maximizes, restores, and redocks a live
 
   const frame = page.locator('[data-workspace-floating-surface^="floating:notes:"]');
   await expect(frame).toBeVisible();
-  await expect(frame).toHaveAttribute("data-compact-header", "true");
+  await expect(frame).toHaveAttribute("data-integrated-header", "true");
   await expect(frame).not.toHaveAttribute("aria-modal");
   await expect(frame.locator(".pf-floating-titlebar .pf-tab-strip")).toBeVisible();
   await expect.poll(() => revisionOf(page)).toBe(beforeFloat + 1);

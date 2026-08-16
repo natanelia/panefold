@@ -126,18 +126,18 @@
     "e2e/performance.spec.ts": "2bbc7b6cb40fd2ad97ba33824b5b8a0a3cf43a82ce638e432f13d29c8db164f3",
     "e2e/performance-baseline.json": "128b4c7dc2c7fc03372224828417f675b279359ebbe9bab7408b172ad76b48a9",
     "scripts/performance-smoke.mjs": "fc0d8ce5df966b75312b5d9fae367e07b5ce4f8215afa724d03a7a6cb17fdc95",
-    "packages/react/src/WorkspaceSurface.tsx": "59dec5ced7819125f2f15926e53c0be855026bbe1abe4f0466d9a6f352e2d5f2",
+    "packages/react/src/WorkspaceSurface.tsx": "a856c1171619d9ce0f5c72ef4a3be869d8a4f6b27cbb97f06cd5f5aab0ccecc8",
     "packages/react/src/panel-drag.tsx": "c6190229fe528ca3ed57890cddc1777cf1943f1200c362df5a9d3612c0cdaf5a",
     "packages/geometry/src/hit-test.ts": "2da9ca42d97c135f37d599bbaebed8f758343fa4e52fd647c05a4b179340c121",
     "packages/geometry/src/invalidation.ts": "dfe873cb6df480d8ce023688e199463489877527b5b1c5155c4a7d1e234d4f1b",
     "packages/kernel-optimized/src/indexes.ts": "c6d962626b3c0cac8d7d89f156aed383b1e313a201f7c3ce5f228d97959ac0a8",
     "packages/motion/src/coordinator.ts": "50eff7dd6a1b8f6433ac3f5bfc5f8d74b99a501e43e712ccb3e1a82520574c6d",
-    "packages/react/src/floating-surface.tsx": "ce26f0641e9fea4d2349255feae86f0d9b3158a6cb8812d09d96b8c55481835c",
+    "packages/react/src/floating-surface.tsx": "210102ea8eb3baed96134c76535f32d1dbcabe689d82d8e4cc2164f112a3cac5",
     "packages/react/src/node-motion.ts": "5f7efe09d09573ea1c2baa44744627d34fabe60cc6978f287da83e6b02ed52bb",
     "packages/react/src/group-drag.tsx": "d5001134f26aa5701c5b60e4aa90dc3018419e7ad50f4ab668db54538f10fd3e",
     "packages/react/src/group-drop.ts": "5f8cf5b0575142ecd7941dbcb9e10b6139d13aad3e4e7e28198f78b31d991796",
-    "packages/react/src/messages.ts": "9fd06f1e34d157a5fbfa9a7a2efee08ead47b76368d47e6733a144b940ab3315",
-    "packages/react/src/styles.css": "fefb3578d429a524fa481f407f3297a7e38773e3b6a7d76ec1a913af04938047"
+    "packages/react/src/messages.ts": "b93857cd9f0c7e0ef83cc9899c770b1c495567095fac5f03c33d80df66e7da77",
+    "packages/react/src/styles.css": "48fe912c6c50b89a6d4ba825040f11e51f72c80e5a64973271a17485d8e0b654"
   },
   "limitations": [
     "This macOS result is an automated regression guard, not a physical 60 Hz or 120 Hz certification.",

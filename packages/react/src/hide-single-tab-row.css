@@ -3,15 +3,23 @@
 @layer workspace-single-tab-row {
   :where(.pf-hide-single-tab-row) {
     --pf-single-tab-drag-handle-size: 12px;
+    --pf-single-tab-drag-grip-inline-size: 28px;
+    --pf-single-tab-drag-grip-block-size: 3px;
   }
 
   :where(.pf-hide-single-tab-row)
-    .pf-group:has(> .pf-tab-strip > .pf-tab-list > .pf-tab:only-child) {
+    .pf-group:has(> .pf-tab-strip[data-header-location="docked"][data-single-panel="true"]) {
     position: relative;
+    transition:
+      border-color var(--pf-motion-micro),
+      box-shadow var(--pf-motion-micro);
   }
 
-  :where(.pf-hide-single-tab-row) .pf-tab-strip:has(> .pf-tab-list > .pf-tab:only-child) {
-    position: relative;
+  :where(.pf-hide-single-tab-row)
+    .pf-group
+    > .pf-tab-strip[data-header-location="docked"][data-single-panel="true"] {
+    position: absolute;
+    z-index: 7;
     min-inline-size: 0;
     min-block-size: 0;
     padding: 0;
@@ -22,50 +30,46 @@
 
   :where(.pf-hide-single-tab-row)
     .pf-group[data-tab-orientation="horizontal"]
-    > .pf-tab-strip:has(> .pf-tab-list > .pf-tab:only-child) {
-    position: absolute;
+    > .pf-tab-strip[data-header-location="docked"][data-single-panel="true"] {
     inset-inline: 0;
-    z-index: 7;
     flex: none;
     block-size: var(--pf-single-tab-drag-handle-size);
   }
 
   :where(.pf-hide-single-tab-row)
     .pf-group[data-tab-placement="block-start"]
-    > .pf-tab-strip:has(> .pf-tab-list > .pf-tab:only-child) {
+    > .pf-tab-strip[data-header-location="docked"][data-single-panel="true"] {
     inset-block-start: 0;
   }
 
   :where(.pf-hide-single-tab-row)
     .pf-group[data-tab-placement="block-end"]
-    > .pf-tab-strip:has(> .pf-tab-list > .pf-tab:only-child) {
+    > .pf-tab-strip[data-header-location="docked"][data-single-panel="true"] {
     inset-block-end: 0;
   }
 
   :where(.pf-hide-single-tab-row)
     .pf-group[data-tab-orientation="vertical"]
-    > .pf-tab-strip:has(> .pf-tab-list > .pf-tab:only-child) {
-    position: absolute;
+    > .pf-tab-strip[data-header-location="docked"][data-single-panel="true"] {
     inset-block: 0;
-    z-index: 7;
     flex: none;
     inline-size: var(--pf-single-tab-drag-handle-size);
   }
 
   :where(.pf-hide-single-tab-row)
     .pf-group[data-tab-placement="inline-start"]
-    > .pf-tab-strip:has(> .pf-tab-list > .pf-tab:only-child) {
+    > .pf-tab-strip[data-header-location="docked"][data-single-panel="true"] {
     inset-inline-start: 0;
   }
 
   :where(.pf-hide-single-tab-row)
     .pf-group[data-tab-placement="inline-end"]
-    > .pf-tab-strip:has(> .pf-tab-list > .pf-tab:only-child) {
+    > .pf-tab-strip[data-header-location="docked"][data-single-panel="true"] {
     inset-inline-end: 0;
   }
 
   :where(.pf-hide-single-tab-row)
-    .pf-tab-strip:has(> .pf-tab-list > .pf-tab:only-child)
+    .pf-tab-strip[data-header-location="docked"][data-single-panel="true"]
     > .pf-tab-list {
     flex: 1 1 auto;
     inline-size: 100%;
@@ -77,7 +81,7 @@
   }
 
   :where(.pf-hide-single-tab-row)
-    .pf-tab-strip:has(> .pf-tab-list > .pf-tab:only-child)
+    .pf-tab-strip[data-header-location="docked"][data-single-panel="true"]
     > .pf-tab-list
     > .pf-tab:only-child {
     flex: 1 1 auto;
@@ -91,9 +95,8 @@
     opacity: 0;
   }
 
-  /* Keep pointerdown on the collapsed tab grip until focus restores the full row. */
   :where(.pf-hide-single-tab-row)
-    .pf-tab-strip:has(> .pf-tab-list > .pf-tab:only-child)
+    .pf-tab-strip[data-header-location="docked"][data-single-panel="true"]
     > .pf-tab-list
     > .pf-tab:only-child:not(:focus-visible)
     > .pf-tab-close {
@@ -101,20 +104,20 @@
   }
 
   :where(.pf-hide-single-tab-row)
-    .pf-tab-strip:has(> .pf-tab-list > .pf-tab:only-child)
+    .pf-tab-strip[data-header-location="docked"][data-single-panel="true"]
     > .pf-tab-controls {
     position: absolute;
     inset-block-start: 0;
     inset-inline-end: 0;
-    z-index: 8;
+    z-index: 9;
     opacity: 0;
-    pointer-events: auto;
+    pointer-events: none;
     transition: opacity var(--pf-motion-micro);
   }
 
   :where(.pf-hide-single-tab-row)
     .pf-group[data-tab-placement="block-end"]
-    > .pf-tab-strip:has(> .pf-tab-list > .pf-tab:only-child)
+    > .pf-tab-strip[data-header-location="docked"][data-single-panel="true"]
     > .pf-tab-controls {
     inset-block-start: auto;
     inset-block-end: 0;
@@ -122,7 +125,7 @@
 
   :where(.pf-hide-single-tab-row)
     .pf-group[data-tab-orientation="vertical"]
-    > .pf-tab-strip:has(> .pf-tab-list > .pf-tab:only-child)
+    > .pf-tab-strip[data-header-location="docked"][data-single-panel="true"]
     > .pf-tab-controls {
     inset-block-start: auto;
     inset-block-end: 0;
@@ -131,76 +134,202 @@
 
   :where(.pf-hide-single-tab-row)
     .pf-group[data-tab-placement="inline-start"]
-    > .pf-tab-strip:has(> .pf-tab-list > .pf-tab:only-child)
+    > .pf-tab-strip[data-header-location="docked"][data-single-panel="true"]
     > .pf-tab-controls {
     inset-inline-start: 0;
     inset-inline-end: auto;
   }
 
   :where(.pf-hide-single-tab-row)
-    .pf-tab-strip:has(> .pf-tab-list > .pf-tab:only-child):hover
+    .pf-tab-strip[data-header-location="docked"][data-single-panel="true"]:hover
     > .pf-tab-controls,
   :where(.pf-hide-single-tab-row)
-    .pf-tab-strip:has(> .pf-tab-list > .pf-tab:only-child)
+    .pf-tab-strip[data-header-location="docked"][data-single-panel="true"]
     > .pf-tab-controls:is(:hover, :focus-within) {
     opacity: 1;
     pointer-events: auto;
   }
 
-  :where(.pf-hide-single-tab-row)
-    .pf-floating-titlebar[data-compact-header="true"]
-    > .pf-floating-header-slot:has(> .pf-tab-strip > .pf-tab-list > .pf-tab:only-child) {
-    position: relative;
-    z-index: 1;
-    flex: 0 1 auto;
-    min-inline-size: 0;
-    margin-inline-start: 12px;
+  :where(.pf-hide-single-tab-row) .pf-single-tab-drag-affordance {
+    position: absolute;
+    inset: 0;
+    z-index: 8;
+    display: grid;
+    place-items: center;
+    color: color-mix(in srgb, var(--pf-text-muted) 72%, transparent);
+    pointer-events: none;
+  }
+
+  :where(.pf-hide-single-tab-row) .pf-single-tab-drag-affordance::before {
+    content: "";
+    inline-size: var(--pf-single-tab-drag-grip-inline-size);
+    block-size: var(--pf-single-tab-drag-grip-block-size);
+    border-radius: 999px;
+    background: currentColor;
+    box-shadow: 0 0 0 1px color-mix(in srgb, var(--pf-bg) 45%, transparent);
+    opacity: 0.42;
+    transition:
+      color var(--pf-motion-micro),
+      opacity var(--pf-motion-micro),
+      scale var(--pf-motion-micro);
   }
 
   :where(.pf-hide-single-tab-row)
-    .pf-floating-titlebar[data-compact-header="true"]
-    > .pf-floating-header-slot
-    > .pf-tab-strip:has(> .pf-tab-list > .pf-tab:only-child)
-    > .pf-tab-list {
-    flex: 0 0 var(--pf-single-tab-drag-handle-size);
-    inline-size: var(--pf-single-tab-drag-handle-size);
+    .pf-group[data-tab-orientation="vertical"]
+    .pf-single-tab-drag-affordance::before {
+    inline-size: var(--pf-single-tab-drag-grip-block-size);
+    block-size: var(--pf-single-tab-drag-grip-inline-size);
+  }
+
+  :where(.pf-hide-single-tab-row) .pf-single-tab-drag-affordance::after {
+    content: attr(data-tooltip);
+    position: absolute;
+    z-index: 40;
+    inline-size: max-content;
+    max-inline-size: 240px;
+    padding: 6px 8px;
+    border: 1px solid var(--pf-border-strong);
+    border-radius: 5px;
+    color: var(--pf-text);
+    background: var(--pf-surface-raised);
+    box-shadow: 0 8px 24px rgb(0 0 0 / 35%);
+    font-size: 10px;
+    line-height: 1.3;
+    opacity: 0;
+    pointer-events: none;
+    transition:
+      opacity var(--pf-motion-micro) 0ms,
+      translate var(--pf-motion-micro) 0ms;
   }
 
   :where(.pf-hide-single-tab-row)
-    .pf-floating-titlebar[data-compact-header="true"]
-    > .pf-floating-header-slot
-    > .pf-tab-strip:has(> .pf-tab-list > .pf-tab:only-child)
-    > .pf-tab-controls {
-    inset-inline-start: 100%;
-    inset-inline-end: auto;
+    .pf-group[data-tab-placement="block-start"]
+    .pf-single-tab-drag-affordance::after {
+    inset-block-start: calc(100% + 7px);
+    inset-inline-start: 50%;
+    translate: -50% -2px;
   }
 
   :where(.pf-hide-single-tab-row)
-    .pf-tab-strip:is(
+    .pf-group[data-tab-placement="block-end"]
+    .pf-single-tab-drag-affordance::after {
+    inset-block-end: calc(100% + 7px);
+    inset-inline-start: 50%;
+    translate: -50% 2px;
+  }
+
+  :where(.pf-hide-single-tab-row)
+    .pf-group[data-tab-placement="inline-start"]
+    .pf-single-tab-drag-affordance::after {
+    inset-block-start: 50%;
+    inset-inline-start: calc(100% + 7px);
+    translate: -2px -50%;
+  }
+
+  :where(.pf-hide-single-tab-row)
+    .pf-group[data-tab-placement="inline-end"]
+    .pf-single-tab-drag-affordance::after {
+    inset-block-start: 50%;
+    inset-inline-end: calc(100% + 7px);
+    translate: 2px -50%;
+  }
+
+  :where(.pf-hide-single-tab-row)
+    .pf-group:has(> .pf-tab-strip[data-header-location="docked"][data-single-panel="true"]:hover) {
+    border-color: color-mix(in srgb, var(--pf-accent) 66%, transparent);
+    box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--pf-accent) 28%, transparent);
+  }
+
+  :where(.pf-hide-single-tab-row)
+    .pf-group:has(
+      > .pf-tab-strip[data-header-location="docked"][data-single-panel="true"]
+        > .pf-tab-list
+        > .pf-tab:active
+    ) {
+    border-color: var(--pf-accent);
+    box-shadow: inset 0 0 0 2px color-mix(in srgb, var(--pf-accent) 42%, transparent);
+  }
+
+  :where(.pf-hide-single-tab-row)
+    .pf-tab-strip[data-header-location="docked"][data-single-panel="true"]:hover
+    > .pf-single-tab-drag-affordance::before,
+  :where(.pf-hide-single-tab-row)
+    .pf-tab-strip[data-header-location="docked"][data-single-panel="true"]:has(
+      > .pf-tab-list > .pf-tab:active
+    )
+    > .pf-single-tab-drag-affordance::before {
+    color: var(--pf-accent);
+    opacity: 0.95;
+    scale: 1.08;
+  }
+
+  @media (hover: hover) and (pointer: fine) {
+    :where(.pf-hide-single-tab-row)
+      .pf-workspace[data-panel-drop-enabled="true"]
+      .pf-tab-strip[data-header-location="docked"][data-single-panel="true"]
+      > .pf-tab-list:hover
+      ~ .pf-single-tab-drag-affordance::after {
+      opacity: 1;
+      transition-delay: 700ms;
+    }
+
+    :where(.pf-hide-single-tab-row)
+      .pf-workspace[data-panel-drop-enabled="true"]
+      .pf-group[data-tab-placement="block-start"]
+      .pf-tab-list:hover
+      ~ .pf-single-tab-drag-affordance::after {
+      translate: -50% 0;
+    }
+
+    :where(.pf-hide-single-tab-row)
+      .pf-workspace[data-panel-drop-enabled="true"]
+      .pf-group[data-tab-placement="block-end"]
+      .pf-tab-list:hover
+      ~ .pf-single-tab-drag-affordance::after {
+      translate: -50% 0;
+    }
+
+    :where(.pf-hide-single-tab-row)
+      .pf-workspace[data-panel-drop-enabled="true"]
+      .pf-group[data-tab-placement="inline-start"]
+      .pf-tab-list:hover
+      ~ .pf-single-tab-drag-affordance::after {
+      translate: 0 -50%;
+    }
+
+    :where(.pf-hide-single-tab-row)
+      .pf-workspace[data-panel-drop-enabled="true"]
+      .pf-group[data-tab-placement="inline-end"]
+      .pf-tab-list:hover
+      ~ .pf-single-tab-drag-affordance::after {
+      translate: 0 -50%;
+    }
+  }
+
+  :where(.pf-hide-single-tab-row)
+    .pf-tab-strip[data-header-location="docked"][data-single-panel="true"]:is(
       :has(> .pf-tab-list > .pf-tab:only-child:focus-visible),
       :has(> .pf-tab-controls :focus-visible)
     ),
   :where(.pf-hide-single-tab-row)
-    .pf-tab-strip:is(
+    .pf-tab-strip[data-header-location="docked"][data-single-panel="true"]:is(
       :has(> .pf-tab-list > .pf-tab:only-child:focus-visible),
       :has(> .pf-tab-controls :focus-visible)
     )
     > :is(.pf-tab-list, .pf-tab-controls),
   :where(.pf-hide-single-tab-row)
-    .pf-tab-strip:is(
+    .pf-tab-strip[data-header-location="docked"][data-single-panel="true"]:is(
       :has(> .pf-tab-list > .pf-tab:only-child:focus-visible),
       :has(> .pf-tab-controls :focus-visible)
     )
     > .pf-tab-list
-    > .pf-tab:only-child,
-  :where(.pf-hide-single-tab-row)
-    .pf-floating-titlebar[data-compact-header="true"]
-    > .pf-floating-header-slot:has(
-      > .pf-tab-strip:is(
-        :has(> .pf-tab-list > .pf-tab:only-child:focus-visible),
-        :has(> .pf-tab-controls :focus-visible)
-      )
-    ) {
+    > .pf-tab:only-child {
     all: revert-layer;
+  }
+
+  :where(.pf-hide-single-tab-row)
+    .pf-tab-strip[data-header-location="docked"][data-single-panel="true"]:focus-within
+    > .pf-single-tab-drag-affordance {
+    display: none;
   }
 }

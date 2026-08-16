@@ -425,7 +425,7 @@ describe("WorkspaceSurface", () => {
     expect(document.activeElement?.closest("[data-workspace-floating-surface]")).toBeNull();
   });
 
-  it("combines a sole floating panel tab and window chrome into one header row", () => {
+  it("presents a sole floating panel as the title in one integrated header row", () => {
     const runtime = new FixtureRuntime(floatingProjection);
     renderWorkspace(runtime, { commands: floatingCommands });
 
@@ -433,16 +433,19 @@ describe("WorkspaceSurface", () => {
       '[data-workspace-floating-surface="floating:delta"]',
     );
     const titlebar = frame?.querySelector(".pf-floating-titlebar");
-    const compactTabStrip = titlebar?.querySelector(".pf-tab-strip");
-    expect(frame?.getAttribute("data-compact-header")).toBe("true");
-    expect(compactTabStrip).not.toBeNull();
+    const integratedTabStrip = titlebar?.querySelector(".pf-tab-strip");
+    expect(frame?.getAttribute("data-integrated-header")).toBe("true");
+    expect(integratedTabStrip).not.toBeNull();
+    expect(integratedTabStrip?.getAttribute("data-header-location")).toBe("floating");
+    expect(integratedTabStrip?.getAttribute("data-header-variant")).toBe("title");
+    expect(integratedTabStrip?.getAttribute("data-single-panel")).toBe("true");
     expect(
-      compactTabStrip?.querySelector('[role="tab"][data-workspace-panel-tab="delta"]'),
+      integratedTabStrip?.querySelector('[role="tab"][data-workspace-panel-tab="delta"]'),
     ).not.toBeNull();
     expect(frame?.querySelectorAll(".pf-tab-strip")).toHaveLength(1);
     expect(frame?.querySelector('[data-workspace-panel-controls="delta"]')).not.toBeNull();
 
-    const tab = compactTabStrip?.querySelector<HTMLElement>(
+    const tab = integratedTabStrip?.querySelector<HTMLElement>(
       '[role="tab"][data-workspace-panel-tab="delta"]',
     );
     expect(tab).not.toBeNull();
@@ -454,7 +457,7 @@ describe("WorkspaceSurface", () => {
     }
   });
 
-  it("keeps separate floating title and tab rows when the window contains multiple panels", () => {
+  it("integrates multiple floating tabs with the window chrome", () => {
     const floatingGroup = floatingProjection.groups["floating-group"];
     if (floatingGroup === undefined) throw new Error("Expected the floating group fixture");
     const runtime = new FixtureRuntime({
@@ -476,9 +479,13 @@ describe("WorkspaceSurface", () => {
     const frame = document.querySelector<HTMLElement>(
       '[data-workspace-floating-surface="floating:delta"]',
     );
-    expect(frame?.getAttribute("data-compact-header")).toBe("false");
-    expect(frame?.querySelector(".pf-floating-titlebar .pf-tab-strip")).toBeNull();
-    expect(frame?.querySelector(".pf-floating-content .pf-tab-strip")).not.toBeNull();
+    const integratedTabStrip = frame?.querySelector(".pf-floating-titlebar .pf-tab-strip");
+    expect(frame?.getAttribute("data-integrated-header")).toBe("true");
+    expect(integratedTabStrip).not.toBeNull();
+    expect(frame?.querySelector(".pf-floating-content .pf-tab-strip")).toBeNull();
+    expect(integratedTabStrip?.getAttribute("data-header-location")).toBe("floating");
+    expect(integratedTabStrip?.getAttribute("data-header-variant")).toBe("tabs");
+    expect(integratedTabStrip?.getAttribute("data-single-panel")).toBe("false");
     expect(frame?.querySelectorAll('[role="tab"]')).toHaveLength(2);
   });
 

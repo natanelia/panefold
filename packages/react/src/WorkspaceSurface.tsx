@@ -76,7 +76,7 @@ import {
   surfaceLayoutBoundsForNode,
 } from "./panel-drop";
 import { useWorkspaceRuntime, useWorkspaceSnapshot } from "./runtime-context";
-import { resolveTabPresentation, tabOrientation } from "./tab-presentation";
+import { resolveGroupHeaderPresentation, resolveTabPresentation } from "./tab-presentation";
 import type {
   WorkspaceCommandAdapter,
   WorkspaceCommandOrigin,
@@ -1208,13 +1208,13 @@ function SurfaceRenderer<TSnapshot, TCommand, TResult>({
             const redockSurface = commands.redockFloatingSurface;
             if (frameBounds === undefined) return null;
             const title = floatingSurfaceTitle(surface, projection, messages.panelGroupFallback());
-            const compactGroupId = singlePanelFloatingGroupId(surface, projection);
+            const headerGroupId = floatingSurfaceHeaderGroupId(surface, projection);
             const redockPanelId = floatingSurfaceSelectedPanelId(surface, projection);
             return (
               <FloatingSurfaceFrame
                 key={surface.id}
                 surface={surface}
-                {...(compactGroupId === undefined ? {} : { compactGroupId })}
+                {...(headerGroupId === undefined ? {} : { headerGroupId })}
                 bounds={frameBounds}
                 projectionRevision={projection.revision}
                 title={title}
@@ -1326,7 +1326,7 @@ function SurfaceRenderer<TSnapshot, TCommand, TResult>({
                       },
                     })}
               >
-                {surface.minimized === true || floatingNode === undefined ? null : (
+                {floatingNode === undefined ? null : (
                   <LayoutNode
                     node={floatingNode}
                     projection={renderedProjection}
@@ -2125,8 +2125,11 @@ function PanelGroup<TCommand, TResult>({
   const createDropGroupCommand = commands.planGroupDrop;
   const createMergeGroupCommand = commands.mergeGroup;
   const presentation = resolveTabPresentation(tabPresentation, group, projection);
-  const orientation =
-    floatingHeaderTarget === undefined ? tabOrientation(presentation) : "horizontal";
+  const headerPresentation = resolveGroupHeaderPresentation(presentation, {
+    floating: floatingHeaderTarget !== undefined,
+    panelCount: groupPanels.length,
+  });
+  const orientation = headerPresentation.orientation;
   const empty = groupPanels.length === 0;
   const groupRect = resolvedLayout.groupRects[group.id] ?? ZERO_LOGICAL_RECT;
   const rootRect = resolvedLayout.nodeRects[resolvedLayout.rootNodeId] ?? groupRect;
@@ -2314,9 +2317,11 @@ function PanelGroup<TCommand, TResult>({
       data-workspace-node={nodeId}
       data-workspace-group={group.id}
       data-active={String(group.panelIds.includes(projection.activePanelId ?? ""))}
-      data-tab-placement={presentation.placement}
-      data-tab-content={presentation.content}
+      data-tab-placement={headerPresentation.placement}
+      data-tab-content={headerPresentation.content}
       data-tab-orientation={orientation}
+      data-header-location={headerPresentation.location}
+      data-header-variant={headerPresentation.variant}
       data-empty={String(empty)}
       aria-labelledby={groupLabelId}
       aria-describedby={empty ? emptyGroupDescriptionId : undefined}
@@ -2350,7 +2355,12 @@ function PanelGroup<TCommand, TResult>({
         </div>
       ) : null}
       {placePanelGroupTabStrip(
-        <div className="pf-tab-strip">
+        <div
+          className="pf-tab-strip"
+          data-header-location={headerPresentation.location}
+          data-header-variant={headerPresentation.variant}
+          data-single-panel={String(groupPanels.length === 1)}
+        >
           <div
             className="pf-tab-list"
             role="tablist"
@@ -2454,7 +2464,7 @@ function PanelGroup<TCommand, TResult>({
                   }}
                 >
                   {definition?.icon === undefined ||
-                  presentation.content === "label-only" ? null : (
+                  headerPresentation.content === "label-only" ? null : (
                     <span className="pf-tab-icon" aria-hidden="true">
                       {definition.icon}
                     </span>
@@ -2462,7 +2472,7 @@ function PanelGroup<TCommand, TResult>({
                   <span
                     className={[
                       "pf-tab-title",
-                      presentation.content === "icon-only" && definition?.icon !== undefined
+                      headerPresentation.content === "icon-only" && definition?.icon !== undefined
                         ? "pf-visually-hidden"
                         : "",
                     ]
@@ -2643,6 +2653,18 @@ function PanelGroup<TCommand, TResult>({
               />
             </div>
           )}
+          {headerPresentation.location === "docked" &&
+          groupPanels.length === 1 &&
+          selectedPanel !== undefined ? (
+            <span
+              className="pf-single-tab-drag-affordance"
+              data-workspace-panel-drag-affordance={selectedPanel.id}
+              data-tooltip={interactionMessages.dragPanelToMove({
+                title: selectedPanel.title,
+              })}
+              aria-hidden="true"
+            />
+          ) : null}
         </div>,
         floatingHeaderTarget,
       )}
@@ -2658,8 +2680,8 @@ function PanelGroup<TCommand, TResult>({
 }
 
 /**
- * Undefined keeps the strip inline, null hides it while the compact-header ref
- * resolves, and an element receives the existing strip through a portal.
+ * Undefined keeps the strip inline, null hides it while the floating-header
+ * ref resolves, and an element receives the existing strip through a portal.
  */
 function placePanelGroupTabStrip(
   tabStrip: ReactNode,
@@ -3983,14 +4005,15 @@ function floatingSurfaceTitle(
   return groups[0]?.label ?? fallback;
 }
 
-function singlePanelFloatingGroupId(
+function floatingSurfaceHeaderGroupId(
   surface: WorkspaceFloatingSurfaceView,
   projection: WorkspaceProjection,
 ): string | undefined {
   const groups = orderedGroups(projection, surface.rootNodeId, false);
   const group = groups.length === 1 ? groups[0] : undefined;
-  const panelId = group?.panelIds.length === 1 ? group.panelIds[0] : undefined;
-  return group !== undefined && panelId !== undefined && projection.panels[panelId] !== undefined
+  return group !== undefined &&
+    group.panelIds.length > 0 &&
+    group.panelIds.every((panelId) => projection.panels[panelId] !== undefined)
     ? group.id
     : undefined;
 }

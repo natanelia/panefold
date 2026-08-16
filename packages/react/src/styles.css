@@ -120,30 +120,101 @@
     user-select: none;
   }
 
+  .pf-floating-titlebar {
+    transition: background-color var(--pf-motion-micro);
+  }
+
   .pf-floating-titlebar[tabindex="0"] {
-    cursor: move;
+    cursor: grab;
+  }
+
+  .pf-floating-titlebar[tabindex="0"]:active {
+    cursor: grabbing;
+  }
+
+  .pf-floating-titlebar:hover {
+    background: color-mix(in srgb, var(--pf-surface-soft) 62%, var(--pf-surface-raised));
+  }
+
+  .pf-floating-surface:has(> .pf-floating-titlebar:hover) {
+    border-color: color-mix(in srgb, var(--pf-accent) 72%, var(--pf-border-strong));
   }
 
   .pf-floating-titlebar:focus-visible {
     box-shadow: inset 0 0 0 2px var(--pf-focus);
   }
 
-  .pf-floating-titlebar[data-compact-header="true"] {
+  .pf-floating-titlebar[data-integrated-header="true"] {
     gap: 0;
     padding-inline-start: 0;
   }
 
   .pf-floating-header-slot {
     display: flex;
-    flex: 0 1 180px;
+    flex: 1 1 auto;
     align-self: stretch;
     min-inline-size: 0;
+    overflow: hidden;
   }
 
   .pf-floating-header-drag-region {
-    flex: 1 1 auto;
+    position: relative;
+    display: grid;
+    flex: 0 1 44px;
+    place-items: center;
     align-self: stretch;
-    min-inline-size: 12px;
+    min-inline-size: 24px;
+    color: var(--pf-text-muted);
+    cursor: grab;
+  }
+
+  .pf-floating-header-drag-region:active {
+    cursor: grabbing;
+  }
+
+  .pf-floating-header-drag-grip {
+    inline-size: 15px;
+    block-size: 10px;
+    opacity: 0.38;
+    background: radial-gradient(circle, currentColor 1.15px, transparent 1.35px) 0 0 / 5px 5px;
+    transition: opacity var(--pf-motion-micro);
+  }
+
+  .pf-floating-header-drag-region:hover .pf-floating-header-drag-grip,
+  .pf-floating-header-drag-region:active .pf-floating-header-drag-grip {
+    opacity: 0.9;
+  }
+
+  .pf-floating-header-drag-region::after {
+    content: attr(data-drag-tooltip);
+    position: absolute;
+    inset-block-start: calc(100% + 7px);
+    inset-inline-end: 0;
+    z-index: 40;
+    inline-size: max-content;
+    max-inline-size: 240px;
+    padding: 6px 8px;
+    border: 1px solid var(--pf-border-strong);
+    border-radius: 5px;
+    color: var(--pf-text);
+    background: var(--pf-surface-raised);
+    box-shadow: 0 8px 24px rgb(0 0 0 / 35%);
+    font-size: 10px;
+    line-height: 1.3;
+    opacity: 0;
+    pointer-events: none;
+    translate: 0 -2px;
+    transition:
+      opacity var(--pf-motion-micro) 0ms,
+      translate var(--pf-motion-micro) 0ms;
+  }
+
+  @media (hover: hover) and (pointer: fine) {
+    .pf-floating-header-drag-region:hover::after {
+      opacity: 1;
+      translate: 0 0;
+      transition-delay: 700ms;
+    }
   }
 
   .pf-floating-header-slot .pf-tab-strip {
@@ -154,16 +225,58 @@
   }
 
   .pf-floating-header-slot .pf-tab-list {
+    min-inline-size: 0;
     overflow: hidden;
   }
 
-  .pf-floating-header-slot .pf-tab {
-    flex: 1 1 auto;
+  .pf-floating-header-slot .pf-tab-strip[data-header-variant="tabs"] .pf-tab {
+    flex: 0 1 160px;
+    min-inline-size: 72px;
+  }
+
+  .pf-floating-header-slot .pf-tab-strip[data-header-variant="title"] .pf-tab {
+    flex: 0 1 auto;
     min-inline-size: 0;
+    padding-inline: 10px 30px;
+    border: 0;
+    color: var(--pf-text);
+    background: transparent;
+    font-weight: 600;
+  }
+
+  .pf-floating-header-slot
+    .pf-tab-strip[data-header-variant="title"]
+    .pf-tab[aria-selected="true"] {
+    border: 0;
+    color: var(--pf-text);
+    background: transparent;
+  }
+
+  .pf-floating-header-slot .pf-tab-strip[data-header-variant="title"] .pf-tab-icon {
+    color: var(--pf-text-muted);
   }
 
   .pf-floating-header-slot .pf-tab-controls {
     background: transparent;
+  }
+
+  .pf-floating-header-slot .pf-group-drag-region {
+    position: relative;
+    flex: 0 0 22px;
+    min-inline-size: 22px;
+    min-block-size: 100%;
+  }
+
+  .pf-floating-header-slot .pf-group-drag-region::before {
+    content: "";
+    position: absolute;
+    inset: 50% auto auto 50%;
+    inline-size: 3px;
+    block-size: 14px;
+    border-radius: 999px;
+    background: var(--pf-border-strong);
+    opacity: 0.5;
+    translate: -50% -50%;
   }
 
   .pf-floating-title {
@@ -469,11 +582,16 @@
   }
 
   .pf-tab-strip {
+    position: relative;
     display: flex;
     flex: 0 0 var(--pf-tab-size);
     min-inline-size: 0;
     background: var(--pf-surface-raised);
     border-block-end: 1px solid var(--pf-border);
+  }
+
+  .pf-single-tab-drag-affordance {
+    display: none;
   }
 
   .pf-tab-list {
