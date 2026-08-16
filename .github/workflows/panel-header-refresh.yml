@@ -66,6 +66,8 @@ jobs:
               [
                 "packages/react/src/WorkspaceSurface.tsx",
                 "packages/react/src/floating-surface.tsx",
+                "packages/react/src/messages.ts",
+                "packages/react/src/styles.css",
               ],
             ],
             [
