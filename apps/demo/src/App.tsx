@@ -73,7 +73,14 @@ const applicationMenuItems = [
 ] as const;
 
 type WorkbenchIconName =
-  "account" | "branch" | "explorer" | "manage" | "problems" | "search" | "source" | "terminal";
+  | "account"
+  | "branch"
+  | "explorer"
+  | "manage"
+  | "problems"
+  | "search"
+  | "source"
+  | "terminal";
 
 const activityItems = [
   { icon: "explorer", label: "Explorer", panelId: "route-explorer" },

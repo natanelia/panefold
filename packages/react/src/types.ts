@@ -122,7 +122,11 @@ export interface WorkspacePanelRenderProps {
 
 export type WorkspacePanelLifecycle = "active" | "visible" | "suspended";
 export type WorkspacePanelLifecycleReason =
-  "mount" | "activation" | "selection" | "same-document-move" | "policy-change";
+  | "mount"
+  | "activation"
+  | "selection"
+  | "same-document-move"
+  | "policy-change";
 
 export interface WorkspacePanelLifecycleChange {
   readonly panelId: string;

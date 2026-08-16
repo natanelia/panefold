@@ -44,7 +44,13 @@ import type {
 } from "./types";
 
 type DragActorState =
-  "idle" | "armed" | "dragging" | "committing" | "settling" | "cancelling" | "recovering";
+  | "idle"
+  | "armed"
+  | "dragging"
+  | "committing"
+  | "settling"
+  | "cancelling"
+  | "recovering";
 type DragActor = ReturnType<typeof createDragActor>;
 
 interface ExternalCandidate {
@@ -65,7 +71,9 @@ interface ReorderCandidate {
 }
 
 type ActiveCandidate<TCommand = unknown> =
-  ExternalCandidate | InternalCandidate<TCommand> | ReorderCandidate;
+  | ExternalCandidate
+  | InternalCandidate<TCommand>
+  | ReorderCandidate;
 
 interface DragSession<TCommand = unknown> {
   readonly actor: DragActor;

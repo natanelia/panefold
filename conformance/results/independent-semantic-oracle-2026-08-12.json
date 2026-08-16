@@ -49,9 +49,9 @@
     "generatedOperationTargetMet": false
   },
   "sourceDigests": {
-    "packages/kernel-optimized/src/independent-reducer.ts": "822901c011339653a4bcd5411bb1d1ef4e00f42ce2134041a859b2f119e1e23e",
-    "packages/kernel-optimized/src/independent-workspace.ts": "c3c78ac416aae9f7899e6aac3aa3680be7d3668f3f4a063cccbb179be5ba4250",
-    "packages/kernel-optimized/test/independent-reducer.test.ts": "18716581e2581c80a4c0fc0e11ee39d14593f2df7a432367e8932bc75e83e35d"
+    "packages/kernel-optimized/src/independent-reducer.ts": "0d6d5da296f9d92416f9b174b235fafa71ef0f153a891a80de430d9d1aeb815b",
+    "packages/kernel-optimized/src/independent-workspace.ts": "40e2c2341872e2433ea71e8ad93a228fbe4a3454eabd4625ebe35bcbbab04aa9",
+    "packages/kernel-optimized/test/independent-reducer.test.ts": "62e4b41b5dc18457bbb6272f1a3f5ae0837824adc2763de858c840fab2eff768"
   },
   "limitations": [
     "The correctness-first candidate rebuilds Map and entity-table state for each command; it is an independent semantic oracle, not a retained performance-optimized production kernel.",

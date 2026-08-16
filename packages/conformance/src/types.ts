@@ -39,7 +39,10 @@ export interface ConformanceManifest {
 }
 
 export type CommandSupportStatus =
-  "stable-implemented" | "experimental-implemented" | "deprecated-implemented" | "unsupported";
+  | "stable-implemented"
+  | "experimental-implemented"
+  | "deprecated-implemented"
+  | "unsupported";
 
 export interface CommandRegistryEntry {
   readonly type: string;
@@ -67,7 +70,10 @@ export type EvidenceStatus = "verified" | "unresolved" | "blocked";
  * turned into evidence merely by attaching a file to it.
  */
 export type VerificationClass =
-  "code-verifiable" | "environment-verifiable" | "manual-external" | "future-scope";
+  | "code-verifiable"
+  | "environment-verifiable"
+  | "manual-external"
+  | "future-scope";
 
 export type EvidenceVerificationClass = Exclude<VerificationClass, "future-scope">;
 

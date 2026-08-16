@@ -26,7 +26,8 @@ export interface PresencePacket<TPresence = unknown> extends CoordinatorPacketBa
 }
 
 export type CoordinatorPacket<TWireCommand = unknown, TPresence = unknown> =
-  DurableTransactionPacket<TWireCommand> | PresencePacket<TPresence>;
+  | DurableTransactionPacket<TWireCommand>
+  | PresencePacket<TPresence>;
 
 export interface CoordinatorApplyContext {
   readonly actorId: string;

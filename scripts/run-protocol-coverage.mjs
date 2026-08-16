@@ -3,7 +3,8 @@ import { createRequire } from "node:module";
 import { readFile, writeFile } from "node:fs/promises";
 import process from "node:process";
 import { URL } from "node:url";
-import { format } from "prettier";
+import { format } from "oxfmt";
+import oxfmtConfig from "../.oxfmtrc.json" with { type: "json" };
 
 import { runProtocolCoverage } from "./protocol-coverage-lib.mjs";
 import {
@@ -52,7 +53,11 @@ if (failures.length > 0) {
   failures.forEach((failure) => process.stderr.write(`${failure}\n`));
   process.exitCode = 1;
 } else {
-  const serialized = await format(JSON.stringify(result), { parser: "json" });
+  const formatted = await format(resultPath, JSON.stringify(result, null, 2), oxfmtConfig);
+  if (formatted.errors.length > 0) {
+    throw new Error(formatted.errors.map((error) => error.message).join("\n"));
+  }
+  const serialized = formatted.code;
   if (process.argv.includes("--write")) {
     await writeFile(resultPath, serialized, "utf8");
     process.stdout.write(

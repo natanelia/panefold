@@ -28,7 +28,9 @@ import {
 } from "./runtime";
 
 export type PersistenceRuntimeErrorCode =
-  "PERSISTENCE_QUEUE_OVERFLOW" | "PERSISTENCE_WRITE_FAILED" | "PERSISTENCE_DEGRADED";
+  | "PERSISTENCE_QUEUE_OVERFLOW"
+  | "PERSISTENCE_WRITE_FAILED"
+  | "PERSISTENCE_DEGRADED";
 
 export class PersistenceRuntimeError extends Error {
   public override readonly name = "PersistenceRuntimeError";
