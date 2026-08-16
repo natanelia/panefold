@@ -56,15 +56,11 @@ jobs:
             await writeFile(resultPath, `${JSON.stringify(result, null, 2)}\n`);
           }
           NODE
-          pnpm conformance:data:generate
           pnpm exec oxfmt --write \
             conformance/results/chromium-reference-2026-08-14.json \
             conformance/results/interaction-performance-2026-08-14.json \
-            conformance/results/protocol-motion-2026-08-14.json \
-            conformance/capabilities.json \
-            conformance/evidence.json \
-            conformance/gates.json \
-            conformance/traces.json
+            conformance/results/protocol-motion-2026-08-14.json
+          pnpm conformance:data:generate
       - name: Verify the complete repository gate
         run: pnpm check
       - run: pnpm exec playwright install --with-deps chromium
