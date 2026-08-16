@@ -54,12 +54,9 @@ jobs:
           NODE
       - name: Regenerate and validate derived evidence
         run: |
-          pnpm exec oxfmt --write \
-            conformance/results/chromium-reference-2026-08-14.json \
-            conformance/results/interaction-performance-2026-08-14.json \
-            conformance/results/protocol-motion-2026-08-14.json
           pnpm conformance:data:generate
           node scripts/check-conformance.mjs
+          pnpm format:check
           git diff --check
       - name: Commit generated evidence
         env:
