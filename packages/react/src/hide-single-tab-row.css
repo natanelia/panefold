@@ -196,9 +196,9 @@
     .pf-floating-titlebar[data-compact-header="true"]
     > .pf-floating-header-slot:has(
       > .pf-tab-strip:is(
-          :has(> .pf-tab-list > .pf-tab:only-child:focus-visible),
-          :has(> .pf-tab-controls :focus-visible)
-        )
+        :has(> .pf-tab-list > .pf-tab:only-child:focus-visible),
+        :has(> .pf-tab-controls :focus-visible)
+      )
     ) {
     all: revert-layer;
   }
