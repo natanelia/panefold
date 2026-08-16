@@ -48,7 +48,7 @@
     "raw splitter interaction frame capture and experimental guardrail"
   ],
   "sourceDigests": {
-    "e2e/demo.spec.ts": "08308495b1de67c00e067530459b6b739f7b6be36bd1d9a6b7a612419a1271d5",
+    "e2e/demo.spec.ts": "0a08487b736ceaa56b0e351d1433ecc77d4e5aaa4bdd386fa9b32f4c73374567",
     "e2e/performance.spec.ts": "2bbc7b6cb40fd2ad97ba33824b5b8a0a3cf43a82ce638e432f13d29c8db164f3",
     "e2e/performance-baseline.json": "128b4c7dc2c7fc03372224828417f675b279359ebbe9bab7408b172ad76b48a9",
     "playwright.config.ts": "1488b4ef7257ef5a6dc5505148550cbb6ed89e9488b2c9e39e874f15469cc245",
@@ -57,7 +57,7 @@
     "apps/demo/src/App.tsx": "af7fe7edfc3b17b4ded34cbd3060b67703d906404cb53a85ea54f52704fe8322",
     "apps/demo/src/styles.css": "b0011e622d0f57f74fe8aeee644feb12d62eac744a83dcb25bb19239e58c8430",
     "apps/demo/src/demo-panels.tsx": "e0896a5cc259c6ea29db9e63bb6e181de1a2d08569fbd4b17c092c74b7a0ae7a",
-    "apps/demo/src/external-panels.ts": "fb54f45c1b28c0c7506b92434d66090b416bc0e4f0b347ba169f86f8710051ab",
+    "apps/demo/src/external-panels.ts": "8929ce47410b9e51bb1d03f172d9aac9aa26a0b842d4c4923396c0a4a8f0fa9e",
     "apps/demo/src/runtime-session.ts": "1b09817f5f32bc10b8e574ac979f3bad472d5840ecb1c08bebdce6d62563c287",
     "apps/demo/src/workspace-config.ts": "fb80bd513007fa229fb8d6f0938900020e82afcdc3917316875405412cd11b64",
     "packages/geometry/src/hit-test.ts": "2da9ca42d97c135f37d599bbaebed8f758343fa4e52fd647c05a4b179340c121",
