@@ -134,10 +134,10 @@
     "packages/motion/src/coordinator.ts": "50eff7dd6a1b8f6433ac3f5bfc5f8d74b99a501e43e712ccb3e1a82520574c6d",
     "packages/react/src/floating-surface.tsx": "8a7ba92606652f126d666faa2600467fb7a11827a86d70f80a641f78d9a1ea12",
     "packages/react/src/node-motion.ts": "5f7efe09d09573ea1c2baa44744627d34fabe60cc6978f287da83e6b02ed52bb",
-    "packages/react/src/group-drag.tsx": "a127a32e6504dfb9848bf0f063110664d650423e0d2bf545913194e6d2d63fa6",
+    "packages/react/src/group-drag.tsx": "d5001134f26aa5701c5b60e4aa90dc3018419e7ad50f4ab668db54538f10fd3e",
     "packages/react/src/group-drop.ts": "5f8cf5b0575142ecd7941dbcb9e10b6139d13aad3e4e7e28198f78b31d991796",
-    "packages/react/src/messages.ts": "185bb792ce65c5679a2f0a73f0db82369f12402b166ecf013f654c2aa7425954",
-    "packages/react/src/styles.css": "3117a467dc87c9a00c542283028e17047f81a632fcff4cfead91c82e5461a79f"
+    "packages/react/src/messages.ts": "9fd06f1e34d157a5fbfa9a7a2efee08ead47b76368d47e6733a144b940ab3315",
+    "packages/react/src/styles.css": "fefb3578d429a524fa481f407f3297a7e38773e3b6a7d76ec1a913af04938047"
   },
   "limitations": [
     "This macOS result is an automated regression guard, not a physical 60 Hz or 120 Hz certification.",

@@ -198,6 +198,7 @@ export const ENGLISH_WORKSPACE_MESSAGES = Object.freeze({
 } satisfies WorkspaceMessageCatalog);
 
 export interface ResolvedWorkspaceInteractionMessages {
+  readonly panelGroupFallback: () => string;
   readonly movedPanelTo: (values: { readonly title: string; readonly group: string }) => string;
   readonly moveCancelled: () => string;
   readonly movePanelContainer: (values: { readonly group: string }) => string;
@@ -260,6 +261,7 @@ export function resolveWorkspaceInteractionMessages(
   catalog: WorkspaceMessageCatalog,
 ): ResolvedWorkspaceInteractionMessages {
   return {
+    panelGroupFallback: catalog.panelGroupFallback,
     movedPanelTo: catalog.movedPanelTo,
     moveCancelled: catalog.moveCancelled,
     movePanelContainer: catalog.movePanelContainer ?? ENGLISH_WORKSPACE_MESSAGES.movePanelContainer,

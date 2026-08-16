@@ -60,6 +60,7 @@ interface GroupDragSession<TCommand> {
   readonly pointerId: number;
   readonly captureElement: HTMLButtonElement;
   readonly candidates: readonly GroupDropCandidate<TCommand>[];
+  readonly groupFallbackLabel: string;
   current: PointerPosition;
   pending: PointerPosition | undefined;
   target: GroupDropCandidate<TCommand> | undefined;
@@ -374,6 +375,7 @@ export function useGroupDrag<TCommand>(
           },
           options.planDrop,
         ),
+        groupFallbackLabel: options.messages.panelGroupFallback(),
         current: pointerPosition(event),
         pending: undefined,
         target: undefined,
@@ -540,7 +542,7 @@ function createGroupDragView<TCommand>(
   target: GroupDropCandidate<TCommand> | undefined,
 ): GroupDragView {
   return {
-    groupLabel: session.group.label?.trim() || "Panel group",
+    groupLabel: session.group.label?.trim() || session.groupFallbackLabel,
     pointer: session.current,
     previewRect: target?.previewRect,
     targetId: target?.id,

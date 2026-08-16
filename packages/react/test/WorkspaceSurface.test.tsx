@@ -1415,6 +1415,11 @@ describe("WorkspaceSurface", () => {
 
     await user.click(moveContainer);
     expect(screen.getByRole("dialog", { name: "Move Left panel container" })).toBeTruthy();
+    await user.keyboard("{Enter}");
+    expect(runtime.lastCommand).toMatchObject({
+      type: "group-drop",
+      request: { sourceGroup: { id: "left" }, target: { kind: "swap" } },
+    });
   });
 
   it("provides arrow, boundary, and Escape behavior for panel action menus", async () => {
@@ -1845,6 +1850,45 @@ describe("WorkspaceSurface", () => {
         document.activeElement,
       );
     });
+  });
+
+  it("localizes the fallback group label in the container drag ghost", async () => {
+    const projection: WorkspaceProjection = {
+      ...initialProjection,
+      groups: {
+        ...initialProjection.groups,
+        left: {
+          id: "left",
+          panelIds: ["alpha", "beta"],
+          selectedPanelId: "alpha",
+        },
+      },
+    };
+    const view = renderWorkspace(new FixtureRuntime(projection), {
+      commands: directManipulationCommands,
+      messageCatalog: INDONESIAN_MESSAGES,
+    });
+    const handle = requiredElement(
+      view.container.querySelector('[data-workspace-group-drag-handle="left"]'),
+    );
+    installPointerCapture(handle);
+
+    fireEvent.pointerDown(handle, {
+      button: 0,
+      pointerId: 142,
+      pointerType: "mouse",
+      clientX: 480,
+      clientY: 20,
+    });
+    fireEvent.pointerMove(handle, {
+      pointerId: 142,
+      pointerType: "mouse",
+      clientX: 750,
+      clientY: 350,
+    });
+
+    const overlay = await waitForElement(view.container, "[data-workspace-group-drag]");
+    expect(overlay.querySelector(".pf-group-drag-ghost strong")?.textContent).toBe("Grup panel");
   });
 
   it("moves a panel container from keyboard-accessible empty tab-strip space", async () => {

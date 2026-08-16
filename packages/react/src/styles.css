@@ -764,7 +764,7 @@
 
   .pf-group[data-tab-orientation="vertical"] .pf-group-drag-region {
     min-inline-size: 100%;
-    min-block-size: 0;
+    min-block-size: var(--pf-target-size);
   }
 
   .pf-group[data-tab-placement="inline-end"] .pf-tab {
