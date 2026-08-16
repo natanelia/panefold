@@ -93,6 +93,14 @@
 
   :where(.pf-hide-single-tab-row)
     .pf-tab-strip:has(> .pf-tab-list > .pf-tab:only-child)
+    > .pf-tab-list
+    > .pf-tab:only-child:not(:focus-visible)
+    > .pf-tab-close {
+    pointer-events: none;
+  }
+
+  :where(.pf-hide-single-tab-row)
+    .pf-tab-strip:has(> .pf-tab-list > .pf-tab:only-child)
     > .pf-tab-controls {
     position: absolute;
     inset-block-start: 0;
