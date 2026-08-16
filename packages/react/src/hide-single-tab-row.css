@@ -91,6 +91,7 @@
     opacity: 0;
   }
 
+  /* Keep pointerdown on the collapsed tab grip until focus restores the full row. */
   :where(.pf-hide-single-tab-row)
     .pf-tab-strip:has(> .pf-tab-list > .pf-tab:only-child)
     > .pf-tab-list
