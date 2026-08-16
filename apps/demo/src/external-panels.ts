@@ -261,7 +261,7 @@ export class DemoExternalPanelController {
     context: BrowserSurfaceMountContext<DemoPanelCheckpoint>,
   ) {
     lease.handle = context.handle;
-    copyInlineStyles(document, context.document);
+    const disposeInlineStyles = copyInlineStyles(document, context.document);
     const shell = context.document.createElement("section");
     shell.className = "demo-app demo-external-app pf-workspace";
     shell.dataset.theme = this.#options.getTheme();
@@ -294,6 +294,7 @@ export class DemoExternalPanelController {
     return {
       ready: Promise.resolve(),
       dispose: () => {
+        disposeInlineStyles();
         request.parkingElement.append(request.host);
         shell.remove();
       },
