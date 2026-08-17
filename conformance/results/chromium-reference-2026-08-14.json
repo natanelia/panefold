@@ -58,7 +58,7 @@
     "apps/demo/src/App.tsx": "af7fe7edfc3b17b4ded34cbd3060b67703d906404cb53a85ea54f52704fe8322",
     "apps/demo/src/styles.css": "686b97c0e150d34b8c6552a74e3e6d917796e619f5a800a81a2792868219e7c5",
     "apps/demo/src/demo-panels.tsx": "e0896a5cc259c6ea29db9e63bb6e181de1a2d08569fbd4b17c092c74b7a0ae7a",
-    "apps/demo/src/external-panels.ts": "8929ce47410b9e51bb1d03f172d9aac9aa26a0b842d4c4923396c0a4a8f0fa9e",
+    "apps/demo/src/external-panels.ts": "2836bab76f011fd9baa4db41be9d164cf450ee00b55933d21fce9c0744fd3b3e",
     "apps/demo/src/runtime-session.ts": "1b09817f5f32bc10b8e574ac979f3bad472d5840ecb1c08bebdce6d62563c287",
     "apps/demo/src/workspace-config.ts": "9494e09046e80ab21d4342cdc7f5c1c3a91232bbef13489b0ee1d3b2d5fdaffc",
     "packages/geometry/src/hit-test.ts": "2da9ca42d97c135f37d599bbaebed8f758343fa4e52fd647c05a4b179340c121",
