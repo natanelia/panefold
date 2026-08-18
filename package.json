@@ -51,10 +51,10 @@
     "check": "pnpm format:check && pnpm lint && pnpm security:check && pnpm publication:check && pnpm requirements:check && pnpm conformance:data:check && pnpm build:packages && pnpm protocol:coverage:check && pnpm docs:claims:check && pnpm conformance:check && pnpm performance:smoke && tsc --noEmit -p tsconfig.json && vitest run && pnpm build:site"
   },
   "devDependencies": {
-    "@axe-core/playwright": "4.12.1",
+    "@axe-core/playwright": "4.13.0",
     "@playwright/test": "1.62.1",
     "@testing-library/react": "16.3.2",
-    "@testing-library/user-event": "14.6.3",
+    "@testing-library/user-event": "14.6.4",
     "@types/node": "26.2.0",
     "@types/react": "19.2.18",
     "@types/react-dom": "19.2.4",
@@ -65,7 +65,7 @@
     "oxfmt": "0.63.0",
     "oxlint": "1.78.0",
     "tsup": "8.5.1",
-    "typescript": "6.0.3",
+    "typescript": "7.0.2",
     "vite": "8.2.1",
     "vitest": "4.1.10"
   }
