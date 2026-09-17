@@ -1,0 +1,160 @@
+{
+  "schemaVersion": 1,
+  "profile": "compact-react-chromium-desktop",
+  "workload": "120-step primary splitter drag with 180 animation-frame samples",
+  "browser": "chromium",
+  "environment": {
+    "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.7922.34 Safari/537.36",
+    "hardwareConcurrency": 4,
+    "devicePixelRatio": 1,
+    "viewport": {
+      "width": 1280,
+      "height": 720
+    },
+    "operatingSystem": "Linux 6.17.0-1022-azure x64",
+    "node": "v22.23.2",
+    "browserVersion": "151.0.7922.34",
+    "vitestMaxWorkers": 1
+  },
+  "sampleCount": 179,
+  "summary": {
+    "minimum": 16.5,
+    "maximum": 16.8,
+    "mean": 16.665,
+    "median": 16.7,
+    "p95": 16.7,
+    "p99": 16.8
+  },
+  "rawFrameDeltasMs": [
+    16.6, 16.7, 16.7, 16.6, 16.7, 16.7, 16.6, 16.7, 16.7, 16.7, 16.6, 16.7, 16.6, 16.7, 16.7, 16.6,
+    16.7, 16.6, 16.7, 16.7, 16.6, 16.8, 16.6, 16.7, 16.6, 16.7, 16.7, 16.6, 16.7, 16.7, 16.6, 16.7,
+    16.6, 16.8, 16.6, 16.7, 16.7, 16.5, 16.7, 16.7, 16.6, 16.7, 16.7, 16.7, 16.7, 16.6, 16.6, 16.7,
+    16.7, 16.6, 16.7, 16.7, 16.7, 16.6, 16.7, 16.6, 16.8, 16.6, 16.7, 16.6, 16.7, 16.6, 16.7, 16.7,
+    16.7, 16.6, 16.7, 16.6, 16.7, 16.7, 16.7, 16.6, 16.7, 16.7, 16.6, 16.7, 16.6, 16.7, 16.6, 16.8,
+    16.6, 16.7, 16.6, 16.7, 16.7, 16.6, 16.7, 16.7, 16.7, 16.6, 16.7, 16.6, 16.7, 16.7, 16.7, 16.6,
+    16.7, 16.6, 16.7, 16.7, 16.6, 16.7, 16.7, 16.6, 16.7, 16.6, 16.7, 16.7, 16.6, 16.7, 16.7, 16.7,
+    16.6, 16.7, 16.7, 16.6, 16.7, 16.7, 16.6, 16.7, 16.6, 16.8, 16.6, 16.7, 16.7, 16.6, 16.6, 16.8,
+    16.6, 16.6, 16.7, 16.7, 16.7, 16.6, 16.7, 16.7, 16.7, 16.5, 16.7, 16.7, 16.7, 16.6, 16.7, 16.7,
+    16.7, 16.6, 16.7, 16.7, 16.6, 16.7, 16.7, 16.6, 16.7, 16.7, 16.6, 16.7, 16.6, 16.7, 16.6, 16.8,
+    16.6, 16.6, 16.8, 16.6, 16.6, 16.7, 16.7, 16.7, 16.6, 16.7, 16.6, 16.7, 16.7, 16.7, 16.6, 16.7,
+    16.7, 16.6, 16.6
+  ],
+  "longTasks": [
+    {
+      "startTime": 186,
+      "duration": 79
+    }
+  ],
+  "baseline": {
+    "schemaVersion": 1,
+    "profile": "compact-react-chromium-desktop",
+    "workload": "120-step primary splitter drag with 180 animation-frame samples",
+    "frameP95MaximumMs": 50,
+    "frameP99MaximumMs": 100,
+    "longTaskMaximumCount": 12,
+    "minimumSamples": 120
+  },
+  "producedAt": "2026-09-17T15:37:13.095Z",
+  "nodeSmoke": {
+    "schemaVersion": 1,
+    "environment": {
+      "node": "v22.23.2",
+      "v8": "12.4.254.21-node.56",
+      "platform": "linux",
+      "architecture": "x64",
+      "cpu": "AMD EPYC 7763 64-Core Processor"
+    },
+    "kernel": {
+      "iterations": 10000,
+      "elapsedMs": 2513.19
+    },
+    "geometry": {
+      "iterations": 100000,
+      "elapsedMs": 369.18
+    },
+    "reorderProfiles": [
+      {
+        "panelCount": 50,
+        "warmupCount": 250,
+        "sampleCount": 2000,
+        "medianMs": 0.3665,
+        "p95Ms": 0.5435,
+        "p99Ms": 0.6951,
+        "designTargetMs": 1,
+        "withinDesignTargetOnThisMachine": true,
+        "invariantViolations": 0
+      },
+      {
+        "panelCount": 500,
+        "warmupCount": 100,
+        "sampleCount": 1000,
+        "medianMs": 3.1175,
+        "p95Ms": 3.3927,
+        "p99Ms": 3.483,
+        "designTargetMs": 5,
+        "withinDesignTargetOnThisMachine": true,
+        "invariantViolations": 0
+      }
+    ],
+    "hitTestProfiles": [
+      {
+        "nodeCount": 100,
+        "sampleCount": 10000,
+        "elapsedMs": 52.39,
+        "meanMicroseconds": 5.239
+      },
+      {
+        "nodeCount": 500,
+        "sampleCount": 10000,
+        "elapsedMs": 274.38,
+        "meanMicroseconds": 27.438
+      },
+      {
+        "nodeCount": 1000,
+        "sampleCount": 10000,
+        "elapsedMs": 587.26,
+        "meanMicroseconds": 58.726
+      }
+    ],
+    "totalElapsedMs": 8255.1,
+    "finalRevision": "10000",
+    "invariantViolations": 0
+  },
+  "rawReport": {
+    "path": "artifacts/preview-browser.json",
+    "sha256": "01e3d600d5c4c2f208d31a3eb63e7055eedc6842f0323c449a8caf1ef532e238",
+    "runUrl": "https://github.com/natanelia/panefold/actions/runs/35241078527",
+    "artifact": "preview-executed-evidence"
+  },
+  "sourceDigests": {
+    "e2e/performance-baseline.json": "128b4c7dc2c7fc03372224828417f675b279359ebbe9bab7408b172ad76b48a9",
+    "e2e/performance.spec.ts": "2bbc7b6cb40fd2ad97ba33824b5b8a0a3cf43a82ce638e432f13d29c8db164f3",
+    "package.json": "acd970060c8df0d628cada8c1762111b9c3587031dbdc0e5815fb1e6159147ee",
+    "packages/geometry/src/hit-test.ts": "2da9ca42d97c135f37d599bbaebed8f758343fa4e52fd647c05a4b179340c121",
+    "packages/geometry/src/invalidation.ts": "dfe873cb6df480d8ce023688e199463489877527b5b1c5155c4a7d1e234d4f1b",
+    "packages/kernel-optimized/src/indexes.ts": "c6d962626b3c0cac8d7d89f156aed383b1e313a201f7c3ce5f228d97959ac0a8",
+    "packages/motion/src/coordinator.ts": "50eff7dd6a1b8f6433ac3f5bfc5f8d74b99a501e43e712ccb3e1a82520574c6d",
+    "packages/react/src/WorkspaceSurface.tsx": "59dec5ced7819125f2f15926e53c0be855026bbe1abe4f0466d9a6f352e2d5f2",
+    "packages/react/src/drop-preview.ts": "73ff8f429ae558ec4ddc573fb4250e2bb4a73c9fd1fb28b3baabf369ea6f781c",
+    "packages/react/src/drop-target.ts": "1f1792525af268cbc5ea7dc901148061e6ea7ba609e06b143a556c9424d48689",
+    "packages/react/src/floating-surface.tsx": "ce26f0641e9fea4d2349255feae86f0d9b3158a6cb8812d09d96b8c55481835c",
+    "packages/react/src/group-drag.tsx": "40b2330f7387c822cfa39678184013c08cfe3e6fd95898dbbd1d820773d1b9e8",
+    "packages/react/src/group-drop.ts": "0ef27f2d2b34277ab641b37c2d687ba086516bd50d9615d862fc10b251682d7c",
+    "packages/react/src/messages.ts": "9fd06f1e34d157a5fbfa9a7a2efee08ead47b76368d47e6733a144b940ab3315",
+    "packages/react/src/node-motion.ts": "5f7efe09d09573ea1c2baa44744627d34fabe60cc6978f287da83e6b02ed52bb",
+    "packages/react/src/panel-drag.tsx": "34b6d9b24fad93e946889672ec3317a9b109c8a09b4bf449edb49d5163b80164",
+    "packages/react/src/styles.css": "ec91d785d4c03ee31ad71600c548f7e958580a06cb683ea6cb8289e8f8ee63cb",
+    "packages/react/test/drop-preview.test.ts": "bdc1de685dce3a9bc5c073cf9fb7f2325de07251a8f71d4b318f09990c22211c",
+    "packages/react/test/drop-target.test.ts": "2f28dc5a482cb6cc12fdbafb4e29ca3fba2a424dd1a5e9f822e9d95f4e9fc0a6",
+    "pnpm-lock.yaml": "e659e90970ee34935228595f2297da307495a7a7b01202ecfa67deaf1ac53209",
+    "scripts/performance-smoke.mjs": "fc0d8ce5df966b75312b5d9fae367e07b5ce4f8215afa724d03a7a6cb17fdc95",
+    "scripts/record-preview-evidence.mjs": "e4f78ac857b5186e2a407568b8fdcb4c408e6086dac80e79599a00ce74b589c9",
+    "vitest.config.ts": "6f743b2639e8e091bdc454a4aaa6336a538b889e70af8814ee7d1f27c7a8769e"
+  },
+  "limitations": [
+    "One automated Linux GitHub Actions run, not a stable browser or physical-device matrix.",
+    "Emulated touch, automated axe, forced colors, and keyboard tests do not establish manual accessibility certification.",
+    "The performance fixture measures splitter frames, not panel-drag latency or physical 60 Hz/120 Hz guarantees.",
+    "Raw reports are also retained in the workflow artifact; artifact retention is 30 days."
+  ]
+}

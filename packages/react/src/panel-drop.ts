@@ -17,6 +17,12 @@ import type {
   WorkspaceProjection,
 } from "./types";
 import type { WorkspacePhysicalEdge } from "./messages";
+import {
+  createEditorDropArea,
+  hitTestEditorDropArea,
+  type EditorDropArea,
+  type MeasuredDropGroup,
+} from "./drop-target";
 
 export interface PanelDropLabels {
   readonly movedPanelTo: (values: { readonly title: string; readonly group: string }) => string;
@@ -30,7 +36,7 @@ export interface PanelDropLabels {
 export interface PanelDropCandidate<TCommand = unknown> {
   readonly id: string;
   readonly label: string;
-  /** Compact acquisition zone used only to choose a destination. */
+  /** Legacy rectangular zone; dropArea is authoritative for editor-style hit tests. */
   readonly hitRect: LogicalRect;
   /** Application-planned commit geometry. */
   readonly previewRect: LogicalRect;
@@ -39,6 +45,8 @@ export interface PanelDropCandidate<TCommand = unknown> {
   readonly plan: WorkspacePanelDropPlan<TCommand>;
   /** Retained empty destinations sit above overlapping ordinary acquisition zones. */
   readonly acquisitionPriority: number;
+  readonly dropArea?: EditorDropArea;
+  readonly occlusionRects?: readonly LogicalRect[];
 }
 
 /**
@@ -108,7 +116,7 @@ export function createPanelDropCandidates<TCommand = unknown>(
   layout: ResolvedLayout,
   panelId: string,
   direction: WorkspaceDirection,
-  edgeRatio = 0.25,
+  edgeRatio = 0.1,
   splitRatio = 0.5,
   splitterSize = 6,
   labels: PanelDropLabels = DEFAULT_PANEL_DROP_LABELS,
@@ -116,6 +124,7 @@ export function createPanelDropCandidates<TCommand = unknown>(
     request: WorkspacePanelDropRequest,
     context: WorkspacePanelDropPlanContext,
   ) => WorkspacePanelDropPlan<TCommand> | undefined,
+  measuredGroups: Readonly<Record<string, MeasuredDropGroup>> = {},
 ): readonly PanelDropCandidate<TCommand>[] {
   const sourceGroup = groupForPanel(projection, panelId);
   if (sourceGroup === undefined) return [];
@@ -132,6 +141,8 @@ export function createPanelDropCandidates<TCommand = unknown>(
     }
 
     const targetSurfaceBounds = surfaceLayoutBoundsForNode(projection, layout, node.id) ?? bounds;
+    const dropArea = createEditorDropArea(rect, measuredGroups[group.id], edgeRatio);
+    const occlusionRects = dropSurfaceOcclusions(projection, layout, node.id, measuredGroups);
     const acquisitionRect = emptyGroupAcquisitionRect(group, rect, targetSurfaceBounds);
     if (acquisitionRect.inlineSize <= 0 || acquisitionRect.blockSize <= 0) continue;
 
@@ -164,6 +175,7 @@ export function createPanelDropCandidates<TCommand = unknown>(
         request,
         plan,
         acquisitionPriority: 1,
+        occlusionRects,
       });
       continue;
     }
@@ -196,6 +208,8 @@ export function createPanelDropCandidates<TCommand = unknown>(
           request,
           plan,
           acquisitionPriority: 0,
+          dropArea,
+          occlusionRects,
         });
         continue;
       }
@@ -226,6 +240,8 @@ export function createPanelDropCandidates<TCommand = unknown>(
         request,
         plan,
         acquisitionPriority: 0,
+        dropArea,
+        occlusionRects,
       });
     }
   }
@@ -279,9 +295,8 @@ function validPreviewRect(rect: LogicalRect, bounds: LogicalRect): boolean {
 }
 
 /**
- * Resolves corner overlap by choosing the closest logical edge. This remains
- * deterministic when supplied by an older geometry adapter whose edge zones
- * overlap at corners, while preserving the geometry package's center target.
+ * Match the editor-style acquisition region, independently of planned geometry.
+ * Legacy candidates without a drop area retain their rectangle-based behavior.
  */
 export function hitTestPanelDropCandidates<TCommand>(
   candidates: readonly PanelDropCandidate<TCommand>[],
@@ -291,7 +306,14 @@ export function hitTestPanelDropCandidates<TCommand>(
   let edge: PanelDropCandidate<TCommand> | undefined;
   let edgeCandidateDistance = Number.POSITIVE_INFINITY;
   for (const candidate of candidates) {
-    if (!containsPoint(candidate.hitRect, point)) continue;
+    if (candidate.occlusionRects?.some((rect) => containsPoint(rect, point))) continue;
+    if (candidate.dropArea === undefined) {
+      if (!containsPoint(candidate.hitRect, point)) continue;
+    } else {
+      const region = hitTestEditorDropArea(candidate.dropArea, point);
+      const target = candidate.request.target;
+      if (region !== (target.kind === "center" ? "center" : target.edge)) continue;
+    }
     if (candidate.request.target.kind === "center") {
       if (center === undefined || compareCenterCandidate(candidate, center) < 0) {
         center = candidate;
@@ -334,6 +356,30 @@ export function nodeForGroup(projection: WorkspaceProjection, groupId: string): 
   return Object.values(projection.nodes).find(
     (node) => node.kind === "group" && node.groupId === groupId,
   )?.id;
+}
+
+/** Occlude lower surfaces even when the foreground has no allowed drop plan. */
+export function dropSurfaceOcclusions(
+  projection: WorkspaceProjection,
+  layout: ResolvedLayout,
+  nodeId: string,
+  measuredGroups: Readonly<Record<string, MeasuredDropGroup>> = {},
+): readonly LogicalRect[] {
+  const surfaces = projection.floatingSurfaces ?? [];
+  const ownIndex = surfaces.findIndex((surface) =>
+    subtreeContainsNode(projection, surface.rootNodeId, nodeId),
+  );
+  return surfaces.slice(ownIndex + 1).flatMap((surface) => {
+    const rect = layout.nodeRects[surface.rootNodeId];
+    const headers = Object.entries(measuredGroups).flatMap(([groupId, measured]) => {
+      const groupNodeId = nodeForGroup(projection, groupId);
+      return groupNodeId !== undefined &&
+        subtreeContainsNode(projection, surface.rootNodeId, groupNodeId)
+        ? measured.headerRects
+        : [];
+    });
+    return rect === undefined ? headers : [rect, ...headers];
+  });
 }
 
 /** Resolve the root geometry of the same-document surface containing a node. */

@@ -18,16 +18,18 @@ async function dragTabToGroup(
   const tab = page.locator(`[data-workspace-panel-tab="${panelId}"]`);
   const group = page.locator(`[data-workspace-group="${targetGroupId}"]`);
   const sourceBox = await requiredBox(tab);
-  const targetBox = await requiredBox(group);
+  const slot = group.locator(".pf-panel-slot");
+  const targetBox = await requiredBox((await slot.isVisible()) ? slot : group);
+  const rtl = await group.evaluate((element) => getComputedStyle(element).direction === "rtl");
   const targetNodeId = await group.getAttribute("data-workspace-node");
   expect(targetNodeId).not.toBeNull();
   const inset = 8;
   const target =
     position === "center"
       ? { x: targetBox.x + targetBox.width / 2, y: targetBox.y + targetBox.height / 2 }
-      : position === "inline-start"
+      : position === (rtl ? "inline-end" : "inline-start")
         ? { x: targetBox.x + inset, y: targetBox.y + targetBox.height / 2 }
-        : position === "inline-end"
+        : position === (rtl ? "inline-start" : "inline-end")
           ? { x: targetBox.x + targetBox.width - inset, y: targetBox.y + targetBox.height / 2 }
           : position === "block-start"
             ? { x: targetBox.x + targetBox.width / 2, y: targetBox.y + inset }
@@ -51,6 +53,7 @@ async function dragTabToGroup(
   if (position !== "center") {
     await expect(overlay).toHaveAttribute("data-workspace-drop-edge", position);
   }
+  await waitForRectToSettle(overlay.locator(".pf-panel-drop-preview"));
   const previewRect = await requiredBox(overlay.locator(".pf-panel-drop-preview"));
   await page.mouse.up();
   return previewRect;
@@ -66,16 +69,20 @@ async function dragGroupToGroup(
   const handle = sourceGroup.locator(`[data-workspace-group-drag-handle="${sourceGroupId}"]`);
   const targetGroup = page.locator(`[data-workspace-group="${targetGroupId}"]`);
   const sourceBox = await requiredBox(handle);
-  const targetBox = await requiredBox(targetGroup);
+  const slot = targetGroup.locator(".pf-panel-slot");
+  const targetBox = await requiredBox((await slot.isVisible()) ? slot : targetGroup);
+  const rtl = await targetGroup.evaluate(
+    (element) => getComputedStyle(element).direction === "rtl",
+  );
   const targetNodeId = await targetGroup.getAttribute("data-workspace-node");
   expect(targetNodeId).not.toBeNull();
   const inset = 8;
   const target =
     position === "center"
       ? { x: targetBox.x + targetBox.width / 2, y: targetBox.y + targetBox.height / 2 }
-      : position === "inline-start"
+      : position === (rtl ? "inline-end" : "inline-start")
         ? { x: targetBox.x + inset, y: targetBox.y + targetBox.height / 2 }
-        : position === "inline-end"
+        : position === (rtl ? "inline-start" : "inline-end")
           ? { x: targetBox.x + targetBox.width - inset, y: targetBox.y + targetBox.height / 2 }
           : position === "block-start"
             ? { x: targetBox.x + targetBox.width / 2, y: targetBox.y + inset }
@@ -96,6 +103,7 @@ async function dragGroupToGroup(
       ? `swap:${String(targetNodeId)}`
       : `edge:${String(targetNodeId)}:${position}`,
   );
+  await waitForRectToSettle(overlay.locator(".pf-panel-drop-preview"));
   const previewRect = await requiredBox(overlay.locator(".pf-panel-drop-preview"));
   await page.mouse.up();
   return previewRect;
@@ -1404,4 +1412,68 @@ test.describe("compact touch projection", () => {
       .analyze();
     expect(results.violations).toEqual([]);
   });
+});
+
+for (const mode of ["horizontal", "vertical", "rtl"] as const) {
+  for (const edge of ["inline-start", "inline-end", "block-start", "block-end"] as const) {
+    test(`VS Code preview matches the committed ${edge} pane in ${mode}`, async ({ page }) => {
+      await page.emulateMedia({ reducedMotion: "reduce" });
+      await page.goto("/");
+      if (mode !== "horizontal") {
+        await page.getByRole("button", { name: "Workspace appearance" }).click();
+        const settings = page.getByRole("dialog", { name: "Workspace appearance" });
+        await settings
+          .getByRole("combobox", { name: mode === "rtl" ? "Direction" : "Tab rail", exact: true })
+          .selectOption(mode === "rtl" ? "rtl" : "inline-start");
+        await page.keyboard.press("Escape");
+      }
+      const target = page.locator('[data-workspace-group="inspector"]');
+      await waitForRectToSettle(target);
+      const before = await revisionOf(page);
+      const preview = await dragTabToGroup(page, "notes", "inspector", edge);
+      await expect.poll(() => revisionOf(page)).toBe(before + 1);
+      const movedGroup = page
+        .locator('[data-workspace-panel-tab="notes"]')
+        .locator("xpath=ancestor::*[@data-workspace-group][1]");
+      await expectRectToSettle(preview, movedGroup);
+      await expect(page.locator("[data-workspace-panel-drag]")).toHaveCount(0);
+      await page.getByRole("button", { name: "Undo layout change" }).click();
+      await expect(
+        page.locator('[data-workspace-group="primary"] [data-workspace-panel-tab="notes"]'),
+      ).toBeVisible();
+    });
+  }
+}
+
+test("VS Code acquisition uses content edges, a broad merge center, and deterministic corners", async ({
+  page,
+}) => {
+  await page.goto("/");
+  const tab = page.locator('[data-workspace-panel-tab="notes"]');
+  const group = page.locator('[data-workspace-group="inspector"]');
+  await waitForRectToSettle(group);
+  const source = await requiredBox(tab);
+  const content = await requiredBox(group.locator(".pf-panel-slot"));
+  const header = await requiredBox(group.locator(".pf-tab-strip"));
+  const before = await revisionOf(page);
+  await page.mouse.move(source.x + source.width / 2, source.y + source.height / 2);
+  await page.mouse.down();
+  const overlay = page.locator("[data-workspace-panel-drag]");
+  const preview = overlay.locator(".pf-panel-drop-preview");
+  await page.mouse.move(content.x + content.width * 0.18, content.y + content.height / 2, {
+    steps: 10,
+  });
+  await expect(overlay).toHaveAttribute("data-workspace-drop-kind", "center");
+  await expect(preview).toHaveCSS("border-radius", "0px");
+  await expect(preview).toHaveCSS("pointer-events", "none");
+  await page.mouse.move(header.x + header.width / 2, header.y + 4);
+  await expect(overlay).toHaveAttribute("data-workspace-drop-kind", "center");
+  await page.mouse.move(content.x + content.width / 2, content.y + 4);
+  await expect(overlay).toHaveAttribute("data-workspace-drop-edge", "block-start");
+  await page.mouse.move(content.x + content.width * 0.2, content.y + 4);
+  await expect(overlay).toHaveAttribute("data-workspace-drop-edge", "inline-start");
+  await page.keyboard.press("Escape");
+  await page.mouse.up();
+  await expect(overlay).toHaveCount(0);
+  expect(await revisionOf(page)).toBe(before);
 });
