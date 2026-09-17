@@ -91,3 +91,22 @@ test("live deployment requires the main run ref and the assembled artifact ID", 
   assert.match(deploy, /artifact-ids: \$\{\{ needs\.build\.outputs\.artifact-id \}\}/u);
   assert.match(deploy, /actions\/deploy-pages@/u);
 });
+
+test("an optional failed preview cannot upload an artifact or hide a current-PR failure", async () => {
+  const workflow = await readFile(
+    new URL("../.github/workflows/pages-build.yml", import.meta.url),
+    "utf8",
+  );
+  const previews = workflow.split("\n  previews:\n")[1]?.split("\n  assemble:\n")[0];
+  assert.ok(previews);
+  assert.doesNotMatch(previews, /\n    continue-on-error:/u);
+  assert.match(previews, /id: build\n        if: steps\.install\.outcome == 'success'/u);
+  assert.match(
+    previews,
+    /uses: actions\/upload-artifact@[^\n]+\n        if: steps\.build\.outcome == 'success'/u,
+  );
+  assert.match(previews, /::warning::PR/u);
+  const { validateManifest } = await import("./pages-preview-smoke.mjs");
+  const unavailable = { ...plan, previews: [{ number: 33, sha, status: "unavailable" }] };
+  assert.throws(() => validateManifest(unavailable, unavailable, "33", sha), /successfully/u);
+});

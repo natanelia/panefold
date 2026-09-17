@@ -82,8 +82,6 @@ jobs:
     if: needs.plan.outputs.has-previews == 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 15
-    # A broken PR must not prevent production or other previews from publishing.
-    continue-on-error: true
     strategy:
       fail-fast: false
       max-parallel: 4
@@ -103,8 +101,14 @@ jobs:
           node-version: 24
           # Do not let PR installs populate a cache used by trusted jobs.
           package-manager-cache: false
-      - run: pnpm install --frozen-lockfile
+      - name: Install preview dependencies
+        id: install
+        continue-on-error: true
+        run: pnpm install --frozen-lockfile
       - name: Build the PR workbench at its own URL
+        id: build
+        if: steps.install.outcome == 'success'
+        continue-on-error: true
         env:
           PR_NUMBER: ${{ matrix.number }}
         run: |
@@ -112,11 +116,19 @@ jobs:
           export PANEFOLD_DEMO_BASE="/${GITHUB_REPOSITORY#*/}/previews/pr-${PR_NUMBER}/workbench/"
           pnpm --filter @panefold/demo run build
       - uses: actions/upload-artifact@v7
+        if: steps.build.outcome == 'success'
         with:
           name: site-pr-${{ matrix.number }}
           path: apps/demo/dist
           if-no-files-found: error
           retention-days: 1
+      - name: Report an unavailable preview
+        if: always() && (steps.install.outcome != 'success' || steps.build.outcome != 'success')
+        env:
+          PR_NUMBER: ${{ matrix.number }}
+        run: |
+          echo "::warning::PR #${PR_NUMBER} did not build. Its preview is unavailable; see the install/build logs."
+          printf '### Preview PR #%s unavailable\n\nNo workbench artifact was published. See the install/build logs.\n' "$PR_NUMBER" >> "$GITHUB_STEP_SUMMARY"
 
   assemble:
     needs: [plan, production, previews]

@@ -34,7 +34,9 @@ lost previews when production publishes and removes closed previews without sepa
 It costs additional build time as the number of open PRs grows.
 
 A failed PR build gets an unavailable landing page; other previews and production can still be
-published. A failed production build or invalid artifact stops deployment and leaves the live
+published. The optional build logs remain available and the job emits a warning instead of a
+failed workflow check for another PR. No artifact is uploaded after a failed install or build.
+Validation still fails when its own PR is unavailable or its commit does not match. A failed production build or invalid artifact stops deployment and leaves the live
 site unchanged. Main is checked again before assembly to prevent an older run from reverting a
 newer production commit. PRs that changed during the build do not publish stale workbench code.
 
@@ -68,7 +70,7 @@ account, personal token, or repository secret is required.
 
 ## Checks and operation
 
-Run `node --test scripts/pages-*.test.mjs`. The 18 tests run in the Node 22/24 CI jobs and the Pages
+Run `node --test scripts/pages-*.test.mjs`. The 19 tests run in the Node 22/24 CI jobs and the Pages
 planning job. They cover source selection, production preservation, closed/stale/failed previews,
 missing and invalid artifacts, unsafe file types, deployment races, comment reuse, local serving,
 current-PR commit checks, and the workflow permission boundary.
