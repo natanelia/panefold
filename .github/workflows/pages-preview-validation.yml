@@ -1,0 +1,69 @@
+name: Validate Pages previews
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - .github/workflows/pages*.yml
+      - scripts/pages-*.mjs
+      - docs/PR_PREVIEWS.md
+  workflow_dispatch:
+
+# The full build and browser checks run without Pages/OIDC write permissions.
+permissions:
+  contents: read
+  pull-requests: read
+
+concurrency:
+  group: pages-validation-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository
+    uses: ./.github/workflows/pages-build.yml
+
+  smoke:
+    needs: build
+    if: always() && !cancelled() && needs.build.result == 'success'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Require a complete current artifact
+        env:
+          READY: ${{ needs.build.outputs.ready }}
+        run: |
+          if [ "$READY" != 'true' ]; then
+            echo '::error::Main changed during the build. Re-run validation for a current artifact.'
+            exit 1
+          fi
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+      - uses: pnpm/action-setup@v6
+        with:
+          version: 11.16.0
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          package-manager-cache: false
+      - run: pnpm install --frozen-lockfile
+      - uses: actions/download-artifact@v7
+        with:
+          artifact-ids: ${{ needs.build.outputs.artifact-id }}
+          path: published
+          merge-multiple: true
+      - run: pnpm exec playwright install --with-deps chromium
+      - name: Test the assembled site without publishing it
+        env:
+          EXPECTED_PR: ${{ github.event.pull_request.number }}
+          EXPECTED_SHA: ${{ github.event.pull_request.head.sha }}
+          PREVIEW_MANIFEST: ${{ needs.build.outputs.manifest }}
+        run: node scripts/pages-preview-smoke.mjs published
+      - uses: actions/upload-artifact@v7
+        if: always()
+        with:
+          name: pages-preview-validation
+          path: artifacts
+          if-no-files-found: warn
+          retention-days: 7

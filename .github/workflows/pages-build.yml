@@ -1,0 +1,165 @@
+name: Build Pages site
+
+on:
+  workflow_call:
+    outputs:
+      ready:
+        description: Whether the complete site is ready for validation or deployment
+        value: ${{ jobs.assemble.outputs.deploy }}
+      manifest:
+        description: Source commits and build status for each preview
+        value: ${{ jobs.assemble.outputs.manifest }}
+      artifact-id:
+        description: Trusted artifact ID for the assembled static site
+        value: ${{ jobs.assemble.outputs.artifact-id }}
+
+# This reusable workflow cannot deploy, approve environments, or write PR comments.
+permissions:
+  contents: read
+  pull-requests: read
+
+jobs:
+  plan:
+    if: github.event_name != 'pull_request_target' || github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: read
+      pull-requests: read
+    outputs:
+      main: ${{ steps.plan.outputs.main }}
+      has-previews: ${{ steps.plan.outputs.has-previews }}
+      matrix: ${{ steps.plan.outputs.matrix }}
+      plan: ${{ steps.plan.outputs.plan }}
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: ${{ github.workflow_sha }}
+          persist-credentials: false
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          package-manager-cache: false
+      - run: node --test scripts/pages-*.test.mjs
+      - uses: actions/github-script@v8
+        id: plan
+        with:
+          script: |
+            const { createPlan } = await import(`${process.env.GITHUB_WORKSPACE}/scripts/pages-previews.mjs`);
+            await createPlan({ github, context, core });
+
+  production:
+    needs: plan
+    outputs:
+      artifact-id: ${{ steps.production.outputs.artifact-id }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: ${{ needs.plan.outputs.main }}
+          persist-credentials: false
+      - uses: pnpm/action-setup@v6
+        with:
+          version: 11.16.0
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          package-manager-cache: false
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm build:site
+      - uses: actions/upload-artifact@v7
+        id: production
+        with:
+          name: site-production
+          path: apps/site/dist
+          include-hidden-files: true
+          if-no-files-found: error
+          retention-days: 1
+
+  previews:
+    needs: plan
+    if: needs.plan.outputs.has-previews == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    # A broken PR must not prevent production or other previews from publishing.
+    continue-on-error: true
+    strategy:
+      fail-fast: false
+      max-parallel: 4
+      matrix: ${{ fromJSON(needs.plan.outputs.matrix) }}
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: ${{ matrix.sha }}
+          persist-credentials: false
+      - uses: pnpm/action-setup@v6
+        with:
+          version: 11.16.0
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          # Do not let PR installs populate a cache used by trusted jobs.
+          package-manager-cache: false
+      - run: pnpm install --frozen-lockfile
+      - name: Build the PR workbench at its own URL
+        env:
+          PR_NUMBER: ${{ matrix.number }}
+        run: |
+          pnpm --filter '@panefold/demo^...' run build
+          export PANEFOLD_DEMO_BASE="/${GITHUB_REPOSITORY#*/}/previews/pr-${PR_NUMBER}/workbench/"
+          pnpm --filter @panefold/demo run build
+      - uses: actions/upload-artifact@v7
+        with:
+          name: site-pr-${{ matrix.number }}
+          path: apps/demo/dist
+          if-no-files-found: error
+          retention-days: 1
+
+  assemble:
+    needs: [plan, production, previews]
+    if: always() && !cancelled() && needs.plan.result == 'success' && needs.production.result == 'success'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: read
+      pull-requests: read
+    outputs:
+      deploy: ${{ steps.assemble.outputs.deploy }}
+      manifest: ${{ steps.assemble.outputs.manifest }}
+      artifact-id: ${{ steps.site.outputs.artifact-id }}
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: ${{ github.workflow_sha }}
+          persist-credentials: false
+          path: tools
+      - uses: actions/download-artifact@v7
+        with:
+          artifact-ids: ${{ needs.production.outputs.artifact-id }}
+          path: incoming/site-production
+          merge-multiple: true
+      - uses: actions/download-artifact@v7
+        if: needs.plan.outputs.has-previews == 'true'
+        with:
+          pattern: site-pr-*
+          path: incoming
+      - uses: actions/github-script@v8
+        id: assemble
+        env:
+          PREVIEW_PLAN: ${{ needs.plan.outputs.plan }}
+        with:
+          script: |
+            const { prepareDeployment } = await import(`${process.env.GITHUB_WORKSPACE}/tools/scripts/pages-previews.mjs`);
+            await prepareDeployment({ github, context, core, plan: JSON.parse(process.env.PREVIEW_PLAN), incoming: 'incoming', output: 'published' });
+      - uses: actions/upload-artifact@v7
+        id: site
+        if: steps.assemble.outputs.deploy == 'true'
+        with:
+          name: site-assembled
+          path: published
+          include-hidden-files: true
+          if-no-files-found: error
+          retention-days: 1

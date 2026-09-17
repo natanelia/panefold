@@ -68,16 +68,36 @@ account, personal token, or repository secret is required.
 
 ## Checks and operation
 
-Run `node --test scripts/pages-previews.test.mjs`. The Node 22/24 CI jobs and the Pages planning
-job run this suite. It covers source selection, production preservation, closed/stale/failed
-previews, missing and invalid artifacts, unsafe file types, deployment races, and comment reuse.
+Run `node --test scripts/pages-*.test.mjs`. The 18 tests run in the Node 22/24 CI jobs and the Pages
+planning job. They cover source selection, production preservation, closed/stale/failed previews,
+missing and invalid artifacts, unsafe file types, deployment races, comment reuse, local serving,
+current-PR commit checks, and the workflow permission boundary.
 
-Use **Actions > Deploy website > Run workflow** on `main` to retry a failed deployment. The
-workflow is also reusable through `workflow_call` for a maintainer-controlled validation run.
-The called workflow still obeys the `github-pages` environment rules. Before initial merge,
-a successful branch validation is not evidence that future PR events are enabled on `main`.
+Use **Actions > Deploy website > Run workflow** on `main` to retry a failed deployment.
+Only workflow runs whose ref is `refs/heads/main` can enter the deployment job. Checking out
+`main` inside a job does not change the run ref or satisfy an environment branch rule.
+
+### Validate before merge
+
+Changes to the Pages workflows, Pages scripts, or this document trigger **Validate Pages previews**.
+This PR check calls the read-only `pages-build.yml` workflow. It builds and assembles the same
+static site as production, then opens the assembled main and ready preview workbenches in Chromium
+on a localhost server. It checks asset loading, page errors, unavailable pages, and the current
+PR's exact commit. Screenshots and a JSON result are in the `pages-preview-validation` artifact.
+The assembled site is retained as `site-assembled` for one day.
+
+The validation workflow has no Pages write token, OIDC write token, environment, or comment write
+access. It cannot publish a site. The deployment wrapper in `pages.yml` is intentionally not
+reusable: branch callers must use the read-only builder instead. This prevents the failure seen
+in run `35246775635`, where GitHub rejected branch `ci/pull-request-previews` under the existing
+`github-pages` environment protection rules before any deployment step could start.
+
+Before initial merge, a passing validation check proves that the local artifact works, not that
+the public preview URL is live. Merge the setup into `main` to enable live preview publication.
+This does not require changes to environment or branch protection rules.
 
 References: [GitHub Pages custom workflows](https://docs.github.com/en/pages/getting-started-with-github-pages/using-custom-workflows-with-github-pages),
+[environment branch rules](https://docs.github.com/en/actions/reference/workflows-and-actions/deployments-and-environments),
 [workflow events and permissions](https://docs.github.com/en/actions/reference/workflows-and-actions/events-that-trigger-workflows),
 and [deploy-pages](https://github.com/actions/deploy-pages). Native Pages preview mode is not
 used; the published action describes it as unavailable to the public.
