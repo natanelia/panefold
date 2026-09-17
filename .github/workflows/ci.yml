@@ -26,6 +26,7 @@ jobs:
           node-version: ${{ matrix.node-version }}
           cache: pnpm
       - run: pnpm install --frozen-lockfile
+      - run: node --test scripts/pages-previews.test.mjs
       - run: pnpm check
       - name: Preserve Node performance evidence
         run: |
