@@ -4191,3 +4191,45 @@ class RecordingMotionDriver implements MotionDriver {
     };
   }
 }
+
+it.each(["release", "observer"] as const)(
+  "rejects changed destination content geometry at %s without committing",
+  async (mode) => {
+    const observers = installControllableResizeObserver();
+    try {
+      const frames = createManualFrameScheduler();
+      const runtime = new FixtureRuntime(initialProjection);
+      const view = renderWorkspace(runtime, {
+        commands: directManipulationCommands,
+        frameScheduler: frames.scheduler,
+      });
+      const alpha = await screen.findByRole("tab", { name: "Alpha" });
+      const slot = requiredElement(
+        view.container.querySelector('[data-workspace-panel-slot="right"]'),
+      );
+      const workspace = screen.getByLabelText("Fixture workspace");
+      setElementRect(workspace, { left: 0, top: 0, width: 1000, height: 700 });
+      setElementRect(slot, { left: 503, top: 34, width: 497, height: 666 });
+      installPointerCapture(alpha);
+      fireEvent.pointerDown(alpha, { button: 0, pointerId: 81, clientX: 100, clientY: 20 });
+      fireEvent.pointerMove(alpha, { pointerId: 81, clientX: 750, clientY: 350 });
+      act(() => frames.flush());
+      expect(view.container.querySelector("[data-workspace-panel-drag]")).toBeTruthy();
+      setElementRect(slot, { left: 503, top: 74, width: 497, height: 626 });
+      if (mode === "observer") {
+        const observer = observers.instances.find((candidate) => candidate.hasObserved(slot));
+        expect(observer).toBeDefined();
+        act(() => observer?.notify());
+      } else {
+        fireEvent.pointerUp(alpha, { pointerId: 81, clientX: 750, clientY: 350 });
+      }
+      await act(async () => Promise.resolve());
+      expect(workspace.dataset.panelDragState).toBe("idle");
+      expect(runtime.transactions).toHaveLength(0);
+      expect(view.container.querySelector("[data-workspace-panel-drag]")).toBeNull();
+      expect(observers.instances.some((observer) => observer.hasObserved(slot))).toBe(false);
+    } finally {
+      observers.restore();
+    }
+  },
+);

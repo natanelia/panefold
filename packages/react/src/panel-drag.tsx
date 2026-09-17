@@ -11,6 +11,7 @@ import type { SurfaceFrameScheduler } from "@panefold/motion";
 import { createDragActor, type DragEvent } from "@panefold/protocol-xstate";
 import { revision } from "@panefold/model";
 
+import { captureDropGeometry, setDropPreviewRect, type DropGeometry } from "./drop-preview";
 import {
   createPanelDropCandidates,
   hitTestPanelDropCandidates,
@@ -84,6 +85,7 @@ interface DragSession<TCommand = unknown> {
   readonly bounds: LogicalRect;
   /** Physical surface geometry captured once when pointer ownership begins. */
   readonly rootRect: PhysicalRect;
+  readonly dropGeometry: DropGeometry;
   readonly direction: WorkspaceDirection;
   readonly geometryEpoch: string;
   readonly pointerId: number;
@@ -296,6 +298,7 @@ export function usePanelDrag<TCommand>(
       options.frameScheduler.cancel(options.scheduleKey);
       const session = sessionRef.current;
       session?.reorderResizeObserver?.disconnect();
+      session?.dropGeometry.dispose();
       if (session?.captureElement.hasPointerCapture?.(session.pointerId)) {
         session.captureElement.releasePointerCapture?.(session.pointerId);
       }
@@ -316,6 +319,7 @@ export function usePanelDrag<TCommand>(
   });
 
   const release = useCallback((session: DragSession<TCommand>) => {
+    session.dropGeometry.dispose();
     session.reorderResizeObserver?.disconnect();
     session.reorderResizeObserver = undefined;
     if (session.captureElement.hasPointerCapture?.(session.pointerId)) {
@@ -562,6 +566,13 @@ export function usePanelDrag<TCommand>(
       const position = externalPosition(event);
       const tabElement = event.currentTarget;
       const rootRect = measureRoot(root, options.logicalBounds);
+      const dropGeometry = captureDropGeometry(
+        root,
+        rootRect,
+        options.logicalBounds,
+        options.resolvedLayout,
+        options.direction,
+      );
       const reorderScrollElement = tabElement.closest<HTMLElement>("[role=tablist]") ?? undefined;
       const createReorderCommand = options.createReorderCommand;
       const measuredReorder =
@@ -587,6 +598,7 @@ export function usePanelDrag<TCommand>(
         layout: options.resolvedLayout,
         bounds: options.logicalBounds,
         rootRect,
+        dropGeometry,
         direction: options.direction,
         geometryEpoch,
         pointerId: event.pointerId,
@@ -598,7 +610,7 @@ export function usePanelDrag<TCommand>(
               options.resolvedLayout,
               panel.id,
               options.direction,
-              0.25,
+              0.1,
               0.5,
               options.splitterSize,
               {
@@ -606,6 +618,7 @@ export function usePanelDrag<TCommand>(
                 splitPanel: options.messages.splitPanel,
               },
               options.planDrop,
+              dropGeometry.groups,
             )
           : [],
         reorderIndex: measuredReorder?.index,
@@ -622,6 +635,11 @@ export function usePanelDrag<TCommand>(
         target: undefined,
       };
       sessionRef.current = session;
+      dropGeometry.watch(() => {
+        if (sessionRef.current === session) {
+          resetRejected(session, options.messages.workspaceChangedBeforePanelMove());
+        }
+      });
       send(actor, {
         type: "POINTER_DOWN",
         pointerId: event.pointerId,
@@ -704,6 +722,10 @@ export function usePanelDrag<TCommand>(
       const session = sessionRef.current;
       if (session === null || session.pointerId !== event.pointerId) return;
       options.frameScheduler.cancel(options.scheduleKey);
+      if (!session.dropGeometry.isCurrent()) {
+        resetRejected(session, options.messages.workspaceChangedBeforePanelMove());
+        return;
+      }
       session.pending = externalPosition(event);
       consumeLatestPointer(session, false);
       if (
@@ -1283,7 +1305,7 @@ function updatePanelDragOverlay(element: HTMLDivElement | null, view: PanelDragV
     view.rootRect,
     view.direction,
   );
-  setOverlayRect(preview, overlayPreview);
+  setDropPreviewRect(preview, overlayPreview);
 
   const indicator = element.querySelector<HTMLElement>(".pf-tab-reorder-indicator");
   setOverlayRect(indicator, view.reorderIndicator);
@@ -1380,7 +1402,7 @@ function clearPanelDragOverlay(element: HTMLDivElement | null): void {
   delete element.dataset.workspaceDropTarget;
   delete element.dataset.workspaceDropKind;
   delete element.dataset.workspaceDropEdge;
-  setOverlayRect(element.querySelector<HTMLElement>(".pf-panel-drop-preview"), undefined);
+  setDropPreviewRect(element.querySelector<HTMLElement>(".pf-panel-drop-preview"), undefined);
   setOverlayRect(element.querySelector<HTMLElement>(".pf-tab-reorder-indicator"), undefined);
   const ghost = element.querySelector<HTMLElement>(".pf-panel-drag-ghost");
   ghost?.querySelector<HTMLElement>("span")?.remove();

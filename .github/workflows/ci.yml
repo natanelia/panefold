@@ -12,6 +12,9 @@ jobs:
   verify:
     runs-on: ubuntu-latest
     timeout-minutes: 20
+    env:
+      # Avoid CPU contention between exhaustive reducer campaigns and UI suites.
+      VITEST_MAX_WORKERS: "1"
     strategy:
       fail-fast: false
       matrix:

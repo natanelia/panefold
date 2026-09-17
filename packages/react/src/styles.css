@@ -828,15 +828,18 @@
     top: var(--pf-drop-y);
     width: var(--pf-drop-width);
     height: var(--pf-drop-height);
-    border: 2px solid var(--pf-valid);
-    border-radius: 8px;
-    background: color-mix(in srgb, var(--pf-valid) 18%, transparent);
-    box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--pf-valid) 38%, transparent);
+    pointer-events: none;
+    border: 1px solid var(--pf-drop-border, color-mix(in srgb, var(--pf-accent) 55%, transparent));
+    border-radius: 0;
+    background: var(--pf-drop-background, color-mix(in srgb, var(--pf-accent) 22%, transparent));
+  }
+
+  .pf-panel-drop-preview[data-moving="true"] {
     transition:
-      left var(--pf-motion-micro),
-      top var(--pf-motion-micro),
-      width var(--pf-motion-micro),
-      height var(--pf-motion-micro);
+      left 70ms ease-out,
+      top 70ms ease-out,
+      width 70ms ease-out,
+      height 70ms ease-out;
   }
 
   .pf-tab-reorder-indicator {

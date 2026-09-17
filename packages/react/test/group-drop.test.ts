@@ -222,3 +222,26 @@ function edgePreview(request: WorkspaceGroupDropRequest, context: WorkspaceGroup
   if (request.target.edge === "block-start") return { ...rect, blockSize };
   return { ...rect, blockStart: rect.blockStart + rect.blockSize - blockSize, blockSize };
 }
+
+it("uses wider side targets for groups but keeps the existing center swap semantics", () => {
+  const candidates = createGroupDropCandidates(
+    projection,
+    layout,
+    "left",
+    "ltr",
+    undefined,
+    undefined,
+    undefined,
+    undefined,
+    (_request, context) => ({ command: "group-drop", previewRect: context.targetRect }),
+  );
+  expect(hitTestGroupDropCandidates(candidates, { inline: 490, block: 150 })?.id).toBe(
+    "edge:right-node:inline-start",
+  );
+  expect(hitTestGroupDropCandidates(candidates, { inline: 600, block: 45 })?.id).toBe(
+    "swap:right-node",
+  );
+  expect(hitTestGroupDropCandidates(candidates, { inline: 600, block: 10 })?.id).toBe(
+    "edge:right-node:block-start",
+  );
+});

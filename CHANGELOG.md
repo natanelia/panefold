@@ -27,6 +27,11 @@ milestones, but no stable package-compatibility promise exists yet.
 
 ### Changed
 
+- React panel drop previews now use VS Code-style content-edge acquisition, deterministic corners,
+  and rectangular 70 ms feedback while retaining exact application-planned commit bounds. Visible
+  tab headers select the center action; foreground floating surfaces block hidden targets. See
+  [Panel drop previews](docs/drag-drop-previews.md) for behavior, scope, and regression coverage.
+
 - Scoped protocol actors now support replaceable typed phase deadlines through the same
   addressed-event path used by ordinary actor input, with injectable FIFO virtual time and
   exactly-once deadline cleanup on fire, cancellation, stop, or parent abort. Coverage performs 84
