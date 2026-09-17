@@ -1,0 +1,38 @@
+name: Inspect preview deployment failure
+
+on:
+  push:
+    branches: [ci/pull-request-previews]
+    paths: [.github/workflows/preview-diagnostics.yml]
+
+permissions:
+  contents: read
+  checks: read
+
+jobs:
+  inspect:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+      - name: Read the failed deployment annotations
+        uses: actions/github-script@v8
+        with:
+          script: |
+            const annotations = await github.paginate(github.rest.checks.listAnnotations, {
+              ...context.repo,
+              check_run_id: 105289488341,
+              per_page: 100,
+            });
+            core.info(JSON.stringify(annotations, null, 2));
+            await core.summary.addHeading('Deployment failure annotations')
+              .addCodeBlock(JSON.stringify(annotations, null, 2), 'json').write();
+      - name: Archive source for local regression tests
+        run: git archive --format=tar.gz --output="$RUNNER_TEMP/preview-source.tar.gz" HEAD
+      - uses: actions/upload-artifact@v7
+        with:
+          name: preview-source
+          path: ${{ runner.temp }}/preview-source.tar.gz
+          retention-days: 1
