@@ -57,20 +57,20 @@ function fixture(mode: "ltr" | "rtl" | "vertical", rejectFirst = false) {
   const root = document.createElement("div");
   root.className = "pf-workspace";
   const group = document.createElement("section");
-group.dataset.workspaceGroup = "right";
-group.dataset.tabOrientation = mode === "vertical" ? "vertical" : "horizontal";
-group.setAttribute("aria-labelledby", "right-title");
-const strip = document.createElement("div");
-strip.setAttribute("role", "tablist");
-strip.setAttribute("aria-labelledby", "right-title");
-const b = document.createElement("button");
-b.dataset.workspacePanelTab = "b";
-const c = document.createElement("button");
-c.dataset.workspacePanelTab = "c";
-strip.append(b, c);
-group.append(strip);
-root.append(group);
-document.body.append(root);
+  group.dataset.workspaceGroup = "right";
+  group.dataset.tabOrientation = mode === "vertical" ? "vertical" : "horizontal";
+  group.setAttribute("aria-labelledby", "right-title");
+  const strip = document.createElement("div");
+  strip.setAttribute("role", "tablist");
+  strip.setAttribute("aria-labelledby", "right-title");
+  const b = document.createElement("button");
+  b.dataset.workspacePanelTab = "b";
+  const c = document.createElement("button");
+  c.dataset.workspacePanelTab = "c";
+  strip.append(b, c);
+  group.append(strip);
+  root.append(group);
+  document.body.append(root);
   const vertical = mode === "vertical";
   vi.spyOn(strip, "getBoundingClientRect").mockReturnValue(
     new DOMRect(400, 0, vertical ? 80 : 300, vertical ? 300 : 30),

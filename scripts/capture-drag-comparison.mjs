@@ -152,16 +152,14 @@ try {
         records.push({
           variant,
           scenario,
-          result: await page
-            .locator("[data-workspace-group]")
-            .evaluateAll((groups) =>
-              groups.map((group) => ({
-                group: group.getAttribute("data-workspace-group"),
-                tabs: [...group.querySelectorAll("[data-workspace-panel-tab]")].map((tab) =>
-                  tab.getAttribute("data-workspace-panel-tab"),
-                ),
-              })),
-            ),
+          result: await page.locator("[data-workspace-group]").evaluateAll((groups) =>
+            groups.map((group) => ({
+              group: group.getAttribute("data-workspace-group"),
+              tabs: [...group.querySelectorAll("[data-workspace-panel-tab]")].map((tab) =>
+                tab.getAttribute("data-workspace-panel-tab"),
+              ),
+            })),
+          ),
         });
       } finally {
         await context.close();
