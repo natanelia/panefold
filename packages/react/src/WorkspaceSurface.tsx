@@ -848,7 +848,12 @@ function SurfaceRenderer<TSnapshot, TCommand, TResult>({
         const handle = workspace.ownerDocument.getElementById(
           groupMoveHandleId(domIdPrefix, groupId),
         );
-        (handle ?? workspace).focus();
+        const selectedPanelId = projectionRef.current.groups[groupId]?.selectedPanelId;
+        const tab =
+          selectedPanelId === undefined
+            ? undefined
+            : workspace.ownerDocument.getElementById(panelTabId(domIdPrefix, selectedPanelId));
+        (handle ?? tab ?? workspace).focus();
       });
     },
     [domIdPrefix],

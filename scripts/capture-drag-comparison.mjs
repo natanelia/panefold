@@ -44,11 +44,20 @@ try {
       await run("pnpm", ["--filter", "@panefold/demo...", "build"], directory);
     const server = spawn(
       "pnpm",
-      ["--filter", "@panefold/demo", "preview", "--host", "127.0.0.1", "--port", String(port)],
+      [
+        "--filter",
+        "@panefold/demo",
+        "preview",
+        "--host",
+        "127.0.0.1",
+        "--port",
+        String(port),
+        "--strictPort",
+      ],
       { cwd: directory, stdio: "ignore", detached: true },
     );
     servers.push(server);
-    await waitForUrl(`http://127.0.0.1:${port}`);
+    await waitForUrl(`http://127.0.0.1:${port}`, server);
     const videos = [];
     for (const scenario of [
       "Tab insertion",
@@ -168,6 +177,8 @@ try {
       assert.ok(video);
       videos.push(await video.path());
     }
+    assert.equal(server.exitCode, null, `Preview exited before ${variant} capture completed`);
+    assert.equal(server.signalCode, null, `Preview was interrupted during ${variant} capture`);
     const list = join(temporary, `${variant}.txt`);
     await writeFile(
       list,
@@ -270,8 +281,10 @@ async function record(page, variant, scenario, pose) {
       })),
   });
 }
-async function waitForUrl(url) {
+async function waitForUrl(url, server) {
   for (let attempt = 0; attempt < 120; attempt++) {
+    assert.equal(server.exitCode, null, `Preview exited before serving ${url}`);
+    assert.equal(server.signalCode, null, `Preview was interrupted before serving ${url}`);
     try {
       if ((await fetch(url)).ok) return;
     } catch {

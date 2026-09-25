@@ -21,6 +21,7 @@ import {
   WorkspaceSurface,
   solveWorkspaceProjectionLayout,
   type WorkspaceMessageCatalog,
+  type WorkspaceDropBehavior,
   type WorkspaceCommandAdapter,
   type WorkspaceFloatingResizeEdge,
   type WorkspaceCommandOrigin,
@@ -1851,6 +1852,55 @@ describe("WorkspaceSurface", () => {
       );
     });
   });
+
+  it.each(["pointer", "keyboard"] as const)(
+    "focuses a surviving tab after the last two groups merge via %s",
+    async (origin) => {
+      const runtime = new FixtureRuntime(initialProjection);
+      const view = renderWorkspace(runtime, {
+        commands: directManipulationCommands,
+        dropBehavior: { centerGroupDrop: "merge" },
+      });
+      const handle = await screen.findByRole("button", { name: "Move Left panel container" });
+      if (origin === "pointer") {
+        installPointerCapture(handle);
+        fireEvent.pointerDown(handle, {
+          button: 0,
+          pointerId: 143,
+          pointerType: "mouse",
+          clientX: 480,
+          clientY: 20,
+        });
+        fireEvent.pointerMove(handle, {
+          pointerId: 143,
+          pointerType: "mouse",
+          clientX: 750,
+          clientY: 350,
+        });
+        const overlay = await waitForElement(view.container, "[data-workspace-group-drag]");
+        expect(overlay.dataset.workspaceDropKind).toBe("merge");
+        fireEvent.pointerUp(handle, {
+          pointerId: 143,
+          pointerType: "mouse",
+          clientX: 750,
+          clientY: 350,
+        });
+      } else {
+        const user = userEvent.setup();
+        await user.click(handle);
+        expect(screen.getByRole("dialog").textContent).toContain("Merge Left into Right");
+        await user.keyboard("{Enter}");
+      }
+      await waitFor(() => {
+        expect(Object.keys(runtime.getSnapshot().projection.groups)).toEqual(["right"]);
+        expect(view.container.querySelector("[data-workspace-group-drag-handle]")).toBeNull();
+        expect(screen.getByRole("tab", { name: "Alpha" })).toBe(document.activeElement);
+      });
+      expect(runtime.transactions).toEqual([
+        expect.objectContaining({ type: "group-drop", origin }),
+      ]);
+    },
+  );
 
   it("localizes the fallback group label in the container drag ghost", async () => {
     const projection: WorkspaceProjection = {
@@ -3689,6 +3739,27 @@ function reduceProjection(
     };
   }
   if (command.type === "group-drop") {
+    if (command.request.target.kind === "merge") {
+      const source = projection.groups[command.request.sourceGroup.id];
+      const target = projection.groups[command.request.targetGroup.id];
+      const node = projection.nodes[command.request.targetNodeId];
+      if (source === undefined || target === undefined || node === undefined)
+        throw new Error("Missing two-group merge fixture");
+      return {
+        ...projection,
+        revision: nextRevision,
+        rootNodeId: node.id,
+        nodes: { [node.id]: node },
+        groups: {
+          [target.id]: {
+            ...target,
+            panelIds: [...target.panelIds, ...source.panelIds],
+            selectedPanelId: source.selectedPanelId,
+          },
+        },
+        activePanelId: source.selectedPanelId,
+      };
+    }
     if (command.request.target.kind !== "swap") {
       return { ...projection, revision: nextRevision };
     }
@@ -3838,6 +3909,7 @@ function renderWorkspace(
   runtime: FixtureRuntime,
   options: {
     readonly motion?: "off" | "reduced" | "productive";
+    readonly dropBehavior?: WorkspaceDropBehavior;
     readonly registry?: WorkspacePanelRegistry;
     readonly direction?: "ltr" | "rtl";
     readonly frameScheduler?: SurfaceFrameScheduler;
@@ -3866,6 +3938,7 @@ function renderWorkspace(
           panels={options.registry ?? panels}
           layoutBounds={{ inlineStart: 0, blockStart: 0, inlineSize: 1000, blockSize: 700 }}
           workspaceLabel="Fixture workspace"
+          {...(options.dropBehavior === undefined ? {} : { dropBehavior: options.dropBehavior })}
           {...(options.messageCatalog === undefined
             ? {}
             : { messageCatalog: options.messageCatalog })}

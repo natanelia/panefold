@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "kind": "protocol-motion-result",
   "profile": "compact-react-chromium-desktop",
-  "producedAt": "2026-09-25T18:24:35.932Z",
+  "producedAt": "2026-09-25T18:33:40.088Z",
   "status": "passed",
   "runner": "Vitest",
   "command": "pnpm exec vitest run --reporter=json --outputFile=artifacts/preview-unit.json",
@@ -12,16 +12,16 @@
     "browserVersion": "151.0.7922.34"
   },
   "summary": {
-    "tests": 546,
-    "passed": 546,
+    "tests": 548,
+    "passed": 548,
     "failed": 0,
     "files": 69,
     "protocolMotionTestFiles": 9,
     "protocolMotionTests": 86,
     "protocolMotionPassed": 86,
     "reactIntegrationTestFiles": 9,
-    "reactIntegrationTests": 145,
-    "reactIntegrationPassed": 145
+    "reactIntegrationTests": 147,
+    "reactIntegrationPassed": 147
   },
   "tests": [
     {
@@ -215,6 +215,11 @@
       "passed": 3
     },
     {
+      "file": "packages/protocol/test/protocol.test.ts",
+      "status": "passed",
+      "passed": 3
+    },
+    {
       "file": "packages/motion/test/motion-lifecycle.test.ts",
       "status": "passed",
       "passed": 13
@@ -225,14 +230,39 @@
       "passed": 7
     },
     {
-      "file": "packages/protocol/test/protocol.test.ts",
+      "file": "packages/protocol-xstate/test/catalog-machines.test.ts",
       "status": "passed",
-      "passed": 3
+      "passed": 10
+    },
+    {
+      "file": "packages/protocol-xstate/test/drag-machine.test.ts",
+      "status": "passed",
+      "passed": 5
+    },
+    {
+      "file": "packages/protocol-xstate/test/machine-corrections.test.ts",
+      "status": "passed",
+      "passed": 9
+    },
+    {
+      "file": "packages/protocol-xstate/test/protocol-coverage.test.ts",
+      "status": "passed",
+      "passed": 2
+    },
+    {
+      "file": "packages/protocol-xstate/test/protocol-machines.test.ts",
+      "status": "passed",
+      "passed": 15
+    },
+    {
+      "file": "packages/protocol-xstate/test/scoped-actor-deadline.test.ts",
+      "status": "passed",
+      "passed": 22
     },
     {
       "file": "packages/react/test/WorkspaceSurface.test.tsx",
       "status": "passed",
-      "passed": 80
+      "passed": 82
     },
     {
       "file": "packages/react/test/drag-parity.test.ts",
@@ -273,36 +303,6 @@
       "file": "packages/react/test/tab-reorder.test.ts",
       "status": "passed",
       "passed": 5
-    },
-    {
-      "file": "packages/protocol-xstate/test/catalog-machines.test.ts",
-      "status": "passed",
-      "passed": 10
-    },
-    {
-      "file": "packages/protocol-xstate/test/drag-machine.test.ts",
-      "status": "passed",
-      "passed": 5
-    },
-    {
-      "file": "packages/protocol-xstate/test/machine-corrections.test.ts",
-      "status": "passed",
-      "passed": 9
-    },
-    {
-      "file": "packages/protocol-xstate/test/protocol-coverage.test.ts",
-      "status": "passed",
-      "passed": 2
-    },
-    {
-      "file": "packages/protocol-xstate/test/protocol-machines.test.ts",
-      "status": "passed",
-      "passed": 15
-    },
-    {
-      "file": "packages/protocol-xstate/test/scoped-actor-deadline.test.ts",
-      "status": "passed",
-      "passed": 22
     },
     {
       "file": "packages/runtime/test/persistence.test.ts",
@@ -372,8 +372,8 @@
   ],
   "rawReport": {
     "path": "artifacts/preview-unit.json",
-    "sha256": "d598451f42c45c1dfc068ec62e3492d4f85876b74ea3c92677d598e8d839bd6a",
-    "runUrl": "https://github.com/natanelia/panefold/actions/runs/36172858649",
+    "sha256": "2334f4c035382fdd54b73279c4ed20750cc98dc9bfa66ae8ea4ac427132c9b3c",
+    "runUrl": "https://github.com/natanelia/panefold/actions/runs/36173877769",
     "artifact": "preview-executed-evidence"
   },
   "sourceDigests": {
@@ -440,7 +440,7 @@
     "packages/protocol/test/protocol.test.ts": "dd118363496c22c9df3110c3a3ab05e7b1bee643fe0c613c75503c2f2262fd4f",
     "packages/protocol/tsconfig.json": "3f465de909ed88bb206aa2ee7095c56a63223c3a11efa84ad39e69b1d1abd1a8",
     "packages/react/package.json": "f3398780b1ec9266b02c73f85393d7bfab6fa8d782120698f420852b3eb62209",
-    "packages/react/src/WorkspaceSurface.tsx": "fb76c0b50d958b00adcf5dbdf0648f4cb06ead1d15ec0b93c6b53c8d256a0e8c",
+    "packages/react/src/WorkspaceSurface.tsx": "25c81bb51d017329d21d30b5feee3d068a71507727209728c79dc53b611f154a",
     "packages/react/src/drop-modifiers.ts": "542583898dfa7d121b0d91f51171df8a3db47a8e749422437da903372a60c6ee",
     "packages/react/src/drop-preview.ts": "73ff8f429ae558ec4ddc573fb4250e2bb4a73c9fd1fb28b3baabf369ea6f781c",
     "packages/react/src/drop-target.ts": "46d7afa6f516ec67bcc0d1deaa7e905c2da826be516125a726a170d6a2523357",
@@ -459,7 +459,7 @@
     "packages/react/src/tab-presentation.ts": "eeeac41f560e89ed8db685a0df1d6190703ed306507e2cc3cff81f5f4e460143",
     "packages/react/src/tab-reorder.ts": "c139803bc37c5f2c6fc6a17eb836784ff8d203b7bae8acebedcbf290cdabc599",
     "packages/react/src/types.ts": "e5f3def8259ae492ac8802fe9b2c7b05b5b15a0cde5a66dd34f4ed570685c893",
-    "packages/react/test/WorkspaceSurface.test.tsx": "b40d43a09a6556a751a8cb994cad6801c1fc8f9b6cd61fa8f010068097eecdaf",
+    "packages/react/test/WorkspaceSurface.test.tsx": "fca09cfb1a462edbee5277f34bc7407848a56f1632983a5461aab97ac1b36ef4",
     "packages/react/test/drag-parity.test.ts": "1f0bca650b8647cf7473639a0afa59839bdd60327892e428f30a98642cd67443",
     "packages/react/test/drop-preview.test.ts": "bdc1de685dce3a9bc5c073cf9fb7f2325de07251a8f71d4b318f09990c22211c",
     "packages/react/test/drop-target.test.ts": "2f28dc5a482cb6cc12fdbafb4e29ca3fba2a424dd1a5e9f822e9d95f4e9fc0a6",
