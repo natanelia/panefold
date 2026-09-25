@@ -1,0 +1,351 @@
+{
+  "recordedAt": "2026-09-25T18:14:25.213Z",
+  "refs": {
+    "before": "877be5f4ee9aae5f76e0a72e2b05b3725b4eacbc",
+    "after": "39e791076790b1650d4029035396b3b7ba3971bd"
+  },
+  "browser": "151.0.7922.34",
+  "viewport": {
+    "width": 1280,
+    "height": 800
+  },
+  "gif": {
+    "fps": 12,
+    "width": 1000
+  },
+  "annotation": "Only a cursor ring and revision/chapter caption were added; workspace rendering and pointer interactions are real.",
+  "records": [
+    {
+      "variant": "before",
+      "scenario": "Tab insertion",
+      "pose": "before first tab",
+      "feedback": {
+        "kind": "edge",
+        "edge": "block-start",
+        "target": "edge:inspector-node:block-start"
+      }
+    },
+    {
+      "variant": "before",
+      "scenario": "Tab insertion",
+      "pose": "after last tab",
+      "feedback": {
+        "kind": "edge",
+        "edge": "block-start",
+        "target": "edge:inspector-node:block-start"
+      }
+    },
+    {
+      "variant": "before",
+      "scenario": "Tab insertion",
+      "result": [
+        {
+          "group": "navigation",
+          "tabs": ["route-explorer", "layers"]
+        },
+        {
+          "group": "primary",
+          "tabs": ["map-canvas"]
+        },
+        {
+          "group": "output",
+          "tabs": ["problems", "timeline"]
+        },
+        {
+          "group": "drag-group:notes:1",
+          "tabs": ["notes"]
+        },
+        {
+          "group": "inspector",
+          "tabs": ["feature-inspector", "validation"]
+        }
+      ]
+    },
+    {
+      "variant": "before",
+      "scenario": "Split targets and modifier",
+      "pose": "20% is center",
+      "feedback": {
+        "kind": "edge",
+        "edge": "inline-start",
+        "target": "edge:inspector-node:inline-start"
+      }
+    },
+    {
+      "variant": "before",
+      "scenario": "Split targets and modifier",
+      "pose": "left edge",
+      "feedback": {
+        "kind": "edge",
+        "edge": "inline-start",
+        "target": "edge:inspector-node:inline-start"
+      }
+    },
+    {
+      "variant": "before",
+      "scenario": "Split targets and modifier",
+      "pose": "top edge",
+      "feedback": {
+        "kind": "edge",
+        "edge": "block-start",
+        "target": "edge:inspector-node:block-start"
+      }
+    },
+    {
+      "variant": "before",
+      "scenario": "Split targets and modifier",
+      "pose": "right edge",
+      "feedback": {
+        "kind": "edge",
+        "edge": "inline-end",
+        "target": "edge:inspector-node:inline-end"
+      }
+    },
+    {
+      "variant": "before",
+      "scenario": "Split targets and modifier",
+      "pose": "bottom edge",
+      "feedback": {
+        "kind": "edge",
+        "edge": "block-end",
+        "target": "edge:inspector-node:block-end"
+      }
+    },
+    {
+      "variant": "before",
+      "scenario": "Split targets and modifier",
+      "pose": "stationary Alt: center",
+      "feedback": {
+        "kind": "edge",
+        "edge": "block-end",
+        "target": "edge:inspector-node:block-end"
+      }
+    },
+    {
+      "variant": "before",
+      "scenario": "Split targets and modifier",
+      "result": [
+        {
+          "group": "navigation",
+          "tabs": ["route-explorer", "layers"]
+        },
+        {
+          "group": "primary",
+          "tabs": ["map-canvas"]
+        },
+        {
+          "group": "output",
+          "tabs": ["problems", "timeline"]
+        },
+        {
+          "group": "inspector",
+          "tabs": ["feature-inspector", "validation"]
+        },
+        {
+          "group": "drag-group:notes:1",
+          "tabs": ["notes"]
+        }
+      ]
+    },
+    {
+      "variant": "before",
+      "scenario": "Whole-group center drop",
+      "pose": "center",
+      "feedback": {
+        "kind": "swap",
+        "edge": null,
+        "target": "swap:inspector-node"
+      }
+    },
+    {
+      "variant": "before",
+      "scenario": "Whole-group center drop",
+      "result": [
+        {
+          "group": "navigation",
+          "tabs": ["route-explorer", "layers"]
+        },
+        {
+          "group": "inspector",
+          "tabs": ["feature-inspector", "validation"]
+        },
+        {
+          "group": "output",
+          "tabs": ["problems", "timeline"]
+        },
+        {
+          "group": "primary",
+          "tabs": ["map-canvas", "notes"]
+        }
+      ]
+    },
+    {
+      "variant": "after",
+      "scenario": "Tab insertion",
+      "pose": "before first tab",
+      "feedback": {
+        "kind": "tab-insert",
+        "edge": null,
+        "target": "tab-insert:inspector-node:0"
+      }
+    },
+    {
+      "variant": "after",
+      "scenario": "Tab insertion",
+      "pose": "after last tab",
+      "feedback": {
+        "kind": "tab-insert",
+        "edge": null,
+        "target": "tab-insert:inspector-node:2"
+      }
+    },
+    {
+      "variant": "after",
+      "scenario": "Tab insertion",
+      "result": [
+        {
+          "group": "navigation",
+          "tabs": ["route-explorer", "layers"]
+        },
+        {
+          "group": "primary",
+          "tabs": ["map-canvas"]
+        },
+        {
+          "group": "output",
+          "tabs": ["problems", "timeline"]
+        },
+        {
+          "group": "inspector",
+          "tabs": ["notes", "feature-inspector", "validation"]
+        }
+      ]
+    },
+    {
+      "variant": "after",
+      "scenario": "Split targets and modifier",
+      "pose": "20% is center",
+      "feedback": {
+        "kind": "center",
+        "edge": null,
+        "target": "center:inspector-node"
+      }
+    },
+    {
+      "variant": "after",
+      "scenario": "Split targets and modifier",
+      "pose": "left edge",
+      "feedback": {
+        "kind": "edge",
+        "edge": "inline-start",
+        "target": "edge:inspector-node:inline-start"
+      }
+    },
+    {
+      "variant": "after",
+      "scenario": "Split targets and modifier",
+      "pose": "top edge",
+      "feedback": {
+        "kind": "edge",
+        "edge": "block-start",
+        "target": "edge:inspector-node:block-start"
+      }
+    },
+    {
+      "variant": "after",
+      "scenario": "Split targets and modifier",
+      "pose": "right edge",
+      "feedback": {
+        "kind": "edge",
+        "edge": "inline-end",
+        "target": "edge:inspector-node:inline-end"
+      }
+    },
+    {
+      "variant": "after",
+      "scenario": "Split targets and modifier",
+      "pose": "bottom edge",
+      "feedback": {
+        "kind": "edge",
+        "edge": "block-end",
+        "target": "edge:inspector-node:block-end"
+      }
+    },
+    {
+      "variant": "after",
+      "scenario": "Split targets and modifier",
+      "pose": "stationary Alt: center",
+      "feedback": {
+        "kind": "center",
+        "edge": null,
+        "target": "center:inspector-node"
+      }
+    },
+    {
+      "variant": "after",
+      "scenario": "Split targets and modifier",
+      "result": [
+        {
+          "group": "navigation",
+          "tabs": ["route-explorer", "layers"]
+        },
+        {
+          "group": "primary",
+          "tabs": ["map-canvas"]
+        },
+        {
+          "group": "output",
+          "tabs": ["problems", "timeline"]
+        },
+        {
+          "group": "inspector",
+          "tabs": ["feature-inspector", "validation"]
+        },
+        {
+          "group": "drag-group:notes:1",
+          "tabs": ["notes"]
+        }
+      ]
+    },
+    {
+      "variant": "after",
+      "scenario": "Whole-group center drop",
+      "pose": "center",
+      "feedback": {
+        "kind": "merge",
+        "edge": null,
+        "target": "merge:inspector-node"
+      }
+    },
+    {
+      "variant": "after",
+      "scenario": "Whole-group center drop",
+      "result": [
+        {
+          "group": "navigation",
+          "tabs": ["route-explorer", "layers"]
+        },
+        {
+          "group": "output",
+          "tabs": ["problems", "timeline"]
+        },
+        {
+          "group": "inspector",
+          "tabs": ["feature-inspector", "validation", "map-canvas", "notes"]
+        }
+      ]
+    }
+  ],
+  "files": [
+    {
+      "filename": "vscode-drag-before.gif",
+      "bytes": 10787955,
+      "sha256": "559896ee97f91408781e0935154bd2cd01a0ca2fd88eabf60f29c40a682ce111"
+    },
+    {
+      "filename": "vscode-drag-after.gif",
+      "bytes": 9793236,
+      "sha256": "2c086ba40b74dc01cb8eba01a935ffd1dc41af34bc856ccf1b1b75426b815a58"
+    }
+  ]
+}

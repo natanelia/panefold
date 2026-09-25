@@ -56,14 +56,21 @@ afterEach(() => {
 function fixture(mode: "ltr" | "rtl" | "vertical", rejectFirst = false) {
   const root = document.createElement("div");
   root.className = "pf-workspace";
-  root.innerHTML =
-    '<section data-workspace-group="right" aria-labelledby="right-title" data-tab-orientation="' +
-    (mode === "vertical" ? "vertical" : "horizontal") +
-    '"><div role="tablist" aria-labelledby="right-title"><button data-workspace-panel-tab="b"></button><button data-workspace-panel-tab="c"></button></div></section>';
-  document.body.append(root);
-  const strip = required(root.querySelector<HTMLElement>('[role="tablist"]'));
-  const b = required(root.querySelector<HTMLElement>('[data-workspace-panel-tab="b"]'));
-  const c = required(root.querySelector<HTMLElement>('[data-workspace-panel-tab="c"]'));
+  const group = document.createElement("section");
+group.dataset.workspaceGroup = "right";
+group.dataset.tabOrientation = mode === "vertical" ? "vertical" : "horizontal";
+group.setAttribute("aria-labelledby", "right-title");
+const strip = document.createElement("div");
+strip.setAttribute("role", "tablist");
+strip.setAttribute("aria-labelledby", "right-title");
+const b = document.createElement("button");
+b.dataset.workspacePanelTab = "b";
+const c = document.createElement("button");
+c.dataset.workspacePanelTab = "c";
+strip.append(b, c);
+group.append(strip);
+root.append(group);
+document.body.append(root);
   const vertical = mode === "vertical";
   vi.spyOn(strip, "getBoundingClientRect").mockReturnValue(
     new DOMRect(400, 0, vertical ? 80 : 300, vertical ? 300 : 30),
