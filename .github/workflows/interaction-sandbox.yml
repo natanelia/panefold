@@ -1,0 +1,47 @@
+name: Prepare interaction validation workspace
+
+on:
+  push:
+    branches: [fix/vscode-drag-interaction-parity]
+    paths: [.github/workflows/interaction-sandbox.yml]
+
+permissions:
+  contents: read
+
+jobs:
+  prepare:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: 877be5f4ee9aae5f76e0a72e2b05b3725b4eacbc
+          fetch-depth: 0
+          persist-credentials: false
+          path: source
+      - uses: pnpm/action-setup@v6
+        with:
+          version: 11.16.0
+          package_json_file: source/package.json
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+      - name: Preserve existing preview implementation
+        working-directory: source
+        run: |
+          git fetch origin bd2a43d80a8fd036414bf42d511295d8d3906ca0
+          git cherry-pick --no-commit bd2a43d80a8fd036414bf42d511295d8d3906ca0
+          pnpm install --frozen-lockfile
+      - name: Package offline validation tools
+        run: |
+          mkdir tools
+          cp "$(command -v node)" tools/node
+          npm install --prefix tools --ignore-scripts pnpm@11.16.0
+          tar -czf interaction-workspace.tar.gz source tools
+      - uses: actions/upload-artifact@v7
+        with:
+          name: interaction-workspace
+          path: interaction-workspace.tar.gz
+          compression-level: 0
+          retention-days: 2
+          if-no-files-found: error
