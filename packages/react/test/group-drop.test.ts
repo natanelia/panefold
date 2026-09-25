@@ -67,6 +67,27 @@ const layout: ResolvedLayout = {
 };
 
 describe("group drop geometry", () => {
+  it("offers a planned center merge only when explicitly configured", () => {
+    const candidates = createGroupDropCandidates(
+      projection,
+      layout,
+      "left",
+      "ltr",
+      0.3,
+      0.5,
+      6,
+      undefined,
+      (request, context) => ({ command: { request }, previewRect: context.targetRect }),
+      {},
+      { centerGroupDrop: "merge" },
+    );
+    const center = hitTestGroupDropCandidates(candidates, { inline: 600, block: 150 });
+    expect(center?.request.target.kind).toBe("merge");
+    expect(center?.id).toBe("merge:right-node");
+    expect(center?.previewRect).toEqual(rightRect);
+    expect(candidates.some((candidate) => candidate.request.target.kind === "swap")).toBe(false);
+  });
+
   it("builds only other-container swap and edge targets with exact retained plans", () => {
     const commands = new Map<string, object>();
     const candidates = createGroupDropCandidates(
@@ -80,11 +101,14 @@ describe("group drop geometry", () => {
       undefined,
       (request, context) => {
         const command = Object.freeze({ request });
-        commands.set(request.target.kind === "swap" ? "swap" : request.target.edge, command);
+        commands.set(
+          request.target.kind !== "edge" ? request.target.kind : request.target.edge,
+          command,
+        );
         return {
           command,
           previewRect:
-            request.target.kind === "swap" ? context.targetRect : edgePreview(request, context),
+            request.target.kind !== "edge" ? context.targetRect : edgePreview(request, context),
         };
       },
     );
@@ -222,3 +246,26 @@ function edgePreview(request: WorkspaceGroupDropRequest, context: WorkspaceGroup
   if (request.target.edge === "block-start") return { ...rect, blockSize };
   return { ...rect, blockStart: rect.blockStart + rect.blockSize - blockSize, blockSize };
 }
+
+it("uses wider side targets for groups but keeps the existing center swap semantics", () => {
+  const candidates = createGroupDropCandidates(
+    projection,
+    layout,
+    "left",
+    "ltr",
+    undefined,
+    undefined,
+    undefined,
+    undefined,
+    (_request, context) => ({ command: "group-drop", previewRect: context.targetRect }),
+  );
+  expect(hitTestGroupDropCandidates(candidates, { inline: 490, block: 150 })?.id).toBe(
+    "edge:right-node:inline-start",
+  );
+  expect(hitTestGroupDropCandidates(candidates, { inline: 600, block: 45 })?.id).toBe(
+    "swap:right-node",
+  );
+  expect(hitTestGroupDropCandidates(candidates, { inline: 600, block: 10 })?.id).toBe(
+    "edge:right-node:block-start",
+  );
+});

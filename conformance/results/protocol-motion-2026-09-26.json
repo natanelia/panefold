@@ -1,0 +1,491 @@
+{
+  "schemaVersion": 1,
+  "kind": "protocol-motion-result",
+  "profile": "compact-react-chromium-desktop",
+  "producedAt": "2026-09-25T18:33:40.088Z",
+  "status": "passed",
+  "runner": "Vitest",
+  "command": "pnpm exec vitest run --reporter=json --outputFile=artifacts/preview-unit.json",
+  "environment": {
+    "operatingSystem": "Linux 6.17.0-1022-azure x64",
+    "node": "v24.21.0",
+    "browserVersion": "151.0.7922.34"
+  },
+  "summary": {
+    "tests": 548,
+    "passed": 548,
+    "failed": 0,
+    "files": 69,
+    "protocolMotionTestFiles": 9,
+    "protocolMotionTests": 86,
+    "protocolMotionPassed": 86,
+    "reactIntegrationTestFiles": 9,
+    "reactIntegrationTests": 147,
+    "reactIntegrationPassed": 147
+  },
+  "tests": [
+    {
+      "file": "packages/adapter-contract/test/adapters.test.ts",
+      "status": "passed",
+      "passed": 10
+    },
+    {
+      "file": "packages/adapter-contract/test/native-adapters.test.ts",
+      "status": "passed",
+      "passed": 4
+    },
+    {
+      "file": "packages/angular/test/angular.test.ts",
+      "status": "passed",
+      "passed": 1
+    },
+    {
+      "file": "packages/conformance/test/certification.test.ts",
+      "status": "passed",
+      "passed": 5
+    },
+    {
+      "file": "packages/conformance/test/commands.test.ts",
+      "status": "passed",
+      "passed": 3
+    },
+    {
+      "file": "packages/conformance/test/design-audit.test.ts",
+      "status": "passed",
+      "passed": 4
+    },
+    {
+      "file": "packages/conformance/test/docs-claims.test.ts",
+      "status": "passed",
+      "passed": 3
+    },
+    {
+      "file": "packages/conformance/test/evidence.test.ts",
+      "status": "passed",
+      "passed": 5
+    },
+    {
+      "file": "packages/conformance/test/hard-gates.test.ts",
+      "status": "passed",
+      "passed": 4
+    },
+    {
+      "file": "packages/conformance/test/manifest.test.ts",
+      "status": "passed",
+      "passed": 4
+    },
+    {
+      "file": "packages/conformance/test/protocol-coverage-result.test.ts",
+      "status": "passed",
+      "passed": 4
+    },
+    {
+      "file": "packages/conformance/test/report.test.ts",
+      "status": "passed",
+      "passed": 5
+    },
+    {
+      "file": "packages/conformance/test/repository-evidence.test.ts",
+      "status": "passed",
+      "passed": 4
+    },
+    {
+      "file": "packages/conformance/test/support.test.ts",
+      "status": "passed",
+      "passed": 3
+    },
+    {
+      "file": "packages/conformance/test/traceability.test.ts",
+      "status": "passed",
+      "passed": 5
+    },
+    {
+      "file": "packages/ecosystem/test/ecosystem.test.ts",
+      "status": "passed",
+      "passed": 10
+    },
+    {
+      "file": "packages/ecosystem/test/isolated-frame.test.ts",
+      "status": "passed",
+      "passed": 2
+    },
+    {
+      "file": "packages/geometry/test/allocate-axis.test.ts",
+      "status": "passed",
+      "passed": 6
+    },
+    {
+      "file": "packages/geometry/test/hit-test.test.ts",
+      "status": "passed",
+      "passed": 4
+    },
+    {
+      "file": "packages/geometry/test/invalidation.test.ts",
+      "status": "passed",
+      "passed": 4
+    },
+    {
+      "file": "packages/geometry/test/solve-layout.test.ts",
+      "status": "passed",
+      "passed": 12
+    },
+    {
+      "file": "packages/kernel/test/effects.test.ts",
+      "status": "passed",
+      "passed": 5
+    },
+    {
+      "file": "packages/kernel/test/exploration.test.ts",
+      "status": "passed",
+      "passed": 1
+    },
+    {
+      "file": "packages/kernel/test/extended-commands.test.ts",
+      "status": "passed",
+      "passed": 10
+    },
+    {
+      "file": "packages/kernel/test/invariants.test.ts",
+      "status": "passed",
+      "passed": 9
+    },
+    {
+      "file": "packages/kernel/test/kernel.test.ts",
+      "status": "passed",
+      "passed": 12
+    },
+    {
+      "file": "packages/kernel/test/patches.test.ts",
+      "status": "passed",
+      "passed": 4
+    },
+    {
+      "file": "packages/kernel/test/plan-group-drop.test.ts",
+      "status": "passed",
+      "passed": 4
+    },
+    {
+      "file": "packages/kernel/test/plan-panel-drop.test.ts",
+      "status": "passed",
+      "passed": 7
+    },
+    {
+      "file": "packages/kernel/test/properties.test.ts",
+      "status": "passed",
+      "passed": 3
+    },
+    {
+      "file": "packages/kernel-optimized/test/benchmark.test.ts",
+      "status": "passed",
+      "passed": 1
+    },
+    {
+      "file": "packages/kernel-optimized/test/differential.test.ts",
+      "status": "passed",
+      "passed": 7
+    },
+    {
+      "file": "packages/kernel-optimized/test/independent-reducer.test.ts",
+      "status": "passed",
+      "passed": 8
+    },
+    {
+      "file": "packages/kernel-optimized/test/persistent-bucket-map.test.ts",
+      "status": "passed",
+      "passed": 4
+    },
+    {
+      "file": "packages/kernel-optimized/test/projection.test.ts",
+      "status": "passed",
+      "passed": 5
+    },
+    {
+      "file": "packages/model/test/effects.test.ts",
+      "status": "passed",
+      "passed": 3
+    },
+    {
+      "file": "packages/model/test/model.test.ts",
+      "status": "passed",
+      "passed": 7
+    },
+    {
+      "file": "packages/model/test/panel-registry.test.ts",
+      "status": "passed",
+      "passed": 3
+    },
+    {
+      "file": "packages/protocol/test/protocol.test.ts",
+      "status": "passed",
+      "passed": 3
+    },
+    {
+      "file": "packages/motion/test/motion-lifecycle.test.ts",
+      "status": "passed",
+      "passed": 13
+    },
+    {
+      "file": "packages/motion/test/motion.test.ts",
+      "status": "passed",
+      "passed": 7
+    },
+    {
+      "file": "packages/protocol-xstate/test/catalog-machines.test.ts",
+      "status": "passed",
+      "passed": 10
+    },
+    {
+      "file": "packages/protocol-xstate/test/drag-machine.test.ts",
+      "status": "passed",
+      "passed": 5
+    },
+    {
+      "file": "packages/protocol-xstate/test/machine-corrections.test.ts",
+      "status": "passed",
+      "passed": 9
+    },
+    {
+      "file": "packages/protocol-xstate/test/protocol-coverage.test.ts",
+      "status": "passed",
+      "passed": 2
+    },
+    {
+      "file": "packages/protocol-xstate/test/protocol-machines.test.ts",
+      "status": "passed",
+      "passed": 15
+    },
+    {
+      "file": "packages/protocol-xstate/test/scoped-actor-deadline.test.ts",
+      "status": "passed",
+      "passed": 22
+    },
+    {
+      "file": "packages/react/test/WorkspaceSurface.test.tsx",
+      "status": "passed",
+      "passed": 82
+    },
+    {
+      "file": "packages/react/test/drag-parity.test.ts",
+      "status": "passed",
+      "passed": 5
+    },
+    {
+      "file": "packages/react/test/drop-preview.test.ts",
+      "status": "passed",
+      "passed": 7
+    },
+    {
+      "file": "packages/react/test/drop-target.test.ts",
+      "status": "passed",
+      "passed": 23
+    },
+    {
+      "file": "packages/react/test/group-drop.test.ts",
+      "status": "passed",
+      "passed": 6
+    },
+    {
+      "file": "packages/react/test/node-motion.test.ts",
+      "status": "passed",
+      "passed": 4
+    },
+    {
+      "file": "packages/react/test/panel-drop.test.ts",
+      "status": "passed",
+      "passed": 10
+    },
+    {
+      "file": "packages/react/test/tab-insertion.test.ts",
+      "status": "passed",
+      "passed": 5
+    },
+    {
+      "file": "packages/react/test/tab-reorder.test.ts",
+      "status": "passed",
+      "passed": 5
+    },
+    {
+      "file": "packages/runtime/test/persistence.test.ts",
+      "status": "passed",
+      "passed": 14
+    },
+    {
+      "file": "packages/runtime/test/policy.test.ts",
+      "status": "passed",
+      "passed": 2
+    },
+    {
+      "file": "packages/runtime/test/post-commit-effects.test.ts",
+      "status": "passed",
+      "passed": 14
+    },
+    {
+      "file": "packages/runtime/test/runtime.test.ts",
+      "status": "passed",
+      "passed": 17
+    },
+    {
+      "file": "packages/runtime-effect/test/persistence.test.ts",
+      "status": "passed",
+      "passed": 5
+    },
+    {
+      "file": "packages/surfaces/test/browser-adapter.test.ts",
+      "status": "passed",
+      "passed": 14
+    },
+    {
+      "file": "packages/surfaces/test/surfaces.test.ts",
+      "status": "passed",
+      "passed": 40
+    },
+    {
+      "file": "packages/svelte/test/svelte.test.ts",
+      "status": "passed",
+      "passed": 1
+    },
+    {
+      "file": "packages/testkit/test/browser-fixtures.test.ts",
+      "status": "passed",
+      "passed": 3
+    },
+    {
+      "file": "packages/testkit/test/testkit.test.ts",
+      "status": "passed",
+      "passed": 6
+    },
+    {
+      "file": "packages/vue/test/vue.test.ts",
+      "status": "passed",
+      "passed": 1
+    },
+    {
+      "file": "packages/web-components/test/ssr-import.test.ts",
+      "status": "passed",
+      "passed": 1
+    },
+    {
+      "file": "packages/web-components/test/web-components.test.ts",
+      "status": "passed",
+      "passed": 2
+    }
+  ],
+  "rawReport": {
+    "path": "artifacts/preview-unit.json",
+    "sha256": "2334f4c035382fdd54b73279c4ed20750cc98dc9bfa66ae8ea4ac427132c9b3c",
+    "runUrl": "https://github.com/natanelia/panefold/actions/runs/36173877769",
+    "artifact": "preview-executed-evidence"
+  },
+  "sourceDigests": {
+    "e2e/drag-parity.spec.ts": "a7c7da7513e3b56de9b832cce5fa2fc6236f55d74ba9ea3aa9be1600f6620bce",
+    "package.json": "acd970060c8df0d628cada8c1762111b9c3587031dbdc0e5815fb1e6159147ee",
+    "packages/geometry/package.json": "c3455159603a71c37cb4a70e89083be28c1c8144cca8939bea4f544bd886ab38",
+    "packages/geometry/src/allocate-axis.ts": "436204e1521bf84052111a7ec254ef34600ee72b8396ef242d1dae6786b5e57b",
+    "packages/geometry/src/hit-test.ts": "2da9ca42d97c135f37d599bbaebed8f758343fa4e52fd647c05a4b179340c121",
+    "packages/geometry/src/index.ts": "d033849f77196b6f518b4deadee9062b72a72e3362732e11fc512e7a78958d13",
+    "packages/geometry/src/invalidation.ts": "dfe873cb6df480d8ce023688e199463489877527b5b1c5155c4a7d1e234d4f1b",
+    "packages/geometry/src/solve-layout.ts": "7e8ef616e83a91be29c53c9da920b54aed17c58e0293c79abb86998224bba3ae",
+    "packages/geometry/src/types.ts": "f8d663491053871b919c0b1782604fa74a740822e11eb2fba4470d505b6345fc",
+    "packages/geometry/tsconfig.json": "49477f7be8bc9f2976c250a0297c34809aed00c7d9e57115eaa4ad1722897e9c",
+    "packages/model/package.json": "15e5054eb50fc8a0c54fcd593a9dfb71a4c10c2091e0af0477598a2b98f88f90",
+    "packages/model/src/commands.ts": "e4d1dd8edd3fde607ae8f5640a2e9c9b7a4d571724b4847ab945d599d3fa32b7",
+    "packages/model/src/effects.ts": "1bed7b3eab6289f407357379f2bfa0cc1611dd3f2ef4aec1eb5835bdf811ff8c",
+    "packages/model/src/entities.ts": "2f8461c6ced824a4d99258dfc3f35e983161cef641779b0d4bcaa72e04d0fd2b",
+    "packages/model/src/factories.ts": "efb2d00d14f7f93fc249daae477a22e1b3dea8541d9cffc1cb2e1e04651c6b98",
+    "packages/model/src/ids.ts": "cbf1947c1c8ed51447a6e3b5d77b04734e0b6b59e588099f442b99c3bde953c1",
+    "packages/model/src/index.ts": "894f6d22e3e7612e4ae3ce186e244452247d6111196270901edfbd3544684f0a",
+    "packages/model/src/json.ts": "71b1008440a2511a701e7ff4484e0373fd0f0dfac78a39eb099da31f0ee389f5",
+    "packages/model/src/panel-registry.ts": "0a84a2ea260b55bf2c8efaa8462aae4e698045865f533d6e937a93ab8af9af5c",
+    "packages/model/src/results.ts": "f66a7e790365153a33f72df22e7961890d74f0e1723cf9ed2f13fcdd58c50fec",
+    "packages/model/tsconfig.json": "49477f7be8bc9f2976c250a0297c34809aed00c7d9e57115eaa4ad1722897e9c",
+    "packages/motion/package.json": "39e7fa3a01054566b9eba9eebfc304aca294f877c9f39fe396d2fc4bfd321caf",
+    "packages/motion/src/coordinator.ts": "50eff7dd6a1b8f6433ac3f5bfc5f8d74b99a501e43e712ccb3e1a82520574c6d",
+    "packages/motion/src/flip.ts": "ecb248cc9808cda1d88af5946ae372b4d963dca3bdabc323ac04c84704e663f6",
+    "packages/motion/src/frame-scheduler.ts": "771f904842a92844ade055cf7a83a889f315cf0b58d2403723e3ab9e8ab5d8ee",
+    "packages/motion/src/index.ts": "9b5437973670c5babd001d2c05b9c7d487e67a7a8989e4e8af14db8a7a17fa70",
+    "packages/motion/src/load-planner.ts": "0339ecaef97b11c88aa422fa4d4d85c2ea411fef6846d04a733a43a04ccf9a0f",
+    "packages/motion/src/motion-dom-driver.ts": "57092ac380b7d666ed807c31d2f691fea906d63d9cdff9095f5c2bc32260323b",
+    "packages/motion/src/tokens.ts": "f4fb443a3a1969289159149de58a6e15ae82a5cdbd43e78eb78e7bd924b7a1aa",
+    "packages/motion/src/types.ts": "87b748ee5e24a2c1954fd05e7e831235ea5ff8eb470cb96309bbd670d064975b",
+    "packages/motion/src/view-transition.ts": "c6000da305647194d0e9d61e5f3b5eb891fa2c52d164eeca67090084c7069d1f",
+    "packages/motion/test/motion-lifecycle.test.ts": "1cedfcdecfc3ba2ae9bd55b650ba2b69992efc0626c5a7a7d1addebe61b74964",
+    "packages/motion/test/motion.test.ts": "02b6068c1abaa54b4433da29c0a7bb430254b24082385541e5617abfccc22ed8",
+    "packages/protocol-xstate/package.json": "c902a258bde7c090e05b58c062a3b049bdcc00c55b010496ca3a2e5e0bec9707",
+    "packages/protocol-xstate/src/close-machine.ts": "393e955339e608d431675bbe17ef8c099f64f131e38423b3845c751b4c37e3cc",
+    "packages/protocol-xstate/src/drag-machine.ts": "688eb01a0d5a1710cc8b1a14a162d7e9d4b984ce8a978de809686dcf509fbb28",
+    "packages/protocol-xstate/src/election-machine.ts": "09b8bc14bc3cfb6b146392b3a515ad2cc0d37df021b966b33a536a1b5e9ec166",
+    "packages/protocol-xstate/src/floating-machine.ts": "58684925d7d1b18b0a2115bd9610a07bc730ef679d50d566fd94a92d70cb3801",
+    "packages/protocol-xstate/src/index.ts": "41eddd0526f68838f29a1a19952306c8dd75cc249fd2a83f9e605635623bc00b",
+    "packages/protocol-xstate/src/keyboard-move-machine.ts": "f0dcfa7b07a8e7a8a2903b0e562305b0df0a664d2019609c404916f70eb7c492",
+    "packages/protocol-xstate/src/persistence-machine.ts": "3d32357ea4617591a2dd8932a56757ebcb5a53d43582c63275e8980836feba20",
+    "packages/protocol-xstate/src/plugin-load-machine.ts": "e1c67aa19aec5b73c9260db63c08c774f6eaa7fd2b913f95d5f9a6e2942b181e",
+    "packages/protocol-xstate/src/resize-machine.ts": "fcebf707e4caf240b158e8b21a161f78395d0e0553fccab8d3fba3eb1db970f6",
+    "packages/protocol-xstate/src/scoped-actor.ts": "30183e00fbd9d128b75d51f52726d4c3419509ce00efb36c75cebeaf309379b8",
+    "packages/protocol-xstate/src/surface-recovery-machine.ts": "b04ec8dae0d13b7a772f28d6685132e7460d50d15723cba4fc341fd62521bfd5",
+    "packages/protocol-xstate/src/surface-transfer-machine.ts": "50fce76131f5f1a90ba9528a6a9155910f6c1a19dac136ad8c7cbb86ddc40252",
+    "packages/protocol-xstate/src/suspend-machine.ts": "956c193be3bb7a71d0254f4f21e9f2b407f15e8b19fcbf66819dbf91849a1441",
+    "packages/protocol-xstate/src/view-transition-machine.ts": "bd9bbdcfa73ba3670043215d386eabd336c406947fa917d88595b74d124ee8c8",
+    "packages/protocol-xstate/test/catalog-machines.test.ts": "3d33e4ca3ea49b32e0a98e7749184d73ad5d93fd20b4ceff749c16156407142d",
+    "packages/protocol-xstate/test/drag-machine.test.ts": "8f7fb758af84a1970141cc7b82d593551ea94164b9153e9d9a6a50ff61a691e5",
+    "packages/protocol-xstate/test/machine-corrections.test.ts": "1383598f4626ce09e6f7db9704a524562b45d334c1d08fb99d7b8d5ff463b4ab",
+    "packages/protocol-xstate/test/protocol-coverage.test.ts": "fb832858be3156e183c95acd05c853c5c1738b5320cb50b14445ac58ccc1b637",
+    "packages/protocol-xstate/test/protocol-machines.test.ts": "b473558c7f1a64c17e58e0d1ebb1503f05734f4ba7e194d53b9b8b780c7d23ce",
+    "packages/protocol-xstate/test/scoped-actor-deadline.test.ts": "20b91125192c90210413398d65a1818dfaaf54569b22349d0f6dbababccb17e7",
+    "packages/protocol/package.json": "dfff661ef7f9253177f53ab25a1fe425a38dad74d6e096875ea9fac8e656a068",
+    "packages/protocol/src/catalog.ts": "8f9a79fa206045cf16903e6727892517796a16dee4e13998dd828c1d36b1121a",
+    "packages/protocol/src/coverage-contract.ts": "539dc24685d0eea7df47be5e6cfd9333b1a1fe4dfb73153d5ee53e4846fc7f61",
+    "packages/protocol/src/index.ts": "8181f9009c395ff6c9f0f3fde9f34577558e8978f66c08e384174247d8a3ffab",
+    "packages/protocol/src/trace.ts": "67e029b806bde573978ca8f37b7d088fbeff4ccdfc40a9632b950c3a4932a308",
+    "packages/protocol/src/types.ts": "7b8fbdfa15ba81da62581764bb2f28434d10ecb9beefdc49513d650e1e05eeb0",
+    "packages/protocol/test/protocol.test.ts": "dd118363496c22c9df3110c3a3ab05e7b1bee643fe0c613c75503c2f2262fd4f",
+    "packages/protocol/tsconfig.json": "3f465de909ed88bb206aa2ee7095c56a63223c3a11efa84ad39e69b1d1abd1a8",
+    "packages/react/package.json": "f3398780b1ec9266b02c73f85393d7bfab6fa8d782120698f420852b3eb62209",
+    "packages/react/src/WorkspaceSurface.tsx": "25c81bb51d017329d21d30b5feee3d068a71507727209728c79dc53b611f154a",
+    "packages/react/src/drop-modifiers.ts": "542583898dfa7d121b0d91f51171df8a3db47a8e749422437da903372a60c6ee",
+    "packages/react/src/drop-preview.ts": "73ff8f429ae558ec4ddc573fb4250e2bb4a73c9fd1fb28b3baabf369ea6f781c",
+    "packages/react/src/drop-target.ts": "46d7afa6f516ec67bcc0d1deaa7e905c2da826be516125a726a170d6a2523357",
+    "packages/react/src/floating-surface.tsx": "ce26f0641e9fea4d2349255feae86f0d9b3158a6cb8812d09d96b8c55481835c",
+    "packages/react/src/geometry.ts": "2b43bf5f4968b75708abcaf539b18e130a36852fca0fbe84b2d42f8837b25f57",
+    "packages/react/src/group-drag.tsx": "bb30a15666da3c6fbcfa53b443b023393ea85bec33ee3da750e9f67384694f26",
+    "packages/react/src/group-drop.ts": "85a436f15d973eacf1a7d556b467a75e56ed484fb1add90e95d2b3e1c4c137dd",
+    "packages/react/src/index.ts": "6cd934f63b725c64260cc060f07463e02c963656ac86a2f23128a86acd15d449",
+    "packages/react/src/messages.ts": "7f8597f1501a1fab6b0cdc06398ed8bc3cf28e6e2faeca3be7de6707f4bfadfd",
+    "packages/react/src/node-motion.ts": "5f7efe09d09573ea1c2baa44744627d34fabe60cc6978f287da83e6b02ed52bb",
+    "packages/react/src/panel-drag.tsx": "e19befa4995182d66a76570990bcff60e2ab4ba5fb76f0fe8a63e020bca493cc",
+    "packages/react/src/panel-drop.ts": "843ce1f6eaaf926bef54f7f9ae246072dbdd50e2f6ffa9976c93b6f7c1afd3e0",
+    "packages/react/src/runtime-context.tsx": "1ed738fc2536846acb90e20afae73c7ee8b02fc7b1eef22cf1d8e336e1f8beaf",
+    "packages/react/src/styles.css": "3b705caba74cedd0c542102947c9a1e76b7dce53c89a94814a004ab2b8a415b9",
+    "packages/react/src/tab-insertion.ts": "e611ecfe7cb4b0b9fb7e748a747f2584e35dbaa72111a907008f6dc6b11f1670",
+    "packages/react/src/tab-presentation.ts": "eeeac41f560e89ed8db685a0df1d6190703ed306507e2cc3cff81f5f4e460143",
+    "packages/react/src/tab-reorder.ts": "c139803bc37c5f2c6fc6a17eb836784ff8d203b7bae8acebedcbf290cdabc599",
+    "packages/react/src/types.ts": "e5f3def8259ae492ac8802fe9b2c7b05b5b15a0cde5a66dd34f4ed570685c893",
+    "packages/react/test/WorkspaceSurface.test.tsx": "fca09cfb1a462edbee5277f34bc7407848a56f1632983a5461aab97ac1b36ef4",
+    "packages/react/test/drag-parity.test.ts": "1f0bca650b8647cf7473639a0afa59839bdd60327892e428f30a98642cd67443",
+    "packages/react/test/drop-preview.test.ts": "bdc1de685dce3a9bc5c073cf9fb7f2325de07251a8f71d4b318f09990c22211c",
+    "packages/react/test/drop-target.test.ts": "2f28dc5a482cb6cc12fdbafb4e29ca3fba2a424dd1a5e9f822e9d95f4e9fc0a6",
+    "packages/react/test/group-drop.test.ts": "c99eadd199fe4c10f3b572d03018f2d36f363c110c33199b2785ee80fa5c4b31",
+    "packages/react/test/node-motion.test.ts": "7c826c0b7f309830af7fd78b0db89cae76c7d06ebeb95e18b1e0bebbd4f3e42d",
+    "packages/react/test/panel-drop.test.ts": "33b5839fb82ad5ab3e79c61badaec03589b8024377e85e549e4af80797a4024c",
+    "packages/react/test/tab-insertion.test.ts": "5c65997257abdca9b2605b13ed733bc9670991b962cd3096674d503f2ed77960",
+    "packages/react/test/tab-reorder.test.ts": "da6e97901c25a0e5b32480ffd0450e058bb1f6070eef5df5d3e062067282dae2",
+    "pnpm-lock.yaml": "e659e90970ee34935228595f2297da307495a7a7b01202ecfa67deaf1ac53209",
+    "pnpm-workspace.yaml": "d51950e32647c121ad667b578a448b703ea5f74637fd91524b7012dd53167169",
+    "scripts/protocol-coverage-lib.d.mts": "ad9778fdda16883ddc6d8c8f366e119453673c61db21abc5a058e648f39e33ca",
+    "scripts/protocol-coverage-lib.mjs": "a6172fbdc67ad48298c7866f47ff25895d255dcbb47976f65e7098825a758f8e",
+    "scripts/record-preview-evidence.mjs": "4dadc918ccf8699fa13f9cea14cd442de6f24aa544f147a18346168b60d2edbf",
+    "scripts/run-protocol-coverage.mjs": "51345937f17b41822986377ed74a6b6f52a88dcc1ac1482fc1580af9a8a0eb9a",
+    "scripts/verify-protocol-coverage.d.mts": "353a5ec6ec45b69ccdac52b7f1d4cc5d308e9360fa7627241c178b52684643cf",
+    "scripts/verify-protocol-coverage.mjs": "e6659c6d19bb29abd6ba2b9942639a9b9b3e83a2535ccf80e2d7a296b6805fc9",
+    "tsconfig.base.json": "6a5180d481cd767365ec8da2257e5573e498c5802ce56bda99e0ac218baca818",
+    "tsconfig.json": "b80805434d59ff95a362cfbff728ceab0e6313f80ea3c23853cb564c1dfc9a65",
+    "vitest.config.ts": "6f743b2639e8e091bdc454a4aaa6336a538b889e70af8814ee7d1f27c7a8769e"
+  },
+  "limitations": [
+    "Deterministic clocks, fake motion drivers, and jsdom do not establish browser or physical-system behavior.",
+    "This run includes the full unit suite, not only the protocol and motion subset.",
+    "One automated Linux GitHub Actions run, not a stable browser or physical-device matrix.",
+    "Emulated touch, automated axe, forced colors, and keyboard tests do not establish manual accessibility certification.",
+    "The performance fixture measures splitter frames, not panel-drag latency or physical 60 Hz/120 Hz guarantees.",
+    "Raw reports are also retained in the workflow artifact; artifact retention is 30 days."
+  ]
+}

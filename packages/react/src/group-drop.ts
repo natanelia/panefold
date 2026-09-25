@@ -7,6 +7,7 @@ import {
 } from "@panefold/geometry";
 
 import {
+  dropSurfaceOcclusions,
   emptyGroupAcquisitionRect,
   groupLabel,
   logicalEdgeLabel,
@@ -16,18 +17,28 @@ import {
   surfaceLayoutBoundsForNode,
 } from "./panel-drop";
 import type { WorkspacePhysicalEdge } from "./messages";
+import {
+  createEditorDropArea,
+  hitTestEditorDropArea,
+  type EditorDropArea,
+  type MeasuredDropGroup,
+} from "./drop-target";
 import type {
   WorkspaceDirection,
+  WorkspaceDropBehavior,
   WorkspaceGroupDropPlan,
   WorkspaceGroupDropPlanContext,
   WorkspaceGroupDropRequest,
   WorkspaceGroupView,
-  WorkspaceLogicalEdge,
   WorkspacePanelView,
   WorkspaceProjection,
 } from "./types";
 
 export interface GroupDropLabels {
+  readonly mergePanelContainers?: (values: {
+    readonly source: string;
+    readonly target: string;
+  }) => string;
   readonly swapPanelContainers: (values: {
     readonly source: string;
     readonly target: string;
@@ -42,7 +53,7 @@ export interface GroupDropLabels {
 export interface GroupDropCandidate<TCommand = unknown> {
   readonly id: string;
   readonly label: string;
-  /** Compact acquisition zone used only to choose a destination. */
+  /** Legacy rectangular zone; dropArea is authoritative for editor-style hit tests. */
   readonly hitRect: LogicalRect;
   /** Application-planned exact resulting source-container geometry. */
   readonly previewRect: LogicalRect;
@@ -51,6 +62,8 @@ export interface GroupDropCandidate<TCommand = unknown> {
   readonly acquisitionPriority: number;
   /** Main is zero; same-document floating surfaces follow back-to-front array order. */
   readonly surfacePriority: number;
+  readonly dropArea?: EditorDropArea | undefined;
+  readonly occlusionRects?: readonly LogicalRect[];
 }
 
 export function createGroupDropRequest(
@@ -58,13 +71,7 @@ export function createGroupDropRequest(
   sourceGroupId: string,
   targetGroupId: string,
   targetNodeId: string,
-  target:
-    | { readonly kind: "swap" }
-    | {
-        readonly kind: "edge";
-        readonly edge: WorkspaceLogicalEdge;
-        readonly ratio: number;
-      },
+  target: WorkspaceGroupDropRequest["target"],
 ): WorkspaceGroupDropRequest | undefined {
   const sourceGroup = projection.groups[sourceGroupId];
   const sourceNodeId = nodeForGroup(projection, sourceGroupId);
@@ -94,7 +101,7 @@ export function createGroupDropCandidates<TCommand = unknown>(
   layout: ResolvedLayout,
   sourceGroupId: string,
   direction: WorkspaceDirection,
-  edgeRatio = 0.25,
+  edgeRatio = 0.3,
   moveRatio = 0.5,
   splitterSize = 6,
   labels: GroupDropLabels = DEFAULT_GROUP_DROP_LABELS,
@@ -102,6 +109,8 @@ export function createGroupDropCandidates<TCommand = unknown>(
     request: WorkspaceGroupDropRequest,
     context: WorkspaceGroupDropPlanContext,
   ) => WorkspaceGroupDropPlan<TCommand> | undefined,
+  measuredGroups: Readonly<Record<string, MeasuredDropGroup>> = {},
+  behavior?: WorkspaceDropBehavior,
 ): readonly GroupDropCandidate<TCommand>[] {
   const sourceGroup = projection.groups[sourceGroupId];
   if (sourceGroup === undefined || sourceGroup.panelIds.length === 0) return [];
@@ -117,6 +126,14 @@ export function createGroupDropCandidates<TCommand = unknown>(
     const bounds = surfaceLayoutBoundsForNode(projection, layout, node.id) ?? fallbackBounds;
     const surfacePriority = groupDropSurfacePriority(projection, node.id);
     const acquisitionRect = emptyGroupAcquisitionRect(targetGroup, targetRect, bounds);
+    const dropArea = createEditorDropArea(
+      targetRect,
+      measuredGroups[targetGroup.id],
+      edgeRatio,
+      true,
+      behavior,
+    );
+    const occlusionRects = dropSurfaceOcclusions(projection, layout, node.id, measuredGroups);
     if (acquisitionRect.inlineSize <= 0 || acquisitionRect.blockSize <= 0) continue;
 
     // A retained empty target may solve to a sliver. Swapping remains useful,
@@ -128,7 +145,7 @@ export function createGroupDropCandidates<TCommand = unknown>(
         sourceGroup,
         targetGroup,
         node.id,
-        { kind: "swap" },
+        { kind: behavior?.centerGroupDrop ?? "swap" },
         acquisitionRect,
         targetRect,
         bounds,
@@ -138,6 +155,8 @@ export function createGroupDropCandidates<TCommand = unknown>(
         planDrop,
         1,
         surfacePriority,
+        undefined,
+        occlusionRects,
       );
       continue;
     }
@@ -150,7 +169,7 @@ export function createGroupDropCandidates<TCommand = unknown>(
           sourceGroup,
           targetGroup,
           node.id,
-          { kind: "swap" },
+          { kind: behavior?.centerGroupDrop ?? "swap" },
           target.rect,
           targetRect,
           bounds,
@@ -160,6 +179,8 @@ export function createGroupDropCandidates<TCommand = unknown>(
           planDrop,
           0,
           surfacePriority,
+          dropArea,
+          occlusionRects,
         );
       } else {
         appendCandidate(
@@ -178,6 +199,8 @@ export function createGroupDropCandidates<TCommand = unknown>(
           planDrop,
           0,
           surfacePriority,
+          dropArea,
+          occlusionRects,
         );
       }
     }
@@ -207,6 +230,8 @@ function appendCandidate<TCommand>(
     | undefined,
   acquisitionPriority: number,
   surfacePriority: number,
+  dropArea: EditorDropArea | undefined,
+  occlusionRects: readonly LogicalRect[],
 ): void {
   const request = createGroupDropRequest(
     projection,
@@ -221,16 +246,23 @@ function appendCandidate<TCommand>(
   const sourceLabel = groupLabel(sourceGroup);
   const targetLabel = groupLabel(targetGroup);
   const label =
-    target.kind === "swap"
-      ? labels.swapPanelContainers({ source: sourceLabel, target: targetLabel })
-      : labels.movePanelContainerBeside({
-          source: sourceLabel,
-          edge: logicalEdgeLabel(target.edge, direction),
-          target: targetLabel,
-        });
+    target.kind === "merge"
+      ? (labels.mergePanelContainers ?? (({ source, target }) => `Merge ${source} into ${target}`))(
+          { source: sourceLabel, target: targetLabel },
+        )
+      : target.kind === "swap"
+        ? labels.swapPanelContainers({ source: sourceLabel, target: targetLabel })
+        : labels.movePanelContainerBeside({
+            source: sourceLabel,
+            edge: logicalEdgeLabel(target.edge, direction),
+            target: targetLabel,
+          });
   candidates.push(
     Object.freeze({
-      id: target.kind === "swap" ? `swap:${targetNodeId}` : `edge:${targetNodeId}:${target.edge}`,
+      id:
+        target.kind !== "edge"
+          ? `${target.kind}:${targetNodeId}`
+          : `edge:${targetNodeId}:${target.edge}`,
       label,
       hitRect: Object.freeze({ ...hitRect }),
       previewRect: plan.previewRect,
@@ -238,6 +270,8 @@ function appendCandidate<TCommand>(
       plan,
       acquisitionPriority,
       surfacePriority,
+      dropArea,
+      occlusionRects,
     }),
   );
 }
@@ -275,14 +309,21 @@ export function planGroupDrop<TCommand>(
 export function hitTestGroupDropCandidates<TCommand>(
   candidates: readonly GroupDropCandidate<TCommand>[],
   point: LogicalPoint,
+  enableSplitting = true,
 ): GroupDropCandidate<TCommand> | undefined {
   let swap: GroupDropCandidate<TCommand> | undefined;
   let edge: GroupDropCandidate<TCommand> | undefined;
   let edgeCandidateDistance = Number.POSITIVE_INFINITY;
   let surfacePriority = Number.NEGATIVE_INFINITY;
   for (const candidate of candidates) {
-    if (!containsPoint(candidate.hitRect, point) || candidate.surfacePriority < surfacePriority) {
-      continue;
+    if (candidate.surfacePriority < surfacePriority) continue;
+    if (candidate.occlusionRects?.some((rect) => containsPoint(rect, point))) continue;
+    if (candidate.dropArea === undefined) {
+      if (!containsPoint(candidate.hitRect, point)) continue;
+    } else {
+      const region = hitTestEditorDropArea(candidate.dropArea, point, enableSplitting);
+      const target = candidate.request.target;
+      if (region !== (target.kind !== "edge" ? "center" : target.edge)) continue;
     }
     if (candidate.surfacePriority > surfacePriority) {
       surfacePriority = candidate.surfacePriority;
@@ -290,7 +331,7 @@ export function hitTestGroupDropCandidates<TCommand>(
       edge = undefined;
       edgeCandidateDistance = Number.POSITIVE_INFINITY;
     }
-    if (candidate.request.target.kind === "swap") {
+    if (candidate.request.target.kind !== "edge") {
       if (swap === undefined || compareSwapCandidate(candidate, swap) < 0) swap = candidate;
       continue;
     }

@@ -146,6 +146,16 @@ export interface WorkspacePanelDefinition {
 
 export type WorkspacePanelRegistry = Readonly<Record<string, WorkspacePanelDefinition>>;
 
+/** View-only pointer policy. Commands and application capabilities remain authoritative. */
+export interface WorkspaceDropBehavior {
+  /** Allow edge splits by default. Alt (Windows/Linux) or Shift (macOS) temporarily inverts it. */
+  readonly splitOnDragAndDrop?: boolean;
+  /** Resolves corner hits and the larger whole-container edge bands. Defaults to right. */
+  readonly preferredSplitDirection?: "right" | "down";
+  /** VS Code merges group centers. Swap remains the default for existing integrations. */
+  readonly centerGroupDrop?: "swap" | "merge";
+}
+
 export interface WorkspacePanelDropRequest {
   /** Projection revision whose geometry and panel context produced this request. */
   readonly revision: string;
@@ -161,7 +171,13 @@ export interface WorkspacePanelDropRequest {
   readonly targetPanels: readonly WorkspacePanelView[];
   readonly targetNodeId: string;
   readonly target:
-    | { readonly kind: "center"; readonly ratio: 1 }
+    | {
+        readonly kind: "center";
+        readonly ratio: 1;
+        /** A tab-header insertion anchor. Omitted for content-area center drops. */
+        readonly beforePanelId?: string;
+        readonly afterPanelId?: string;
+      }
     | {
         readonly kind: "edge";
         readonly edge: WorkspaceLogicalEdge;
@@ -182,6 +198,7 @@ export interface WorkspaceGroupDropRequest {
   readonly targetNodeId: string;
   readonly target:
     | { readonly kind: "swap" }
+    | { readonly kind: "merge" }
     | {
         readonly kind: "edge";
         readonly edge: WorkspaceLogicalEdge;
@@ -281,6 +298,11 @@ export interface WorkspaceCommandAdapter<TCommand> {
   readonly minimizeFloatingSurface?: (surfaceId: string) => TCommand;
   /** The application owns the semantic redock destination and placement policy. */
   readonly redockFloatingSurface?: (surfaceId: string) => TCommand;
+  /** Opt in to precise foreign tab-header insertion. Must honor the requested relational anchor. */
+  readonly planPanelTabDrop?: (
+    request: WorkspacePanelDropRequest,
+    context: WorkspacePanelDropPlanContext,
+  ) => WorkspacePanelDropPlan<TCommand> | undefined;
   /**
    * Pure, revision-bound direct-manipulation plan. The application owns real
    * topology, IDs, constraints, policy, and command representation. The
@@ -291,8 +313,8 @@ export interface WorkspaceCommandAdapter<TCommand> {
     context: WorkspacePanelDropPlanContext,
   ) => WorkspacePanelDropPlan<TCommand> | undefined;
   /**
-   * Pure, revision-bound whole-container plan. A center target swaps intact
-   * groups; an edge target moves the source group beside the target. The
+   * Pure, revision-bound whole-container plan. Center targets swap by default,
+   * or merge when explicitly configured. Edge targets move beside the target. The
    * application retains ownership of topology, IDs, constraints, and policy.
    */
   readonly planGroupDrop?: (

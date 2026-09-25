@@ -25,6 +25,7 @@ export type {
   WorkspaceCommandOrigin,
   WorkspaceCommandAdapter,
   WorkspaceDirection,
+  WorkspaceDropBehavior,
   WorkspaceDispatchContext,
   WorkspaceDispatchOutcome,
   WorkspaceDispatchStatus,

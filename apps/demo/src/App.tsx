@@ -442,6 +442,7 @@ function CodeWorkspaceApp({ session }: { readonly session: DemoWorkspaceSession 
           compactGroupId={compactGroupId}
           onCompactGroupChange={setCompactGroupId}
           tabPresentation={{ placement: tabPlacement, content: tabContent }}
+          dropBehavior={{ centerGroupDrop: "merge" }}
           onExternalPanelRequest={externalPanels.handleRequest}
         />
         {inspectorOpen ? (

@@ -27,6 +27,11 @@ milestones, but no stable package-compatibility promise exists yet.
 
 ### Changed
 
+- React panel drop previews now use VS Code-style content-edge acquisition, deterministic corners,
+  and rectangular 70 ms feedback while retaining exact application-planned commit bounds. Visible
+  tab headers select the center action; foreground floating surfaces block hidden targets. See
+  [Panel drop previews](docs/drag-drop-previews.md) for behavior, scope, and regression coverage.
+
 - Scoped protocol actors now support replaceable typed phase deadlines through the same
   addressed-event path used by ordinary actor input, with injectable FIFO virtual time and
   exactly-once deadline cleanup on fire, cancellation, stop, or parent abort. Coverage performs 84
@@ -65,3 +70,12 @@ milestones, but no stable package-compatibility promise exists yet.
   certification, compatibility, security-review, unrestricted popout, or production-support claim.
 - See [Support matrix](docs/SUPPORT.md), [Conformance status](docs/CONFORMANCE.md), and
   [Roadmap](docs/ROADMAP.md) for implemented scope and remaining evidence gates.
+
+### Drag interaction parity
+
+- Add opt-in foreign tab-header insertion with retained before/after plans, vertical/RTL markers,
+  rejection and stale-geometry guards, and an explicit adapter capability.
+- Add live platform-specific split toggles and configurable split preference; merge whole groups
+  on demo center drops while retaining the library's default swap behavior.
+- Use compact drag labels, neutral docking feedback, and bounded Escape/window-blur cleanup.
+- Add pointer regressions and reproducible, source-identified before/after GIF recordings.

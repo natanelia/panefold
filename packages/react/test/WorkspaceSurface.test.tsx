@@ -21,6 +21,7 @@ import {
   WorkspaceSurface,
   solveWorkspaceProjectionLayout,
   type WorkspaceMessageCatalog,
+  type WorkspaceDropBehavior,
   type WorkspaceCommandAdapter,
   type WorkspaceFloatingResizeEdge,
   type WorkspaceCommandOrigin,
@@ -1851,6 +1852,55 @@ describe("WorkspaceSurface", () => {
       );
     });
   });
+
+  it.each(["pointer", "keyboard"] as const)(
+    "focuses a surviving tab after the last two groups merge via %s",
+    async (origin) => {
+      const runtime = new FixtureRuntime(initialProjection);
+      const view = renderWorkspace(runtime, {
+        commands: directManipulationCommands,
+        dropBehavior: { centerGroupDrop: "merge" },
+      });
+      const handle = await screen.findByRole("button", { name: "Move Left panel container" });
+      if (origin === "pointer") {
+        installPointerCapture(handle);
+        fireEvent.pointerDown(handle, {
+          button: 0,
+          pointerId: 143,
+          pointerType: "mouse",
+          clientX: 480,
+          clientY: 20,
+        });
+        fireEvent.pointerMove(handle, {
+          pointerId: 143,
+          pointerType: "mouse",
+          clientX: 750,
+          clientY: 350,
+        });
+        const overlay = await waitForElement(view.container, "[data-workspace-group-drag]");
+        expect(overlay.dataset.workspaceDropKind).toBe("merge");
+        fireEvent.pointerUp(handle, {
+          pointerId: 143,
+          pointerType: "mouse",
+          clientX: 750,
+          clientY: 350,
+        });
+      } else {
+        const user = userEvent.setup();
+        await user.click(handle);
+        expect(screen.getByRole("dialog").textContent).toContain("Merge Left into Right");
+        await user.keyboard("{Enter}");
+      }
+      await waitFor(() => {
+        expect(Object.keys(runtime.getSnapshot().projection.groups)).toEqual(["right"]);
+        expect(view.container.querySelector("[data-workspace-group-drag-handle]")).toBeNull();
+        expect(screen.getByRole("tab", { name: "Alpha" })).toBe(document.activeElement);
+      });
+      expect(runtime.transactions).toEqual([
+        expect.objectContaining({ type: "group-drop", origin }),
+      ]);
+    },
+  );
 
   it("localizes the fallback group label in the container drag ghost", async () => {
     const projection: WorkspaceProjection = {
@@ -3689,6 +3739,27 @@ function reduceProjection(
     };
   }
   if (command.type === "group-drop") {
+    if (command.request.target.kind === "merge") {
+      const source = projection.groups[command.request.sourceGroup.id];
+      const target = projection.groups[command.request.targetGroup.id];
+      const node = projection.nodes[command.request.targetNodeId];
+      if (source === undefined || target === undefined || node === undefined)
+        throw new Error("Missing two-group merge fixture");
+      return {
+        ...projection,
+        revision: nextRevision,
+        rootNodeId: node.id,
+        nodes: { [node.id]: node },
+        groups: {
+          [target.id]: {
+            ...target,
+            panelIds: [...target.panelIds, ...source.panelIds],
+            selectedPanelId: source.selectedPanelId,
+          },
+        },
+        activePanelId: source.selectedPanelId,
+      };
+    }
     if (command.request.target.kind !== "swap") {
       return { ...projection, revision: nextRevision };
     }
@@ -3838,6 +3909,7 @@ function renderWorkspace(
   runtime: FixtureRuntime,
   options: {
     readonly motion?: "off" | "reduced" | "productive";
+    readonly dropBehavior?: WorkspaceDropBehavior;
     readonly registry?: WorkspacePanelRegistry;
     readonly direction?: "ltr" | "rtl";
     readonly frameScheduler?: SurfaceFrameScheduler;
@@ -3866,6 +3938,7 @@ function renderWorkspace(
           panels={options.registry ?? panels}
           layoutBounds={{ inlineStart: 0, blockStart: 0, inlineSize: 1000, blockSize: 700 }}
           workspaceLabel="Fixture workspace"
+          {...(options.dropBehavior === undefined ? {} : { dropBehavior: options.dropBehavior })}
           {...(options.messageCatalog === undefined
             ? {}
             : { messageCatalog: options.messageCatalog })}
@@ -3927,7 +4000,7 @@ function fixtureGroupDropPreview(
   request: WorkspaceGroupDropRequest,
   context: WorkspaceGroupDropPlanContext,
 ) {
-  if (request.target.kind === "swap") return context.targetRect;
+  if (request.target.kind !== "edge") return context.targetRect;
   const rect = context.targetRect;
   const inlineSize = Math.round((rect.inlineSize - context.splitterSize) * request.target.ratio);
   const blockSize = Math.round((rect.blockSize - context.splitterSize) * request.target.ratio);
@@ -4191,3 +4264,94 @@ class RecordingMotionDriver implements MotionDriver {
     };
   }
 }
+
+it.each(["release", "observer"] as const)(
+  "rejects changed destination content geometry at %s without committing",
+  async (mode) => {
+    const observers = installControllableResizeObserver();
+    try {
+      const frames = createManualFrameScheduler();
+      const runtime = new FixtureRuntime(initialProjection);
+      const view = renderWorkspace(runtime, {
+        commands: directManipulationCommands,
+        frameScheduler: frames.scheduler,
+      });
+      const alpha = await screen.findByRole("tab", { name: "Alpha" });
+      const slot = requiredElement(
+        view.container.querySelector('[data-workspace-panel-slot="right"]'),
+      );
+      const workspace = screen.getByLabelText("Fixture workspace");
+      setElementRect(workspace, { left: 0, top: 0, width: 1000, height: 700 });
+      setElementRect(slot, { left: 503, top: 34, width: 497, height: 666 });
+      installPointerCapture(alpha);
+      fireEvent.pointerDown(alpha, { button: 0, pointerId: 81, clientX: 100, clientY: 20 });
+      fireEvent.pointerMove(alpha, { pointerId: 81, clientX: 750, clientY: 350 });
+      act(() => frames.flush());
+      expect(view.container.querySelector("[data-workspace-panel-drag]")).toBeTruthy();
+      setElementRect(slot, { left: 503, top: 74, width: 497, height: 626 });
+      if (mode === "observer") {
+        const observer = observers.instances.find((candidate) => candidate.hasObserved(slot));
+        expect(observer).toBeDefined();
+        act(() => observer?.notify());
+      } else {
+        fireEvent.pointerUp(alpha, { pointerId: 81, clientX: 750, clientY: 350 });
+      }
+      await act(async () => Promise.resolve());
+      expect(workspace.dataset.panelDragState).toBe("idle");
+      expect(runtime.transactions).toHaveLength(0);
+      expect(view.container.querySelector("[data-workspace-panel-drag]")).toBeNull();
+      expect(observers.instances.some((observer) => observer.hasObserved(slot))).toBe(false);
+    } finally {
+      observers.restore();
+    }
+  },
+);
+
+it.each(["panel", "group"] as const)(
+  "consumes the pending %s pointer when a modifier arrives before its frame",
+  async (kind) => {
+    const frames = createManualFrameScheduler();
+    const runtime = new FixtureRuntime(initialProjection);
+    const view = renderWorkspace(runtime, {
+      commands: directManipulationCommands,
+      frameScheduler: frames.scheduler,
+    });
+    const source =
+      kind === "panel"
+        ? await screen.findByRole("tab", { name: "Alpha" })
+        : await screen.findByRole("button", { name: "Move Left panel container" });
+    const workspace = screen.getByLabelText("Fixture workspace");
+    setElementRect(workspace, { left: 0, top: 0, width: 1000, height: 700 });
+    installPointerCapture(source);
+    fireEvent.pointerDown(source, { button: 0, pointerId: 82, clientX: 100, clientY: 20 });
+    fireEvent.pointerMove(source, { pointerId: 82, clientX: 750, clientY: 350 });
+    fireEvent.keyDown(window, { key: "Alt", altKey: true });
+    act(() => frames.flush());
+    const overlay = requiredElement(view.container.querySelector(`[data-workspace-${kind}-drag]`));
+    expect(overlay.dataset.workspaceDropKind).toBe(kind === "panel" ? "center" : "swap");
+    expect(runtime.transactions).toHaveLength(0);
+    fireEvent.pointerCancel(source, { pointerId: 82 });
+  },
+);
+
+it("repairs a panel split modifier from a pointer sample without a keyboard event", async () => {
+  const frames = createManualFrameScheduler();
+  const runtime = new FixtureRuntime(initialProjection);
+  const view = renderWorkspace(runtime, {
+    commands: directManipulationCommands,
+    frameScheduler: frames.scheduler,
+  });
+  const source = await screen.findByRole("tab", { name: "Alpha" });
+  const workspace = screen.getByLabelText("Fixture workspace");
+  setElementRect(workspace, { left: 0, top: 0, width: 1000, height: 700 });
+  installPointerCapture(source);
+  fireEvent.pointerDown(source, { button: 0, pointerId: 83, clientX: 100, clientY: 20 });
+  fireEvent.pointerMove(source, { pointerId: 83, clientX: 510, clientY: 350, altKey: true });
+  act(() => frames.flush());
+  const overlay = requiredElement(view.container.querySelector("[data-workspace-panel-drag]"));
+  expect(overlay.dataset.workspaceDropKind).toBe("center");
+  fireEvent.pointerMove(source, { pointerId: 83, clientX: 510, clientY: 350, altKey: false });
+  act(() => frames.flush());
+  expect(overlay.dataset.workspaceDropKind).toBe("edge");
+  fireEvent.pointerCancel(source, { pointerId: 83 });
+});
