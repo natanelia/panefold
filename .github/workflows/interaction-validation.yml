@@ -9,42 +9,7 @@ permissions:
   contents: read
 
 jobs:
-  prepare:
-    runs-on: ubuntu-latest
-    timeout-minutes: 5
-    permissions:
-      contents: write
-    outputs:
-      sha: ${{ steps.apply.outputs.sha }}
-    steps:
-      - uses: actions/checkout@v7
-        with:
-          fetch-depth: 0
-          persist-credentials: false
-      - name: Apply checked refinement without executing repository code
-        id: apply
-        run: |
-          python3 - <<'PY'
-          import base64, hashlib, lzma, pathlib
-          data = lzma.decompress(base64.b64decode(pathlib.Path('.github/interaction-refinement.b64').read_text().strip(), validate=True))
-          assert hashlib.sha256(data).hexdigest() == '6bd450d0ff4fc1043537fccb97c7a236d0830e1ae0ce87cb46cdba7fb17809c9'
-          pathlib.Path('/tmp/refinement.patch').write_bytes(data)
-          PY
-          git apply --index /tmp/refinement.patch
-          git rm .github/interaction-refinement.b64
-          git config user.name 'github-actions[bot]'
-          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git commit -m 'fix(react): preserve pending pointer samples across split modifier frames'
-          echo "sha=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
-      - name: Fast-forward the feature branch
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          AUTH=$(printf 'x-access-token:%s' "$GH_TOKEN" | base64 -w0)
-          git -c core.hooksPath=/dev/null -c http.https://github.com/.extraheader="AUTHORIZATION: basic $AUTH" push origin HEAD:refs/heads/fix/vscode-drag-interaction-parity
-
   validate:
-    needs: prepare
     runs-on: ubuntu-latest
     timeout-minutes: 35
     env:
@@ -55,7 +20,6 @@ jobs:
     steps:
       - uses: actions/checkout@v7
         with:
-          ref: ${{ needs.prepare.outputs.sha }}
           fetch-depth: 0
           persist-credentials: false
       - uses: pnpm/action-setup@v6
@@ -100,9 +64,9 @@ jobs:
         run: |
           node scripts/performance-smoke.mjs > artifacts/preview-node-smoke.json
           node scripts/record-preview-evidence.mjs
-          pnpm exec oxfmt --write conformance/results/*-2026-09-26.json docs/CONFORMANCE.md docs/media/vscode-drag-provenance.json .github/workflows/interaction-validation.yml
+          pnpm exec oxfmt --write conformance/results/*-2026-09-26.json docs/CONFORMANCE.md docs/media/vscode-drag-provenance.json scripts/capture-drag-comparison.mjs .github/workflows/interaction-validation.yml
           node scripts/generate-conformance-data.mjs
-          git add conformance docs .github/workflows/interaction-validation.yml
+          git add conformance docs scripts/capture-drag-comparison.mjs .github/workflows/interaction-validation.yml
       - name: Repository and demo verification
         run: |
           pnpm check
@@ -111,11 +75,11 @@ jobs:
       - name: Commit executed evidence and recordings
         id: bundle
         env:
-          SOURCE_SHA: ${{ needs.prepare.outputs.sha }}
+          SOURCE_SHA: ${{ github.sha }}
         run: |
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git add conformance docs
+          git add conformance docs scripts/capture-drag-comparison.mjs
           git commit -m 'test: retain executed drag parity evidence and before-after GIFs'
           git branch captured-interactions
           git bundle create /tmp/interaction-evidence.bundle "$SOURCE_SHA"..captured-interactions
@@ -134,6 +98,7 @@ jobs:
           path: |
             artifacts
             test-results
+            conformance/results/*-2026-09-26.json
             docs/media/vscode-drag-*
           retention-days: 30
           if-no-files-found: warn
