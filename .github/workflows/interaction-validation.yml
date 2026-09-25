@@ -1,0 +1,130 @@
+name: Record verified drag interaction comparison
+
+on:
+  push:
+    branches: [fix/vscode-drag-interaction-parity]
+    paths: [.github/workflows/interaction-validation.yml]
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    env:
+      VITEST_MAX_WORKERS: "1"
+    outputs:
+      sha: ${{ steps.bundle.outputs.sha }}
+      artifact: ${{ steps.upload.outputs.artifact-id }}
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: pnpm/action-setup@v6
+        with:
+          version: 11.16.0
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm exec playwright install --with-deps chromium
+      - name: Install video encoder
+        run: command -v ffmpeg || (sudo apt-get update && sudo apt-get install -y ffmpeg)
+      - run: pnpm build:packages
+      - name: Full unit suite with retained JSON
+        id: units
+        continue-on-error: true
+        run: |
+          mkdir -p artifacts
+          pnpm exec vitest run --maxWorkers=1 --no-file-parallelism --reporter=json --outputFile=artifacts/preview-unit.json
+      - name: Full Chromium suite with retained JSON
+        id: browser
+        continue-on-error: true
+        run: pnpm exec playwright test --retries=0 --reporter=json > artifacts/preview-browser.json
+      - name: Capture identical gestures against the pinned main baseline
+        id: capture
+        continue-on-error: true
+        run: |
+          git worktree add --detach /tmp/panefold-before 877be5f4ee9aae5f76e0a72e2b05b3725b4eacbc
+          pnpm --dir /tmp/panefold-before install --frozen-lockfile
+          node scripts/capture-drag-comparison.mjs --before-dir /tmp/panefold-before
+      - name: Require all executed scenarios to pass
+        env:
+          UNIT_OUTCOME: ${{ steps.units.outcome }}
+          BROWSER_OUTCOME: ${{ steps.browser.outcome }}
+          CAPTURE_OUTCOME: ${{ steps.capture.outcome }}
+        run: |
+          test "$UNIT_OUTCOME" = success
+          test "$BROWSER_OUTCOME" = success
+          test "$CAPTURE_OUTCOME" = success
+      - name: Record fresh source-bound conformance evidence
+        run: |
+          node scripts/performance-smoke.mjs > artifacts/preview-node-smoke.json
+          node scripts/record-preview-evidence.mjs
+          pnpm exec oxfmt --write conformance/results/*-2026-09-26.json docs/media/vscode-drag-provenance.json .github/workflows/interaction-validation.yml
+          node scripts/generate-conformance-data.mjs
+          git add conformance docs/media .github/workflows/interaction-validation.yml
+      - name: Repository and demo verification
+        run: |
+          pnpm check
+          pnpm --filter @panefold/demo test
+          pnpm test:site:e2e
+      - name: Commit executed evidence and recordings
+        id: bundle
+        env:
+          SOURCE_SHA: ${{ github.sha }}
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add conformance docs/media
+          git commit -m 'test: retain executed drag parity evidence and before-after GIFs'
+          git branch captured-interactions
+          git bundle create /tmp/interaction-evidence.bundle "$SOURCE_SHA"..captured-interactions
+          echo "sha=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
+      - uses: actions/upload-artifact@v7
+        id: upload
+        with:
+          name: interaction-evidence-bundle
+          path: /tmp/interaction-evidence.bundle
+          retention-days: 2
+          if-no-files-found: error
+      - uses: actions/upload-artifact@v7
+        if: always()
+        with:
+          name: preview-executed-evidence
+          path: |
+            artifacts
+            test-results
+            docs/media/vscode-drag-*
+          retention-days: 30
+          if-no-files-found: warn
+
+  publish-evidence:
+    needs: validate
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: fix/vscode-drag-interaction-parity
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: actions/download-artifact@v7
+        with:
+          artifact-ids: ${{ needs.validate.outputs.artifact }}
+          path: /tmp/evidence
+          merge-multiple: true
+      - name: Fast-forward only the requested feature branch
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          EXPECTED_SHA: ${{ needs.validate.outputs.sha }}
+        run: |
+          git -c core.hooksPath=/dev/null fetch /tmp/evidence/interaction-evidence.bundle refs/heads/captured-interactions
+          test "$(git rev-parse FETCH_HEAD)" = "$EXPECTED_SHA"
+          AUTH=$(printf 'x-access-token:%s' "$GH_TOKEN" | base64 -w0)
+          git -c core.hooksPath=/dev/null -c http.https://github.com/.extraheader="AUTHORIZATION: basic $AUTH" push origin FETCH_HEAD:refs/heads/fix/vscode-drag-interaction-parity
