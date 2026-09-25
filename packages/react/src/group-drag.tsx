@@ -11,6 +11,9 @@ import type { SurfaceFrameScheduler } from "@panefold/motion";
 import { revision } from "@panefold/model";
 import { createDragActor, type DragEvent } from "@panefold/protocol-xstate";
 
+import { splitEnabledForEvent } from "./drop-modifiers";
+import { captureDropGeometry, setDropPreviewRect, type DropGeometry } from "./drop-preview";
+
 import {
   createGroupDropCandidates,
   hitTestGroupDropCandidates,
@@ -19,6 +22,7 @@ import {
 import type { ResolvedWorkspaceInteractionMessages } from "./messages";
 import type {
   WorkspaceDirection,
+  WorkspaceDropBehavior,
   WorkspaceDispatchOutcome,
   WorkspaceGroupDropPlan,
   WorkspaceGroupDropPlanContext,
@@ -55,18 +59,21 @@ interface GroupDragSession<TCommand> {
   readonly projection: WorkspaceProjection;
   readonly bounds: LogicalRect;
   readonly rootRect: PhysicalRect;
+  readonly dropGeometry: DropGeometry;
   readonly direction: WorkspaceDirection;
   readonly geometryEpoch: string;
   readonly pointerId: number;
   readonly captureElement: HTMLButtonElement;
   readonly candidates: readonly GroupDropCandidate<TCommand>[];
   readonly groupFallbackLabel: string;
+  splitEnabled: boolean;
   current: PointerPosition;
   pending: PointerPosition | undefined;
   target: GroupDropCandidate<TCommand> | undefined;
 }
 
 interface UseGroupDragOptions<TCommand> {
+  readonly dropBehavior?: WorkspaceDropBehavior | undefined;
   readonly projection: WorkspaceProjection;
   readonly resolvedLayout: ResolvedLayout;
   readonly logicalBounds: LogicalRect;
@@ -108,7 +115,7 @@ interface GroupDragView {
   readonly pointer: PointerPosition;
   readonly previewRect: LogicalRect | undefined;
   readonly targetId: string | undefined;
-  readonly targetKind: "swap" | "edge" | undefined;
+  readonly targetKind: "swap" | "merge" | "edge" | undefined;
   readonly targetEdge: string | undefined;
   readonly targetLabel: string | undefined;
   readonly bounds: LogicalRect;
@@ -131,12 +138,13 @@ export function useGroupDrag<TCommand>(
   useLayoutEffect(() => {
     getRootRef.current = options.getRoot;
   }, [options.getRoot]);
-  const geometryEpoch = groupDragGeometryEpoch(
+  const layoutEpoch = groupDragGeometryEpoch(
     options.resolvedLayout,
     options.logicalBounds,
     options.direction,
     options.splitterSize,
   );
+  const geometryEpoch = `${layoutEpoch}:${options.dropBehavior?.splitOnDragAndDrop ?? true}:${options.dropBehavior?.preferredSplitDirection ?? "right"}:${options.dropBehavior?.centerGroupDrop ?? "swap"}`;
   const currentGeometryEpochRef = useRef(geometryEpoch);
   const currentRevisionRef = useRef(options.projection.revision);
   useLayoutEffect(() => {
@@ -179,6 +187,7 @@ export function useGroupDrag<TCommand>(
   }, []);
 
   const release = useCallback((session: GroupDragSession<TCommand>) => {
+    session.dropGeometry.dispose();
     if (session.captureElement.hasPointerCapture?.(session.pointerId)) {
       session.captureElement.releasePointerCapture?.(session.pointerId);
     }
@@ -188,6 +197,7 @@ export function useGroupDrag<TCommand>(
     return () => {
       options.frameScheduler.cancel(options.scheduleKey);
       const session = sessionRef.current;
+      session?.dropGeometry.dispose();
       if (session?.captureElement.hasPointerCapture?.(session.pointerId)) {
         session.captureElement.releasePointerCapture?.(session.pointerId);
       }
@@ -264,6 +274,7 @@ export function useGroupDrag<TCommand>(
         : hitTestGroupDropCandidates(
             session.candidates,
             toLogicalPoint(session.current, session.rootRect, session.bounds, session.direction),
+            session.splitEnabled,
           );
       const previousId = session.target?.id;
       session.target = target;
@@ -313,6 +324,32 @@ export function useGroupDrag<TCommand>(
       if (current !== "armed" && current !== "dragging") return;
       resetRejected(session, options.messages.workspaceChangedBeforeGroupMove());
     };
+    const handleKey = (event: globalThis.KeyboardEvent) => {
+      const session = sessionRef.current;
+      if (session === null) return;
+      if (event.key === "Escape") {
+        event.preventDefault();
+        resetRejected(session, options.messages.moveCancelled());
+        return;
+      }
+      if (event.key !== "Alt" && event.key !== "Shift") return;
+      const enabled = splitEnabledForEvent(
+        event,
+        ownerWindow.navigator.platform,
+        options.dropBehavior,
+      );
+      if (enabled === session.splitEnabled) return;
+      event.preventDefault();
+      session.splitEnabled = enabled;
+      options.frameScheduler.schedule(options.scheduleKey, () => paintCandidate(session));
+    };
+    const handleBlur = () => {
+      const session = sessionRef.current;
+      if (session !== null) resetRejected(session, options.messages.moveCancelled());
+    };
+    ownerWindow.addEventListener("keydown", handleKey);
+    ownerWindow.addEventListener("keyup", handleKey);
+    ownerWindow.addEventListener("blur", handleBlur);
     ownerWindow.addEventListener("resize", invalidate);
     ownerWindow.addEventListener("scroll", invalidate, true);
     const Observer = ownerWindow.ResizeObserver;
@@ -331,10 +368,20 @@ export function useGroupDrag<TCommand>(
     observer?.observe(root);
     return () => {
       observer?.disconnect();
+      ownerWindow.removeEventListener("keydown", handleKey);
+      ownerWindow.removeEventListener("keyup", handleKey);
+      ownerWindow.removeEventListener("blur", handleBlur);
       ownerWindow.removeEventListener("resize", invalidate);
       ownerWindow.removeEventListener("scroll", invalidate, true);
     };
-  }, [options.messages, resetRejected]);
+  }, [
+    options.dropBehavior,
+    options.frameScheduler,
+    options.scheduleKey,
+    options.messages,
+    paintCandidate,
+    resetRejected,
+  ]);
 
   const begin = useCallback(
     (group: WorkspaceGroupView, event: ReactPointerEvent<HTMLButtonElement>) => {
@@ -351,12 +398,21 @@ export function useGroupDrag<TCommand>(
       const actor = createDragActor();
       actor.start();
       actorRef.current = actor;
+      const rootRect = measureRoot(root, options.logicalBounds);
+      const dropGeometry = captureDropGeometry(
+        root,
+        rootRect,
+        options.logicalBounds,
+        options.resolvedLayout,
+        options.direction,
+      );
       const session: GroupDragSession<TCommand> = {
         actor,
         group,
         projection: options.projection,
         bounds: options.logicalBounds,
-        rootRect: measureRoot(root, options.logicalBounds),
+        rootRect,
+        dropGeometry,
         direction: options.direction,
         geometryEpoch,
         pointerId: event.pointerId,
@@ -366,21 +422,34 @@ export function useGroupDrag<TCommand>(
           options.resolvedLayout,
           group.id,
           options.direction,
-          0.25,
+          0.3,
           0.5,
           options.splitterSize,
           {
             swapPanelContainers: options.messages.swapPanelContainers,
+            mergePanelContainers: options.messages.mergePanelContainers,
             movePanelContainerBeside: options.messages.movePanelContainerBeside,
           },
           options.planDrop,
+          dropGeometry.groups,
+          options.dropBehavior,
         ),
         groupFallbackLabel: options.messages.panelGroupFallback(),
+        splitEnabled: splitEnabledForEvent(
+          event,
+          event.currentTarget.ownerDocument.defaultView?.navigator.platform ?? "",
+          options.dropBehavior,
+        ),
         current: pointerPosition(event),
         pending: undefined,
         target: undefined,
       };
       sessionRef.current = session;
+      dropGeometry.watch(() => {
+        if (sessionRef.current === session) {
+          resetRejected(session, options.messages.workspaceChangedBeforeGroupMove());
+        }
+      });
       send(actor, {
         type: "POINTER_DOWN",
         pointerId: event.pointerId,
@@ -389,18 +458,23 @@ export function useGroupDrag<TCommand>(
       });
       event.currentTarget.setPointerCapture?.(event.pointerId);
     },
-    [geometryEpoch, options, send],
+    [geometryEpoch, options, resetRejected, send],
   );
 
   const move = useCallback(
     (event: ReactPointerEvent<HTMLButtonElement>) => {
       const session = sessionRef.current;
       if (session === null || session.pointerId !== event.pointerId) return;
+      session.splitEnabled = splitEnabledForEvent(
+        event,
+        event.currentTarget.ownerDocument.defaultView?.navigator.platform ?? "",
+        options.dropBehavior,
+      );
       session.pending = pointerPosition(event);
       options.frameScheduler.schedule(options.scheduleKey, () => consumeLatestPointer(session));
       event.preventDefault();
     },
-    [consumeLatestPointer, options.frameScheduler, options.scheduleKey],
+    [consumeLatestPointer, options.dropBehavior, options.frameScheduler, options.scheduleKey],
   );
 
   const finish = useCallback(
@@ -408,6 +482,15 @@ export function useGroupDrag<TCommand>(
       const session = sessionRef.current;
       if (session === null || session.pointerId !== event.pointerId) return;
       options.frameScheduler.cancel(options.scheduleKey);
+      if (!session.dropGeometry.isCurrent()) {
+        resetRejected(session, options.messages.workspaceChangedBeforeGroupMove());
+        return;
+      }
+      session.splitEnabled = splitEnabledForEvent(
+        event,
+        event.currentTarget.ownerDocument.defaultView?.navigator.platform ?? "",
+        options.dropBehavior,
+      );
       session.pending = pointerPosition(event);
       consumeLatestPointer(session);
       const next = send(session.actor, { type: "POINTER_UP", pointerId: event.pointerId });
@@ -465,7 +548,16 @@ export function useGroupDrag<TCommand>(
         disposeActor(session.actor);
       }
     },
-    [clearPresentation, consumeLatestPointer, disposeActor, options, release, restore, send],
+    [
+      clearPresentation,
+      consumeLatestPointer,
+      disposeActor,
+      options,
+      release,
+      resetRejected,
+      restore,
+      send,
+    ],
   );
 
   const cancel = useCallback(
@@ -569,7 +661,11 @@ function settleDispatch<TCommand>(
     if (outcome.message === undefined && outcome.status === "committed") {
       options.announce(committedLabel);
     }
-    restore(session.group.id);
+    restore(
+      session.target?.request.target.kind === "merge"
+        ? session.target.request.targetGroup.id
+        : session.group.id,
+    );
     return;
   }
   const message = boundedMessage(outcome.message, options.messages.groupMoveRejected());
@@ -585,12 +681,13 @@ function updateGroupDragOverlay(element: HTMLDivElement, view: GroupDragView): v
   setData(element, "workspaceDropTarget", view.targetId);
   setData(element, "workspaceDropKind", view.targetKind);
   setData(element, "workspaceDropEdge", view.targetEdge);
-  setOverlayRect(
+  setDropPreviewRect(
     element.querySelector<HTMLElement>(".pf-panel-drop-preview"),
     toOverlayRect(view.previewRect, view.bounds, view.rootRect, view.direction),
   );
   const ghost = element.querySelector<HTMLElement>(".pf-group-drag-ghost");
   if (ghost === null) return;
+  ghost.dataset.available = String(view.targetId !== undefined);
   ghost.style.setProperty("--pf-drag-x", `${view.pointer.clientX - view.rootRect.left}px`);
   ghost.style.setProperty("--pf-drag-y", `${view.pointer.clientY - view.rootRect.top}px`);
   const title = ghost.querySelector<HTMLElement>("strong");
@@ -611,7 +708,7 @@ function clearGroupDragOverlay(element: HTMLDivElement | null): void {
   delete element.dataset.workspaceDropTarget;
   delete element.dataset.workspaceDropKind;
   delete element.dataset.workspaceDropEdge;
-  setOverlayRect(element.querySelector<HTMLElement>(".pf-panel-drop-preview"), undefined);
+  setDropPreviewRect(element.querySelector<HTMLElement>(".pf-panel-drop-preview"), undefined);
   element.querySelector<HTMLElement>(".pf-group-drag-ghost span")?.remove();
 }
 
@@ -622,16 +719,6 @@ function setData(
 ): void {
   if (value === undefined) delete element.dataset[key];
   else element.dataset[key] = value;
-}
-
-function setOverlayRect(element: HTMLElement | null, rect: PhysicalRect | undefined): void {
-  if (element === null) return;
-  element.hidden = rect === undefined;
-  if (rect === undefined) return;
-  element.style.setProperty("--pf-drop-x", `${rect.left}px`);
-  element.style.setProperty("--pf-drop-y", `${rect.top}px`);
-  element.style.setProperty("--pf-drop-width", `${rect.width}px`);
-  element.style.setProperty("--pf-drop-height", `${rect.height}px`);
 }
 
 function pointerPosition(event: ReactPointerEvent<HTMLElement>): PointerPosition {

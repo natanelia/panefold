@@ -435,7 +435,7 @@ const resultDefinitions = [
   [
     "chromium-reference-result",
     "compatibility-report",
-    "conformance/results/chromium-reference-2026-08-14.json",
+    "conformance/results/chromium-reference-2026-09-26.json",
     [
       "A11Y-002",
       "A11Y-003",
@@ -465,7 +465,7 @@ const resultDefinitions = [
   [
     "interaction-performance-result",
     "performance-report",
-    "conformance/results/interaction-performance-2026-08-14.json",
+    "conformance/results/interaction-performance-2026-09-26.json",
     ["PRF-001", "PRF-006", "QLT-003", "TST-006"],
     [compactProfile],
     "environment-verifiable",
@@ -481,7 +481,7 @@ const resultDefinitions = [
   [
     "protocol-motion-result",
     "model-report",
-    "conformance/results/protocol-motion-2026-08-14.json",
+    "conformance/results/protocol-motion-2026-09-26.json",
     [
       "A11Y-002",
       "ARC-002",

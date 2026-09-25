@@ -43,6 +43,7 @@ export interface WorkspaceMessageCatalog {
   removePanelContainer?(values: { readonly target: string }): string;
   removedPanelContainer?(values: { readonly group: string; readonly target: string }): string;
   movePanelContainer?(values: { readonly group: string }): string;
+  mergePanelContainers?(values: { readonly source: string; readonly target: string }): string;
   swapPanelContainers?(values: { readonly source: string; readonly target: string }): string;
   movePanelContainerBeside?(values: {
     readonly source: string;
@@ -138,6 +139,7 @@ export const ENGLISH_WORKSPACE_MESSAGES = Object.freeze({
   removedPanelContainer: ({ group, target }) =>
     `Removed ${group} panel container and moved its tabs to ${target}`,
   movePanelContainer: ({ group }) => `Move ${group} panel container`,
+  mergePanelContainers: ({ source, target }) => `Merge ${source} into ${target}`,
   swapPanelContainers: ({ source, target }) => `Swap ${source} and ${target} panel containers`,
   movePanelContainerBeside: ({ source, edge, target }) =>
     `Move ${source} ${physicalEdgeRelation(edge, target)}`,
@@ -202,6 +204,10 @@ export interface ResolvedWorkspaceInteractionMessages {
   readonly movedPanelTo: (values: { readonly title: string; readonly group: string }) => string;
   readonly moveCancelled: () => string;
   readonly movePanelContainer: (values: { readonly group: string }) => string;
+  readonly mergePanelContainers: (values: {
+    readonly source: string;
+    readonly target: string;
+  }) => string;
   readonly swapPanelContainers: (values: {
     readonly source: string;
     readonly target: string;
@@ -265,6 +271,8 @@ export function resolveWorkspaceInteractionMessages(
     movedPanelTo: catalog.movedPanelTo,
     moveCancelled: catalog.moveCancelled,
     movePanelContainer: catalog.movePanelContainer ?? ENGLISH_WORKSPACE_MESSAGES.movePanelContainer,
+    mergePanelContainers:
+      catalog.mergePanelContainers ?? ENGLISH_WORKSPACE_MESSAGES.mergePanelContainers,
     swapPanelContainers:
       catalog.swapPanelContainers ?? ENGLISH_WORKSPACE_MESSAGES.swapPanelContainers,
     movePanelContainerBeside:

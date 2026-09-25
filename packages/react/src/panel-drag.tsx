@@ -12,6 +12,13 @@ import { createDragActor, type DragEvent } from "@panefold/protocol-xstate";
 import { revision } from "@panefold/model";
 
 import {
+  captureTabInsertionStrips,
+  hitTestTabInsertion,
+  type TabInsertionStrip,
+} from "./tab-insertion";
+import { splitEnabledForEvent } from "./drop-modifiers";
+import { captureDropGeometry, setDropPreviewRect, type DropGeometry } from "./drop-preview";
+import {
   createPanelDropCandidates,
   hitTestPanelDropCandidates,
   panelsForGroup,
@@ -31,6 +38,7 @@ import {
 import type { ResolvedWorkspaceInteractionMessages } from "./messages";
 import type {
   WorkspaceDirection,
+  WorkspaceDropBehavior,
   WorkspaceDispatchOutcome,
   WorkspaceExternalPanelOutcome,
   WorkspaceExternalPanelPosition,
@@ -61,6 +69,7 @@ interface ExternalCandidate {
 }
 
 interface InternalCandidate<TCommand = unknown> {
+  readonly indicatorRect?: PhysicalTabRect | undefined;
   readonly kind: "internal";
   readonly candidate: PanelDropCandidate<TCommand>;
 }
@@ -84,18 +93,21 @@ interface DragSession<TCommand = unknown> {
   readonly bounds: LogicalRect;
   /** Physical surface geometry captured once when pointer ownership begins. */
   readonly rootRect: PhysicalRect;
+  readonly dropGeometry: DropGeometry;
   readonly direction: WorkspaceDirection;
   readonly geometryEpoch: string;
   readonly pointerId: number;
   readonly pointerType: string;
   readonly captureElement: HTMLElement;
   readonly candidates: readonly PanelDropCandidate<TCommand>[];
+  insertionStrips: readonly TabInsertionStrip<TCommand>[];
   reorderIndex: TabReorderIndex<TCommand> | undefined;
   readonly reorderScrollElement: HTMLElement | undefined;
   readonly reorderGeometry: TabReorderGeometry | undefined;
   readonly reorderScrollPosition: { left: number; top: number };
   reorderScrollChanged: boolean;
   reorderResizeObserver: ResizeObserver | undefined;
+  splitEnabled: boolean;
   current: WorkspaceExternalPanelPosition;
   pending: WorkspaceExternalPanelPosition | undefined;
   target: ActiveCandidate<TCommand> | undefined;
@@ -112,6 +124,7 @@ export interface ExternalPanelInvocation {
 }
 
 interface UsePanelDragOptions<TCommand> {
+  readonly dropBehavior?: WorkspaceDropBehavior | undefined;
   readonly projection: WorkspaceProjection;
   readonly resolvedLayout: ResolvedLayout;
   readonly logicalBounds: LogicalRect;
@@ -123,6 +136,12 @@ interface UsePanelDragOptions<TCommand> {
   readonly splitterSize: number;
   readonly frameScheduler: SurfaceFrameScheduler;
   readonly scheduleKey: string;
+  readonly planTabDrop?:
+    | ((
+        request: WorkspacePanelDropRequest,
+        context: WorkspacePanelDropPlanContext,
+      ) => WorkspacePanelDropPlan<TCommand> | undefined)
+    | undefined;
   readonly planDrop:
     | ((
         request: WorkspacePanelDropRequest,
@@ -171,7 +190,7 @@ export interface PanelDragView {
   readonly pointer: WorkspaceExternalPanelPosition;
   readonly previewRect: LogicalRect | undefined;
   readonly targetId: string | undefined;
-  readonly targetKind: "center" | "edge" | "reorder" | "external" | undefined;
+  readonly targetKind: "center" | "edge" | "reorder" | "tab-insert" | "external" | undefined;
   readonly targetEdge: string | undefined;
   readonly targetLabel: string | undefined;
   readonly externalAvailable: boolean;
@@ -241,12 +260,13 @@ export function usePanelDrag<TCommand>(
   useLayoutEffect(() => {
     getRootRef.current = options.getRoot;
   }, [options.getRoot]);
-  const geometryEpoch = panelDragGeometryEpoch(
+  const layoutEpoch = panelDragGeometryEpoch(
     options.resolvedLayout,
     options.logicalBounds,
     options.direction,
     options.splitterSize,
   );
+  const geometryEpoch = `${layoutEpoch}:${options.dropBehavior?.splitOnDragAndDrop ?? true}:${options.dropBehavior?.preferredSplitDirection ?? "right"}:${options.dropBehavior?.centerGroupDrop ?? "swap"}`;
   const currentGeometryEpochRef = useRef(geometryEpoch);
   const currentRevisionRef = useRef(options.projection.revision);
   useLayoutEffect(() => {
@@ -296,6 +316,7 @@ export function usePanelDrag<TCommand>(
       options.frameScheduler.cancel(options.scheduleKey);
       const session = sessionRef.current;
       session?.reorderResizeObserver?.disconnect();
+      session?.dropGeometry.dispose();
       if (session?.captureElement.hasPointerCapture?.(session.pointerId)) {
         session.captureElement.releasePointerCapture?.(session.pointerId);
       }
@@ -316,6 +337,7 @@ export function usePanelDrag<TCommand>(
   });
 
   const release = useCallback((session: DragSession<TCommand>) => {
+    session.dropGeometry.dispose();
     session.reorderResizeObserver?.disconnect();
     session.reorderResizeObserver = undefined;
     if (session.captureElement.hasPointerCapture?.(session.pointerId)) {
@@ -415,8 +437,28 @@ export function usePanelDrag<TCommand>(
             session.bounds,
             session.direction,
           );
-          const candidate = hitTestPanelDropCandidates(session.candidates, logicalPoint);
-          if (candidate !== undefined) target = { kind: "internal", candidate };
+          const candidate = hitTestPanelDropCandidates(
+            session.candidates,
+            logicalPoint,
+            session.splitEnabled,
+          );
+          if (candidate !== undefined) {
+            const insertion =
+              candidate.request.target.kind === "center"
+                ? hitTestTabInsertion(session.insertionStrips, candidate.request.targetGroup.id, {
+                    x: session.current.clientX,
+                    y: session.current.clientY,
+                  })
+                : undefined;
+            // A rejected slot must not silently turn into an append operation.
+            if (insertion === undefined) target = { kind: "internal", candidate };
+            else if (insertion.candidate !== undefined)
+              target = {
+                kind: "internal",
+                candidate: insertion.candidate,
+                indicatorRect: insertion.indicatorRect,
+              };
+          }
         }
       }
       if (
@@ -483,6 +525,32 @@ export function usePanelDrag<TCommand>(
       invalidate();
     };
     const handleResize = () => invalidate();
+    const handleKey = (event: globalThis.KeyboardEvent) => {
+      const session = sessionRef.current;
+      if (session === null) return;
+      if (event.key === "Escape") {
+        event.preventDefault();
+        resetRejected(session, options.messages.moveCancelled());
+        return;
+      }
+      if (event.key !== "Alt" && event.key !== "Shift") return;
+      const enabled = splitEnabledForEvent(
+        event,
+        ownerWindow.navigator.platform,
+        options.dropBehavior,
+      );
+      if (enabled === session.splitEnabled) return;
+      event.preventDefault();
+      session.splitEnabled = enabled;
+      options.frameScheduler.schedule(options.scheduleKey, () => paintCandidate(session, false));
+    };
+    const handleBlur = () => {
+      const session = sessionRef.current;
+      if (session !== null) resetRejected(session, options.messages.moveCancelled());
+    };
+    ownerWindow.addEventListener("keydown", handleKey);
+    ownerWindow.addEventListener("keyup", handleKey);
+    ownerWindow.addEventListener("blur", handleBlur);
     ownerWindow.addEventListener("resize", handleResize);
     ownerWindow.addEventListener("scroll", handleScroll, true);
 
@@ -500,10 +568,14 @@ export function usePanelDrag<TCommand>(
 
     return () => {
       observer?.disconnect();
+      ownerWindow.removeEventListener("keydown", handleKey);
+      ownerWindow.removeEventListener("keyup", handleKey);
+      ownerWindow.removeEventListener("blur", handleBlur);
       ownerWindow.removeEventListener("resize", handleResize);
       ownerWindow.removeEventListener("scroll", handleScroll, true);
     };
   }, [
+    options.dropBehavior,
     options.frameScheduler,
     options.messages,
     options.scheduleKey,
@@ -562,6 +634,13 @@ export function usePanelDrag<TCommand>(
       const position = externalPosition(event);
       const tabElement = event.currentTarget;
       const rootRect = measureRoot(root, options.logicalBounds);
+      const dropGeometry = captureDropGeometry(
+        root,
+        rootRect,
+        options.logicalBounds,
+        options.resolvedLayout,
+        options.direction,
+      );
       const reorderScrollElement = tabElement.closest<HTMLElement>("[role=tablist]") ?? undefined;
       const createReorderCommand = options.createReorderCommand;
       const measuredReorder =
@@ -587,6 +666,7 @@ export function usePanelDrag<TCommand>(
         layout: options.resolvedLayout,
         bounds: options.logicalBounds,
         rootRect,
+        dropGeometry,
         direction: options.direction,
         geometryEpoch,
         pointerId: event.pointerId,
@@ -598,7 +678,7 @@ export function usePanelDrag<TCommand>(
               options.resolvedLayout,
               panel.id,
               options.direction,
-              0.25,
+              0.1,
               0.5,
               options.splitterSize,
               {
@@ -606,8 +686,11 @@ export function usePanelDrag<TCommand>(
                 splitPanel: options.messages.splitPanel,
               },
               options.planDrop,
+              dropGeometry.groups,
+              options.dropBehavior,
             )
           : [],
+        insertionStrips: [],
         reorderIndex: measuredReorder?.index,
         reorderScrollElement,
         reorderGeometry: measuredReorder?.geometry,
@@ -617,11 +700,30 @@ export function usePanelDrag<TCommand>(
         },
         reorderScrollChanged: false,
         reorderResizeObserver: undefined,
+        splitEnabled: splitEnabledForEvent(
+          event,
+          event.currentTarget.ownerDocument.defaultView?.navigator.platform ?? "",
+          options.dropBehavior,
+        ),
         current: position,
         pending: undefined,
         target: undefined,
       };
+      session.insertionStrips = captureTabInsertionStrips(
+        root,
+        session.candidates,
+        options.projection,
+        options.resolvedLayout,
+        options.direction,
+        options.splitterSize,
+        options.planTabDrop,
+      );
       sessionRef.current = session;
+      dropGeometry.watch(() => {
+        if (sessionRef.current === session) {
+          resetRejected(session, options.messages.workspaceChangedBeforePanelMove());
+        }
+      });
       send(actor, {
         type: "POINTER_DOWN",
         pointerId: event.pointerId,
@@ -704,6 +806,18 @@ export function usePanelDrag<TCommand>(
       const session = sessionRef.current;
       if (session === null || session.pointerId !== event.pointerId) return;
       options.frameScheduler.cancel(options.scheduleKey);
+      if (
+        !session.dropGeometry.isCurrent() ||
+        session.insertionStrips.some((strip) => !strip.isCurrent())
+      ) {
+        resetRejected(session, options.messages.workspaceChangedBeforePanelMove());
+        return;
+      }
+      session.splitEnabled = splitEnabledForEvent(
+        event,
+        event.currentTarget.ownerDocument.defaultView?.navigator.platform ?? "",
+        options.dropBehavior,
+      );
       session.pending = externalPosition(event);
       consumeLatestPointer(session, false);
       if (
@@ -974,14 +1088,19 @@ function createDragView<TCommand>(
   return {
     panelTitle: session.panel.title,
     pointer: session.current,
-    previewRect: candidate?.previewRect,
+    previewRect:
+      target?.kind === "internal" && target.indicatorRect !== undefined
+        ? undefined
+        : candidate?.previewRect,
     targetId: activeCandidateId(target),
     targetKind:
       target?.kind === "external"
         ? "external"
         : target?.kind === "reorder"
           ? "reorder"
-          : candidate?.request.target.kind,
+          : target?.kind === "internal" && target.indicatorRect !== undefined
+            ? "tab-insert"
+            : candidate?.request.target.kind,
     targetEdge:
       candidate?.request.target.kind === "edge" ? candidate.request.target.edge : undefined,
     targetLabel:
@@ -994,7 +1113,9 @@ function createDragView<TCommand>(
     bounds: session.bounds,
     direction: session.direction,
     rootRect,
-    reorderIndicator: reorderCandidate?.indicatorRect,
+    reorderIndicator:
+      reorderCandidate?.indicatorRect ??
+      (target?.kind === "internal" ? target.indicatorRect : undefined),
     reorderShifts: reorderCandidate?.shifts ?? EMPTY_TAB_REORDER_SHIFTS,
     sourcePanelId: session.panel.id,
     sourceGroupId: session.sourceGroup.id,
@@ -1283,7 +1404,7 @@ function updatePanelDragOverlay(element: HTMLDivElement | null, view: PanelDragV
     view.rootRect,
     view.direction,
   );
-  setOverlayRect(preview, overlayPreview);
+  setDropPreviewRect(preview, overlayPreview);
 
   const indicator = element.querySelector<HTMLElement>(".pf-tab-reorder-indicator");
   setOverlayRect(indicator, view.reorderIndicator);
@@ -1291,7 +1412,7 @@ function updatePanelDragOverlay(element: HTMLDivElement | null, view: PanelDragV
   const ghost = element.querySelector<HTMLElement>(".pf-panel-drag-ghost");
   if (ghost !== null) {
     ghost.dataset.external = String(view.targetKind === "external");
-    ghost.dataset.available = String(view.externalAvailable);
+    ghost.dataset.available = String(view.externalAvailable && view.targetId !== undefined);
     ghost.style.setProperty("--pf-drag-x", `${view.pointer.clientX - view.rootRect.left}px`);
     ghost.style.setProperty("--pf-drag-y", `${view.pointer.clientY - view.rootRect.top}px`);
     const title = ghost.querySelector<HTMLElement>("strong");
@@ -1355,7 +1476,7 @@ function updatePanelDragOverlay(element: HTMLDivElement | null, view: PanelDragV
     }
     touchedTabs.add(tab);
   }
-  if (view.targetKind === "reorder") {
+  if (view.targetKind !== undefined) {
     const sourceTab = tabsByPanelId.get(view.sourcePanelId);
     if (sourceTab !== undefined) {
       sourceTab.dataset.reorderSource = "true";
@@ -1380,7 +1501,7 @@ function clearPanelDragOverlay(element: HTMLDivElement | null): void {
   delete element.dataset.workspaceDropTarget;
   delete element.dataset.workspaceDropKind;
   delete element.dataset.workspaceDropEdge;
-  setOverlayRect(element.querySelector<HTMLElement>(".pf-panel-drop-preview"), undefined);
+  setDropPreviewRect(element.querySelector<HTMLElement>(".pf-panel-drop-preview"), undefined);
   setOverlayRect(element.querySelector<HTMLElement>(".pf-tab-reorder-indicator"), undefined);
   const ghost = element.querySelector<HTMLElement>(".pf-panel-drag-ghost");
   ghost?.querySelector<HTMLElement>("span")?.remove();

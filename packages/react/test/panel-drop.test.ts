@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import type { ResolvedLayout } from "@panefold/geometry";
 
-import { createPanelDropCandidates } from "../src/panel-drop";
+import { createPanelDropCandidates, hitTestPanelDropCandidates } from "../src/panel-drop";
 import type {
   WorkspacePanelDropPlanContext,
   WorkspacePanelDropRequest,
@@ -314,3 +314,111 @@ function exactFixturePlanner(
             : { ...context.targetRect, blockStart: 173, blockSize: 147 };
   return { command: { type: "planned-drop", request }, previewRect };
 }
+
+describe("editor-style planned panel destinations", () => {
+  it("uses a 10% edge band and preserves the exact preview and command", () => {
+    const candidates = createPanelDropCandidates(
+      projection,
+      layout,
+      "alpha",
+      "ltr",
+      undefined,
+      undefined,
+      undefined,
+      undefined,
+      exactFixturePlanner,
+    );
+    const merge = hitTestPanelDropCandidates(candidates, { inline: 460, block: 170 });
+    expect(merge?.id).toBe("center:right-node");
+    expect(merge?.previewRect).toBe(merge?.plan.previewRect);
+    const corner = hitTestPanelDropCandidates(candidates, { inline: 480, block: 21 });
+    expect(corner?.id).toBe("edge:right-node:inline-start");
+    expect(corner?.previewRect).toBe(corner?.plan.previewRect);
+  });
+
+  it("does not fall back to a different operation when the intended split is rejected", () => {
+    const candidates = createPanelDropCandidates(
+      projection,
+      layout,
+      "alpha",
+      "ltr",
+      undefined,
+      undefined,
+      undefined,
+      undefined,
+      (request, context) =>
+        request.target.kind === "center" ? exactFixturePlanner(request, context) : undefined,
+    );
+    expect(hitTestPanelDropCandidates(candidates, { inline: 401, block: 170 })).toBeUndefined();
+    expect(hitTestPanelDropCandidates(candidates, { inline: 600, block: 170 })?.id).toBe(
+      "center:right-node",
+    );
+  });
+
+  it("keeps the source group's sole panel a non-destination", () => {
+    const candidates = createPanelDropCandidates(
+      projection,
+      layout,
+      "gamma",
+      "ltr",
+      undefined,
+      undefined,
+      undefined,
+      undefined,
+      exactFixturePlanner,
+    );
+    expect(hitTestPanelDropCandidates(candidates, { inline: 600, block: 170 })).toBeUndefined();
+    expect(hitTestPanelDropCandidates(candidates, { inline: 401, block: 170 })).toBeUndefined();
+  });
+
+  it("never drops through a floating source or a foreground rejected destination", () => {
+    const floatingRect = { inlineStart: 500, blockStart: 80, inlineSize: 200, blockSize: 200 };
+    const floatingProjection: WorkspaceProjection = {
+      ...projection,
+      nodes: { ...projection.nodes, float: { id: "float", kind: "group", groupId: "floating" } },
+      groups: {
+        ...projection.groups,
+        floating: { id: "floating", panelIds: ["delta"], selectedPanelId: "delta" },
+      },
+      panels: { ...projection.panels, delta: { id: "delta", type: "fixture", title: "Delta" } },
+      floatingSurfaces: [
+        {
+          id: "surface",
+          rootNodeId: "float",
+          bounds: { x: 500, y: 46, width: 200, height: 234 },
+          maximized: false,
+        },
+      ],
+    };
+    const floatingLayout: ResolvedLayout = {
+      ...layout,
+      nodeRects: { ...layout.nodeRects, float: floatingRect },
+      groupRects: { ...layout.groupRects, floating: floatingRect },
+    };
+    for (const panel of ["alpha", "delta"]) {
+      const candidates = createPanelDropCandidates(
+        floatingProjection,
+        floatingLayout,
+        panel,
+        "ltr",
+        undefined,
+        undefined,
+        undefined,
+        undefined,
+        (request, context) =>
+          request.targetGroup.id === "floating" ? undefined : exactFixturePlanner(request, context),
+        {
+          floating: {
+            contentRect: floatingRect,
+            headerRects: [{ ...floatingRect, blockStart: 46, blockSize: 34 }],
+          },
+        },
+      );
+      expect(hitTestPanelDropCandidates(candidates, { inline: 600, block: 170 })).toBeUndefined();
+      expect(hitTestPanelDropCandidates(candidates, { inline: 600, block: 60 })).toBeUndefined();
+      expect(hitTestPanelDropCandidates(candidates, { inline: 460, block: 170 })?.id).toBe(
+        "center:right-node",
+      );
+    }
+  });
+});

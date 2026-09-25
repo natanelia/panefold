@@ -81,6 +81,7 @@ import type {
   WorkspaceCommandAdapter,
   WorkspaceCommandOrigin,
   WorkspaceDirection,
+  WorkspaceDropBehavior,
   WorkspaceDispatchContext,
   WorkspaceDispatchOutcome,
   WorkspaceExternalPanelHandler,
@@ -139,6 +140,8 @@ export interface WorkspaceSurfaceProps<TSnapshot, TCommand, TResult> {
   readonly announcementDebounceMs?: number;
   readonly onCommandResult?: (result: TResult) => void;
   readonly interpretResult?: WorkspaceResultInterpreter<TCommand, TResult>;
+  /** View-only drag preferences; application planners remain authoritative. */
+  readonly dropBehavior?: WorkspaceDropBehavior;
   /** Static or per-group logical placement and tab content treatment. */
   readonly tabPresentation?: WorkspaceTabPresentation | WorkspaceTabPresentationResolver;
   /**
@@ -253,6 +256,7 @@ function SurfaceRenderer<TSnapshot, TCommand, TResult>({
   onCommandResult,
   interpretResult,
   tabPresentation,
+  dropBehavior,
   onExternalPanelRequest,
   externalPanelRequestTimeoutMs = 15_000,
 }: SurfaceRendererProps<TSnapshot, TCommand, TResult>) {
@@ -1033,6 +1037,7 @@ function SurfaceRenderer<TSnapshot, TCommand, TResult>({
   );
 
   const panelDrag = usePanelDrag({
+    dropBehavior,
     projection,
     resolvedLayout,
     logicalBounds,
@@ -1046,6 +1051,7 @@ function SurfaceRenderer<TSnapshot, TCommand, TResult>({
     externalAvailable: onExternalPanelRequest !== undefined,
     splitterSize,
     planDrop: commands.planPanelDrop,
+    planTabDrop: commands.planPanelTabDrop,
     createReorderCommand: commands.reorderPanel,
     frameScheduler: scheduler,
     scheduleKey: `${domIdPrefix}:panel-drag`,
@@ -1058,6 +1064,7 @@ function SurfaceRenderer<TSnapshot, TCommand, TResult>({
   });
 
   const groupDrag = useGroupDrag({
+    dropBehavior,
     projection,
     resolvedLayout,
     logicalBounds,
@@ -1088,12 +1095,16 @@ function SurfaceRenderer<TSnapshot, TCommand, TResult>({
             splitterSize,
             {
               swapPanelContainers: interactionMessages.swapPanelContainers,
+              mergePanelContainers: interactionMessages.mergePanelContainers,
               movePanelContainerBeside: interactionMessages.movePanelContainerBeside,
             },
             commands.planGroupDrop,
+            {},
+            dropBehavior,
           ),
     [
       commands.planGroupDrop,
+      dropBehavior,
       direction,
       interactionMessages,
       moveGroupId,
@@ -1544,14 +1555,19 @@ function SurfaceRenderer<TSnapshot, TCommand, TResult>({
             announce={announce}
             onMove={(candidate) => {
               const groupId = moveGroupId;
-              commitGroupDrop(
+              const outcome = commitGroupDrop(
                 candidate.request,
                 candidate.label,
                 "keyboard",
                 candidate.plan.command,
               );
               setMoveGroupId(undefined);
-              restoreGroupMoveHandle(groupId);
+              restoreGroupMoveHandle(
+                candidate.request.target.kind === "merge" &&
+                  (outcome.status === "committed" || outcome.status === "queued")
+                  ? candidate.request.targetGroup.id
+                  : groupId,
+              );
             }}
             onCancel={() => {
               const groupId = moveGroupId;

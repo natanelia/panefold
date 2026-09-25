@@ -366,26 +366,7 @@ export function createDemoCommands(
       select: true,
       activate: true,
     }),
-    mergeGroup: (sourceGroupId, targetGroupId, selectedPanelId) => {
-      const merge: WorkspaceCommand = {
-        type: "merge-groups",
-        sourceGroupId: groupId(sourceGroupId),
-        target: { groupId: groupId(targetGroupId) },
-      };
-      return selectedPanelId === undefined
-        ? merge
-        : {
-            type: "batch",
-            commands: [
-              merge,
-              {
-                type: "select-panel",
-                panelId: panelId(selectedPanelId),
-                activate: true,
-              },
-            ],
-          };
-    },
+    mergeGroup: createDemoMergeGroupCommand,
     floatPanel: (id) => createDemoFloatPanelCommand(getSnapshot(), id),
     moveFloatingSurface: (id, position) =>
       createDemoFloatingBatch(getSnapshot(), id, [
@@ -414,6 +395,7 @@ export function createDemoCommands(
       target: { groupId: demoRedockTarget(getSnapshot()) },
     }),
     planPanelDrop: (request, context) => planDemoPanelDrop(getSnapshot(), request, context),
+    planPanelTabDrop: (request, context) => planDemoPanelDrop(getSnapshot(), request, context),
     planGroupDrop: (request, context) => planDemoGroupDrop(getSnapshot(), request, context),
   };
 }
@@ -544,7 +526,16 @@ function planDemoPanelDrop(
       panelId: panelId(request.panel.id),
       target:
         request.target.kind === "center"
-          ? { kind: "center", groupId: groupId(request.targetGroup.id) }
+          ? {
+              kind: "center",
+              groupId: groupId(request.targetGroup.id),
+              ...(request.target.beforePanelId === undefined
+                ? {}
+                : { beforePanelId: panelId(request.target.beforePanelId) }),
+              ...(request.target.afterPanelId === undefined
+                ? {}
+                : { afterPanelId: panelId(request.target.afterPanelId) }),
+            }
           : {
               kind: "edge",
               groupId: groupId(request.targetGroup.id),
@@ -579,6 +570,19 @@ function planDemoGroupDrop(
   context: WorkspaceGroupDropPlanContext,
 ): WorkspaceGroupDropPlan<WorkspaceCommand> | undefined {
   if (request.revision !== snapshot.revision.toString()) return undefined;
+  if (request.target.kind === "merge") {
+    const command = createDemoMergeGroupCommand(
+      request.sourceGroup.id,
+      request.targetGroup.id,
+      request.sourceGroup.selectedPanelId,
+    );
+    return previewDemoDrop(
+      snapshot,
+      command,
+      (next) => getEntity(next.groups, groupId(request.targetGroup.id)),
+      context,
+    );
+  }
   const plan = planGroupDropCommand(
     snapshot,
     {
@@ -689,4 +693,29 @@ function collectReachableNodeIds(
     if (node.kind === "split") pending.push(...node.children);
   }
   return result;
+}
+
+function createDemoMergeGroupCommand(
+  sourceGroupId: string,
+  targetGroupId: string,
+  selectedPanelId?: string,
+): WorkspaceCommand {
+  const merge: WorkspaceCommand = {
+    type: "merge-groups",
+    sourceGroupId: groupId(sourceGroupId),
+    target: { groupId: groupId(targetGroupId) },
+  };
+  return selectedPanelId === undefined
+    ? merge
+    : {
+        type: "batch",
+        commands: [
+          merge,
+          {
+            type: "select-panel",
+            panelId: panelId(selectedPanelId),
+            activate: true,
+          },
+        ],
+      };
 }

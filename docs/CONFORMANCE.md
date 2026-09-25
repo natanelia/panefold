@@ -77,7 +77,7 @@ the command output.
   undo, one-action populated and empty panel-container removal, same-document floating
   move/resize/minimize/maximize/restore/redock with compact sole-panel chrome, movable
   minimized headers, stable live panel state, and raw splitter-frame capture.
-  The checked-in result records 30/30 passing browser tasks.
+  The checked-in result records the executed browser task count and individual outcomes.
 - The framework JSDOM contract passed 20/20 tests across Vue, Svelte, Angular, and Web Components.
 - The compact headless protocol result matches the reviewed graphs for all 12 Appendix-C actors:
   84/84 states, 258/258 transition branches, both outcomes for 64/64 guarded branches, and 146/146
@@ -87,7 +87,7 @@ the command output.
   primary and byte-equivalent replay runs plus 12 cancelled twins, with zero pending handles. This
   is code evidence, not browser/OS/process failure certification or the per-panel final-authority
   matrix required by `TST-009`.
-- Protocol/motion validation passed 86/86 focused tests plus 92/92 React integration tests. It
+- Protocol/motion validation passed 86/86 focused tests plus 131/131 React integration tests. It
   covers the twelve-actor catalog, cancellation/revision conflicts, disposable motion leases,
   progressive View Transition fallback, and deterministic load degradation; these focused tests
   supplement rather than substitute for the exact graph result above.
@@ -97,10 +97,7 @@ the command output.
   state per command, not the retained optimized production kernel.
 - The earlier 50,000-attempt projection campaign completed with zero replay/projection divergence.
   It is below the ten-million stable threshold and its checked-in summary records the missing seed.
-- The local automated interaction capture retained 179 frame deltas at 10.11 ms p95 and 10.3 ms
-  p99, with one observed long task of 56 ms. The paired Node smoke run measured 50-panel reorder at
-  0.2946 ms p95 and 500-panel reorder at 2.1511 ms p95 on that machine. These are experimental
-  regression guards—not physical performance certification.
+- The Linux Chromium interaction capture records raw frame deltas, long tasks, and paired Node smoke measurements in `conformance/results/interaction-performance-2026-09-26.json`. These are experimental regression guards, not physical performance certification.
 
 ## Hard release gates
 
@@ -119,7 +116,7 @@ the command output.
 
 ## Published profile boundary
 
-- `compact-react-chromium-desktop` is one React 19.2.8 / Playwright Chromium Darwin 25.6 arm64 fixture, with a
+- `compact-react-chromium-desktop` is a React / Playwright Chromium fixture with recorded macOS and Linux runs, and a
   390×844 touch-emulation subprofile and controlled same-origin popup. It is not a general browser,
   OS, mobile hardware, PiP, multi-screen, crash, security, or assistive-technology promise.
 - `framework-adapter-contract-jsdom` is an immutable-store/lifecycle/SSR contract for Vue, Svelte,
