@@ -4233,3 +4233,52 @@ it.each(["release", "observer"] as const)(
     }
   },
 );
+
+it.each(["panel", "group"] as const)(
+  "consumes the pending %s pointer when a modifier arrives before its frame",
+  async (kind) => {
+    const frames = createManualFrameScheduler();
+    const runtime = new FixtureRuntime(initialProjection);
+    const view = renderWorkspace(runtime, {
+      commands: directManipulationCommands,
+      frameScheduler: frames.scheduler,
+    });
+    const source =
+      kind === "panel"
+        ? await screen.findByRole("tab", { name: "Alpha" })
+        : await screen.findByRole("button", { name: "Move Left panel container" });
+    const workspace = screen.getByLabelText("Fixture workspace");
+    setElementRect(workspace, { left: 0, top: 0, width: 1000, height: 700 });
+    installPointerCapture(source);
+    fireEvent.pointerDown(source, { button: 0, pointerId: 82, clientX: 100, clientY: 20 });
+    fireEvent.pointerMove(source, { pointerId: 82, clientX: 750, clientY: 350 });
+    fireEvent.keyDown(window, { key: "Alt", altKey: true });
+    act(() => frames.flush());
+    const overlay = requiredElement(view.container.querySelector(`[data-workspace-${kind}-drag]`));
+    expect(overlay.dataset.workspaceDropKind).toBe(kind === "panel" ? "center" : "swap");
+    expect(runtime.transactions).toHaveLength(0);
+    fireEvent.pointerCancel(source, { pointerId: 82 });
+  },
+);
+
+it("repairs a panel split modifier from a pointer sample without a keyboard event", async () => {
+  const frames = createManualFrameScheduler();
+  const runtime = new FixtureRuntime(initialProjection);
+  const view = renderWorkspace(runtime, {
+    commands: directManipulationCommands,
+    frameScheduler: frames.scheduler,
+  });
+  const source = await screen.findByRole("tab", { name: "Alpha" });
+  const workspace = screen.getByLabelText("Fixture workspace");
+  setElementRect(workspace, { left: 0, top: 0, width: 1000, height: 700 });
+  installPointerCapture(source);
+  fireEvent.pointerDown(source, { button: 0, pointerId: 83, clientX: 100, clientY: 20 });
+  fireEvent.pointerMove(source, { pointerId: 83, clientX: 510, clientY: 350, altKey: true });
+  act(() => frames.flush());
+  const overlay = requiredElement(view.container.querySelector("[data-workspace-panel-drag]"));
+  expect(overlay.dataset.workspaceDropKind).toBe("center");
+  fireEvent.pointerMove(source, { pointerId: 83, clientX: 510, clientY: 350, altKey: false });
+  act(() => frames.flush());
+  expect(overlay.dataset.workspaceDropKind).toBe("edge");
+  fireEvent.pointerCancel(source, { pointerId: 83 });
+});

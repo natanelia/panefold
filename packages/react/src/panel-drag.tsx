@@ -498,6 +498,28 @@ export function usePanelDrag<TCommand>(
     [options, send],
   );
 
+  const consumeLatestPointer = useCallback(
+    (session: DragSession<TCommand>, allowAutoScroll: boolean) => {
+      const position = session.pending;
+      if (
+        position === undefined ||
+        sessionRef.current !== session ||
+        actorRef.current !== session.actor
+      ) {
+        return;
+      }
+      session.pending = undefined;
+      session.current = position;
+      const next = send(session.actor, {
+        type: "POINTER_MOVE",
+        pointerId: session.pointerId,
+        position: { x: position.clientX, y: position.clientY },
+      });
+      if (next === "dragging") paintCandidate(session, allowAutoScroll);
+    },
+    [paintCandidate, send],
+  );
+
   useEffect(() => {
     const root = getRootRef.current();
     const ownerWindow = root?.ownerDocument.defaultView;
@@ -542,7 +564,12 @@ export function usePanelDrag<TCommand>(
       if (enabled === session.splitEnabled) return;
       event.preventDefault();
       session.splitEnabled = enabled;
-      options.frameScheduler.schedule(options.scheduleKey, () => paintCandidate(session, false));
+      options.frameScheduler.schedule(options.scheduleKey, () => {
+        // A key event may replace a queued pointer frame. Consume that sample
+        // first so the actor and the overlay advance together.
+        consumeLatestPointer(session, false);
+        paintCandidate(session, false);
+      });
     };
     const handleBlur = () => {
       const session = sessionRef.current;
@@ -575,6 +602,7 @@ export function usePanelDrag<TCommand>(
       ownerWindow.removeEventListener("scroll", handleScroll, true);
     };
   }, [
+    consumeLatestPointer,
     options.dropBehavior,
     options.frameScheduler,
     options.messages,
@@ -582,28 +610,6 @@ export function usePanelDrag<TCommand>(
     paintCandidate,
     resetRejected,
   ]);
-
-  const consumeLatestPointer = useCallback(
-    (session: DragSession<TCommand>, allowAutoScroll: boolean) => {
-      const position = session.pending;
-      if (
-        position === undefined ||
-        sessionRef.current !== session ||
-        actorRef.current !== session.actor
-      ) {
-        return;
-      }
-      session.pending = undefined;
-      session.current = position;
-      const next = send(session.actor, {
-        type: "POINTER_MOVE",
-        pointerId: session.pointerId,
-        position: { x: position.clientX, y: position.clientY },
-      });
-      if (next === "dragging") paintCandidate(session, allowAutoScroll);
-    },
-    [paintCandidate, send],
-  );
 
   const queuePointerSample = useCallback(
     (session: DragSession<TCommand>, position: WorkspaceExternalPanelPosition) => {
@@ -755,10 +761,15 @@ export function usePanelDrag<TCommand>(
     (event: ReactPointerEvent<HTMLButtonElement>) => {
       const session = sessionRef.current;
       if (session === null || session.pointerId !== event.pointerId) return;
+      session.splitEnabled = splitEnabledForEvent(
+        event,
+        event.currentTarget.ownerDocument.defaultView?.navigator.platform ?? "",
+        options.dropBehavior,
+      );
       queuePointerSample(session, externalPosition(event));
       event.preventDefault();
     },
-    [queuePointerSample],
+    [options.dropBehavior, queuePointerSample],
   );
 
   const settleExternal = useCallback(

@@ -341,7 +341,10 @@ export function useGroupDrag<TCommand>(
       if (enabled === session.splitEnabled) return;
       event.preventDefault();
       session.splitEnabled = enabled;
-      options.frameScheduler.schedule(options.scheduleKey, () => paintCandidate(session));
+      options.frameScheduler.schedule(options.scheduleKey, () => {
+        consumeLatestPointer(session);
+        paintCandidate(session);
+      });
     };
     const handleBlur = () => {
       const session = sessionRef.current;
@@ -375,6 +378,7 @@ export function useGroupDrag<TCommand>(
       ownerWindow.removeEventListener("scroll", invalidate, true);
     };
   }, [
+    consumeLatestPointer,
     options.dropBehavior,
     options.frameScheduler,
     options.scheduleKey,

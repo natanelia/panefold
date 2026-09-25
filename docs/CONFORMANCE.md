@@ -77,7 +77,7 @@ the command output.
   undo, one-action populated and empty panel-container removal, same-document floating
   move/resize/minimize/maximize/restore/redock with compact sole-panel chrome, movable
   minimized headers, stable live panel state, and raw splitter-frame capture.
-  The checked-in result records the executed browser task count and individual outcomes.
+  The checked-in result records 46/46 passing browser tasks.
 - The framework JSDOM contract passed 20/20 tests across Vue, Svelte, Angular, and Web Components.
 - The compact headless protocol result matches the reviewed graphs for all 12 Appendix-C actors:
   84/84 states, 258/258 transition branches, both outcomes for 64/64 guarded branches, and 146/146

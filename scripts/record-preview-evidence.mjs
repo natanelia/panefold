@@ -171,18 +171,18 @@ const docsPath = "docs/CONFORMANCE.md";
 const docs = await readFile(docsPath, "utf8");
 const updatedDocs = docs
   .replace(
-    /The checked-in result records \d+\/\d+ passing browser tasks/u,
+    /The checked-in result records\s+\d+\/\d+ passing\s+browser tasks/u,
     `The checked-in result records ${browser.stats.expected}/${browser.stats.expected} passing browser tasks`,
   )
   .replace(
-    /Protocol\/motion validation passed \d+\/\d+ focused tests plus \d+\/\d+ React integration tests/u,
+    /Protocol\/motion validation passed\s+\d+\/\d+ focused tests plus\s+\d+\/\d+ React integration tests/u,
     `Protocol/motion validation passed ${countPassed(focusedResults)}/${countPassed(focusedResults)} focused tests plus ${countPassed(reactResults)}/${countPassed(reactResults)} React integration tests`,
   );
-assert.match(updatedDocs, /The checked-in result records \d+\/\d+ passing browser tasks/u);
+assert.match(updatedDocs, /The checked-in result records\s+\d+\/\d+ passing\s+browser tasks/u);
 const currentDocs = updatedDocs.replace(
   /- The local automated interaction capture[\s\S]*?(?=\n\n## Hard release gates)/u,
   "- The Linux Chromium interaction capture records raw frame deltas, long tasks, and the paired " +
-    "Node smoke measurements in `conformance/results/interaction-performance-2026-09-17.json`. " +
+    "Node smoke measurements in `conformance/results/interaction-performance-2026-09-26.json`. " +
     "These are experimental regression guards, not physical performance certification.",
 );
 await writeFile(docsPath, currentDocs);
