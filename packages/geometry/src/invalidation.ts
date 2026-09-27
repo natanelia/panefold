@@ -215,8 +215,10 @@ export function planLayoutInvalidation(
   after: WorkspaceSnapshot,
   patches: readonly WorkspacePatch[],
 ): LayoutInvalidationPlan {
-  const beforeIndex = createIndex(before);
-  const afterIndex = createIndex(after);
+  // Geometry-neutral patches need no membership/topology traversal. Keep
+  // indexes lazy and local to this call, without allocating getter closures.
+  let beforeIndex: SnapshotIndex | undefined;
+  let afterIndex: SnapshotIndex | undefined;
   const constraints = new Set<string>();
   const geometry = new Set<string>();
   const surfaces = new Set<string>();
@@ -237,6 +239,8 @@ export function planLayoutInvalidation(
 
   for (const patch of patches) {
     if (patch.kind === "panel" && panelAffectsConstraints(patch.before, patch.after)) {
+      beforeIndex ??= createIndex(before);
+      afterIndex ??= createIndex(after);
       for (const nodeId of nodesForPanel(beforeIndex, String(patch.id))) {
         invalidateConstraintPath(beforeIndex, nodeId);
       }
@@ -246,6 +250,8 @@ export function planLayoutInvalidation(
       continue;
     }
     if (patch.kind === "group" && groupAffectsConstraints(patch.before, patch.after)) {
+      beforeIndex ??= createIndex(before);
+      afterIndex ??= createIndex(after);
       for (const nodeId of nodesForGroup(beforeIndex, String(patch.id))) {
         invalidateConstraintPath(beforeIndex, nodeId);
       }
@@ -257,11 +263,15 @@ export function planLayoutInvalidation(
     if (patch.kind === "node") {
       const nodeId = String(patch.id);
       if (nodeTopologyChanged(patch.before, patch.after)) {
+        beforeIndex ??= createIndex(before);
+        afterIndex ??= createIndex(after);
         invalidateConstraintPath(beforeIndex, nodeId);
         invalidateConstraintPath(afterIndex, nodeId);
         invalidateSurfaceIndex(beforeIndex, nodeId);
         invalidateSurfaceIndex(afterIndex, nodeId);
       } else if (nodeAllocationChanged(patch.before, patch.after)) {
+        beforeIndex ??= createIndex(before);
+        afterIndex ??= createIndex(after);
         invalidateSubtree(beforeIndex, nodeId);
         invalidateSubtree(afterIndex, nodeId);
       }
@@ -269,10 +279,12 @@ export function planLayoutInvalidation(
     }
     if (patch.kind === "surface" && surfaceGeometryChanged(patch.before, patch.after)) {
       if (patch.before !== undefined) {
+        beforeIndex ??= createIndex(before);
         addDescendants(beforeIndex, String(patch.before.rootNodeId), geometry);
         surfaces.add(String(patch.before.id));
       }
       if (patch.after !== undefined) {
+        afterIndex ??= createIndex(after);
         addDescendants(afterIndex, String(patch.after.rootNodeId), geometry);
         surfaces.add(String(patch.after.id));
       }

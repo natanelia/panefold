@@ -678,7 +678,7 @@
       "verificationClass": "code-verifiable",
       "artifactRole": "source",
       "uri": "repo://packages/geometry/test/invalidation.test.ts",
-      "sha256": "ef54d506202106cdfb7d85066fa71f6d83e1ed234d17125d3e94cba0e1118b11",
+      "sha256": "930cb0c67dabbff1e9ed542de171b51d91ae7365d1c20944e2a5be0c367989a6",
       "producedAt": "2026-08-14T07:19:51.074Z",
       "requirementIds": [
         "LAY-006",
@@ -1075,8 +1075,8 @@
       "verificationClass": "environment-verifiable",
       "artifactRole": "result",
       "uri": "repo://conformance/results/protocol-motion-2026-09-26.json",
-      "sha256": "69d02b805d4984337c5e5a2f6cf5512ed4c12133ccbf867d2877d2b7da9c8bc3",
-      "producedAt": "2026-09-27T13:19:03.555Z",
+      "sha256": "406871b58c7b8afa3f40a912e680840aa0d1c0c176093f6e0fe6148cd25d2c9d",
+      "producedAt": "2026-09-27T13:34:44.453Z",
       "requirementIds": [
         "A11Y-002",
         "ARC-002",
