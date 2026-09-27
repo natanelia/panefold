@@ -1,0 +1,45 @@
+name: Publish verified performance experiment
+
+on:
+  push:
+    branches: [perf/audit-20260927]
+    paths: [audit-publish.json]
+
+permissions:
+  contents: read
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v7
+      - name: Validate payload and publish isolated branch
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          import base64, gzip, hashlib, json, re, subprocess
+          from pathlib import Path
+          payload = json.loads(Path('audit-publish.json').read_text())
+          base = payload['base']
+          branch = payload['branch']
+          if base != '81b11b4fab78a8824243fd6b3a28e50131b997f0':
+              raise ValueError('Unexpected experiment baseline')
+          if not re.fullmatch(r'perf/audit-[a-z0-9-]+-20260927', branch):
+              raise ValueError('Only isolated audit review branches are allowed')
+          patch = gzip.decompress(base64.b64decode(payload['patchGzipBase64'], validate=True))
+          if hashlib.sha256(patch).hexdigest() != payload['patchSha256']:
+              raise ValueError('Patch digest mismatch')
+          patch_path = Path('/tmp/verified-performance.patch')
+          patch_path.write_bytes(patch)
+          def git(*args):
+              return subprocess.run(['git', *args], check=True)
+          git('fetch', '--no-tags', 'origin', base)
+          git('checkout', '-b', branch, base)
+          git('apply', '--check', str(patch_path))
+          git('apply', '--index', str(patch_path))
+          git('-c', 'user.name=github-actions[bot]', '-c', 'user.email=41898282+github-actions[bot]@users.noreply.github.com', 'commit', '-m', payload['message'])
+          git('push', 'origin', 'HEAD:refs/heads/' + branch)
+          PY
