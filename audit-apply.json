@@ -1,6 +1,6 @@
 {
-  "branch": "perf/audit-envelope-20260927",
-  "candidateCommit": "d1a3244ea0b3445ee356b8aeaea6a24fb3454d43",
-  "expectedTree": "394c22b6365ddf0fc592b6f61cc3b05c52936610",
-  "message": "perf(runtime): reuse canonical serialized bytes when creating envelopes"
+  "branch": "perf/audit-drop-measurement-20260927",
+  "candidateCommit": "1566a7e62e5bbb5c223c62453ef7c2927f85b26e",
+  "expectedTree": "fc8ccf1e10f5f55d387077004ff3cca45e3a2a64",
+  "message": "perf(react): index tab-strip labels once per drop measurement"
 }
