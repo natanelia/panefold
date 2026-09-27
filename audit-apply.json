@@ -1,6 +1,6 @@
 {
   "branch": "perf/audit-invalidation-20260927",
-  "candidateCommit": "f5a7b15c5e4244ee86c415581af9620424c37684",
-  "expectedTree": "323f1930fac17f3c3693ace7b36dd4c44d7964d9",
-  "message": "perf(geometry): defer snapshot indexing until geometry actually changes"
+  "candidateCommit": "602dd977c2760c657e816dd9fceabbd2f564b9ac",
+  "expectedTree": "a19659f3ddadeb7e051aec194e8af391dfca185f",
+  "message": "perf(geometry): retain native bulk traversal for wide splits"
 }
