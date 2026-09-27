@@ -17,31 +17,31 @@
   },
   "sampleCount": 179,
   "summary": {
-    "minimum": 16.6,
-    "maximum": 33.4,
-    "mean": 16.945,
+    "minimum": 16.5,
+    "maximum": 16.8,
+    "mean": 16.666,
     "median": 16.7,
     "p95": 16.7,
-    "p99": 33.322
+    "p99": 16.8
   },
   "rawFrameDeltasMs": [
-    16.7, 16.7, 16.6, 16.7, 16.6, 16.7, 33.4, 16.6, 16.7, 16.6, 16.7, 16.6, 16.7, 16.7, 16.6, 16.8,
-    16.6, 16.6, 16.7, 16.7, 16.7, 16.7, 16.6, 16.6, 16.7, 16.7, 16.7, 16.6, 16.7, 16.7, 16.6, 16.7,
-    16.7, 16.6, 16.7, 16.7, 16.6, 16.7, 16.7, 16.6, 16.7, 16.6, 16.7, 16.7, 16.7, 16.6, 16.7, 16.7,
-    16.6, 16.7, 16.7, 16.6, 16.7, 16.7, 16.7, 16.6, 16.7, 16.6, 16.7, 16.6, 16.7, 16.7, 16.6, 16.7,
-    16.7, 16.6, 16.7, 16.7, 16.6, 16.7, 16.7, 16.6, 16.7, 16.7, 16.6, 16.7, 16.7, 16.6, 16.7, 16.7,
-    16.6, 16.7, 16.7, 16.6, 16.7, 16.7, 16.6, 16.7, 16.6, 16.7, 16.7, 16.7, 16.6, 16.7, 16.6, 16.7,
-    16.7, 16.7, 16.6, 16.7, 16.6, 16.7, 16.7, 16.6, 16.7, 16.7, 16.6, 16.7, 16.7, 16.6, 16.7, 16.6,
-    16.7, 16.7, 16.7, 16.6, 16.7, 16.6, 16.7, 16.7, 16.6, 16.8, 16.6, 16.7, 16.7, 16.6, 16.6, 16.7,
-    16.7, 16.7, 16.6, 16.7, 16.7, 16.7, 16.6, 16.6, 16.7, 16.6, 16.8, 16.6, 16.7, 16.7, 16.6, 16.7,
-    16.6, 16.7, 16.7, 16.6, 16.7, 16.6, 16.8, 16.6, 16.7, 16.7, 16.6, 16.7, 16.6, 16.7, 16.7, 16.6,
-    16.7, 16.7, 16.6, 16.7, 33.3, 16.7, 16.6, 16.7, 16.7, 33.4, 16.6, 16.7, 16.6, 16.7, 16.7, 16.6,
+    16.7, 16.6, 16.8, 16.6, 16.7, 16.7, 16.6, 16.6, 16.7, 16.7, 16.7, 16.6, 16.7, 16.7, 16.6, 16.7,
+    16.7, 16.7, 16.6, 16.7, 16.7, 16.5, 16.8, 16.6, 16.7, 16.6, 16.7, 16.6, 16.7, 16.7, 16.6, 16.7,
+    16.7, 16.6, 16.8, 16.6, 16.7, 16.6, 16.7, 16.7, 16.6, 16.7, 16.7, 16.6, 16.7, 16.6, 16.7, 16.7,
+    16.7, 16.6, 16.7, 16.6, 16.7, 16.7, 16.7, 16.6, 16.7, 16.7, 16.7, 16.6, 16.6, 16.7, 16.7, 16.7,
+    16.6, 16.7, 16.7, 16.6, 16.7, 16.7, 16.6, 16.7, 16.7, 16.7, 16.6, 16.7, 16.7, 16.5, 16.8, 16.6,
+    16.7, 16.7, 16.6, 16.7, 16.6, 16.7, 16.7, 16.7, 16.6, 16.7, 16.7, 16.6, 16.7, 16.6, 16.7, 16.6,
+    16.8, 16.6, 16.6, 16.7, 16.7, 16.7, 16.6, 16.7, 16.7, 16.7, 16.6, 16.7, 16.6, 16.7, 16.7, 16.6,
+    16.7, 16.7, 16.6, 16.7, 16.6, 16.7, 16.7, 16.6, 16.7, 16.6, 16.7, 16.8, 16.6, 16.6, 16.7, 16.7,
+    16.6, 16.7, 16.6, 16.7, 16.8, 16.5, 16.7, 16.7, 16.7, 16.7, 16.6, 16.6, 16.7, 16.7, 16.6, 16.7,
+    16.7, 16.6, 16.7, 16.7, 16.7, 16.6, 16.7, 16.6, 16.7, 16.7, 16.6, 16.8, 16.6, 16.7, 16.7, 16.6,
+    16.6, 16.7, 16.7, 16.7, 16.7, 16.6, 16.6, 16.7, 16.7, 16.7, 16.6, 16.7, 16.7, 16.6, 16.6, 16.7,
     16.7, 16.7, 16.6
   ],
   "longTasks": [
     {
-      "startTime": 175.70000000001164,
-      "duration": 60
+      "startTime": 213.40000000002328,
+      "duration": 77
     }
   ],
   "baseline": {
@@ -53,7 +53,7 @@
     "longTaskMaximumCount": 12,
     "minimumSamples": 120
   },
-  "producedAt": "2026-09-25T18:33:40.088Z",
+  "producedAt": "2026-09-27T23:38:58.164Z",
   "nodeSmoke": {
     "schemaVersion": 1,
     "environment": {
@@ -61,24 +61,24 @@
       "v8": "13.6.233.17-node.53",
       "platform": "linux",
       "architecture": "x64",
-      "cpu": "AMD EPYC 9V74 80-Core Processor"
+      "cpu": "AMD EPYC 7763 64-Core Processor"
     },
     "kernel": {
       "iterations": 10000,
-      "elapsedMs": 2082.5
+      "elapsedMs": 2347.57
     },
     "geometry": {
       "iterations": 100000,
-      "elapsedMs": 355.19
+      "elapsedMs": 364.38
     },
     "reorderProfiles": [
       {
         "panelCount": 50,
         "warmupCount": 250,
         "sampleCount": 2000,
-        "medianMs": 0.3152,
-        "p95Ms": 0.4973,
-        "p99Ms": 0.6148,
+        "medianMs": 0.3498,
+        "p95Ms": 0.5181,
+        "p99Ms": 0.647,
         "designTargetMs": 1,
         "withinDesignTargetOnThisMachine": true,
         "invariantViolations": 0
@@ -87,11 +87,11 @@
         "panelCount": 500,
         "warmupCount": 100,
         "sampleCount": 1000,
-        "medianMs": 2.9932,
-        "p95Ms": 5.1153,
-        "p99Ms": 6.2294,
+        "medianMs": 3.0028,
+        "p95Ms": 3.2782,
+        "p99Ms": 3.787,
         "designTargetMs": 5,
-        "withinDesignTargetOnThisMachine": false,
+        "withinDesignTargetOnThisMachine": true,
         "invariantViolations": 0
       }
     ],
@@ -99,31 +99,31 @@
       {
         "nodeCount": 100,
         "sampleCount": 10000,
-        "elapsedMs": 50.74,
-        "meanMicroseconds": 5.074
+        "elapsedMs": 49.39,
+        "meanMicroseconds": 4.939
       },
       {
         "nodeCount": 500,
         "sampleCount": 10000,
-        "elapsedMs": 263.96,
-        "meanMicroseconds": 26.396
+        "elapsedMs": 261.89,
+        "meanMicroseconds": 26.189
       },
       {
         "nodeCount": 1000,
         "sampleCount": 10000,
-        "elapsedMs": 541.42,
-        "meanMicroseconds": 54.142
+        "elapsedMs": 537.76,
+        "meanMicroseconds": 53.776
       }
     ],
-    "totalElapsedMs": 7632.21,
+    "totalElapsedMs": 7832.45,
     "finalRevision": "10000",
     "invariantViolations": 0
   },
   "rawReport": {
     "path": "artifacts/preview-browser.json",
-    "sha256": "e7d6e0e0b68749e6a528b73205d3e4b30a10ed9b4ea4d705cc4c33eec3be3b25",
-    "runUrl": "https://github.com/natanelia/panefold/actions/runs/36173877769",
-    "artifact": "preview-executed-evidence"
+    "sha256": "3ef3a9b3e656a8bc93c8410226214e1f59645bed85a642051a219a899b507773",
+    "runUrl": "https://github.com/natanelia/panefold/actions/runs/36359174170",
+    "artifact": "drop-measurement-audit"
   },
   "sourceDigests": {
     "e2e/drag-parity.spec.ts": "a7c7da7513e3b56de9b832cce5fa2fc6236f55d74ba9ea3aa9be1600f6620bce",
@@ -136,7 +136,7 @@
     "packages/motion/src/coordinator.ts": "50eff7dd6a1b8f6433ac3f5bfc5f8d74b99a501e43e712ccb3e1a82520574c6d",
     "packages/react/src/WorkspaceSurface.tsx": "25c81bb51d017329d21d30b5feee3d068a71507727209728c79dc53b611f154a",
     "packages/react/src/drop-modifiers.ts": "542583898dfa7d121b0d91f51171df8a3db47a8e749422437da903372a60c6ee",
-    "packages/react/src/drop-preview.ts": "73ff8f429ae558ec4ddc573fb4250e2bb4a73c9fd1fb28b3baabf369ea6f781c",
+    "packages/react/src/drop-preview.ts": "8b1402771a190f59d794a5e2d02b379c3265a264c2e46b328f85700656258a96",
     "packages/react/src/drop-target.ts": "46d7afa6f516ec67bcc0d1deaa7e905c2da826be516125a726a170d6a2523357",
     "packages/react/src/floating-surface.tsx": "ce26f0641e9fea4d2349255feae86f0d9b3158a6cb8812d09d96b8c55481835c",
     "packages/react/src/group-drag.tsx": "bb30a15666da3c6fbcfa53b443b023393ea85bec33ee3da750e9f67384694f26",
