@@ -1,17 +1,56 @@
-diff --git a/packages/runtime/src/persistence-codec.ts b/packages/runtime/src/persistence-codec.ts
-index e3d26c5..4ab9cc2 100644
---- a/packages/runtime/src/persistence-codec.ts
-+++ b/packages/runtime/src/persistence-codec.ts
-@@ -132,9 +132,9 @@ export async function createWorkspaceEnvelope(
-   }
-   const serialized = canonicalSerialize(snapshot);
-   const workspace = JSON.parse(serialized) as unknown;
--  const checksum = await (options.checksum ?? SHA256_CHECKSUM).digest(
--    canonicalSerialize(workspace),
--  );
-+  // Parsing canonical JSON and serializing it canonically again preserves its
-+  // bytes, including tagged BigInts, sorted keys and normalized negative zero.
-+  const checksum = await (options.checksum ?? SHA256_CHECKSUM).digest(serialized);
-   const panelTypeVersions: Record<string, number> = Object.create(null) as Record<string, number>;
-   for (const panelId of snapshot.panels.ids) {
-     const panel = snapshot.panels.byId[panelId];
+diff --git a/packages/react/src/drop-preview.ts b/packages/react/src/drop-preview.ts
+index 1d12f20..5ed0625 100644
+--- a/packages/react/src/drop-preview.ts
++++ b/packages/react/src/drop-preview.ts
+@@ -64,6 +64,7 @@ export function measureDropGroups(
+   const groups: Record<string, MeasuredDropGroup> = {};
+   if (root === null || rootRect.width <= 0 || rootRect.height <= 0) return groups;
+   const strips = Array.from(root.querySelectorAll<HTMLElement>("[role=tablist]"));
++  let stripsByLabel: Map<string, HTMLElement[]> | undefined;
+   for (const group of root.querySelectorAll<HTMLElement>("[data-workspace-group]")) {
+     if (group.closest(".pf-workspace") !== root) continue;
+     const groupId = group.dataset.workspaceGroup;
+@@ -79,8 +80,27 @@ export function measureDropGroups(
+     );
+     if (contentRect.inlineSize <= 0 || contentRect.blockSize <= 0) continue;
+     const labelId = group.getAttribute("aria-labelledby");
+-    const headerRects = strips.flatMap((strip) => {
+-      if (labelId === null || strip.getAttribute("aria-labelledby") !== labelId) return [];
++    // Index only when a visible group needs headers, and keep the small-layout
++    // path unchanged. The index belongs to this measurement, never to a drag.
++    if (labelId !== null && strips.length >= 8 && stripsByLabel === undefined) {
++      stripsByLabel = new Map<string, HTMLElement[]>();
++      for (const strip of strips) {
++        const label = strip.getAttribute("aria-labelledby");
++        if (label === null) continue;
++        const matches = stripsByLabel.get(label);
++        if (matches === undefined) stripsByLabel.set(label, [strip]);
++        else matches.push(strip);
++      }
++    }
++    const matchingStrips =
++      labelId === null
++        ? []
++        : stripsByLabel === undefined
++          ? strips
++          : (stripsByLabel.get(labelId) ?? []);
++    const headerRects = matchingStrips.flatMap((strip) => {
++      if (stripsByLabel === undefined && strip.getAttribute("aria-labelledby") !== labelId)
++        return [];
+       // Include strip controls and the compact floating-header portal, too.
+       const header = strip.closest<HTMLElement>(".pf-tab-strip") ?? strip;
+       const rect = header.getBoundingClientRect();
+diff --git a/packages/react/test/reference-drop-preview.ts b/packages/react/test/reference-drop-preview.ts
+index 1d12f20..ad4b1df 100644
+--- a/packages/react/test/reference-drop-preview.ts
++++ b/packages/react/test/reference-drop-preview.ts
+@@ -1,7 +1,7 @@
+ import type { LogicalRect, ResolvedLayout } from "@panefold/geometry";
+ 
+-import type { MeasuredDropGroup } from "./drop-target";
+-import type { WorkspaceDirection } from "./types";
++import type { MeasuredDropGroup } from "../src/drop-target";
++import type { WorkspaceDirection } from "../src/types";
+ 
+ interface PhysicalRect {
+   readonly left: number;
