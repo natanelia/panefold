@@ -3,6 +3,7 @@ name: Performance audit
 on:
   push:
     branches: [perf/audit-20260927]
+    paths: [.github/workflows/performance-audit.yml]
 
 permissions:
   contents: read
