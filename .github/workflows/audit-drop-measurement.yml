@@ -18,7 +18,7 @@ jobs:
     steps:
       - uses: actions/checkout@v7
         with:
-          ref: e818c54b99d13d2e5b0448395db0af7b1e403b42
+          ref: ddbafb4d0d25f0f17a67445b74f6d5de49ed153c
           fetch-depth: 0
           persist-credentials: false
       - uses: pnpm/action-setup@v6
@@ -66,7 +66,7 @@ jobs:
           node scripts/generate-conformance-data.mjs
           git add conformance docs/CONFORMANCE.md
           git -c user.name='Performance audit' -c user.email='audit@users.noreply.github.com' commit -m 'test: record executed drop-measurement regression evidence'
-          git diff --binary e818c54b99d13d2e5b0448395db0af7b1e403b42 HEAD > artifacts/drop-evidence.patch
+          git diff --binary ddbafb4d0d25f0f17a67445b74f6d5de49ed153c HEAD > artifacts/drop-evidence.patch
           git rev-parse HEAD^{tree} > artifacts/drop-evidence-tree.txt
       - run: pnpm check
       - name: Retain all raw measurements and test reports
@@ -91,7 +91,7 @@ jobs:
     steps:
       - uses: actions/checkout@v7
         with:
-          ref: e818c54b99d13d2e5b0448395db0af7b1e403b42
+          ref: ddbafb4d0d25f0f17a67445b74f6d5de49ed153c
       - uses: actions/download-artifact@v7
         with:
           name: drop-measurement-audit
@@ -101,7 +101,7 @@ jobs:
         run: |
           branch=perf/audit-drop-measurement-20260927
           git fetch --no-tags origin "$branch"
-          test "$(git rev-parse FETCH_HEAD)" = e818c54b99d13d2e5b0448395db0af7b1e403b42
+          test "$(git rev-parse FETCH_HEAD)" = ddbafb4d0d25f0f17a67445b74f6d5de49ed153c
           git switch -c "$branch"
           git apply --check /tmp/verified-evidence/artifacts/drop-evidence.patch
           git apply --index /tmp/verified-evidence/artifacts/drop-evidence.patch
