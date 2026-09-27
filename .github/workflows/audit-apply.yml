@@ -26,14 +26,14 @@ jobs:
           branch = p['branch']
           if not re.fullmatch(r'perf/audit-[a-z0-9-]+-20260927', branch):
               raise ValueError('Only isolated audit branches are permitted')
+          patch = Path('/tmp/performance.patch')
+          patch.write_bytes(Path('audit-change.patch').read_bytes())
           def git(*args):
               return subprocess.check_output(['git', *args], text=True).strip()
           git('fetch', '--no-tags', 'origin', branch)
           if git('rev-parse', 'FETCH_HEAD') != p['candidateCommit']:
               raise ValueError('Candidate changed; refusing a stale patch')
           git('checkout', '-B', branch, p['candidateCommit'])
-          patch = Path('/tmp/performance.patch')
-          patch.write_text(p['patch'])
           git('apply', '--check', str(patch))
           git('apply', '--index', str(patch))
           if git('write-tree') != p['expectedTree']:
