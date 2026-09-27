@@ -1,6 +1,6 @@
 {
-  "branch": "perf/audit-axis-rounding-20260927",
-  "candidateCommit": "1fd6948a25ed4fcef6e45ddae6b18077d5ddf162",
-  "expectedTree": "901272d4f7d991c877a74aa3d9e5eca74dc7fcd3",
-  "message": "perf(geometry): defer rounding work and sort only the required direction"
+  "branch": "perf/audit-invalidation-20260927",
+  "candidateCommit": "f5a7b15c5e4244ee86c415581af9620424c37684",
+  "expectedTree": "323f1930fac17f3c3693ace7b36dd4c44d7964d9",
+  "message": "perf(geometry): defer snapshot indexing until geometry actually changes"
 }
