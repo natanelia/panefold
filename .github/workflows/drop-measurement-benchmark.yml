@@ -1,0 +1,44 @@
+name: Browser drop-measurement benchmark
+
+on:
+  pull_request:
+    paths:
+      - "packages/react/src/drop-preview.ts"
+      - "packages/react/test/drop-header-index.test.ts"
+      - "scripts/benchmarks/drop-measurement-browser.mjs"
+      - ".github/workflows/drop-measurement-benchmark.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  benchmark:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: pnpm/action-setup@v6
+        with:
+          version: 11.16.0
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm exec playwright install --with-deps chromium
+      - name: Repeat actual DOM measurements
+        run: |
+          mkdir -p artifacts/drop-measurement
+          for run in 1 2 3; do
+            node scripts/benchmarks/drop-measurement-browser.mjs > "artifacts/drop-measurement/run-${run}.json"
+          done
+      - uses: actions/upload-artifact@v7
+        if: always()
+        with:
+          name: drop-measurement-benchmarks
+          path: artifacts/drop-measurement
+          if-no-files-found: error
+          retention-days: 30
