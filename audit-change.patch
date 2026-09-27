@@ -1,144 +1,283 @@
 diff --git a/conformance/evidence.json b/conformance/evidence.json
-index 4af2b29..10e7cd0 100644
+index 10e7cd0..3a67f72 100644
 --- a/conformance/evidence.json
 +++ b/conformance/evidence.json
+@@ -678,7 +678,7 @@
+       "verificationClass": "code-verifiable",
+       "artifactRole": "source",
+       "uri": "repo://packages/geometry/test/invalidation.test.ts",
+-      "sha256": "ef54d506202106cdfb7d85066fa71f6d83e1ed234d17125d3e94cba0e1118b11",
++      "sha256": "930cb0c67dabbff1e9ed542de171b51d91ae7365d1c20944e2a5be0c367989a6",
+       "producedAt": "2026-08-14T07:19:51.074Z",
+       "requirementIds": [
+         "LAY-006",
 @@ -1075,8 +1075,8 @@
        "verificationClass": "environment-verifiable",
        "artifactRole": "result",
        "uri": "repo://conformance/results/protocol-motion-2026-09-26.json",
--      "sha256": "ea7a0961d02fd5d1d34d417524a282ee1b5a52eec3eb230f4850479e837890ed",
--      "producedAt": "2026-09-27T13:02:17.986Z",
-+      "sha256": "69d02b805d4984337c5e5a2f6cf5512ed4c12133ccbf867d2877d2b7da9c8bc3",
-+      "producedAt": "2026-09-27T13:19:03.555Z",
+-      "sha256": "69d02b805d4984337c5e5a2f6cf5512ed4c12133ccbf867d2877d2b7da9c8bc3",
+-      "producedAt": "2026-09-27T13:19:03.555Z",
++      "sha256": "406871b58c7b8afa3f40a912e680840aa0d1c0c176093f6e0fe6148cd25d2c9d",
++      "producedAt": "2026-09-27T13:34:44.453Z",
        "requirementIds": [
          "A11Y-002",
          "ARC-002",
 diff --git a/conformance/results/protocol-motion-2026-09-26.json b/conformance/results/protocol-motion-2026-09-26.json
-index 82399dc..d59bd07 100644
+index d59bd07..be0f951 100644
 --- a/conformance/results/protocol-motion-2026-09-26.json
 +++ b/conformance/results/protocol-motion-2026-09-26.json
 @@ -2,10 +2,10 @@
    "schemaVersion": 1,
    "kind": "protocol-motion-result",
    "profile": "compact-react-chromium-desktop",
--  "producedAt": "2026-09-27T13:02:17.986Z",
-+  "producedAt": "2026-09-27T13:19:03.555Z",
+-  "producedAt": "2026-09-27T13:19:03.555Z",
++  "producedAt": "2026-09-27T13:34:44.453Z",
    "status": "passed",
    "runner": "Vitest 4.1.10",
--  "command": "pnpm exec vitest run --reporter=json --outputFile=artifacts/audit-constraints-unit.json",
-+  "command": "pnpm exec vitest run --reporter=json --outputFile=artifacts/audit-rounding-unit.json",
+-  "command": "pnpm exec vitest run --reporter=json --outputFile=artifacts/audit-rounding-unit.json",
++  "command": "pnpm exec vitest run --reporter=json --outputFile=artifacts/audit-invalidation-unit.json",
    "environment": {
      "operatingSystem": "Linux 6.18.44 x64",
      "node": "v22.23.2",
-@@ -13,10 +13,10 @@
+@@ -13,8 +13,8 @@
      "vitestMaxWorkers": 1
    },
    "summary": {
--    "tests": 550,
--    "passed": 550,
-+    "tests": 552,
-+    "passed": 552,
+-    "tests": 552,
+-    "passed": 552,
++    "tests": 554,
++    "passed": 554,
      "failed": 0,
--    "files": 70,
-+    "files": 71,
+     "files": 71,
      "protocolMotionTestFiles": 9,
-     "protocolMotionTests": 86,
-     "protocolMotionPassed": 86,
-@@ -374,18 +374,23 @@
-       "file": "packages/geometry/test/group-constraints.test.ts",
+@@ -123,7 +123,7 @@
+     {
+       "file": "packages/geometry/test/invalidation.test.ts",
        "status": "passed",
-       "passed": 2
-+    },
-+    {
-+      "file": "packages/geometry/test/rounding-compatibility.test.ts",
-+      "status": "passed",
-+      "passed": 2
+-      "passed": 4
++      "passed": 6
+     },
+     {
+       "file": "packages/geometry/test/solve-layout.test.ts",
+@@ -382,8 +382,8 @@
      }
    ],
    "rawReport": {
--    "path": "artifacts/audit-constraints-unit.json",
--    "sha256": "3db7f7d6a77a56b8b78b86740bb60be039dcb69e186f9c87061da25cff5365ba",
-+    "path": "artifacts/audit-rounding-unit.json",
-+    "sha256": "bcff95ea853b6655fd10f325af23f7e8b8ee9b42ebcf0de70eb8ddc84b741c7e",
+-    "path": "artifacts/audit-rounding-unit.json",
+-    "sha256": "bcff95ea853b6655fd10f325af23f7e8b8ee9b42ebcf0de70eb8ddc84b741c7e",
++    "path": "artifacts/audit-invalidation-unit.json",
++    "sha256": "041fdefcb4563ed1c29708982dd6f91c22951481c0e9839d45d85aff01d7d7ac",
      "availability": "Included in the downloadable audit evidence; regenerate with the command above. The original output was copied without modification."
    },
    "sourceDigests": {
-     "e2e/drag-parity.spec.ts": "a7c7da7513e3b56de9b832cce5fa2fc6236f55d74ba9ea3aa9be1600f6620bce",
-     "package.json": "acd970060c8df0d628cada8c1762111b9c3587031dbdc0e5815fb1e6159147ee",
-     "packages/geometry/package.json": "c3455159603a71c37cb4a70e89083be28c1c8144cca8939bea4f544bd886ab38",
--    "packages/geometry/src/allocate-axis.ts": "436204e1521bf84052111a7ec254ef34600ee72b8396ef242d1dae6786b5e57b",
-+    "packages/geometry/src/allocate-axis.ts": "a4317dea79bbb8986fc37ba48c1cec8f7089e6542d8955497d2d050c76d540cf",
+@@ -393,7 +393,7 @@
+     "packages/geometry/src/allocate-axis.ts": "a4317dea79bbb8986fc37ba48c1cec8f7089e6542d8955497d2d050c76d540cf",
      "packages/geometry/src/hit-test.ts": "2da9ca42d97c135f37d599bbaebed8f758343fa4e52fd647c05a4b179340c121",
      "packages/geometry/src/index.ts": "d033849f77196b6f518b4deadee9062b72a72e3362732e11fc512e7a78958d13",
-     "packages/geometry/src/invalidation.ts": "dfe873cb6df480d8ce023688e199463489877527b5b1c5155c4a7d1e234d4f1b",
-@@ -485,7 +490,10 @@
-     "tsconfig.json": "b80805434d59ff95a362cfbff728ceab0e6313f80ea3c23853cb564c1dfc9a65",
-     "vitest.config.ts": "6f743b2639e8e091bdc454a4aaa6336a538b889e70af8814ee7d1f27c7a8769e",
-     "packages/geometry/test/group-constraints.test.ts": "d9fd32beebd962439cfbbe9d5954dcf9ad90b4c6817789706dfc23e602d71f08",
--    "packages/geometry/test/reference-group-constraints.ts": "803f2128d23692293afb053b1d480be0cdb7f90bd6a93b80975ee2911d960e88"
-+    "packages/geometry/test/reference-group-constraints.ts": "803f2128d23692293afb053b1d480be0cdb7f90bd6a93b80975ee2911d960e88",
-+    "packages/geometry/test/rounding-compatibility.test.ts": "01f48decc7b28b3de0b96bbd30411231684df8645f05fbbf68f7cb30458569b9",
-+    "packages/geometry/test/reference/allocate-axis.ts": "436204e1521bf84052111a7ec254ef34600ee72b8396ef242d1dae6786b5e57b",
-+    "packages/geometry/test/reference/types.ts": "3b77ea26c1b9d5923b32fffb61ab8515bff13e4a32a5e625b88093eb670e196e"
+-    "packages/geometry/src/invalidation.ts": "dfe873cb6df480d8ce023688e199463489877527b5b1c5155c4a7d1e234d4f1b",
++    "packages/geometry/src/invalidation.ts": "65b0f4d4ec4eb49a39dc240b27c766cf254a780cb7d3b8221ca5805bfc5286df",
+     "packages/geometry/src/solve-layout.ts": "0686fcb7b43b713abe13f81c93c84652fa9f78d192dd80211e56d10ca0c9c8ff",
+     "packages/geometry/src/types.ts": "f8d663491053871b919c0b1782604fa74a740822e11eb2fba4470d505b6345fc",
+     "packages/geometry/tsconfig.json": "49477f7be8bc9f2976c250a0297c34809aed00c7d9e57115eaa4ad1722897e9c",
+@@ -493,7 +493,8 @@
+     "packages/geometry/test/reference-group-constraints.ts": "803f2128d23692293afb053b1d480be0cdb7f90bd6a93b80975ee2911d960e88",
+     "packages/geometry/test/rounding-compatibility.test.ts": "01f48decc7b28b3de0b96bbd30411231684df8645f05fbbf68f7cb30458569b9",
+     "packages/geometry/test/reference/allocate-axis.ts": "436204e1521bf84052111a7ec254ef34600ee72b8396ef242d1dae6786b5e57b",
+-    "packages/geometry/test/reference/types.ts": "3b77ea26c1b9d5923b32fffb61ab8515bff13e4a32a5e625b88093eb670e196e"
++    "packages/geometry/test/reference/types.ts": "3b77ea26c1b9d5923b32fffb61ab8515bff13e4a32a5e625b88093eb670e196e",
++    "packages/geometry/test/reference/invalidation.ts": "dfe873cb6df480d8ce023688e199463489877527b5b1c5155c4a7d1e234d4f1b"
    },
    "limitations": [
      "Deterministic clocks, fake motion drivers, and jsdom do not establish browser or physical-system behavior.",
-diff --git a/packages/geometry/src/allocate-axis.ts b/packages/geometry/src/allocate-axis.ts
-index aefbb5b..85287fb 100644
---- a/packages/geometry/src/allocate-axis.ts
-+++ b/packages/geometry/src/allocate-axis.ts
-@@ -170,7 +170,6 @@ function roundConserving(
-   minMayBeViolated: boolean,
-   maxMayBeViolated: boolean,
- ): number[] {
--  const fractions = values.map((value) => value - Math.floor(value));
-   const rounded = values.map((value, index) => {
-     const item = items[index];
-     if (item === undefined) {
-@@ -182,15 +181,22 @@ function roundConserving(
+diff --git a/packages/geometry/src/invalidation.ts b/packages/geometry/src/invalidation.ts
+index f94fd60..40ca3dd 100644
+--- a/packages/geometry/src/invalidation.ts
++++ b/packages/geometry/src/invalidation.ts
+@@ -215,8 +215,10 @@ export function planLayoutInvalidation(
+   after: WorkspaceSnapshot,
+   patches: readonly WorkspacePatch[],
+ ): LayoutInvalidationPlan {
+-  const beforeIndex = createIndex(before);
+-  const afterIndex = createIndex(after);
++  // Geometry-neutral patches need no membership/topology traversal. Keep
++  // indexes lazy and local to this call, without allocating getter closures.
++  let beforeIndex: SnapshotIndex | undefined;
++  let afterIndex: SnapshotIndex | undefined;
+   const constraints = new Set<string>();
+   const geometry = new Set<string>();
+   const surfaces = new Set<string>();
+@@ -237,6 +239,8 @@ export function planLayoutInvalidation(
+ 
+   for (const patch of patches) {
+     if (patch.kind === "panel" && panelAffectsConstraints(patch.before, patch.after)) {
++      beforeIndex ??= createIndex(before);
++      afterIndex ??= createIndex(after);
+       for (const nodeId of nodesForPanel(beforeIndex, String(patch.id))) {
+         invalidateConstraintPath(beforeIndex, nodeId);
+       }
+@@ -246,6 +250,8 @@ export function planLayoutInvalidation(
+       continue;
+     }
+     if (patch.kind === "group" && groupAffectsConstraints(patch.before, patch.after)) {
++      beforeIndex ??= createIndex(before);
++      afterIndex ??= createIndex(after);
+       for (const nodeId of nodesForGroup(beforeIndex, String(patch.id))) {
+         invalidateConstraintPath(beforeIndex, nodeId);
+       }
+@@ -257,11 +263,15 @@ export function planLayoutInvalidation(
+     if (patch.kind === "node") {
+       const nodeId = String(patch.id);
+       if (nodeTopologyChanged(patch.before, patch.after)) {
++        beforeIndex ??= createIndex(before);
++        afterIndex ??= createIndex(after);
+         invalidateConstraintPath(beforeIndex, nodeId);
+         invalidateConstraintPath(afterIndex, nodeId);
+         invalidateSurfaceIndex(beforeIndex, nodeId);
+         invalidateSurfaceIndex(afterIndex, nodeId);
+       } else if (nodeAllocationChanged(patch.before, patch.after)) {
++        beforeIndex ??= createIndex(before);
++        afterIndex ??= createIndex(after);
+         invalidateSubtree(beforeIndex, nodeId);
+         invalidateSubtree(afterIndex, nodeId);
+       }
+@@ -269,10 +279,12 @@ export function planLayoutInvalidation(
+     }
+     if (patch.kind === "surface" && surfaceGeometryChanged(patch.before, patch.after)) {
+       if (patch.before !== undefined) {
++        beforeIndex ??= createIndex(before);
+         addDescendants(beforeIndex, String(patch.before.rootNodeId), geometry);
+         surfaces.add(String(patch.before.id));
+       }
+       if (patch.after !== undefined) {
++        afterIndex ??= createIndex(after);
+         addDescendants(afterIndex, String(patch.after.rootNodeId), geometry);
+         surfaces.add(String(patch.after.id));
+       }
+diff --git a/packages/geometry/test/invalidation.test.ts b/packages/geometry/test/invalidation.test.ts
+index 487d512..3fc0393 100644
+--- a/packages/geometry/test/invalidation.test.ts
++++ b/packages/geometry/test/invalidation.test.ts
+@@ -1,3 +1,4 @@
++import fc from "fast-check";
+ import {
+   DEFAULT_PANEL_CAPABILITIES,
+   DEFAULT_PANEL_LIFECYCLE,
+@@ -11,10 +12,12 @@ import {
+   type LayoutNode,
+   type PanelRecord,
+   type WorkspaceSnapshot,
++  type WorkspacePatch,
+ } from "@panefold/model";
+ import { describe, expect, it } from "vitest";
+ 
+ import { planLayoutInvalidation } from "../src/index.js";
++import { planLayoutInvalidation as referencePlan } from "./reference/invalidation.js";
+ 
+ const ids = {
+   panelA: panelId("panel:a"),
+@@ -167,3 +170,105 @@ describe("planLayoutInvalidation", () => {
+     });
    });
- 
-   let delta = target - rounded.reduce((total, value) => total + value, 0);
--  const growOrder = items
--    .map((item, index) => ({ item, index, fraction: fractions[index] ?? 0 }))
--    .sort((left, right) => right.fraction - left.fraction || left.item.index - right.item.index);
--  const shrinkOrder = [...growOrder].sort(
--    (left, right) => left.fraction - right.fraction || left.item.index - right.item.index,
--  );
-+  if (delta === 0) return rounded;
+ });
 +
-+  // A correction only approaches zero; its sign never changes. Build the
-+  // remainder ordering only when needed, and only for that one direction.
-+  const order = items
-+    .map((item, index) => {
-+      const value = values[index] ?? 0;
-+      return { item, index, fraction: value - Math.floor(value) };
-+    })
-+    .sort(
-+      delta > 0
-+        ? (left, right) => right.fraction - left.fraction || left.item.index - right.item.index
-+        : (left, right) => left.fraction - right.fraction || left.item.index - right.item.index,
++describe("lazy snapshot indexes", () => {
++  it("does not traverse snapshot tables for empty or geometry-neutral patches", () => {
++    const snapshot = fixture();
++    let tableReads = 0;
++    const observed = new Proxy(snapshot, {
++      get(target, key, receiver) {
++        if (key === "groups" || key === "nodes" || key === "surfaces") tableReads += 1;
++        return Reflect.get(target, key, receiver);
++      },
++    });
++    const panel = entity<PanelRecord>(snapshot, "panels", ids.panelA);
++    const group = entity<GroupRecord>(snapshot, "groups", ids.groupA);
++    const patches: readonly WorkspacePatch[] = [
++      { kind: "activation", before: snapshot.activation, after: { activePanelId: ids.panelB } },
++      { kind: "metadata", before: {}, after: { title: "Renamed" } },
++      { kind: "focus-memory", before: snapshot.focusMemory, after: { fallback: "workspace-root" } },
++      { kind: "panel", id: panel.id, before: panel, after: { ...panel, title: "New title" } },
++      {
++        kind: "group",
++        id: group.id,
++        before: group,
++        after: { ...group, panelIds: [...group.panelIds].reverse() },
++      },
++    ];
++    for (const entries of [[], patches]) {
++      const plan = planLayoutInvalidation(observed, observed, entries);
++      expect(plan).toEqual(referencePlan(snapshot, snapshot, entries));
++      expect(Object.isFrozen(plan)).toBe(true);
++      expect(Object.values(plan).every(Object.isFrozen)).toBe(true);
++    }
++    expect(tableReads).toBe(0);
++  });
++
++  it("matches the original index plan across 5000 seeded topology and patch combinations", () => {
++    function variation(data: readonly number[]): WorkspaceSnapshot {
++      const pick = (index: number) => data[index % data.length] ?? 0;
++      const base = fixture(pick(0) % 2 === 0 ? ids.panelA : ids.panelB, [pick(1) + 1, pick(2) + 1]);
++      const panels = Object.values(base.panels.byId)
++        .filter((_, i) => pick(i + 3) % 7 !== 0)
++        .map((panel, i) => ({ ...panel, constraints: { preferredInline: pick(i + 4) * 10 } }));
++      const groups = Object.values(base.groups.byId).filter((_, i) => pick(i + 5) % 7 !== 0);
++      const nodes = Object.values(base.nodes.byId)
++        .filter((_, i) => pick(i + 7) % 9 !== 0)
++        .map((node) =>
++          node.kind !== "split"
++            ? node
++            : {
++                ...node,
++                children: pick(10) % 3 === 0 ? [ids.root, ids.nodeA] : node.children,
++                collapsedChildIds: pick(11) % 2 === 0 ? [ids.nodeA] : [],
++              },
++        );
++      const surfaces = Object.values(base.surfaces.byId)
++        .filter(() => pick(12) % 5 !== 0)
++        .map((surface) => ({
++          ...surface,
++          rootNodeId: pick(13) % 2 === 0 ? ids.root : ids.nodeB,
++          maximized: pick(14) % 2 === 0,
++        }));
++      return createWorkspaceSnapshot({ panels, groups, nodes, surfaces });
++    }
++    const data = fc.array(fc.integer({ min: 0, max: 99 }), { minLength: 16, maxLength: 32 });
++    fc.assert(
++      fc.property(data, data, (left, right) => {
++        const before = variation(left);
++        const after = variation(right);
++        const patches: WorkspacePatch[] = [];
++        for (const [table, kind] of [
++          ["panels", "panel"],
++          ["groups", "group"],
++          ["nodes", "node"],
++          ["surfaces", "surface"],
++        ] as const) {
++          for (const id of new Set([...before[table].ids, ...after[table].ids])) {
++            const oldRecord = before[table].byId[id];
++            const newRecord = after[table].byId[id];
++            // Table and discriminant are paired above; omit absent optional records.
++            patches.push({
++              kind,
++              id,
++              ...(oldRecord === undefined ? {} : { before: oldRecord }),
++              ...(newRecord === undefined ? {} : { after: newRecord }),
++            } as WorkspacePatch);
++          }
++        }
++        for (const patch of patches) {
++          expect(planLayoutInvalidation(before, after, [patch])).toEqual(
++            referencePlan(before, after, [patch]),
++          );
++        }
++        expect(planLayoutInvalidation(before, after, patches)).toEqual(
++          referencePlan(before, after, patches),
++        );
++        expect(planLayoutInvalidation(after, before, patches)).toEqual(
++          referencePlan(after, before, patches),
++        );
++      }),
++      { seed: 20260927, numRuns: 5000 },
 +    );
- 
-   while (delta !== 0) {
--    const order = delta > 0 ? growOrder : shrinkOrder;
-     let changed = false;
- 
-     for (const { item, index } of order) {
-@@ -213,14 +219,14 @@ function roundConserving(
-       // infeasible. Exact conservation wins and the caller already emits a bound
-       // violation diagnostic.
-       if (delta > 0) {
--        const firstCandidate = growOrder[0];
-+        const firstCandidate = order[0];
-         if (firstCandidate === undefined) {
-           throw new RangeError("Axis rounding requires at least one item.");
-         }
-         rounded[firstCandidate.index] = (rounded[firstCandidate.index] ?? 0) + delta;
-         delta = 0;
-       } else {
--        for (const { index } of shrinkOrder) {
-+        for (const { index } of order) {
-           const removable = Math.min(rounded[index] ?? 0, -delta);
-           rounded[index] = (rounded[index] ?? 0) - removable;
-           delta += removable;
++  });
++});
