@@ -1,6 +1,6 @@
 {
-  "branch": "perf/audit-persistence-bytes-20260927",
-  "candidateCommit": "0c9e9580efc4d21043dbd1df425dd0cd51b2085b",
-  "expectedTree": "ab31ad561ea78e2ce81b7b43c649d9518a0f1013",
-  "message": "perf(runtime): count exact short JSON byte lengths without temporary encoding buffers"
+  "branch": "perf/audit-envelope-20260927",
+  "candidateCommit": "d1a3244ea0b3445ee356b8aeaea6a24fb3454d43",
+  "expectedTree": "394c22b6365ddf0fc592b6f61cc3b05c52936610",
+  "message": "perf(runtime): reuse canonical serialized bytes when creating envelopes"
 }
