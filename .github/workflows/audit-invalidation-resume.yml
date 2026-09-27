@@ -1,0 +1,88 @@
+name: Verify invalidation optimization
+
+on:
+  push:
+    branches: [perf/audit-20260927]
+    paths: [.github/workflows/audit-invalidation-resume.yml]
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    env:
+      VITEST_MAX_WORKERS: "1"
+      CI: "1"
+    strategy:
+      fail-fast: false
+      matrix:
+        node-version: [22, 24]
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: 602dd977c2760c657e816dd9fceabbd2f564b9ac
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: pnpm/action-setup@v6
+        with:
+          version: 11.16.0
+      - uses: actions/setup-node@v7
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm build:packages
+      - run: pnpm exec tsc --noEmit -p tsconfig.json
+      - name: Execute full unit suite
+        run: |
+          mkdir -p artifacts/invalidation-audit
+          pnpm exec vitest run --reporter=json --outputFile=artifacts/preview-unit.json
+      - name: Repeat paired timings without test-worker contention
+        run: |
+          for run in 1 2 3; do
+            for benchmark in scripts/benchmark-invalidation*.mjs; do
+              node "$benchmark" > "artifacts/invalidation-audit/$(basename "$benchmark" .mjs)-node-${{ matrix.node-version }}-${run}.json"
+            done
+          done
+      - name: Run both browser suites and capture raw evidence
+        if: matrix.node-version == 22
+        run: |
+          pnpm exec playwright install --with-deps chromium
+          pnpm exec playwright test --reporter=json > artifacts/preview-browser.json
+          pnpm exec playwright test --config playwright.site.config.ts --reporter=json > artifacts/audit-site-browser.json
+          node scripts/performance-smoke.mjs > artifacts/preview-node-smoke.json
+      - name: Record only freshly executed results
+        if: matrix.node-version == 22
+        run: |
+          node scripts/record-preview-evidence.mjs
+          python3 - <<'PY'
+          import hashlib, json
+          from pathlib import Path
+          path = Path('conformance/results/protocol-motion-2026-09-26.json')
+          result = json.loads(path.read_text())
+          for source in ['packages/geometry/test/invalidation-differential.test.ts', 'packages/geometry/test/reference-invalidation.ts', 'packages/geometry/test/reference/invalidation.ts', 'packages/geometry/test/invalidation.test.ts']:
+              result['sourceDigests'][source] = hashlib.sha256(Path(source).read_bytes()).hexdigest()
+          result['sourceDigests'] = dict(sorted(result['sourceDigests'].items()))
+          path.write_text(json.dumps(result, indent=2) + '\n')
+          PY
+          node scripts/generate-conformance-data.mjs
+          git add conformance docs/CONFORMANCE.md
+          git -c user.name='Performance audit' -c user.email='audit@users.noreply.github.com' commit -m 'test: record this executed browser and unit evidence'
+          git diff --binary 602dd977c2760c657e816dd9fceabbd2f564b9ac HEAD > artifacts/invalidation-evidence.patch
+          git rev-parse HEAD^{tree} > artifacts/invalidation-evidence-tree.txt
+      - name: Verify complete candidate plus recorded evidence
+        if: matrix.node-version == 22
+        run: pnpm check
+      - name: Retain inspectable benchmark batches and test results
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: invalidation-audit-node-${{ matrix.node-version }}
+          path: |
+            artifacts
+            test-results
+            playwright-report
+          if-no-files-found: warn
+          retention-days: 30
