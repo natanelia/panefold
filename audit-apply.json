@@ -1,6 +1,6 @@
 {
-  "branch": "perf/audit-invalidation-20260927",
-  "candidateCommit": "602dd977c2760c657e816dd9fceabbd2f564b9ac",
-  "expectedTree": "a19659f3ddadeb7e051aec194e8af391dfca185f",
-  "message": "perf(geometry): retain native bulk traversal for wide splits"
+  "branch": "perf/audit-persistence-bytes-20260927",
+  "candidateCommit": "0c9e9580efc4d21043dbd1df425dd0cd51b2085b",
+  "expectedTree": "ab31ad561ea78e2ce81b7b43c649d9518a0f1013",
+  "message": "perf(runtime): count exact short JSON byte lengths without temporary encoding buffers"
 }
