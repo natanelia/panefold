@@ -1,0 +1,67 @@
+name: Resume performance audit
+
+on:
+  push:
+    branches: [perf/audit-20260927]
+    paths: [.github/workflows/audit-resume.yml]
+
+permissions:
+  contents: read
+
+jobs:
+  group-constraints:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    env:
+      VITEST_MAX_WORKERS: "1"
+    strategy:
+      fail-fast: false
+      matrix:
+        node-version: [22, 24]
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: 81056cab937f04f2e334f6d65c1525025134434a
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Export public Git objects for local differential tests
+        if: matrix.node-version == 22
+        run: git bundle create /tmp/panefold-audit.bundle --all
+      - uses: actions/upload-artifact@v7
+        if: matrix.node-version == 22
+        with:
+          name: panefold-audit-history
+          path: /tmp/panefold-audit.bundle
+          retention-days: 7
+      - uses: pnpm/action-setup@v6
+        with:
+          version: 11.16.0
+      - uses: actions/setup-node@v7
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm build:packages
+      - name: Repeat paired measurements
+        run: |
+          mkdir -p artifacts/resumed-audit
+          for run in 1 2 3; do
+            node scripts/benchmark-group-constraints.mjs > artifacts/resumed-audit/group-constraints-${{ matrix.node-version }}-${run}.json
+          done
+      - run: pnpm check
+      - name: Candidate browser regression checks
+        if: matrix.node-version == 22
+        run: |
+          pnpm exec playwright install --with-deps chromium
+          pnpm test:e2e
+          pnpm test:site:e2e
+      - uses: actions/upload-artifact@v7
+        if: always()
+        with:
+          name: resumed-audit-node-${{ matrix.node-version }}
+          path: |
+            artifacts
+            test-results
+            playwright-report
+          if-no-files-found: warn
+          retention-days: 30
