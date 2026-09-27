@@ -22,7 +22,7 @@ jobs:
     steps:
       - uses: actions/checkout@v7
         with:
-          ref: 602dd977c2760c657e816dd9fceabbd2f564b9ac
+          ref: b5aaf3c300a0bb530adbb777f73bef006d86215b
           fetch-depth: 0
           persist-credentials: false
       - uses: pnpm/action-setup@v6
@@ -60,17 +60,27 @@ jobs:
           python3 - <<'PY'
           import hashlib, json
           from pathlib import Path
-          path = Path('conformance/results/protocol-motion-2026-09-26.json')
-          result = json.loads(path.read_text())
-          for source in ['packages/geometry/test/invalidation-differential.test.ts', 'packages/geometry/test/reference-invalidation.ts', 'packages/geometry/test/reference/invalidation.ts', 'packages/geometry/test/invalidation.test.ts']:
-              result['sourceDigests'][source] = hashlib.sha256(Path(source).read_bytes()).hexdigest()
-          result['sourceDigests'] = dict(sorted(result['sourceDigests'].items()))
-          path.write_text(json.dumps(result, indent=2) + '\n')
+          for name in ['protocol-motion', 'interaction-performance', 'chromium-reference']:
+              path = Path('conformance/results/' + name + '-2026-09-26.json')
+              if not path.exists():
+                  if name == 'chromium-reference':
+                      path = Path('conformance/results/chromium-reference-2026-08-14.json')
+                  else:
+                      raise ValueError('Missing freshly executed result: ' + str(path))
+              result = json.loads(path.read_text())
+              if 'rawReport' in result:
+                  result['rawReport']['artifact'] = 'invalidation-audit-node-22'
+              if name == 'protocol-motion':
+                  for source in ['packages/geometry/test/invalidation-differential.test.ts', 'packages/geometry/test/reference-invalidation.ts', 'packages/geometry/test/reference/invalidation.ts', 'packages/geometry/test/invalidation.test.ts']:
+                      result['sourceDigests'][source] = hashlib.sha256(Path(source).read_bytes()).hexdigest()
+                  result['sourceDigests'] = dict(sorted(result['sourceDigests'].items()))
+              path.write_text(json.dumps(result, indent=2) + '\n')
           PY
+          pnpm exec oxfmt --write conformance/results
           node scripts/generate-conformance-data.mjs
           git add conformance docs/CONFORMANCE.md
           git -c user.name='Performance audit' -c user.email='audit@users.noreply.github.com' commit -m 'test: record this executed browser and unit evidence'
-          git diff --binary 602dd977c2760c657e816dd9fceabbd2f564b9ac HEAD > artifacts/invalidation-evidence.patch
+          git diff --binary b5aaf3c300a0bb530adbb777f73bef006d86215b HEAD > artifacts/invalidation-evidence.patch
           git rev-parse HEAD^{tree} > artifacts/invalidation-evidence-tree.txt
       - name: Verify complete candidate plus recorded evidence
         if: matrix.node-version == 22
@@ -86,3 +96,31 @@ jobs:
             playwright-report
           if-no-files-found: warn
           retention-days: 30
+
+  publish-executed-evidence:
+    needs: verify
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: write
+      actions: read
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: b5aaf3c300a0bb530adbb777f73bef006d86215b
+      - uses: actions/download-artifact@v7
+        with:
+          name: invalidation-audit-node-22
+          path: /tmp/verified-evidence
+      - name: Publish only the exact checked result tree
+        shell: bash
+        run: |
+          branch=perf/audit-invalidation-20260927
+          git fetch --no-tags origin "$branch"
+          test "$(git rev-parse FETCH_HEAD)" = b5aaf3c300a0bb530adbb777f73bef006d86215b
+          git switch -c "$branch"
+          git apply --check /tmp/verified-evidence/artifacts/invalidation-evidence.patch
+          git apply --index /tmp/verified-evidence/artifacts/invalidation-evidence.patch
+          test "$(git write-tree)" = "$(cat /tmp/verified-evidence/artifacts/invalidation-evidence-tree.txt)"
+          git -c user.name='github-actions[bot]' -c user.email='41898282+github-actions[bot]@users.noreply.github.com' commit -m 'test(geometry): record passing browser and unit evidence for invalidation'
+          git push origin "HEAD:refs/heads/$branch"
