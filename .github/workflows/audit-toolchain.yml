@@ -1,0 +1,34 @@
+name: Audit toolchain export
+
+on:
+  push:
+    branches: [perf/audit-20260927]
+    paths: [.github/workflows/audit-toolchain.yml]
+
+permissions:
+  contents: read
+
+jobs:
+  export:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: pnpm/action-setup@v6
+        with:
+          version: 11.16.0
+          standalone: true
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 22
+      - name: Export public toolchain binaries
+        shell: bash
+        run: |
+          mkdir -p /tmp/audit-toolchain
+          cp -L "$(command -v node)" /tmp/audit-toolchain/node
+          cp -a "$(dirname "$(dirname "$(command -v pnpm)")")" /tmp/audit-toolchain/pnpm-packages
+          tar -C /tmp/audit-toolchain -czf /tmp/audit-toolchain.tar.gz .
+      - uses: actions/upload-artifact@v7
+        with:
+          name: audit-toolchain
+          path: /tmp/audit-toolchain.tar.gz
+          retention-days: 7
