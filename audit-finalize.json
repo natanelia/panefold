@@ -1,0 +1,17 @@
+{
+  "branch": "perf/audit-fingerprint-20260927",
+  "candidateCommit": "dec50694db297ab2df5f8632670e4b5fe773cf55",
+  "expectedTree": "4ca5b7e55a2fe51f071cd464bce0b0f0b3c1eec0",
+  "producedAt": "2026-09-27T12:39:29.762Z",
+  "environment": {
+    "operatingSystem": "Linux 6.18.44 x86_64",
+    "node": "22.23.2",
+    "pnpm": "11.16.0",
+    "dependencies": "Frozen-lockfile workspace exported by GitHub Actions run 36318570589; executed offline after package builds.",
+    "vitestMaxWorkers": 1
+  },
+  "buildCommand": "pnpm exec tsup scripts/run-independent-semantic-campaign.ts --format esm --platform node --target node22 --out-dir artifacts/independent-audit --clean",
+  "campaignCommand": "node artifacts/independent-audit/run-independent-semantic-campaign.js --seed 20260812 --steps 10000",
+  "campaignElapsedMs": 41889,
+  "suiteDurationMs": 16918
+}
