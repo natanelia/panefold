@@ -2,14 +2,14 @@
   "schemaVersion": 1,
   "kind": "browser-profile-result",
   "profile": "compact-react-chromium-desktop",
-  "producedAt": "2026-09-25T18:33:40.088Z",
+  "producedAt": "2026-09-27T15:13:16.847Z",
   "status": "passed",
   "runner": "Playwright",
   "command": "pnpm exec playwright test --reporter=json",
   "project": "chromium",
   "environment": {
     "operatingSystem": "Linux 6.17.0-1022-azure x64",
-    "node": "v24.21.0",
+    "node": "v22.23.2",
     "browserVersion": "151.0.7922.34"
   },
   "summary": {
@@ -17,7 +17,7 @@
     "passed": 56,
     "skipped": 0,
     "failed": 0,
-    "durationMs": 59771.07
+    "durationMs": 66640.058
   },
   "tests": [
     {
@@ -303,9 +303,9 @@
   ],
   "rawReport": {
     "path": "artifacts/preview-browser.json",
-    "sha256": "e7d6e0e0b68749e6a528b73205d3e4b30a10ed9b4ea4d705cc4c33eec3be3b25",
-    "runUrl": "https://github.com/natanelia/panefold/actions/runs/36173877769",
-    "artifact": "preview-executed-evidence"
+    "sha256": "8c9b8c603d55050f2c3da5e81224e9afb3ca65a1f6dae8a344853f7c51e76e9d",
+    "runUrl": "https://github.com/natanelia/panefold/actions/runs/36328396318",
+    "artifact": "invalidation-audit-node-22"
   },
   "sourceDigests": {
     "apps/demo/index.html": "c82b4b1af0fb76789fffcef28c7c785a078c7234f8f68be54e1000bc173f6848",
