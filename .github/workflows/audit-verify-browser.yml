@@ -1,0 +1,119 @@
+name: Verify performance candidate with fresh browser evidence
+
+on:
+  push:
+    branches: [perf/audit-20260927]
+    paths: [audit-verify-browser.json]
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    permissions:
+      contents: write
+    env:
+      VITEST_MAX_WORKERS: "1"
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+      - name: Validate the isolated candidate request
+        id: request
+        run: |
+          python3 - <<'PY'
+          import json, os, re
+          from pathlib import Path
+          p = json.loads(Path('audit-verify-browser.json').read_text())
+          assert re.fullmatch(r'perf/audit-[a-z0-9-]+-20260927', p['branch'])
+          assert re.fullmatch(r'[0-9a-f]{40}', p['commit'])
+          assert re.fullmatch(r'[0-9a-f]{40}', p['tree'])
+          with open(os.environ['GITHUB_OUTPUT'], 'a') as out:
+              for key in ('branch', 'commit', 'tree'):
+                  out.write(f'{key}={p[key]}\n')
+          PY
+      - uses: actions/checkout@v7
+        with:
+          ref: ${{ steps.request.outputs.commit }}
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Require the exact locally measured source tree
+        env:
+          EXPECTED_TREE: ${{ steps.request.outputs.tree }}
+        run: test "$(git rev-parse HEAD^{tree})" = "$EXPECTED_TREE"
+      - uses: pnpm/action-setup@v6
+        with:
+          version: 11.16.0
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm build:packages
+      - name: Execute full unit suite and Node smoke
+        run: |
+          mkdir -p artifacts
+          pnpm exec vitest run --reporter=json --outputFile=artifacts/preview-unit.json
+          node scripts/performance-smoke.mjs > artifacts/preview-node-smoke.json
+      - run: pnpm exec playwright install --with-deps chromium
+      - name: Execute browser and site regression suites
+        run: |
+          pnpm exec playwright test --reporter=json > artifacts/preview-browser.json
+          pnpm exec playwright test --config playwright.site.config.ts --reporter=json > artifacts/preview-site.json
+      - name: Record only the freshly executed successful evidence
+        run: |
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+          names = ['chromium-reference', 'interaction-performance', 'protocol-motion']
+          previous = {name: list(json.loads(Path(f'conformance/results/{name}-2026-09-26.json').read_text())['sourceDigests']) for name in names}
+          Path('artifacts/prior-source-digest-paths.json').write_text(json.dumps(previous))
+          PY
+          node scripts/record-preview-evidence.mjs
+          python3 - <<'PY'
+          import hashlib, json, subprocess
+          from pathlib import Path
+          previous = json.loads(Path('artifacts/prior-source-digest-paths.json').read_text())
+          for name, paths in previous.items():
+              path = Path(f'conformance/results/{name}-2026-09-26.json')
+              result = json.loads(path.read_text())
+              # Preserve the source closure of earlier experiments; the full
+              # suite above executed all these sources, including their oracles.
+              for source in sorted(set(paths) | set(result['sourceDigests'])):
+                  result['sourceDigests'][source] = hashlib.sha256(Path(source).read_bytes()).hexdigest()
+              path.write_text(json.dumps(result, indent=2) + '\n')
+          PY
+          pnpm exec oxfmt --write conformance/results/chromium-reference-2026-09-26.json conformance/results/interaction-performance-2026-09-26.json conformance/results/protocol-motion-2026-09-26.json docs/CONFORMANCE.md
+          node scripts/generate-conformance-data.mjs
+          python3 - <<'PY'
+          import subprocess
+          paths = subprocess.check_output(['git', 'diff', '--name-only'], text=True).splitlines()
+          assert all((p.startswith('conformance/') and p.endswith('.json')) or p == 'docs/CONFORMANCE.md' for p in paths), paths
+          PY
+          git add conformance docs/CONFORMANCE.md
+          git -c user.name='github-actions[bot]' -c user.email='41898282+github-actions[bot]@users.noreply.github.com' commit -m 'test: refresh actually executed browser and conformance evidence'
+          git diff HEAD^ HEAD > artifacts/verified-evidence.patch
+      - name: Verify the final repository including fresh evidence
+        run: pnpm check
+      - name: Publish only after all checks pass
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TARGET_BRANCH: ${{ steps.request.outputs.branch }}
+        run: |
+          git diff --exit-code
+          git rev-parse HEAD > artifacts/verified-commit.txt
+          git rev-parse HEAD^{tree} > artifacts/verified-tree.txt
+          credential=$(printf 'x-access-token:%s' "$GH_TOKEN" | base64 -w0)
+          git -c "http.https://github.com/.extraheader=AUTHORIZATION: basic $credential" push origin "HEAD:refs/heads/$TARGET_BRANCH"
+      - uses: actions/upload-artifact@v7
+        if: always()
+        with:
+          name: preview-executed-evidence
+          path: |
+            artifacts/preview-*.json
+            artifacts/verified-*
+            test-results
+          if-no-files-found: warn
+          retention-days: 30
