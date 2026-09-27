@@ -65,6 +65,7 @@ export function measureDropGroups(
   if (root === null || rootRect.width <= 0 || rootRect.height <= 0) return groups;
   const strips = Array.from(root.querySelectorAll<HTMLElement>("[role=tablist]"));
   let stripsByLabel: Map<string, HTMLElement[]> | undefined;
+  let measuredHeaderGroups = 0;
   for (const group of root.querySelectorAll<HTMLElement>("[data-workspace-group]")) {
     if (group.closest(".pf-workspace") !== root) continue;
     const groupId = group.dataset.workspaceGroup;
@@ -80,9 +81,9 @@ export function measureDropGroups(
     );
     if (contentRect.inlineSize <= 0 || contentRect.blockSize <= 0) continue;
     const labelId = group.getAttribute("aria-labelledby");
-    // Index only when a visible group needs headers, and keep the small-layout
-    // path unchanged. The index belongs to this measurement, never to a drag.
-    if (labelId !== null && strips.length >= 8 && stripsByLabel === undefined) {
+    // A single visible group does not benefit from an index. Build it only
+    // for a second group, and keep it local to this measurement, never a drag.
+    if (labelId !== null && strips.length >= 8 && ++measuredHeaderGroups === 2) {
       stripsByLabel = new Map<string, HTMLElement[]>();
       for (const strip of strips) {
         const label = strip.getAttribute("aria-labelledby");

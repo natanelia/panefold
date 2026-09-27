@@ -37,6 +37,9 @@ try {
         [500, "unique"],
         [50, "duplicate"],
         [50, "hidden"],
+        [8, "single-visible"],
+        [50, "single-visible"],
+        [500, "single-visible"],
       ]) {
         document.body.replaceChildren();
         document.body.style.margin = "0";
@@ -69,7 +72,8 @@ try {
             top: "20px",
             width: "800px",
             height: "60px",
-            display: mode === "hidden" ? "none" : "block",
+            display:
+              mode === "hidden" || (mode === "single-visible" && index > 0) ? "none" : "block",
           });
           const header = document.createElement("div");
           header.className = "pf-tab-strip";
@@ -108,7 +112,10 @@ try {
           actual = candidate(...args);
         if (JSON.stringify(actual) !== JSON.stringify(expected))
           throw new Error("Different measured geometry");
-        if (Object.keys(actual).length !== (mode === "hidden" ? 0 : count))
+        if (
+          Object.keys(actual).length !==
+          (mode === "hidden" ? 0 : mode === "single-visible" ? 1 : count)
+        )
           throw new Error("Unmeasured fixture");
         let sink;
         const run = (operation, iterations) => {

@@ -95,7 +95,7 @@ describe("per-measurement drop header index", () => {
       original(root, rootRect, bounds, layout, "ltr"),
     );
   });
-  it("reads each strip label once instead of once per group", () => {
+  it("reads strip labels at most twice instead of once per group", () => {
     const { root, layout, strips } = fixture(
       Array.from({ length: 50 }, (_, i) => `label:${i}`),
       true,
@@ -107,7 +107,7 @@ describe("per-measurement drop header index", () => {
         (n, spy) => n + spy.mock.calls.filter(([key]) => key === "aria-labelledby").length,
         0,
       ),
-    ).toBe(50);
+    ).toBe(100);
     expect(actual).toEqual(original(root, rootRect, bounds, layout, "ltr"));
   });
   it("does not build an index for hidden groups", () => {
