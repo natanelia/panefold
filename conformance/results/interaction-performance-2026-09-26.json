@@ -25,23 +25,23 @@
     "p99": 16.8
   },
   "rawFrameDeltasMs": [
-    16.7, 16.6, 16.8, 16.6, 16.7, 16.7, 16.6, 16.6, 16.7, 16.7, 16.7, 16.6, 16.7, 16.7, 16.6, 16.7,
-    16.7, 16.7, 16.6, 16.7, 16.7, 16.5, 16.8, 16.6, 16.7, 16.6, 16.7, 16.6, 16.7, 16.7, 16.6, 16.7,
-    16.7, 16.6, 16.8, 16.6, 16.7, 16.6, 16.7, 16.7, 16.6, 16.7, 16.7, 16.6, 16.7, 16.6, 16.7, 16.7,
-    16.7, 16.6, 16.7, 16.6, 16.7, 16.7, 16.7, 16.6, 16.7, 16.7, 16.7, 16.6, 16.6, 16.7, 16.7, 16.7,
-    16.6, 16.7, 16.7, 16.6, 16.7, 16.7, 16.6, 16.7, 16.7, 16.7, 16.6, 16.7, 16.7, 16.5, 16.8, 16.6,
-    16.7, 16.7, 16.6, 16.7, 16.6, 16.7, 16.7, 16.7, 16.6, 16.7, 16.7, 16.6, 16.7, 16.6, 16.7, 16.6,
-    16.8, 16.6, 16.6, 16.7, 16.7, 16.7, 16.6, 16.7, 16.7, 16.7, 16.6, 16.7, 16.6, 16.7, 16.7, 16.6,
-    16.7, 16.7, 16.6, 16.7, 16.6, 16.7, 16.7, 16.6, 16.7, 16.6, 16.7, 16.8, 16.6, 16.6, 16.7, 16.7,
-    16.6, 16.7, 16.6, 16.7, 16.8, 16.5, 16.7, 16.7, 16.7, 16.7, 16.6, 16.6, 16.7, 16.7, 16.6, 16.7,
-    16.7, 16.6, 16.7, 16.7, 16.7, 16.6, 16.7, 16.6, 16.7, 16.7, 16.6, 16.8, 16.6, 16.7, 16.7, 16.6,
-    16.6, 16.7, 16.7, 16.7, 16.7, 16.6, 16.6, 16.7, 16.7, 16.7, 16.6, 16.7, 16.7, 16.6, 16.6, 16.7,
+    16.6, 16.7, 16.7, 16.7, 16.6, 16.6, 16.7, 16.7, 16.7, 16.7, 16.6, 16.7, 16.6, 16.7, 16.6, 16.8,
+    16.6, 16.6, 16.7, 16.7, 16.6, 16.7, 16.7, 16.6, 16.7, 16.7, 16.6, 16.8, 16.6, 16.6, 16.7, 16.7,
+    16.7, 16.6, 16.6, 16.8, 16.6, 16.7, 16.6, 16.7, 16.7, 16.6, 16.7, 16.7, 16.6, 16.7, 16.7, 16.6,
+    16.7, 16.6, 16.7, 16.7, 16.7, 16.6, 16.7, 16.7, 16.6, 16.7, 16.6, 16.7, 16.7, 16.6, 16.8, 16.6,
+    16.7, 16.6, 16.7, 16.7, 16.6, 16.7, 16.7, 16.6, 16.7, 16.7, 16.7, 16.5, 16.8, 16.6, 16.7, 16.7,
+    16.6, 16.7, 16.7, 16.6, 16.7, 16.7, 16.6, 16.7, 16.6, 16.7, 16.7, 16.6, 16.7, 16.7, 16.6, 16.7,
+    16.7, 16.6, 16.7, 16.7, 16.6, 16.7, 16.7, 16.7, 16.6, 16.7, 16.6, 16.7, 16.7, 16.7, 16.6, 16.7,
+    16.6, 16.7, 16.7, 16.6, 16.7, 16.7, 16.6, 16.7, 16.6, 16.7, 16.7, 16.6, 16.7, 16.7, 16.7, 16.7,
+    16.5, 16.7, 16.7, 16.7, 16.6, 16.7, 16.7, 16.6, 16.7, 16.7, 16.6, 16.7, 16.7, 16.6, 16.7, 16.7,
+    16.7, 16.7, 16.5, 16.7, 16.7, 16.7, 16.6, 16.7, 16.6, 16.8, 16.7, 16.6, 16.6, 16.8, 16.6, 16.7,
+    16.7, 16.6, 16.6, 16.7, 16.7, 16.6, 16.7, 16.7, 16.7, 16.6, 16.6, 16.7, 16.7, 16.7, 16.6, 16.7,
     16.7, 16.7, 16.6
   ],
   "longTasks": [
     {
-      "startTime": 213.40000000002328,
-      "duration": 77
+      "startTime": 166.29999999998836,
+      "duration": 82
     }
   ],
   "baseline": {
@@ -53,7 +53,7 @@
     "longTaskMaximumCount": 12,
     "minimumSamples": 120
   },
-  "producedAt": "2026-09-27T23:38:58.164Z",
+  "producedAt": "2026-09-27T23:52:40.946Z",
   "nodeSmoke": {
     "schemaVersion": 1,
     "environment": {
@@ -65,20 +65,20 @@
     },
     "kernel": {
       "iterations": 10000,
-      "elapsedMs": 2347.57
+      "elapsedMs": 2391.42
     },
     "geometry": {
       "iterations": 100000,
-      "elapsedMs": 364.38
+      "elapsedMs": 345.26
     },
     "reorderProfiles": [
       {
         "panelCount": 50,
         "warmupCount": 250,
         "sampleCount": 2000,
-        "medianMs": 0.3498,
-        "p95Ms": 0.5181,
-        "p99Ms": 0.647,
+        "medianMs": 0.3587,
+        "p95Ms": 0.5295,
+        "p99Ms": 0.636,
         "designTargetMs": 1,
         "withinDesignTargetOnThisMachine": true,
         "invariantViolations": 0
@@ -87,9 +87,9 @@
         "panelCount": 500,
         "warmupCount": 100,
         "sampleCount": 1000,
-        "medianMs": 3.0028,
-        "p95Ms": 3.2782,
-        "p99Ms": 3.787,
+        "medianMs": 3.1035,
+        "p95Ms": 3.3874,
+        "p99Ms": 3.9822,
         "designTargetMs": 5,
         "withinDesignTargetOnThisMachine": true,
         "invariantViolations": 0
@@ -99,30 +99,30 @@
       {
         "nodeCount": 100,
         "sampleCount": 10000,
-        "elapsedMs": 49.39,
-        "meanMicroseconds": 4.939
+        "elapsedMs": 49.16,
+        "meanMicroseconds": 4.916
       },
       {
         "nodeCount": 500,
         "sampleCount": 10000,
-        "elapsedMs": 261.89,
-        "meanMicroseconds": 26.189
+        "elapsedMs": 255.1,
+        "meanMicroseconds": 25.51
       },
       {
         "nodeCount": 1000,
         "sampleCount": 10000,
-        "elapsedMs": 537.76,
-        "meanMicroseconds": 53.776
+        "elapsedMs": 539.21,
+        "meanMicroseconds": 53.921
       }
     ],
-    "totalElapsedMs": 7832.45,
+    "totalElapsedMs": 7982.86,
     "finalRevision": "10000",
     "invariantViolations": 0
   },
   "rawReport": {
     "path": "artifacts/preview-browser.json",
-    "sha256": "3ef3a9b3e656a8bc93c8410226214e1f59645bed85a642051a219a899b507773",
-    "runUrl": "https://github.com/natanelia/panefold/actions/runs/36359174170",
+    "sha256": "3e35c6b3cc13a4814e039bea1c655e4f14fb4c5bfca4f3144baa08ad5475d900",
+    "runUrl": "https://github.com/natanelia/panefold/actions/runs/36359909795",
     "artifact": "drop-measurement-audit"
   },
   "sourceDigests": {
@@ -136,7 +136,7 @@
     "packages/motion/src/coordinator.ts": "50eff7dd6a1b8f6433ac3f5bfc5f8d74b99a501e43e712ccb3e1a82520574c6d",
     "packages/react/src/WorkspaceSurface.tsx": "25c81bb51d017329d21d30b5feee3d068a71507727209728c79dc53b611f154a",
     "packages/react/src/drop-modifiers.ts": "542583898dfa7d121b0d91f51171df8a3db47a8e749422437da903372a60c6ee",
-    "packages/react/src/drop-preview.ts": "8b1402771a190f59d794a5e2d02b379c3265a264c2e46b328f85700656258a96",
+    "packages/react/src/drop-preview.ts": "7c84edb3ba5ee124e207ca6fc5fb3f2a8b8e07178d90f11b96a68504b4402de7",
     "packages/react/src/drop-target.ts": "46d7afa6f516ec67bcc0d1deaa7e905c2da826be516125a726a170d6a2523357",
     "packages/react/src/floating-surface.tsx": "ce26f0641e9fea4d2349255feae86f0d9b3158a6cb8812d09d96b8c55481835c",
     "packages/react/src/group-drag.tsx": "bb30a15666da3c6fbcfa53b443b023393ea85bec33ee3da750e9f67384694f26",

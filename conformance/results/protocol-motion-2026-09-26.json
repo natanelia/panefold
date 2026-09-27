@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "kind": "protocol-motion-result",
   "profile": "compact-react-chromium-desktop",
-  "producedAt": "2026-09-27T23:38:58.164Z",
+  "producedAt": "2026-09-27T23:52:40.946Z",
   "status": "passed",
   "runner": "Vitest",
   "command": "pnpm exec vitest run --reporter=json --outputFile=artifacts/preview-unit.json",
@@ -100,16 +100,6 @@
       "passed": 5
     },
     {
-      "file": "packages/ecosystem/test/ecosystem.test.ts",
-      "status": "passed",
-      "passed": 10
-    },
-    {
-      "file": "packages/ecosystem/test/isolated-frame.test.ts",
-      "status": "passed",
-      "passed": 2
-    },
-    {
       "file": "packages/geometry/test/allocate-axis.test.ts",
       "status": "passed",
       "passed": 6
@@ -128,6 +118,16 @@
       "file": "packages/geometry/test/solve-layout.test.ts",
       "status": "passed",
       "passed": 12
+    },
+    {
+      "file": "packages/ecosystem/test/ecosystem.test.ts",
+      "status": "passed",
+      "passed": 10
+    },
+    {
+      "file": "packages/ecosystem/test/isolated-frame.test.ts",
+      "status": "passed",
+      "passed": 2
     },
     {
       "file": "packages/kernel/test/effects.test.ts",
@@ -377,8 +377,8 @@
   ],
   "rawReport": {
     "path": "artifacts/preview-unit.json",
-    "sha256": "2fb5c9fa593d84d09c61537a9b635fd47aaa2a64d370ee1a10819e4fa4fabb17",
-    "runUrl": "https://github.com/natanelia/panefold/actions/runs/36359174170",
+    "sha256": "a72af2b723933db602795223d6007ac4c73dd5bdfd6297729553e3f91f79dd6c",
+    "runUrl": "https://github.com/natanelia/panefold/actions/runs/36359909795",
     "artifact": "drop-measurement-audit"
   },
   "sourceDigests": {
@@ -447,7 +447,7 @@
     "packages/react/package.json": "f3398780b1ec9266b02c73f85393d7bfab6fa8d782120698f420852b3eb62209",
     "packages/react/src/WorkspaceSurface.tsx": "25c81bb51d017329d21d30b5feee3d068a71507727209728c79dc53b611f154a",
     "packages/react/src/drop-modifiers.ts": "542583898dfa7d121b0d91f51171df8a3db47a8e749422437da903372a60c6ee",
-    "packages/react/src/drop-preview.ts": "8b1402771a190f59d794a5e2d02b379c3265a264c2e46b328f85700656258a96",
+    "packages/react/src/drop-preview.ts": "7c84edb3ba5ee124e207ca6fc5fb3f2a8b8e07178d90f11b96a68504b4402de7",
     "packages/react/src/drop-target.ts": "46d7afa6f516ec67bcc0d1deaa7e905c2da826be516125a726a170d6a2523357",
     "packages/react/src/floating-surface.tsx": "ce26f0641e9fea4d2349255feae86f0d9b3158a6cb8812d09d96b8c55481835c",
     "packages/react/src/geometry.ts": "2b43bf5f4968b75708abcaf539b18e130a36852fca0fbe84b2d42f8837b25f57",
@@ -466,7 +466,7 @@
     "packages/react/src/types.ts": "e5f3def8259ae492ac8802fe9b2c7b05b5b15a0cde5a66dd34f4ed570685c893",
     "packages/react/test/WorkspaceSurface.test.tsx": "fca09cfb1a462edbee5277f34bc7407848a56f1632983a5461aab97ac1b36ef4",
     "packages/react/test/drag-parity.test.ts": "1f0bca650b8647cf7473639a0afa59839bdd60327892e428f30a98642cd67443",
-    "packages/react/test/drop-header-index.test.ts": "944ea852709500d2cf365b880ba9e0dce9fa5884983d7a1d54e090e872a90266",
+    "packages/react/test/drop-header-index.test.ts": "165853b451367c889964f5371a09b14752e8eb8a02ed2acf778a1c4c4bedcda0",
     "packages/react/test/drop-preview.test.ts": "bdc1de685dce3a9bc5c073cf9fb7f2325de07251a8f71d4b318f09990c22211c",
     "packages/react/test/drop-target.test.ts": "2f28dc5a482cb6cc12fdbafb4e29ca3fba2a424dd1a5e9f822e9d95f4e9fc0a6",
     "packages/react/test/group-drop.test.ts": "c99eadd199fe4c10f3b572d03018f2d36f363c110c33199b2785ee80fa5c4b31",
