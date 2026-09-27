@@ -1,0 +1,110 @@
+name: Verify drop measurement optimization
+
+on:
+  push:
+    branches: [perf/audit-20260927]
+    paths: [.github/workflows/audit-drop-measurement.yml]
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    env:
+      VITEST_MAX_WORKERS: "1"
+      CI: "1"
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: e818c54b99d13d2e5b0448395db0af7b1e403b42
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: pnpm/action-setup@v6
+        with:
+          version: 11.16.0
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm build:packages
+      - run: pnpm exec tsc --noEmit -p tsconfig.json
+      - name: Execute the full unit suite
+        run: |
+          mkdir -p artifacts/drop-audit
+          pnpm exec vitest run --reporter=json --outputFile=artifacts/preview-unit.json
+      - run: pnpm exec playwright install --with-deps chromium
+      - name: Repeat actual DOM measurements without unit-worker contention
+        run: |
+          for run in 1 2 3; do
+            node scripts/benchmarks/drop-measurement-browser.mjs > "artifacts/drop-audit/run-${run}.json"
+          done
+      - name: Execute both browser suites and the Node smoke workload
+        run: |
+          pnpm exec playwright test --reporter=json > artifacts/preview-browser.json
+          pnpm exec playwright test --config playwright.site.config.ts --reporter=json > artifacts/audit-site-browser.json
+          node scripts/performance-smoke.mjs > artifacts/preview-node-smoke.json
+      - name: Record only newly executed results
+        run: |
+          node scripts/record-preview-evidence.mjs
+          python3 - <<'PY'
+          import hashlib, json
+          from pathlib import Path
+          for name in ['protocol-motion', 'interaction-performance', 'chromium-reference']:
+              path = Path('conformance/results/' + name + '-2026-09-26.json')
+              result = json.loads(path.read_text())
+              result['rawReport']['artifact'] = 'drop-measurement-audit'
+              if name == 'protocol-motion':
+                  for source in ['packages/react/test/drop-header-index.test.ts', 'packages/react/test/reference-drop-preview.ts']:
+                      result['sourceDigests'][source] = hashlib.sha256(Path(source).read_bytes()).hexdigest()
+                  result['sourceDigests'] = dict(sorted(result['sourceDigests'].items()))
+              path.write_text(json.dumps(result, indent=2) + '\n')
+          PY
+          pnpm exec oxfmt --write conformance/results
+          node scripts/generate-conformance-data.mjs
+          git add conformance docs/CONFORMANCE.md
+          git -c user.name='Performance audit' -c user.email='audit@users.noreply.github.com' commit -m 'test: record executed drop-measurement regression evidence'
+          git diff --binary e818c54b99d13d2e5b0448395db0af7b1e403b42 HEAD > artifacts/drop-evidence.patch
+          git rev-parse HEAD^{tree} > artifacts/drop-evidence-tree.txt
+      - run: pnpm check
+      - name: Retain all raw measurements and test reports
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: drop-measurement-audit
+          path: |
+            artifacts
+            test-results
+            playwright-report
+          if-no-files-found: warn
+          retention-days: 30
+
+  publish-executed-evidence:
+    needs: verify
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: write
+      actions: read
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: e818c54b99d13d2e5b0448395db0af7b1e403b42
+      - uses: actions/download-artifact@v7
+        with:
+          name: drop-measurement-audit
+          path: /tmp/verified-evidence
+      - name: Publish only the exact checked result tree
+        shell: bash
+        run: |
+          branch=perf/audit-drop-measurement-20260927
+          git fetch --no-tags origin "$branch"
+          test "$(git rev-parse FETCH_HEAD)" = e818c54b99d13d2e5b0448395db0af7b1e403b42
+          git switch -c "$branch"
+          git apply --check /tmp/verified-evidence/artifacts/drop-evidence.patch
+          git apply --index /tmp/verified-evidence/artifacts/drop-evidence.patch
+          test "$(git write-tree)" = "$(cat /tmp/verified-evidence/artifacts/drop-evidence-tree.txt)"
+          git -c user.name='github-actions[bot]' -c user.email='41898282+github-actions[bot]@users.noreply.github.com' commit -m 'test(react): record passing drop-measurement browser and unit evidence'
+          git push origin "HEAD:refs/heads/$branch"
