@@ -1,6 +1,6 @@
 {
   "branch": "perf/audit-drop-measurement-20260927",
-  "candidateCommit": "1566a7e62e5bbb5c223c62453ef7c2927f85b26e",
-  "expectedTree": "fc8ccf1e10f5f55d387077004ff3cca45e3a2a64",
-  "message": "perf(react): index tab-strip labels once per drop measurement"
+  "candidateCommit": "64d4025ff8e552a34af69b3de74a96dc5089e8a1",
+  "expectedTree": "04ceaf820dbc604525aa7f16fc5397f51d94cb00",
+  "message": "perf(react): avoid indexing headers for a single visible group"
 }
