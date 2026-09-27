@@ -1,0 +1,6 @@
+{
+  "branch": "perf/audit-group-constraints-20260927",
+  "candidateCommit": "c1780d26fc1b68ad717a34d0a66f4ba8f1213774",
+  "expectedTree": "2783f3342336e76bf2400d4c413314619b73cc27",
+  "message": "perf(geometry): calculate both group constraint axes in one pass"
+}
