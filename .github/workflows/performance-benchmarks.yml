@@ -1,0 +1,49 @@
+name: Paired performance benchmarks
+
+on:
+  pull_request:
+    paths:
+      - "packages/**"
+      - "scripts/benchmark-*.mjs"
+      - "scripts/benchmarks/**"
+      - ".github/workflows/performance-benchmarks.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  benchmark:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    strategy:
+      fail-fast: false
+      matrix:
+        node-version: [22, 24]
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: pnpm/action-setup@v6
+        with:
+          version: 11.16.0
+      - uses: actions/setup-node@v7
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm build:packages
+      - name: Compare original and candidate implementations
+        shell: bash
+        run: |
+          mkdir -p artifacts/paired-benchmarks
+          for benchmark in scripts/benchmark-*.mjs; do
+            node "$benchmark" | tee "artifacts/paired-benchmarks/$(basename "$benchmark" .mjs)-node-${{ matrix.node-version }}.json"
+          done
+      - uses: actions/upload-artifact@v7
+        if: always()
+        with:
+          name: paired-benchmarks-node-${{ matrix.node-version }}
+          path: artifacts/paired-benchmarks
+          if-no-files-found: error
+          retention-days: 30

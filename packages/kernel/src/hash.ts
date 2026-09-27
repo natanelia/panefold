@@ -33,15 +33,19 @@ export const canonicalSerialize = (value: unknown): string => canonicalValue(val
  * security checksum. Persistence adapters should use a cryptographic digest.
  */
 function fnv1a64(value: string): string {
-  let hash = 0xcbf29ce484222325n;
-  const prime = 0x100000001b3n;
-  const mask = 0xffffffffffffffffn;
+  // Multiply modulo 2^64 using two unsigned 32-bit words. The FNV prime
+  // is 2^40 + 435, so only the low-word carry and two cross products survive.
+  // low * 435 is below 2^41 and therefore exact in a JavaScript number.
+  let high = 0xcbf29ce4;
+  let low = 0x84222325;
   const bytes = new TextEncoder().encode(value);
   for (const byte of bytes) {
-    hash ^= BigInt(byte);
-    hash = (hash * prime) & mask;
+    low = (low ^ byte) >>> 0;
+    const product = low * 435;
+    high = (Math.imul(high, 435) + (low << 8) + Math.floor(product / 0x1_0000_0000)) >>> 0;
+    low = product >>> 0;
   }
-  return hash.toString(16).padStart(16, "0");
+  return high.toString(16).padStart(8, "0") + low.toString(16).padStart(8, "0");
 }
 
 /** Revision is excluded so inverse commands can be semantically compared. */
