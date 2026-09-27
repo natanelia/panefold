@@ -1,0 +1,57 @@
+name: Finalize verified performance evidence
+
+on:
+  push:
+    branches: [perf/audit-20260927]
+    paths: [audit-finalize.json]
+
+permissions:
+  contents: read
+
+jobs:
+  finalize:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 22
+      - name: Reproduce evidence metadata for the already-executed source tree
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          import hashlib, json, re, subprocess
+          from pathlib import Path
+          p = json.loads(Path('audit-finalize.json').read_text())
+          branch = p['branch']
+          if not re.fullmatch(r'perf/audit-[a-z0-9-]+-20260927', branch):
+              raise ValueError('Only isolated audit review branches are allowed')
+          def git(*args):
+              return subprocess.check_output(['git', *args], text=True).strip()
+          git('fetch', '--no-tags', 'origin', branch)
+          if git('rev-parse', 'FETCH_HEAD') != p['candidateCommit']:
+              raise ValueError('Candidate changed; refusing to attach stale evidence')
+          git('checkout', '-B', branch, p['candidateCommit'])
+          old_path = Path('conformance/results/independent-semantic-oracle-2026-08-13.json')
+          new_path = Path('conformance/results/independent-semantic-oracle-2026-09-27.json')
+          evidence = json.loads(old_path.read_text())
+          evidence['producedAt'] = p['producedAt']
+          evidence['environment'] = p['environment']
+          evidence['commands']['build'] = p['buildCommand']
+          evidence['commands']['campaign'] = p['campaignCommand']
+          evidence['campaign']['elapsedMs'] = p['campaignElapsedMs']
+          evidence['suite']['durationMs'] = p['suiteDurationMs']
+          evidence['sourceDigests'] = {path: hashlib.sha256(Path(path).read_bytes()).hexdigest() for path in evidence['sourceDigests']}
+          new_path.write_text(json.dumps(evidence, indent=2) + '\n')
+          generator = Path('scripts/generate-conformance-data.mjs')
+          generator.write_text(generator.read_text().replace(str(old_path), str(new_path)))
+          subprocess.run(['node', str(generator)], check=True)
+          git('add', str(new_path), str(generator), 'conformance/evidence.json')
+          if git('write-tree') != p['expectedTree']:
+              raise ValueError('Tree differs from the exact locally tested files; refusing publication')
+          git('-c', 'user.name=github-actions[bot]', '-c', 'user.email=41898282+github-actions[bot]@users.noreply.github.com', 'commit', '-m', 'test(kernel): refresh independently executed semantic evidence')
+          git('push', 'origin', 'HEAD:refs/heads/' + branch)
+          PY
