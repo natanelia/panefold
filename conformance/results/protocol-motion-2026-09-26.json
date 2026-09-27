@@ -2,20 +2,21 @@
   "schemaVersion": 1,
   "kind": "protocol-motion-result",
   "profile": "compact-react-chromium-desktop",
-  "producedAt": "2026-09-25T18:33:40.088Z",
+  "producedAt": "2026-09-27T13:02:17.986Z",
   "status": "passed",
-  "runner": "Vitest",
-  "command": "pnpm exec vitest run --reporter=json --outputFile=artifacts/preview-unit.json",
+  "runner": "Vitest 4.1.10",
+  "command": "pnpm exec vitest run --reporter=json --outputFile=artifacts/audit-constraints-unit.json",
   "environment": {
-    "operatingSystem": "Linux 6.17.0-1022-azure x64",
-    "node": "v24.21.0",
-    "browserVersion": "151.0.7922.34"
+    "operatingSystem": "Linux 6.18.44 x64",
+    "node": "v22.23.2",
+    "pnpm": "11.16.0",
+    "vitestMaxWorkers": 1
   },
   "summary": {
-    "tests": 548,
-    "passed": 548,
+    "tests": 550,
+    "passed": 550,
     "failed": 0,
-    "files": 69,
+    "files": 70,
     "protocolMotionTestFiles": 9,
     "protocolMotionTests": 86,
     "protocolMotionPassed": 86,
@@ -368,13 +369,17 @@
       "file": "packages/web-components/test/web-components.test.ts",
       "status": "passed",
       "passed": 2
+    },
+    {
+      "file": "packages/geometry/test/group-constraints.test.ts",
+      "status": "passed",
+      "passed": 2
     }
   ],
   "rawReport": {
-    "path": "artifacts/preview-unit.json",
-    "sha256": "2334f4c035382fdd54b73279c4ed20750cc98dc9bfa66ae8ea4ac427132c9b3c",
-    "runUrl": "https://github.com/natanelia/panefold/actions/runs/36173877769",
-    "artifact": "preview-executed-evidence"
+    "path": "artifacts/audit-constraints-unit.json",
+    "sha256": "3db7f7d6a77a56b8b78b86740bb60be039dcb69e186f9c87061da25cff5365ba",
+    "availability": "Included in the downloadable audit evidence; regenerate with the command above. The original output was copied without modification."
   },
   "sourceDigests": {
     "e2e/drag-parity.spec.ts": "a7c7da7513e3b56de9b832cce5fa2fc6236f55d74ba9ea3aa9be1600f6620bce",
@@ -384,7 +389,7 @@
     "packages/geometry/src/hit-test.ts": "2da9ca42d97c135f37d599bbaebed8f758343fa4e52fd647c05a4b179340c121",
     "packages/geometry/src/index.ts": "d033849f77196b6f518b4deadee9062b72a72e3362732e11fc512e7a78958d13",
     "packages/geometry/src/invalidation.ts": "dfe873cb6df480d8ce023688e199463489877527b5b1c5155c4a7d1e234d4f1b",
-    "packages/geometry/src/solve-layout.ts": "7e8ef616e83a91be29c53c9da920b54aed17c58e0293c79abb86998224bba3ae",
+    "packages/geometry/src/solve-layout.ts": "0686fcb7b43b713abe13f81c93c84652fa9f78d192dd80211e56d10ca0c9c8ff",
     "packages/geometry/src/types.ts": "f8d663491053871b919c0b1782604fa74a740822e11eb2fba4470d505b6345fc",
     "packages/geometry/tsconfig.json": "49477f7be8bc9f2976c250a0297c34809aed00c7d9e57115eaa4ad1722897e9c",
     "packages/model/package.json": "15e5054eb50fc8a0c54fcd593a9dfb71a4c10c2091e0af0477598a2b98f88f90",
@@ -478,14 +483,15 @@
     "scripts/verify-protocol-coverage.mjs": "e6659c6d19bb29abd6ba2b9942639a9b9b3e83a2535ccf80e2d7a296b6805fc9",
     "tsconfig.base.json": "6a5180d481cd767365ec8da2257e5573e498c5802ce56bda99e0ac218baca818",
     "tsconfig.json": "b80805434d59ff95a362cfbff728ceab0e6313f80ea3c23853cb564c1dfc9a65",
-    "vitest.config.ts": "6f743b2639e8e091bdc454a4aaa6336a538b889e70af8814ee7d1f27c7a8769e"
+    "vitest.config.ts": "6f743b2639e8e091bdc454a4aaa6336a538b889e70af8814ee7d1f27c7a8769e",
+    "packages/geometry/test/group-constraints.test.ts": "d9fd32beebd962439cfbbe9d5954dcf9ad90b4c6817789706dfc23e602d71f08",
+    "packages/geometry/test/reference-group-constraints.ts": "803f2128d23692293afb053b1d480be0cdb7f90bd6a93b80975ee2911d960e88"
   },
   "limitations": [
     "Deterministic clocks, fake motion drivers, and jsdom do not establish browser or physical-system behavior.",
     "This run includes the full unit suite, not only the protocol and motion subset.",
-    "One automated Linux GitHub Actions run, not a stable browser or physical-device matrix.",
     "Emulated touch, automated axe, forced colors, and keyboard tests do not establish manual accessibility certification.",
     "The performance fixture measures splitter frames, not panel-drag latency or physical 60 Hz/120 Hz guarantees.",
-    "Raw reports are also retained in the workflow artifact; artifact retention is 30 days."
+    "One local Linux x64 unit-test execution, not browser, physical-device, or external certification."
   ]
 }
