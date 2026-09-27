@@ -1,0 +1,43 @@
+name: Apply verified performance patch
+
+on:
+  push:
+    branches: [perf/audit-20260927]
+    paths: [audit-apply.json]
+
+permissions:
+  contents: read
+
+jobs:
+  apply:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v7
+      - name: Apply the reviewed text diff to the candidate branch
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          import json, re, subprocess
+          from pathlib import Path
+          p = json.loads(Path('audit-apply.json').read_text())
+          branch = p['branch']
+          if not re.fullmatch(r'perf/audit-[a-z0-9-]+-20260927', branch):
+              raise ValueError('Only isolated audit branches are permitted')
+          def git(*args):
+              return subprocess.check_output(['git', *args], text=True).strip()
+          git('fetch', '--no-tags', 'origin', branch)
+          if git('rev-parse', 'FETCH_HEAD') != p['candidateCommit']:
+              raise ValueError('Candidate changed; refusing a stale patch')
+          git('checkout', '-B', branch, p['candidateCommit'])
+          patch = Path('/tmp/performance.patch')
+          patch.write_text(p['patch'])
+          git('apply', '--check', str(patch))
+          git('apply', '--index', str(patch))
+          if git('write-tree') != p['expectedTree']:
+              raise ValueError('Tree differs from the exact locally tested source')
+          git('-c', 'user.name=github-actions[bot]', '-c', 'user.email=41898282+github-actions[bot]@users.noreply.github.com', 'commit', '-m', p['message'])
+          git('push', 'origin', 'HEAD:refs/heads/' + branch)
+          PY
