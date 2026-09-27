@@ -132,9 +132,9 @@ export async function createWorkspaceEnvelope(
   }
   const serialized = canonicalSerialize(snapshot);
   const workspace = JSON.parse(serialized) as unknown;
-  const checksum = await (options.checksum ?? SHA256_CHECKSUM).digest(
-    canonicalSerialize(workspace),
-  );
+  // Parsing canonical JSON and serializing it canonically again preserves its
+  // bytes, including tagged BigInts, sorted keys and normalized negative zero.
+  const checksum = await (options.checksum ?? SHA256_CHECKSUM).digest(serialized);
   const panelTypeVersions: Record<string, number> = Object.create(null) as Record<string, number>;
   for (const panelId of snapshot.panels.ids) {
     const panel = snapshot.panels.byId[panelId];
