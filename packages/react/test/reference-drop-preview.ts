@@ -1,7 +1,7 @@
 import type { LogicalRect, ResolvedLayout } from "@panefold/geometry";
 
-import type { MeasuredDropGroup } from "./drop-target";
-import type { WorkspaceDirection } from "./types";
+import type { MeasuredDropGroup } from "../src/drop-target";
+import type { WorkspaceDirection } from "../src/types";
 
 interface PhysicalRect {
   readonly left: number;
