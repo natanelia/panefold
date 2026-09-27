@@ -2,10 +2,10 @@
   "schemaVersion": 1,
   "kind": "protocol-motion-result",
   "profile": "compact-react-chromium-desktop",
-  "producedAt": "2026-09-27T13:02:17.986Z",
+  "producedAt": "2026-09-27T13:19:03.555Z",
   "status": "passed",
   "runner": "Vitest 4.1.10",
-  "command": "pnpm exec vitest run --reporter=json --outputFile=artifacts/audit-constraints-unit.json",
+  "command": "pnpm exec vitest run --reporter=json --outputFile=artifacts/audit-rounding-unit.json",
   "environment": {
     "operatingSystem": "Linux 6.18.44 x64",
     "node": "v22.23.2",
@@ -13,10 +13,10 @@
     "vitestMaxWorkers": 1
   },
   "summary": {
-    "tests": 550,
-    "passed": 550,
+    "tests": 552,
+    "passed": 552,
     "failed": 0,
-    "files": 70,
+    "files": 71,
     "protocolMotionTestFiles": 9,
     "protocolMotionTests": 86,
     "protocolMotionPassed": 86,
@@ -374,18 +374,23 @@
       "file": "packages/geometry/test/group-constraints.test.ts",
       "status": "passed",
       "passed": 2
+    },
+    {
+      "file": "packages/geometry/test/rounding-compatibility.test.ts",
+      "status": "passed",
+      "passed": 2
     }
   ],
   "rawReport": {
-    "path": "artifacts/audit-constraints-unit.json",
-    "sha256": "3db7f7d6a77a56b8b78b86740bb60be039dcb69e186f9c87061da25cff5365ba",
+    "path": "artifacts/audit-rounding-unit.json",
+    "sha256": "bcff95ea853b6655fd10f325af23f7e8b8ee9b42ebcf0de70eb8ddc84b741c7e",
     "availability": "Included in the downloadable audit evidence; regenerate with the command above. The original output was copied without modification."
   },
   "sourceDigests": {
     "e2e/drag-parity.spec.ts": "a7c7da7513e3b56de9b832cce5fa2fc6236f55d74ba9ea3aa9be1600f6620bce",
     "package.json": "acd970060c8df0d628cada8c1762111b9c3587031dbdc0e5815fb1e6159147ee",
     "packages/geometry/package.json": "c3455159603a71c37cb4a70e89083be28c1c8144cca8939bea4f544bd886ab38",
-    "packages/geometry/src/allocate-axis.ts": "436204e1521bf84052111a7ec254ef34600ee72b8396ef242d1dae6786b5e57b",
+    "packages/geometry/src/allocate-axis.ts": "a4317dea79bbb8986fc37ba48c1cec8f7089e6542d8955497d2d050c76d540cf",
     "packages/geometry/src/hit-test.ts": "2da9ca42d97c135f37d599bbaebed8f758343fa4e52fd647c05a4b179340c121",
     "packages/geometry/src/index.ts": "d033849f77196b6f518b4deadee9062b72a72e3362732e11fc512e7a78958d13",
     "packages/geometry/src/invalidation.ts": "dfe873cb6df480d8ce023688e199463489877527b5b1c5155c4a7d1e234d4f1b",
@@ -485,7 +490,10 @@
     "tsconfig.json": "b80805434d59ff95a362cfbff728ceab0e6313f80ea3c23853cb564c1dfc9a65",
     "vitest.config.ts": "6f743b2639e8e091bdc454a4aaa6336a538b889e70af8814ee7d1f27c7a8769e",
     "packages/geometry/test/group-constraints.test.ts": "d9fd32beebd962439cfbbe9d5954dcf9ad90b4c6817789706dfc23e602d71f08",
-    "packages/geometry/test/reference-group-constraints.ts": "803f2128d23692293afb053b1d480be0cdb7f90bd6a93b80975ee2911d960e88"
+    "packages/geometry/test/reference-group-constraints.ts": "803f2128d23692293afb053b1d480be0cdb7f90bd6a93b80975ee2911d960e88",
+    "packages/geometry/test/rounding-compatibility.test.ts": "01f48decc7b28b3de0b96bbd30411231684df8645f05fbbf68f7cb30458569b9",
+    "packages/geometry/test/reference/allocate-axis.ts": "436204e1521bf84052111a7ec254ef34600ee72b8396ef242d1dae6786b5e57b",
+    "packages/geometry/test/reference/types.ts": "3b77ea26c1b9d5923b32fffb61ab8515bff13e4a32a5e625b88093eb670e196e"
   },
   "limitations": [
     "Deterministic clocks, fake motion drivers, and jsdom do not establish browser or physical-system behavior.",

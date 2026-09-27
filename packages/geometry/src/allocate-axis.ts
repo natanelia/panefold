@@ -170,7 +170,6 @@ function roundConserving(
   minMayBeViolated: boolean,
   maxMayBeViolated: boolean,
 ): number[] {
-  const fractions = values.map((value) => value - Math.floor(value));
   const rounded = values.map((value, index) => {
     const item = items[index];
     if (item === undefined) {
@@ -182,15 +181,22 @@ function roundConserving(
   });
 
   let delta = target - rounded.reduce((total, value) => total + value, 0);
-  const growOrder = items
-    .map((item, index) => ({ item, index, fraction: fractions[index] ?? 0 }))
-    .sort((left, right) => right.fraction - left.fraction || left.item.index - right.item.index);
-  const shrinkOrder = [...growOrder].sort(
-    (left, right) => left.fraction - right.fraction || left.item.index - right.item.index,
-  );
+  if (delta === 0) return rounded;
+
+  // A correction only approaches zero; its sign never changes. Build the
+  // remainder ordering only when needed, and only for that one direction.
+  const order = items
+    .map((item, index) => {
+      const value = values[index] ?? 0;
+      return { item, index, fraction: value - Math.floor(value) };
+    })
+    .sort(
+      delta > 0
+        ? (left, right) => right.fraction - left.fraction || left.item.index - right.item.index
+        : (left, right) => left.fraction - right.fraction || left.item.index - right.item.index,
+    );
 
   while (delta !== 0) {
-    const order = delta > 0 ? growOrder : shrinkOrder;
     let changed = false;
 
     for (const { item, index } of order) {
@@ -213,14 +219,14 @@ function roundConserving(
       // infeasible. Exact conservation wins and the caller already emits a bound
       // violation diagnostic.
       if (delta > 0) {
-        const firstCandidate = growOrder[0];
+        const firstCandidate = order[0];
         if (firstCandidate === undefined) {
           throw new RangeError("Axis rounding requires at least one item.");
         }
         rounded[firstCandidate.index] = (rounded[firstCandidate.index] ?? 0) + delta;
         delta = 0;
       } else {
-        for (const { index } of shrinkOrder) {
+        for (const { index } of order) {
           const removable = Math.min(rounded[index] ?? 0, -delta);
           rounded[index] = (rounded[index] ?? 0) - removable;
           delta += removable;
