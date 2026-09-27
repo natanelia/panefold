@@ -73,9 +73,13 @@ function createIndex(snapshot: WorkspaceSnapshot): SnapshotIndex {
       surfaceByNode.set(nodeId, String(surface.id));
       const node = snapshot.nodes.byId[nodeId];
       if (node?.kind === "split") {
-        for (let child = 0; child < node.children.length; child += 1) {
-          // Match map(String): skip holes, but retain inherited indexed children.
-          if (child in node.children) stack.push(String(node.children[child]));
+        // Native bulk push is faster for wide splits; avoid its array for small splits.
+        if (node.children.length > 16) {
+          stack.push(...node.children.map(String));
+        } else {
+          for (let child = 0; child < node.children.length; child += 1) {
+            if (child in node.children) stack.push(String(node.children[child]));
+          }
         }
       }
     }
@@ -131,9 +135,13 @@ function addDescendants(index: SnapshotIndex, nodeId: string, output: Set<string
     output.add(current);
     const node = index.snapshot.nodes.byId[current];
     if (node?.kind === "split") {
-      for (let child = 0; child < node.children.length; child += 1) {
-        // Match map(String): skip holes, but retain inherited indexed children.
-        if (child in node.children) stack.push(String(node.children[child]));
+      // Native bulk push is faster for wide splits; avoid its array for small splits.
+      if (node.children.length > 16) {
+        stack.push(...node.children.map(String));
+      } else {
+        for (let child = 0; child < node.children.length; child += 1) {
+          if (child in node.children) stack.push(String(node.children[child]));
+        }
       }
     }
   }

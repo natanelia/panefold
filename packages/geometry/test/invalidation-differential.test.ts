@@ -259,53 +259,55 @@ describe("lazy and batched invalidation compatibility", () => {
   });
 
   it("preserves sparse and inherited indexed child traversal", () => {
-    const children = new Array<ReturnType<typeof nodeId>>(3);
-    children[2] = nodeId("own");
-    const prototype = Object.create(Array.prototype) as Record<string, unknown>;
-    prototype[0] = nodeId("inherited");
-    Object.setPrototypeOf(children, prototype);
-    const canonical = createWorkspaceSnapshot({
-      nodes: [
-        {
-          id: nodeId("root"),
-          kind: "split",
-          axis: "inline",
-          children,
-          weights: [1, 1, 1],
-          collapsedChildIds: [],
+    for (const length of [3, 16, 17, 50]) {
+      const children = new Array<ReturnType<typeof nodeId>>(length);
+      children[length - 1] = nodeId("own");
+      const prototype = Object.create(Array.prototype) as Record<string, unknown>;
+      prototype[0] = nodeId("inherited");
+      Object.setPrototypeOf(children, prototype);
+      const canonical = createWorkspaceSnapshot({
+        nodes: [
+          {
+            id: nodeId("root"),
+            kind: "split",
+            axis: "inline",
+            children,
+            weights: [1, 1, 1],
+            collapsedChildIds: [],
+          },
+        ],
+        surfaces: [
+          {
+            id: surfaceId("s"),
+            kind: "main",
+            rootNodeId: nodeId("root"),
+            capabilities: MAIN_SURFACE_CAPABILITIES,
+            maximized: false,
+          },
+        ],
+      });
+      const canonicalRoot = canonical.nodes.byId.root;
+      if (canonicalRoot?.kind !== "split") throw new Error("Missing fixture root");
+      const snapshot: WorkspaceSnapshot = {
+        ...canonical,
+        nodes: {
+          ...canonical.nodes,
+          byId: { ...canonical.nodes.byId, root: { ...canonicalRoot, children } },
         },
-      ],
-      surfaces: [
-        {
-          id: surfaceId("s"),
-          kind: "main",
-          rootNodeId: nodeId("root"),
-          capabilities: MAIN_SURFACE_CAPABILITIES,
-          maximized: false,
-        },
-      ],
-    });
-    const canonicalRoot = canonical.nodes.byId.root;
-    if (canonicalRoot?.kind !== "split") throw new Error("Missing fixture root");
-    const snapshot: WorkspaceSnapshot = {
-      ...canonical,
-      nodes: {
-        ...canonical.nodes,
-        byId: { ...canonical.nodes.byId, root: { ...canonicalRoot, children } },
-      },
-    };
-    const root = snapshot.nodes.byId.root;
-    const patches: WorkspacePatch[] = [
-      { kind: "node", id: nodeId("root"), ...(root === undefined ? {} : { after: root }) },
-    ];
-    expect(planLayoutInvalidation(snapshot, snapshot, patches)).toEqual(
-      referenceInvalidation(snapshot, snapshot, patches),
-    );
-    expect(planLayoutInvalidation(snapshot, snapshot, patches).geometryNodeIds).toEqual([
-      "inherited",
-      "own",
-      "root",
-    ]);
+      };
+      const root = snapshot.nodes.byId.root;
+      const patches: WorkspacePatch[] = [
+        { kind: "node", id: nodeId("root"), ...(root === undefined ? {} : { after: root }) },
+      ];
+      expect(planLayoutInvalidation(snapshot, snapshot, patches)).toEqual(
+        referenceInvalidation(snapshot, snapshot, patches),
+      );
+      expect(planLayoutInvalidation(snapshot, snapshot, patches).geometryNodeIds).toEqual([
+        "inherited",
+        "own",
+        "root",
+      ]);
+    }
   });
 
   it("matches the original for cyclic, missing, moved, shared and duplicate topology", () => {
