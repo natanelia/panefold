@@ -1,6 +1,6 @@
 {
-  "branch": "perf/audit-group-constraints-20260927",
-  "candidateCommit": "c1780d26fc1b68ad717a34d0a66f4ba8f1213774",
-  "expectedTree": "2783f3342336e76bf2400d4c413314619b73cc27",
-  "message": "perf(geometry): calculate both group constraint axes in one pass"
+  "branch": "perf/audit-axis-rounding-20260927",
+  "candidateCommit": "1fd6948a25ed4fcef6e45ddae6b18077d5ddf162",
+  "expectedTree": "901272d4f7d991c877a74aa3d9e5eca74dc7fcd3",
+  "message": "perf(geometry): defer rounding work and sort only the required direction"
 }
