@@ -1,179 +1,144 @@
 diff --git a/conformance/evidence.json b/conformance/evidence.json
-index 8d95a48..4af2b29 100644
+index 4af2b29..10e7cd0 100644
 --- a/conformance/evidence.json
 +++ b/conformance/evidence.json
 @@ -1075,8 +1075,8 @@
        "verificationClass": "environment-verifiable",
        "artifactRole": "result",
        "uri": "repo://conformance/results/protocol-motion-2026-09-26.json",
--      "sha256": "d25a8bb6c1b36736ab532324a36d77a0ce1e6466e6661e559463bf34a2d5d037",
--      "producedAt": "2026-09-25T18:33:40.088Z",
-+      "sha256": "ea7a0961d02fd5d1d34d417524a282ee1b5a52eec3eb230f4850479e837890ed",
-+      "producedAt": "2026-09-27T13:02:17.986Z",
+-      "sha256": "ea7a0961d02fd5d1d34d417524a282ee1b5a52eec3eb230f4850479e837890ed",
+-      "producedAt": "2026-09-27T13:02:17.986Z",
++      "sha256": "69d02b805d4984337c5e5a2f6cf5512ed4c12133ccbf867d2877d2b7da9c8bc3",
++      "producedAt": "2026-09-27T13:19:03.555Z",
        "requirementIds": [
          "A11Y-002",
          "ARC-002",
 diff --git a/conformance/results/protocol-motion-2026-09-26.json b/conformance/results/protocol-motion-2026-09-26.json
-index 405c54f..82399dc 100644
+index 82399dc..d59bd07 100644
 --- a/conformance/results/protocol-motion-2026-09-26.json
 +++ b/conformance/results/protocol-motion-2026-09-26.json
-@@ -2,20 +2,21 @@
+@@ -2,10 +2,10 @@
    "schemaVersion": 1,
    "kind": "protocol-motion-result",
    "profile": "compact-react-chromium-desktop",
--  "producedAt": "2026-09-25T18:33:40.088Z",
-+  "producedAt": "2026-09-27T13:02:17.986Z",
+-  "producedAt": "2026-09-27T13:02:17.986Z",
++  "producedAt": "2026-09-27T13:19:03.555Z",
    "status": "passed",
--  "runner": "Vitest",
--  "command": "pnpm exec vitest run --reporter=json --outputFile=artifacts/preview-unit.json",
-+  "runner": "Vitest 4.1.10",
-+  "command": "pnpm exec vitest run --reporter=json --outputFile=artifacts/audit-constraints-unit.json",
+   "runner": "Vitest 4.1.10",
+-  "command": "pnpm exec vitest run --reporter=json --outputFile=artifacts/audit-constraints-unit.json",
++  "command": "pnpm exec vitest run --reporter=json --outputFile=artifacts/audit-rounding-unit.json",
    "environment": {
--    "operatingSystem": "Linux 6.17.0-1022-azure x64",
--    "node": "v24.21.0",
--    "browserVersion": "151.0.7922.34"
-+    "operatingSystem": "Linux 6.18.44 x64",
-+    "node": "v22.23.2",
-+    "pnpm": "11.16.0",
-+    "vitestMaxWorkers": 1
+     "operatingSystem": "Linux 6.18.44 x64",
+     "node": "v22.23.2",
+@@ -13,10 +13,10 @@
+     "vitestMaxWorkers": 1
    },
    "summary": {
--    "tests": 548,
--    "passed": 548,
-+    "tests": 550,
-+    "passed": 550,
+-    "tests": 550,
+-    "passed": 550,
++    "tests": 552,
++    "passed": 552,
      "failed": 0,
--    "files": 69,
-+    "files": 70,
+-    "files": 70,
++    "files": 71,
      "protocolMotionTestFiles": 9,
      "protocolMotionTests": 86,
      "protocolMotionPassed": 86,
-@@ -368,13 +369,17 @@
-       "file": "packages/web-components/test/web-components.test.ts",
+@@ -374,18 +374,23 @@
+       "file": "packages/geometry/test/group-constraints.test.ts",
        "status": "passed",
        "passed": 2
 +    },
 +    {
-+      "file": "packages/geometry/test/group-constraints.test.ts",
++      "file": "packages/geometry/test/rounding-compatibility.test.ts",
 +      "status": "passed",
 +      "passed": 2
      }
    ],
    "rawReport": {
--    "path": "artifacts/preview-unit.json",
--    "sha256": "2334f4c035382fdd54b73279c4ed20750cc98dc9bfa66ae8ea4ac427132c9b3c",
--    "runUrl": "https://github.com/natanelia/panefold/actions/runs/36173877769",
--    "artifact": "preview-executed-evidence"
-+    "path": "artifacts/audit-constraints-unit.json",
-+    "sha256": "3db7f7d6a77a56b8b78b86740bb60be039dcb69e186f9c87061da25cff5365ba",
-+    "availability": "Included in the downloadable audit evidence; regenerate with the command above. The original output was copied without modification."
+-    "path": "artifacts/audit-constraints-unit.json",
+-    "sha256": "3db7f7d6a77a56b8b78b86740bb60be039dcb69e186f9c87061da25cff5365ba",
++    "path": "artifacts/audit-rounding-unit.json",
++    "sha256": "bcff95ea853b6655fd10f325af23f7e8b8ee9b42ebcf0de70eb8ddc84b741c7e",
+     "availability": "Included in the downloadable audit evidence; regenerate with the command above. The original output was copied without modification."
    },
    "sourceDigests": {
      "e2e/drag-parity.spec.ts": "a7c7da7513e3b56de9b832cce5fa2fc6236f55d74ba9ea3aa9be1600f6620bce",
-@@ -384,7 +389,7 @@
+     "package.json": "acd970060c8df0d628cada8c1762111b9c3587031dbdc0e5815fb1e6159147ee",
+     "packages/geometry/package.json": "c3455159603a71c37cb4a70e89083be28c1c8144cca8939bea4f544bd886ab38",
+-    "packages/geometry/src/allocate-axis.ts": "436204e1521bf84052111a7ec254ef34600ee72b8396ef242d1dae6786b5e57b",
++    "packages/geometry/src/allocate-axis.ts": "a4317dea79bbb8986fc37ba48c1cec8f7089e6542d8955497d2d050c76d540cf",
      "packages/geometry/src/hit-test.ts": "2da9ca42d97c135f37d599bbaebed8f758343fa4e52fd647c05a4b179340c121",
      "packages/geometry/src/index.ts": "d033849f77196b6f518b4deadee9062b72a72e3362732e11fc512e7a78958d13",
      "packages/geometry/src/invalidation.ts": "dfe873cb6df480d8ce023688e199463489877527b5b1c5155c4a7d1e234d4f1b",
--    "packages/geometry/src/solve-layout.ts": "7e8ef616e83a91be29c53c9da920b54aed17c58e0293c79abb86998224bba3ae",
-+    "packages/geometry/src/solve-layout.ts": "0686fcb7b43b713abe13f81c93c84652fa9f78d192dd80211e56d10ca0c9c8ff",
-     "packages/geometry/src/types.ts": "f8d663491053871b919c0b1782604fa74a740822e11eb2fba4470d505b6345fc",
-     "packages/geometry/tsconfig.json": "49477f7be8bc9f2976c250a0297c34809aed00c7d9e57115eaa4ad1722897e9c",
-     "packages/model/package.json": "15e5054eb50fc8a0c54fcd593a9dfb71a4c10c2091e0af0477598a2b98f88f90",
-@@ -478,14 +483,15 @@
-     "scripts/verify-protocol-coverage.mjs": "e6659c6d19bb29abd6ba2b9942639a9b9b3e83a2535ccf80e2d7a296b6805fc9",
-     "tsconfig.base.json": "6a5180d481cd767365ec8da2257e5573e498c5802ce56bda99e0ac218baca818",
+@@ -485,7 +490,10 @@
      "tsconfig.json": "b80805434d59ff95a362cfbff728ceab0e6313f80ea3c23853cb564c1dfc9a65",
--    "vitest.config.ts": "6f743b2639e8e091bdc454a4aaa6336a538b889e70af8814ee7d1f27c7a8769e"
-+    "vitest.config.ts": "6f743b2639e8e091bdc454a4aaa6336a538b889e70af8814ee7d1f27c7a8769e",
-+    "packages/geometry/test/group-constraints.test.ts": "d9fd32beebd962439cfbbe9d5954dcf9ad90b4c6817789706dfc23e602d71f08",
-+    "packages/geometry/test/reference-group-constraints.ts": "803f2128d23692293afb053b1d480be0cdb7f90bd6a93b80975ee2911d960e88"
+     "vitest.config.ts": "6f743b2639e8e091bdc454a4aaa6336a538b889e70af8814ee7d1f27c7a8769e",
+     "packages/geometry/test/group-constraints.test.ts": "d9fd32beebd962439cfbbe9d5954dcf9ad90b4c6817789706dfc23e602d71f08",
+-    "packages/geometry/test/reference-group-constraints.ts": "803f2128d23692293afb053b1d480be0cdb7f90bd6a93b80975ee2911d960e88"
++    "packages/geometry/test/reference-group-constraints.ts": "803f2128d23692293afb053b1d480be0cdb7f90bd6a93b80975ee2911d960e88",
++    "packages/geometry/test/rounding-compatibility.test.ts": "01f48decc7b28b3de0b96bbd30411231684df8645f05fbbf68f7cb30458569b9",
++    "packages/geometry/test/reference/allocate-axis.ts": "436204e1521bf84052111a7ec254ef34600ee72b8396ef242d1dae6786b5e57b",
++    "packages/geometry/test/reference/types.ts": "3b77ea26c1b9d5923b32fffb61ab8515bff13e4a32a5e625b88093eb670e196e"
    },
    "limitations": [
      "Deterministic clocks, fake motion drivers, and jsdom do not establish browser or physical-system behavior.",
-     "This run includes the full unit suite, not only the protocol and motion subset.",
--    "One automated Linux GitHub Actions run, not a stable browser or physical-device matrix.",
-     "Emulated touch, automated axe, forced colors, and keyboard tests do not establish manual accessibility certification.",
-     "The performance fixture measures splitter frames, not panel-drag latency or physical 60 Hz/120 Hz guarantees.",
--    "Raw reports are also retained in the workflow artifact; artifact retention is 30 days."
-+    "One local Linux x64 unit-test execution, not browser, physical-device, or external certification."
-   ]
- }
-diff --git a/packages/geometry/src/solve-layout.ts b/packages/geometry/src/solve-layout.ts
-index 50634d1..7b395a5 100644
---- a/packages/geometry/src/solve-layout.ts
-+++ b/packages/geometry/src/solve-layout.ts
-@@ -3,6 +3,7 @@ import type {
-   LayoutNode,
-   NodeId,
-   PanelConstraints,
-+  PanelRecord,
-   WorkspaceSnapshot,
- } from "@panefold/model";
+diff --git a/packages/geometry/src/allocate-axis.ts b/packages/geometry/src/allocate-axis.ts
+index aefbb5b..85287fb 100644
+--- a/packages/geometry/src/allocate-axis.ts
++++ b/packages/geometry/src/allocate-axis.ts
+@@ -170,7 +170,6 @@ function roundConserving(
+   minMayBeViolated: boolean,
+   maxMayBeViolated: boolean,
+ ): number[] {
+-  const fractions = values.map((value) => value - Math.floor(value));
+   const rounded = values.map((value, index) => {
+     const item = items[index];
+     if (item === undefined) {
+@@ -182,15 +181,22 @@ function roundConserving(
+   });
  
-@@ -70,22 +71,11 @@ function safeDimension(value: number | undefined, fallback: number): number {
- }
- 
- function selectedPanelConstraints(
--  group: GroupRecord,
--  snapshot: WorkspaceSnapshot,
-+  selected: PanelRecord,
-   axis: LogicalAxis,
-+  min: number,
-+  collapsible: boolean,
- ): AxisConstraints {
--  const panels = group.panelIds
--    .map((id) => snapshot.panels.byId[String(id)])
--    .filter((panel) => panel !== undefined);
--  const selected = snapshot.panels.byId[String(group.selectedPanelId)] ?? panels[0];
--
--  if (panels.length === 0 || selected === undefined) return {};
--
--  const min = panels.reduce(
--    (current, panel) =>
--      Math.max(current, safeDimension(axisValue(panel.constraints, axis, "hardMin"), 0)),
--    0,
+   let delta = target - rounded.reduce((total, value) => total + value, 0);
+-  const growOrder = items
+-    .map((item, index) => ({ item, index, fraction: fractions[index] ?? 0 }))
+-    .sort((left, right) => right.fraction - left.fraction || left.item.index - right.item.index);
+-  const shrinkOrder = [...growOrder].sort(
+-    (left, right) => left.fraction - right.fraction || left.item.index - right.item.index,
 -  );
-   const preferredMin = safeDimension(axisValue(selected.constraints, axis, "preferredMin"), min);
-   const preferred = Math.max(
-     min,
-@@ -102,7 +92,7 @@ function selectedPanelConstraints(
-     max,
-     grow: safeDimension(selected.constraints.grow, 1),
-     shrink: safeDimension(selected.constraints.shrink, 1),
--    collapsible: panels.every((panel) => panel.constraints.collapsible === true),
-+    collapsible,
-     collapsePriority: safeDimension(selected.constraints.collapsePriority, 0),
-   };
- }
-@@ -113,9 +103,29 @@ export function defaultGroupConstraints(
- ): BoxConstraints {
-   const selected = snapshot.panels.byId[String(group.selectedPanelId)];
-   const preferredAspectRatio = selected?.constraints.preferredAspectRatio;
-+  let firstPanel: PanelRecord | undefined;
-+  let minInline = 0;
-+  let minBlock = 0;
-+  let collapsible = true;
-+  // Both axes use the same members. Avoid materializing/filtering that list
-+  // twice on every solve; hidden panels still contribute both hard minima.
-+  for (const panelId of group.panelIds) {
-+    const panel = snapshot.panels.byId[String(panelId)];
-+    if (panel === undefined) continue;
-+    firstPanel ??= panel;
-+    minInline = Math.max(minInline, safeDimension(panel.constraints.hardMinInline, 0));
-+    minBlock = Math.max(minBlock, safeDimension(panel.constraints.hardMinBlock, 0));
-+    collapsible &&= panel.constraints.collapsible === true;
-+  }
-+  const effectiveSelection = selected ?? firstPanel;
-+  const hasMembers = firstPanel !== undefined && effectiveSelection !== undefined;
-   return {
--    inline: selectedPanelConstraints(group, snapshot, "inline"),
--    block: selectedPanelConstraints(group, snapshot, "block"),
-+    inline: hasMembers
-+      ? selectedPanelConstraints(effectiveSelection, "inline", minInline, collapsible)
-+      : {},
-+    block: hasMembers
-+      ? selectedPanelConstraints(effectiveSelection, "block", minBlock, collapsible)
-+      : {},
-     ...(preferredAspectRatio === undefined ||
-     !Number.isFinite(preferredAspectRatio) ||
-     preferredAspectRatio <= 0
++  if (delta === 0) return rounded;
++
++  // A correction only approaches zero; its sign never changes. Build the
++  // remainder ordering only when needed, and only for that one direction.
++  const order = items
++    .map((item, index) => {
++      const value = values[index] ?? 0;
++      return { item, index, fraction: value - Math.floor(value) };
++    })
++    .sort(
++      delta > 0
++        ? (left, right) => right.fraction - left.fraction || left.item.index - right.item.index
++        : (left, right) => left.fraction - right.fraction || left.item.index - right.item.index,
++    );
+ 
+   while (delta !== 0) {
+-    const order = delta > 0 ? growOrder : shrinkOrder;
+     let changed = false;
+ 
+     for (const { item, index } of order) {
+@@ -213,14 +219,14 @@ function roundConserving(
+       // infeasible. Exact conservation wins and the caller already emits a bound
+       // violation diagnostic.
+       if (delta > 0) {
+-        const firstCandidate = growOrder[0];
++        const firstCandidate = order[0];
+         if (firstCandidate === undefined) {
+           throw new RangeError("Axis rounding requires at least one item.");
+         }
+         rounded[firstCandidate.index] = (rounded[firstCandidate.index] ?? 0) + delta;
+         delta = 0;
+       } else {
+-        for (const { index } of shrinkOrder) {
++        for (const { index } of order) {
+           const removable = Math.min(rounded[index] ?? 0, -delta);
+           rounded[index] = (rounded[index] ?? 0) - removable;
+           delta += removable;
