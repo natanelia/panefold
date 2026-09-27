@@ -1,0 +1,52 @@
+name: Performance audit
+
+on:
+  push:
+    branches: [perf/audit-20260927]
+
+permissions:
+  contents: read
+
+jobs:
+  baseline:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    env:
+      VITEST_MAX_WORKERS: "1"
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+      - uses: pnpm/action-setup@v6
+        with:
+          version: 11.16.0
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 22
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - name: Export reproducible workspace for offline audit
+        run: tar --exclude=.git --exclude=./audit-workspace.tar.gz -czf /tmp/audit-workspace.tar.gz .
+      - uses: actions/upload-artifact@v7
+        with:
+          name: audit-workspace
+          path: /tmp/audit-workspace.tar.gz
+          retention-days: 7
+      - name: Verify unmodified baseline
+        run: pnpm check
+      - name: Baseline browser checks
+        run: |
+          pnpm exec playwright install --with-deps chromium
+          pnpm test:e2e
+          pnpm test:site:e2e
+      - name: Upload baseline evidence
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: audit-baseline-evidence
+          path: |
+            artifacts
+            test-results
+            playwright-report
+          if-no-files-found: warn
+          retention-days: 14
