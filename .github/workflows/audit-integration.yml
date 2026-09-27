@@ -1,0 +1,125 @@
+name: Verify combined performance changes
+
+on:
+  push:
+    branches: [perf/audit-20260927]
+    paths: [.github/workflows/audit-integration.yml]
+
+permissions:
+  contents: read
+
+jobs:
+  integration:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    env:
+      VITEST_MAX_WORKERS: "1"
+      CI: "1"
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: 81b11b4fab78a8824243fd6b3a28e50131b997f0
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Integrate pinned candidates only in the disposable checkout
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          import json, subprocess
+          from pathlib import Path
+          refs = [
+              '503f32da9778d34e0c723bb658be6ecca4ea2b80',
+              '81056cab937f04f2e334f6d65c1525025134434a',
+              '7fe46858d4c8f2bd4a0092b05de60062621e6cfa',
+              '14db28a1ed8fbd9b44f1ececec9f09b81c6d0665',
+              'ced1c67534ece71f26e0343030238d59441b391d',
+              '83c8f187f3f4019288ca827f0929f7c9b8da3d2e',
+              'ddbafb4d0d25f0f17a67445b74f6d5de49ed153c',
+          ]
+          def git(*args):
+              return subprocess.check_output(['git', *args], text=True).strip()
+          git('config', 'user.name', 'Performance integration test')
+          git('config', 'user.email', 'audit@users.noreply.github.com')
+          resolutions = []
+          for ref in refs:
+              result = subprocess.run(['git', 'merge', '--no-edit', '--no-ff', ref])
+              if result.returncode == 0:
+                  continue
+              conflicts = git('diff', '--name-only', '--diff-filter=U').splitlines()
+              allowed = {'conformance/evidence.json', 'conformance/gates.json', 'conformance/traces.json', 'conformance/capabilities.json', 'docs/CONFORMANCE.md'}
+              if not conflicts or any(path not in allowed and not path.startswith('conformance/results/') for path in conflicts):
+                  raise RuntimeError('Unexpected source conflict: ' + repr(conflicts))
+              # These records are temporary. Fresh tests below must regenerate
+              # their source-bound results before the full check may pass.
+              git('checkout', '--theirs', '--', *conflicts)
+              git('add', '--', *conflicts)
+              git('commit', '--no-edit')
+              resolutions.append({'ref': ref, 'temporaryResultConflicts': conflicts})
+          Path('artifacts').mkdir(exist_ok=True)
+          Path('artifacts/integration-manifest.json').write_text(json.dumps({
+              'baseline': '81b11b4fab78a8824243fd6b3a28e50131b997f0',
+              'candidateCommits': refs,
+              'sourceTreeBeforeEvidence': git('rev-parse', 'HEAD^{tree}'),
+              'temporaryResultResolutions': resolutions,
+              'remoteWrites': False,
+          }, indent=2) + '\n')
+          PY
+      - uses: pnpm/action-setup@v6
+        with:
+          version: 11.16.0
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm build:packages
+      - run: pnpm exec tsc --noEmit -p tsconfig.json
+      - name: Run every unit test on the combined sources
+        run: pnpm exec vitest run --reporter=json --outputFile=artifacts/preview-unit.json
+      - name: Execute the independent 10000-command campaign
+        run: |
+          pnpm exec tsup scripts/run-independent-semantic-campaign.ts --format esm --platform node --target node22 --out-dir artifacts/independent-integration --clean
+          node artifacts/independent-integration/run-independent-semantic-campaign.js --seed 20260812 --steps 10000 > artifacts/integration-semantic-campaign.json
+      - run: pnpm exec playwright install --with-deps chromium
+      - name: Run both browser suites and the Node performance guard
+        run: |
+          pnpm exec playwright test --reporter=json > artifacts/preview-browser.json
+          pnpm exec playwright test --config playwright.site.config.ts --reporter=json > artifacts/integration-site-browser.json
+          node scripts/performance-smoke.mjs > artifacts/preview-node-smoke.json
+      - name: Bind newly executed results to the integrated sources
+        run: |
+          node scripts/record-preview-evidence.mjs
+          python3 - <<'PY'
+          import hashlib, json
+          from pathlib import Path
+          for name in ['protocol-motion', 'interaction-performance', 'chromium-reference']:
+              path = Path('conformance/results/' + name + '-2026-09-26.json')
+              result = json.loads(path.read_text())
+              result['rawReport']['artifact'] = 'combined-performance-audit'
+              if name == 'protocol-motion':
+                  for source in Path('packages').rglob('*'):
+                      if source.is_file() and source.suffix in {'.ts', '.tsx'} and '/node_modules/' not in str(source) and '/dist/' not in str(source):
+                          result['sourceDigests'][str(source)] = hashlib.sha256(source.read_bytes()).hexdigest()
+                  result['sourceDigests'] = dict(sorted(result['sourceDigests'].items()))
+              path.write_text(json.dumps(result, indent=2) + '\n')
+          PY
+          pnpm exec oxfmt --write conformance/results
+          node scripts/generate-conformance-data.mjs
+          git add conformance docs/CONFORMANCE.md
+          git commit -m 'test: bind combined execution evidence to the exact source tree'
+      - name: Run every release-independent repository check
+        run: pnpm check
+      - name: Retain the exact combined patch for inspection, without publishing it
+        run: |
+          git diff --binary 81b11b4fab78a8824243fd6b3a28e50131b997f0 HEAD > artifacts/combined-candidate.patch
+          git rev-parse HEAD^{tree} > artifacts/combined-tested-tree.txt
+      - uses: actions/upload-artifact@v7
+        if: always()
+        with:
+          name: combined-performance-audit
+          path: |
+            artifacts
+            test-results
+            playwright-report
+          if-no-files-found: warn
+          retention-days: 30
