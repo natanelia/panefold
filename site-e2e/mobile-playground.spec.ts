@@ -3,9 +3,7 @@ import { expect, test } from "@playwright/test";
 test.describe("embedded phone playground", () => {
   test.use({ viewport: { width: 390, height: 844 }, hasTouch: true, isMobile: true });
 
-  test("keeps the live workspace usable and offers a standalone view", async ({
-    page,
-  }, testInfo) => {
+  test("supports the embedded phone playground", async ({ page }, testInfo) => {
     const errors: string[] = [];
     page.on("pageerror", (error) => errors.push(error.message));
     await page.goto("./demo/");
@@ -34,9 +32,11 @@ test.describe("embedded phone playground", () => {
       .getByRole("button", { name: "Editor", exact: true })
       .tap();
     await expect(workbench.getByRole("tab", { name: "App.tsx", exact: true })).toBeVisible();
-    expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(
-      true,
-    );
+    const widths = await page.evaluate(() => ({
+      document: document.documentElement.scrollWidth,
+      viewport: innerWidth,
+    }));
+    expect(widths.document).toBeLessThanOrEqual(widths.viewport);
     const screenshot = testInfo.outputPath("phone-playground.png");
     await page.screenshot({ path: screenshot });
     await testInfo.attach("Phone playground", { path: screenshot, contentType: "image/png" });

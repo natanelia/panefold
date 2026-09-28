@@ -10,6 +10,7 @@ export function DemoPage({ navigate }: { readonly navigate: (path: string) => vo
       <h1 className="sr-only">Panefold Code live workbench demo</h1>
       <div className="playground-toolbar">
         <SiteLink
+          aria-label="Back to Panefold home"
           to="/"
           navigate={navigate}
           data-track="demo_back_home"
