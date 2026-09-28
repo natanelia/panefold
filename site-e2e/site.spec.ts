@@ -8,9 +8,10 @@ test("presents the product story and live reference fixture", async ({ page }) =
   });
   await page.goto("./");
   await expect(
-    page.getByRole("heading", { name: /Workspace state you can reason about/i }),
+    page.getByRole("heading", { name: /Build tools.*Not tab management/i }),
   ).toBeVisible();
-  await expect(page.getByText("36", { exact: true })).toBeVisible();
+  await expect(page.getByText("Experimental, source-only. No npm release yet.")).toBeVisible();
+  await page.getByRole("button", { name: "Launch interactive demo" }).click();
   const embeddedFixture = page.getByTitle("Interactive Panefold Code workbench demo");
   await expect(embeddedFixture).toBeVisible();
   await embeddedFixture.scrollIntoViewIfNeeded();
@@ -29,8 +30,8 @@ test("navigates the repository-backed documentation", async ({ page }) => {
   await expect(skipLink).toBeVisible();
   await skipLink.press("Enter");
   await expect(page.locator("#main-content")).toBeFocused();
-  await expect(page.getByRole("heading", { name: /Understand the boundaries/i })).toBeVisible();
-  await page.locator('main a.group[href$="/docs/architecture"]').click();
+  await expect(page.getByRole("heading", { name: /From first panel/i })).toBeVisible();
+  await page.locator('.docs-reference-links a[href$="/docs/architecture"]').click();
   await expect(page.getByRole("heading", { name: "Architecture", exact: true })).toBeVisible();
   await expect(page.getByRole("heading", { name: "Governing rule", exact: true })).toBeVisible();
 });
@@ -196,7 +197,7 @@ test("has no automated WCAG A/AA violations on the landing page", async ({ page 
     "One desktop axe pass covers the same DOM projection",
   );
   await page.goto("./");
-  await page.getByRole("heading", { name: /Workspace state you can reason about/i }).waitFor();
+  await page.getByRole("heading", { name: /Build tools.*Not tab management/i }).waitFor();
   const results = await new AxeBuilder({ page })
     .withTags(["wcag2a", "wcag2aa", "wcag21aa", "wcag22aa"])
     .analyze();

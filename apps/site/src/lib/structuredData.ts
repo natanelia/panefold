@@ -57,7 +57,7 @@ function metadataFor(path: string): PageMetadata {
     return {
       title: "Documentation — Panefold",
       description:
-        "Explore Panefold architecture, commands, support boundaries, conformance evidence, decisions, and system design.",
+        "Build your first workspace. Learn React integration, panel components, tab rails, themes, commands and persistence.",
       path,
     };
   }
@@ -74,10 +74,17 @@ function metadataFor(path: string): PageMetadata {
     }
   }
 
+  if (path !== "/")
+    return {
+      title: "Page not found — Panefold",
+      description: "This page is not in the Panefold documentation catalog.",
+      path,
+    };
+
   return {
-    title: "Panefold — Workspace state you can reason about",
+    title: "Panefold — Build tools. Not tab management.",
     description:
-      "Panefold is an experimental runtime for deterministic workspace state, with accessible interaction patterns in its React reference projection.",
+      "Dockable panels, resizable splits and layouts that come back. An experimental TypeScript workspace runtime for web applications.",
     path: "/",
   };
 }

@@ -1,24 +1,13 @@
-import { cn } from "../lib/cn";
-
 export function Brand({ compact = false }: { readonly compact?: boolean }) {
   return (
-    <span className="inline-flex items-center gap-2.5">
-      <span
-        className="relative grid size-8 grid-cols-[0.8fr_1.2fr] grid-rows-2 gap-0.5 overflow-hidden rounded-[9px] border border-cyan-200/25 bg-[#0c1521] p-1 shadow-[inset_0_1px_0_rgba(255,255,255,0.08)]"
-        aria-hidden="true"
-      >
-        <i className="row-span-2 rounded-[2px] border border-cyan-300/55 bg-cyan-300/10" />
-        <i className="rounded-[2px] border border-sky-300/45 bg-sky-300/10" />
-        <i className="rounded-[2px] border border-teal-300/45 bg-teal-300/10" />
-        <span className="absolute left-[47%] top-1/2 size-1 -translate-x-1/2 -translate-y-1/2 rounded-full bg-cyan-200 shadow-[0_0_9px_#67e8f9]" />
+    <span className="brand">
+      <span className="brand-mark" aria-hidden="true">
+        <i />
+        <i />
+        <i />
       </span>
-      <span
-        className={cn(
-          "font-display text-[17px] font-semibold tracking-[-0.02em]",
-          compact && "sr-only",
-        )}
-      >
-        Panefold
+      <span className={compact ? "sr-only" : ""}>
+        Panefold<span className="brand-dot">.</span>
       </span>
     </span>
   );

@@ -12,6 +12,8 @@ export function SiteLink({ to, navigate, onClick, ...props }: SiteLinkProps) {
     onClick?.(event);
     if (
       event.defaultPrevented ||
+      (props.target !== undefined && props.target !== "_self") ||
+      props.download !== undefined ||
       event.button !== 0 ||
       event.metaKey ||
       event.ctrlKey ||

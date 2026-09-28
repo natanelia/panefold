@@ -31,6 +31,11 @@ jobs:
       - run: pnpm install --frozen-lockfile
       - run: node --test scripts/pages-*.test.mjs
       - run: pnpm check
+      - name: Verify documentation catalog and application examples
+        run: |
+          node --test scripts/site-catalog.test.mjs
+          pnpm --filter @panefold/demo test
+          pnpm --filter @panefold/site test
       - name: Preserve Node performance evidence
         run: |
           mkdir -p artifacts
