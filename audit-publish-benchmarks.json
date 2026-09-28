@@ -1,5 +1,6 @@
 {
   "candidate": "e08334f87dedb0d0418e8cf35fbc193a2db1984e",
   "benchmarkRun": 36372474835,
-  "status": "Both Node versions, repeated benchmarks, unit tests, browser suites, semantic campaign and full pnpm check passed."
+  "documentationAttempt": 2,
+  "status": "Merged-code benchmark evidence is unchanged. Narrow the parsed workload name in the new website test, then rerun all documentation checks."
 }
