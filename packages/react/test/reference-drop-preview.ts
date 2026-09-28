@@ -1,7 +1,7 @@
 import type { LogicalRect, ResolvedLayout } from "@panefold/geometry";
 
-import type { MeasuredDropGroup } from "./drop-target";
-import type { WorkspaceDirection } from "./types";
+import type { MeasuredDropGroup } from "../src/drop-target";
+import type { WorkspaceDirection } from "../src/types";
 
 interface PhysicalRect {
   readonly left: number;
@@ -64,8 +64,6 @@ export function measureDropGroups(
   const groups: Record<string, MeasuredDropGroup> = {};
   if (root === null || rootRect.width <= 0 || rootRect.height <= 0) return groups;
   const strips = Array.from(root.querySelectorAll<HTMLElement>("[role=tablist]"));
-  let stripsByLabel: Map<string, HTMLElement[]> | undefined;
-  let measuredHeaderGroups = 0;
   for (const group of root.querySelectorAll<HTMLElement>("[data-workspace-group]")) {
     if (group.closest(".pf-workspace") !== root) continue;
     const groupId = group.dataset.workspaceGroup;
@@ -81,27 +79,8 @@ export function measureDropGroups(
     );
     if (contentRect.inlineSize <= 0 || contentRect.blockSize <= 0) continue;
     const labelId = group.getAttribute("aria-labelledby");
-    // A single visible group does not benefit from an index. Build it only
-    // for a second group, and keep it local to this measurement, never a drag.
-    if (labelId !== null && strips.length >= 8 && ++measuredHeaderGroups === 2) {
-      stripsByLabel = new Map<string, HTMLElement[]>();
-      for (const strip of strips) {
-        const label = strip.getAttribute("aria-labelledby");
-        if (label === null) continue;
-        const matches = stripsByLabel.get(label);
-        if (matches === undefined) stripsByLabel.set(label, [strip]);
-        else matches.push(strip);
-      }
-    }
-    const matchingStrips =
-      labelId === null
-        ? []
-        : stripsByLabel === undefined
-          ? strips
-          : (stripsByLabel.get(labelId) ?? []);
-    const headerRects = matchingStrips.flatMap((strip) => {
-      if (stripsByLabel === undefined && strip.getAttribute("aria-labelledby") !== labelId)
-        return [];
+    const headerRects = strips.flatMap((strip) => {
+      if (labelId === null || strip.getAttribute("aria-labelledby") !== labelId) return [];
       // Include strip controls and the compact floating-header portal, too.
       const header = strip.closest<HTMLElement>(".pf-tab-strip") ?? strip;
       const rect = header.getBoundingClientRect();

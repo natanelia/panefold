@@ -2,14 +2,14 @@
   "schemaVersion": 1,
   "kind": "browser-profile-result",
   "profile": "compact-react-chromium-desktop",
-  "producedAt": "2026-09-27T15:13:16.847Z",
+  "producedAt": "2026-09-27T23:54:48.679Z",
   "status": "passed",
   "runner": "Playwright",
   "command": "pnpm exec playwright test --reporter=json",
   "project": "chromium",
   "environment": {
     "operatingSystem": "Linux 6.17.0-1022-azure x64",
-    "node": "v22.23.2",
+    "node": "v24.21.0",
     "browserVersion": "151.0.7922.34"
   },
   "summary": {
@@ -17,7 +17,7 @@
     "passed": 56,
     "skipped": 0,
     "failed": 0,
-    "durationMs": 66640.058
+    "durationMs": 64784.193
   },
   "tests": [
     {
@@ -303,9 +303,9 @@
   ],
   "rawReport": {
     "path": "artifacts/preview-browser.json",
-    "sha256": "8c9b8c603d55050f2c3da5e81224e9afb3ca65a1f6dae8a344853f7c51e76e9d",
-    "runUrl": "https://github.com/natanelia/panefold/actions/runs/36328396318",
-    "artifact": "invalidation-audit-node-22"
+    "sha256": "6e4e11902d3a2bc2c952076c2597d0e4bede8092361439ebe8172e8e44060845",
+    "runUrl": "https://github.com/natanelia/panefold/actions/runs/36360058090",
+    "artifact": "combined-performance-audit"
   },
   "sourceDigests": {
     "apps/demo/index.html": "c82b4b1af0fb76789fffcef28c7c785a078c7234f8f68be54e1000bc173f6848",
@@ -327,7 +327,7 @@
     "packages/motion/src/motion-dom-driver.ts": "57092ac380b7d666ed807c31d2f691fea906d63d9cdff9095f5c2bc32260323b",
     "packages/react/src/WorkspaceSurface.tsx": "25c81bb51d017329d21d30b5feee3d068a71507727209728c79dc53b611f154a",
     "packages/react/src/drop-modifiers.ts": "542583898dfa7d121b0d91f51171df8a3db47a8e749422437da903372a60c6ee",
-    "packages/react/src/drop-preview.ts": "73ff8f429ae558ec4ddc573fb4250e2bb4a73c9fd1fb28b3baabf369ea6f781c",
+    "packages/react/src/drop-preview.ts": "7c84edb3ba5ee124e207ca6fc5fb3f2a8b8e07178d90f11b96a68504b4402de7",
     "packages/react/src/drop-target.ts": "46d7afa6f516ec67bcc0d1deaa7e905c2da826be516125a726a170d6a2523357",
     "packages/react/src/floating-surface.tsx": "ce26f0641e9fea4d2349255feae86f0d9b3158a6cb8812d09d96b8c55481835c",
     "packages/react/src/group-drag.tsx": "bb30a15666da3c6fbcfa53b443b023393ea85bec33ee3da750e9f67384694f26",

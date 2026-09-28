@@ -12,36 +12,36 @@
       "height": 720
     },
     "operatingSystem": "Linux 6.17.0-1022-azure x64",
-    "node": "v22.23.2",
+    "node": "v24.21.0",
     "browserVersion": "151.0.7922.34"
   },
   "sampleCount": 179,
   "summary": {
     "minimum": 16.6,
-    "maximum": 16.8,
-    "mean": 16.666,
+    "maximum": 33.4,
+    "mean": 16.759,
     "median": 16.7,
     "p95": 16.7,
     "p99": 16.8
   },
   "rawFrameDeltasMs": [
-    16.7, 16.6, 16.7, 16.7, 16.6, 16.7, 16.7, 16.6, 16.7, 16.7, 16.6, 16.7, 16.7, 16.6, 16.6, 16.7,
-    16.7, 16.6, 16.7, 16.7, 16.7, 16.6, 16.7, 16.7, 16.7, 16.6, 16.7, 16.6, 16.7, 16.7, 16.6, 16.7,
-    16.7, 16.7, 16.6, 16.6, 16.7, 16.7, 16.6, 16.7, 16.7, 16.7, 16.6, 16.7, 16.6, 16.7, 16.7, 16.6,
-    16.7, 16.7, 16.6, 16.7, 16.7, 16.6, 16.7, 16.7, 16.6, 16.7, 16.6, 16.7, 16.7, 16.7, 16.7, 16.6,
-    16.7, 16.7, 16.6, 16.7, 16.6, 16.7, 16.6, 16.7, 16.7, 16.7, 16.6, 16.7, 16.6, 16.7, 16.7, 16.6,
-    16.7, 16.7, 16.6, 16.7, 16.7, 16.7, 16.6, 16.7, 16.7, 16.6, 16.6, 16.7, 16.7, 16.7, 16.7, 16.6,
-    16.7, 16.6, 16.7, 16.7, 16.7, 16.7, 16.6, 16.7, 16.6, 16.7, 16.7, 16.6, 16.7, 16.6, 16.8, 16.6,
-    16.6, 16.7, 16.7, 16.6, 16.7, 16.6, 16.8, 16.6, 16.6, 16.7, 16.7, 16.6, 16.7, 16.7, 16.7, 16.6,
-    16.7, 16.6, 16.7, 16.7, 16.6, 16.7, 16.7, 16.6, 16.7, 16.7, 16.7, 16.6, 16.7, 16.6, 16.7, 16.7,
-    16.6, 16.7, 16.7, 16.7, 16.6, 16.7, 16.7, 16.6, 16.7, 16.7, 16.7, 16.6, 16.7, 16.6, 16.7, 16.6,
-    16.7, 16.6, 16.8, 16.6, 16.6, 16.7, 16.7, 16.7, 16.6, 16.7, 16.7, 16.7, 16.7, 16.6, 16.6, 16.7,
-    16.6, 16.7, 16.7
+    16.6, 16.7, 16.7, 16.7, 16.6, 16.6, 16.8, 16.6, 16.7, 16.6, 16.7, 16.7, 16.7, 16.6, 16.6, 16.7,
+    16.7, 16.7, 16.6, 16.7, 16.7, 16.6, 16.7, 16.7, 16.6, 16.7, 16.6, 16.7, 16.7, 16.6, 16.7, 16.7,
+    16.6, 16.7, 16.6, 16.7, 16.7, 16.6, 16.7, 16.7, 16.7, 16.6, 16.7, 16.6, 16.7, 16.7, 16.6, 16.7,
+    16.7, 16.7, 16.6, 16.7, 16.7, 16.6, 16.7, 16.7, 16.6, 16.6, 16.8, 16.6, 16.7, 16.7, 16.6, 16.7,
+    16.7, 16.6, 16.6, 16.7, 16.7, 16.7, 16.7, 16.6, 16.6, 16.7, 16.7, 16.7, 16.6, 16.7, 16.7, 16.6,
+    16.7, 16.7, 16.6, 16.7, 16.7, 16.7, 16.6, 16.7, 16.7, 16.6, 16.7, 16.6, 16.7, 16.7, 16.6, 16.7,
+    16.7, 16.6, 16.7, 16.7, 16.7, 16.6, 16.7, 16.6, 16.7, 16.7, 16.6, 16.7, 16.7, 16.7, 16.6, 16.7,
+    16.6, 16.7, 16.7, 16.6, 16.7, 16.7, 16.7, 16.6, 16.7, 16.6, 16.6, 16.7, 16.7, 16.7, 16.7, 16.6,
+    16.7, 16.7, 16.6, 16.6, 16.7, 16.7, 16.6, 16.7, 16.7, 16.7, 16.7, 16.6, 16.7, 16.7, 16.6, 16.6,
+    16.8, 16.6, 16.6, 16.7, 16.7, 16.7, 16.6, 16.7, 16.7, 16.6, 16.7, 16.6, 16.7, 33.4, 16.6, 16.7,
+    16.7, 16.6, 16.7, 16.7, 16.6, 16.7, 16.7, 16.7, 16.6, 16.6, 16.7, 16.7, 16.6, 16.7, 16.7, 16.7,
+    16.6, 16.7, 16.6
   ],
   "longTasks": [
     {
-      "startTime": 233.69999999995343,
-      "duration": 53
+      "startTime": 213.10000000003492,
+      "duration": 81
     }
   ],
   "baseline": {
@@ -53,32 +53,32 @@
     "longTaskMaximumCount": 12,
     "minimumSamples": 120
   },
-  "producedAt": "2026-09-27T15:13:16.847Z",
+  "producedAt": "2026-09-27T23:54:48.679Z",
   "nodeSmoke": {
     "schemaVersion": 1,
     "environment": {
-      "node": "v22.23.2",
-      "v8": "12.4.254.21-node.56",
+      "node": "v24.21.0",
+      "v8": "13.6.233.17-node.53",
       "platform": "linux",
       "architecture": "x64",
       "cpu": "AMD EPYC 7763 64-Core Processor"
     },
     "kernel": {
       "iterations": 10000,
-      "elapsedMs": 2531.05
+      "elapsedMs": 2366.56
     },
     "geometry": {
       "iterations": 100000,
-      "elapsedMs": 336.85
+      "elapsedMs": 326.69
     },
     "reorderProfiles": [
       {
         "panelCount": 50,
         "warmupCount": 250,
         "sampleCount": 2000,
-        "medianMs": 0.3704,
-        "p95Ms": 0.5511,
-        "p99Ms": 0.7075,
+        "medianMs": 0.3488,
+        "p95Ms": 0.5018,
+        "p99Ms": 0.6035,
         "designTargetMs": 1,
         "withinDesignTargetOnThisMachine": true,
         "invariantViolations": 0
@@ -87,9 +87,9 @@
         "panelCount": 500,
         "warmupCount": 100,
         "sampleCount": 1000,
-        "medianMs": 3.1433,
-        "p95Ms": 3.4261,
-        "p99Ms": 3.5693,
+        "medianMs": 3.0255,
+        "p95Ms": 3.3447,
+        "p99Ms": 3.9384,
         "designTargetMs": 5,
         "withinDesignTargetOnThisMachine": true,
         "invariantViolations": 0
@@ -99,31 +99,31 @@
       {
         "nodeCount": 100,
         "sampleCount": 10000,
-        "elapsedMs": 50.37,
-        "meanMicroseconds": 5.037
+        "elapsedMs": 48.43,
+        "meanMicroseconds": 4.843
       },
       {
         "nodeCount": 500,
         "sampleCount": 10000,
-        "elapsedMs": 280.78,
-        "meanMicroseconds": 28.078
+        "elapsedMs": 259.34,
+        "meanMicroseconds": 25.934
       },
       {
         "nodeCount": 1000,
         "sampleCount": 10000,
-        "elapsedMs": 580.64,
-        "meanMicroseconds": 58.064
+        "elapsedMs": 536.41,
+        "meanMicroseconds": 53.641
       }
     ],
-    "totalElapsedMs": 8261.03,
+    "totalElapsedMs": 7842.35,
     "finalRevision": "10000",
     "invariantViolations": 0
   },
   "rawReport": {
     "path": "artifacts/preview-browser.json",
-    "sha256": "8c9b8c603d55050f2c3da5e81224e9afb3ca65a1f6dae8a344853f7c51e76e9d",
-    "runUrl": "https://github.com/natanelia/panefold/actions/runs/36328396318",
-    "artifact": "invalidation-audit-node-22"
+    "sha256": "6e4e11902d3a2bc2c952076c2597d0e4bede8092361439ebe8172e8e44060845",
+    "runUrl": "https://github.com/natanelia/panefold/actions/runs/36360058090",
+    "artifact": "combined-performance-audit"
   },
   "sourceDigests": {
     "e2e/drag-parity.spec.ts": "a7c7da7513e3b56de9b832cce5fa2fc6236f55d74ba9ea3aa9be1600f6620bce",
@@ -136,7 +136,7 @@
     "packages/motion/src/coordinator.ts": "50eff7dd6a1b8f6433ac3f5bfc5f8d74b99a501e43e712ccb3e1a82520574c6d",
     "packages/react/src/WorkspaceSurface.tsx": "25c81bb51d017329d21d30b5feee3d068a71507727209728c79dc53b611f154a",
     "packages/react/src/drop-modifiers.ts": "542583898dfa7d121b0d91f51171df8a3db47a8e749422437da903372a60c6ee",
-    "packages/react/src/drop-preview.ts": "73ff8f429ae558ec4ddc573fb4250e2bb4a73c9fd1fb28b3baabf369ea6f781c",
+    "packages/react/src/drop-preview.ts": "7c84edb3ba5ee124e207ca6fc5fb3f2a8b8e07178d90f11b96a68504b4402de7",
     "packages/react/src/drop-target.ts": "46d7afa6f516ec67bcc0d1deaa7e905c2da826be516125a726a170d6a2523357",
     "packages/react/src/floating-surface.tsx": "ce26f0641e9fea4d2349255feae86f0d9b3158a6cb8812d09d96b8c55481835c",
     "packages/react/src/group-drag.tsx": "bb30a15666da3c6fbcfa53b443b023393ea85bec33ee3da750e9f67384694f26",
