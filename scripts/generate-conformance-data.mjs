@@ -516,7 +516,7 @@ const resultDefinitions = [
   [
     "independent-semantic-oracle-result",
     "model-report",
-    "conformance/results/independent-semantic-oracle-2026-08-13.json",
+    "conformance/results/independent-semantic-oracle-2026-09-27.json",
     ["MOD-004", "PRF-003", "TST-002"],
     [compactProfile],
     "code-verifiable",

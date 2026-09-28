@@ -1,3 +1,4 @@
+import fc from "fast-check";
 import {
   DEFAULT_PANEL_CAPABILITIES,
   DEFAULT_PANEL_LIFECYCLE,
@@ -11,10 +12,12 @@ import {
   type LayoutNode,
   type PanelRecord,
   type WorkspaceSnapshot,
+  type WorkspacePatch,
 } from "@panefold/model";
 import { describe, expect, it } from "vitest";
 
 import { planLayoutInvalidation } from "../src/index.js";
+import { planLayoutInvalidation as referencePlan } from "./reference/invalidation.js";
 
 const ids = {
   panelA: panelId("panel:a"),
@@ -165,5 +168,107 @@ describe("planLayoutInvalidation", () => {
       surfaceIds: [],
       surfaceIndexIds: [],
     });
+  });
+});
+
+describe("lazy snapshot indexes", () => {
+  it("does not traverse snapshot tables for empty or geometry-neutral patches", () => {
+    const snapshot = fixture();
+    let tableReads = 0;
+    const observed = new Proxy(snapshot, {
+      get(target, key, receiver) {
+        if (key === "groups" || key === "nodes" || key === "surfaces") tableReads += 1;
+        return Reflect.get(target, key, receiver);
+      },
+    });
+    const panel = entity<PanelRecord>(snapshot, "panels", ids.panelA);
+    const group = entity<GroupRecord>(snapshot, "groups", ids.groupA);
+    const patches: readonly WorkspacePatch[] = [
+      { kind: "activation", before: snapshot.activation, after: { activePanelId: ids.panelB } },
+      { kind: "metadata", before: {}, after: { title: "Renamed" } },
+      { kind: "focus-memory", before: snapshot.focusMemory, after: { fallback: "workspace-root" } },
+      { kind: "panel", id: panel.id, before: panel, after: { ...panel, title: "New title" } },
+      {
+        kind: "group",
+        id: group.id,
+        before: group,
+        after: { ...group, panelIds: [...group.panelIds].reverse() },
+      },
+    ];
+    for (const entries of [[], patches]) {
+      const plan = planLayoutInvalidation(observed, observed, entries);
+      expect(plan).toEqual(referencePlan(snapshot, snapshot, entries));
+      expect(Object.isFrozen(plan)).toBe(true);
+      expect(Object.values(plan).every(Object.isFrozen)).toBe(true);
+    }
+    expect(tableReads).toBe(0);
+  });
+
+  it("matches the original index plan across 5000 seeded topology and patch combinations", () => {
+    function variation(data: readonly number[]): WorkspaceSnapshot {
+      const pick = (index: number) => data[index % data.length] ?? 0;
+      const base = fixture(pick(0) % 2 === 0 ? ids.panelA : ids.panelB, [pick(1) + 1, pick(2) + 1]);
+      const panels = Object.values(base.panels.byId)
+        .filter((_, i) => pick(i + 3) % 7 !== 0)
+        .map((panel, i) => ({ ...panel, constraints: { preferredInline: pick(i + 4) * 10 } }));
+      const groups = Object.values(base.groups.byId).filter((_, i) => pick(i + 5) % 7 !== 0);
+      const nodes = Object.values(base.nodes.byId)
+        .filter((_, i) => pick(i + 7) % 9 !== 0)
+        .map((node) =>
+          node.kind !== "split"
+            ? node
+            : {
+                ...node,
+                children: pick(10) % 3 === 0 ? [ids.root, ids.nodeA] : node.children,
+                collapsedChildIds: pick(11) % 2 === 0 ? [ids.nodeA] : [],
+              },
+        );
+      const surfaces = Object.values(base.surfaces.byId)
+        .filter(() => pick(12) % 5 !== 0)
+        .map((surface) => ({
+          ...surface,
+          rootNodeId: pick(13) % 2 === 0 ? ids.root : ids.nodeB,
+          maximized: pick(14) % 2 === 0,
+        }));
+      return createWorkspaceSnapshot({ panels, groups, nodes, surfaces });
+    }
+    const data = fc.array(fc.integer({ min: 0, max: 99 }), { minLength: 16, maxLength: 32 });
+    fc.assert(
+      fc.property(data, data, (left, right) => {
+        const before = variation(left);
+        const after = variation(right);
+        const patches: WorkspacePatch[] = [];
+        for (const [table, kind] of [
+          ["panels", "panel"],
+          ["groups", "group"],
+          ["nodes", "node"],
+          ["surfaces", "surface"],
+        ] as const) {
+          for (const id of new Set([...before[table].ids, ...after[table].ids])) {
+            const oldRecord = before[table].byId[id];
+            const newRecord = after[table].byId[id];
+            // Table and discriminant are paired above; omit absent optional records.
+            patches.push({
+              kind,
+              id,
+              ...(oldRecord === undefined ? {} : { before: oldRecord }),
+              ...(newRecord === undefined ? {} : { after: newRecord }),
+            } as WorkspacePatch);
+          }
+        }
+        for (const patch of patches) {
+          expect(planLayoutInvalidation(before, after, [patch])).toEqual(
+            referencePlan(before, after, [patch]),
+          );
+        }
+        expect(planLayoutInvalidation(before, after, patches)).toEqual(
+          referencePlan(before, after, patches),
+        );
+        expect(planLayoutInvalidation(after, before, patches)).toEqual(
+          referencePlan(after, before, patches),
+        );
+      }),
+      { seed: 20260927, numRuns: 5000 },
+    );
   });
 });

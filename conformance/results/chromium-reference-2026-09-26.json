@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "kind": "browser-profile-result",
   "profile": "compact-react-chromium-desktop",
-  "producedAt": "2026-09-27T23:52:40.946Z",
+  "producedAt": "2026-09-27T23:54:48.679Z",
   "status": "passed",
   "runner": "Playwright",
   "command": "pnpm exec playwright test --reporter=json",
@@ -17,7 +17,7 @@
     "passed": 56,
     "skipped": 0,
     "failed": 0,
-    "durationMs": 64344.522
+    "durationMs": 64784.193
   },
   "tests": [
     {
@@ -303,9 +303,9 @@
   ],
   "rawReport": {
     "path": "artifacts/preview-browser.json",
-    "sha256": "3e35c6b3cc13a4814e039bea1c655e4f14fb4c5bfca4f3144baa08ad5475d900",
-    "runUrl": "https://github.com/natanelia/panefold/actions/runs/36359909795",
-    "artifact": "drop-measurement-audit"
+    "sha256": "6e4e11902d3a2bc2c952076c2597d0e4bede8092361439ebe8172e8e44060845",
+    "runUrl": "https://github.com/natanelia/panefold/actions/runs/36360058090",
+    "artifact": "combined-performance-audit"
   },
   "sourceDigests": {
     "apps/demo/index.html": "c82b4b1af0fb76789fffcef28c7c785a078c7234f8f68be54e1000bc173f6848",
