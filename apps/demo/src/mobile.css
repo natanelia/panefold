@@ -173,6 +173,18 @@
   }
 
   @media (max-width: 700px) {
+    /* Let the panel picker give up width before any 44px action is clipped. */
+    .demo-command-center {
+      flex: 1 1 0;
+      padding-inline: 6px;
+      gap: 4px;
+    }
+
+    .demo-settings {
+      flex-shrink: 0;
+      margin-inline-start: 0;
+    }
+
     .demo-topbar > .demo-toolbar-spacer,
     .demo-command-center kbd,
     .demo-command-center .demo-command-label {
