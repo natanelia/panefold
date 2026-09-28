@@ -148,6 +148,9 @@ export type WorkspacePanelRegistry = Readonly<Record<string, WorkspacePanelDefin
 
 /** View-only pointer policy. Commands and application capabilities remain authoritative. */
 export interface WorkspaceDropBehavior {
+  /** Fraction of each content edge used to acquire a split, clamped to 0–1/3.
+   * Use 1/3 for touch-oriented workspaces. This does not change split proportions. */
+  readonly edgeBandRatio?: number;
   /** Allow edge splits by default. Alt (Windows/Linux) or Shift (macOS) temporarily inverts it. */
   readonly splitOnDragAndDrop?: boolean;
   /** Resolves corner hits and the larger whole-container edge bands. Defaults to right. */
