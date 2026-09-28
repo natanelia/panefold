@@ -1,0 +1,96 @@
+name: Verify deployed benchmark documentation
+
+on:
+  push:
+    branches: [perf/audit-20260927]
+    paths: [audit-live-documentation.json]
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      CI: "1"
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          path: audit-input
+          persist-credentials: false
+      - id: input
+        name: Pin the published documentation commit
+        run: |
+          python3 - <<'PY'
+          import json, os, re
+          from pathlib import Path
+          commit = json.loads(Path('audit-input/audit-live-documentation.json').read_text())['commit']
+          if not re.fullmatch('[a-f0-9]{40}', commit):
+              raise ValueError('Expected an immutable documentation commit')
+          with open(os.environ['GITHUB_OUTPUT'], 'a') as output:
+              output.write('commit=' + commit + '\n')
+          PY
+      - uses: actions/checkout@v7
+        with:
+          ref: ${{ steps.input.outputs.commit }}
+          path: site-source
+          persist-credentials: false
+      - uses: pnpm/action-setup@v6
+        with:
+          version: 11.16.0
+          package_json_file: site-source/package.json
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          package-manager-cache: false
+      - working-directory: site-source
+        run: pnpm install --frozen-lockfile
+      - working-directory: site-source
+        run: pnpm exec playwright install --with-deps chromium
+      - name: Compare the actual public website with the checked-in Markdown
+        working-directory: site-source
+        run: |
+          mkdir -p artifacts
+          cat > playwright.live-docs.config.ts <<'TS'
+          import base from './playwright.site.config';
+          export default {
+            ...base,
+            testMatch: 'performance-docs.spec.ts',
+            retries: 0,
+            webServer: undefined,
+            use: {
+              ...base.use,
+              baseURL: 'https://natanelia.github.io/panefold/',
+              screenshot: 'on',
+              trace: 'retain-on-failure',
+            },
+          };
+          TS
+          pnpm exec playwright test --config playwright.live-docs.config.ts --reporter=json > artifacts/live-documentation.json
+          node --input-type=module <<'JS'
+          import assert from 'node:assert/strict';
+          import {readFileSync,writeFileSync} from 'node:fs';
+          import {chromium,expect} from '@playwright/test';
+          const browser=await chromium.launch();
+          const page=await browser.newPage();
+          const response=await page.goto('https://natanelia.github.io/panefold/docs/design-audit/');
+          assert.equal(response?.status(),200);
+          await expect(page.locator('article')).toContainText('The current measurements follow the merge of PRs #39–#45.');
+          await expect(page.locator('article').getByRole('link',{name:'Performance benchmarks',exact:true})).toHaveAttribute('href','/panefold/docs/performance');
+          const result=JSON.parse(readFileSync('artifacts/live-documentation.json','utf8'));
+          assert.equal(result.stats.expected,2);
+          assert.equal(result.stats.unexpected,0);
+          assert.equal(result.stats.flaky,0);
+          writeFileSync('artifacts/live-summary.json',JSON.stringify({status:'passed',url:'https://natanelia.github.io/panefold/docs/performance/',designAuditUrl:page.url(),browser:browser.version(),verifiedAt:new Date().toISOString(),desktopAndMobileChecks:result.stats.expected},null,2)+'\n');
+          await browser.close();
+          JS
+      - uses: actions/upload-artifact@v7
+        if: always()
+        with:
+          name: deployed-documentation-verification
+          path: |
+            site-source/artifacts
+            site-source/test-results
+          if-no-files-found: error
+          retention-days: 30
