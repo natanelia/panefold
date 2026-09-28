@@ -31,6 +31,11 @@ jobs:
       - run: pnpm install --frozen-lockfile
       - run: node --test scripts/pages-*.test.mjs
       - run: pnpm check
+      - name: Report formatter differences
+        if: failure()
+        run: |
+          pnpm exec oxfmt apps/site/src/pages/DemoPage.tsx
+          git diff -- apps/site/src/pages/DemoPage.tsx
       - name: Verify documentation catalog and application examples
         run: |
           node --test scripts/site-catalog.test.mjs
