@@ -3,6 +3,7 @@ import type {
   LayoutNode,
   NodeId,
   PanelConstraints,
+  PanelRecord,
   WorkspaceSnapshot,
 } from "@panefold/model";
 
@@ -70,22 +71,11 @@ function safeDimension(value: number | undefined, fallback: number): number {
 }
 
 function selectedPanelConstraints(
-  group: GroupRecord,
-  snapshot: WorkspaceSnapshot,
+  selected: PanelRecord,
   axis: LogicalAxis,
+  min: number,
+  collapsible: boolean,
 ): AxisConstraints {
-  const panels = group.panelIds
-    .map((id) => snapshot.panels.byId[String(id)])
-    .filter((panel) => panel !== undefined);
-  const selected = snapshot.panels.byId[String(group.selectedPanelId)] ?? panels[0];
-
-  if (panels.length === 0 || selected === undefined) return {};
-
-  const min = panels.reduce(
-    (current, panel) =>
-      Math.max(current, safeDimension(axisValue(panel.constraints, axis, "hardMin"), 0)),
-    0,
-  );
   const preferredMin = safeDimension(axisValue(selected.constraints, axis, "preferredMin"), min);
   const preferred = Math.max(
     min,
@@ -102,7 +92,7 @@ function selectedPanelConstraints(
     max,
     grow: safeDimension(selected.constraints.grow, 1),
     shrink: safeDimension(selected.constraints.shrink, 1),
-    collapsible: panels.every((panel) => panel.constraints.collapsible === true),
+    collapsible,
     collapsePriority: safeDimension(selected.constraints.collapsePriority, 0),
   };
 }
@@ -113,9 +103,29 @@ export function defaultGroupConstraints(
 ): BoxConstraints {
   const selected = snapshot.panels.byId[String(group.selectedPanelId)];
   const preferredAspectRatio = selected?.constraints.preferredAspectRatio;
+  let firstPanel: PanelRecord | undefined;
+  let minInline = 0;
+  let minBlock = 0;
+  let collapsible = true;
+  // Both axes use the same members. Avoid materializing/filtering that list
+  // twice on every solve; hidden panels still contribute both hard minima.
+  for (const panelId of group.panelIds) {
+    const panel = snapshot.panels.byId[String(panelId)];
+    if (panel === undefined) continue;
+    firstPanel ??= panel;
+    minInline = Math.max(minInline, safeDimension(panel.constraints.hardMinInline, 0));
+    minBlock = Math.max(minBlock, safeDimension(panel.constraints.hardMinBlock, 0));
+    collapsible &&= panel.constraints.collapsible === true;
+  }
+  const effectiveSelection = selected ?? firstPanel;
+  const hasMembers = firstPanel !== undefined && effectiveSelection !== undefined;
   return {
-    inline: selectedPanelConstraints(group, snapshot, "inline"),
-    block: selectedPanelConstraints(group, snapshot, "block"),
+    inline: hasMembers
+      ? selectedPanelConstraints(effectiveSelection, "inline", minInline, collapsible)
+      : {},
+    block: hasMembers
+      ? selectedPanelConstraints(effectiveSelection, "block", minBlock, collapsible)
+      : {},
     ...(preferredAspectRatio === undefined ||
     !Number.isFinite(preferredAspectRatio) ||
     preferredAspectRatio <= 0
