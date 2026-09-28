@@ -31,6 +31,8 @@ interface DocsPageProps {
 }
 
 const markdownRouteMap: Readonly<Record<string, string>> = {
+  "docs/PERFORMANCE.md": "/docs/performance",
+  "PERFORMANCE.md": "/docs/performance",
   "docs/ARCHITECTURE.md": "/docs/architecture",
   "ARCHITECTURE.md": "/docs/architecture",
   "docs/COMMANDS.md": "/docs/commands",

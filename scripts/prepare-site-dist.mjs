@@ -44,6 +44,11 @@ const siteRoutes = [
     description: "Evidence inventory, hard gates, and the meaning of experimental.",
   },
   {
+    path: "docs/performance",
+    title: "Performance benchmarks — Panefold documentation",
+    description: "Merged-code measurements, raw samples, controls, and regression results.",
+  },
+  {
     path: "docs/design-audit",
     title: "System-design audit — Panefold documentation",
     description: "An exact 190-requirement implementation and evidence matrix.",

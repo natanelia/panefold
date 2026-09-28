@@ -248,3 +248,7 @@ described in [SECURITY.md](SECURITY.md), not a public issue.
 ## License
 
 [MIT](LICENSE)
+
+## Measured performance
+
+See [Performance benchmarks](docs/PERFORMANCE.md) for merged-code measurements, raw samples, controls, and limits. The documentation website renders the same report.

@@ -1,0 +1,888 @@
+{
+  "config": {
+    "argv": [
+      "/opt/hostedtoolcache/node/24.21.0/x64/bin/node",
+      "/home/runner/work/panefold/panefold/node_modules/@playwright/test/cli.js",
+      "test",
+      "--config",
+      "playwright.site.config.ts",
+      "--reporter=json"
+    ],
+    "configFile": "/home/runner/work/panefold/panefold/playwright.site.config.ts",
+    "rootDir": "/home/runner/work/panefold/panefold/site-e2e",
+    "failOnFlakyTests": false,
+    "forbidOnly": true,
+    "fullyParallel": true,
+    "globalSetup": null,
+    "globalTeardown": null,
+    "globalTimeout": 0,
+    "grep": {},
+    "grepInvert": null,
+    "maxFailures": 0,
+    "metadata": {
+      "ci": {
+        "commitHref": "https://github.com/natanelia/panefold/commit/9a0fed12b90fbdbd07c53e246316b6333a90f94f",
+        "commitHash": "9a0fed12b90fbdbd07c53e246316b6333a90f94f",
+        "buildHref": "https://github.com/natanelia/panefold/actions/runs/36372474835"
+      },
+      "gitCommit": {
+        "shortHash": "e08334f",
+        "hash": "e08334f87dedb0d0418e8cf35fbc193a2db1984e",
+        "subject": "Merge pull request #45 from natanelia/perf/audit-drop-measurement-20260927",
+        "body": "Merge pull request #45 from natanelia/perf/audit-drop-measurement-20260927\n\nperf(react): index tab-strip labels once per drop measurement",
+        "author": {
+          "name": "Natan",
+          "email": "1708681+natanelia@users.noreply.github.com",
+          "time": 1790564832000
+        },
+        "committer": {
+          "name": "GitHub",
+          "email": "noreply@github.com",
+          "time": 1790564832000
+        },
+        "branch": "HEAD"
+      },
+      "actualWorkers": 2
+    },
+    "preserveOutput": "always",
+    "projects": [
+      {
+        "outputDir": "/home/runner/work/panefold/panefold/test-results",
+        "repeatEach": 1,
+        "retries": 2,
+        "metadata": {
+          "ci": {
+            "commitHref": "https://github.com/natanelia/panefold/commit/9a0fed12b90fbdbd07c53e246316b6333a90f94f",
+            "commitHash": "9a0fed12b90fbdbd07c53e246316b6333a90f94f",
+            "buildHref": "https://github.com/natanelia/panefold/actions/runs/36372474835"
+          },
+          "gitCommit": {
+            "shortHash": "e08334f",
+            "hash": "e08334f87dedb0d0418e8cf35fbc193a2db1984e",
+            "subject": "Merge pull request #45 from natanelia/perf/audit-drop-measurement-20260927",
+            "body": "Merge pull request #45 from natanelia/perf/audit-drop-measurement-20260927\n\nperf(react): index tab-strip labels once per drop measurement",
+            "author": {
+              "name": "Natan",
+              "email": "1708681+natanelia@users.noreply.github.com",
+              "time": 1790564832000
+            },
+            "committer": {
+              "name": "GitHub",
+              "email": "noreply@github.com",
+              "time": 1790564832000
+            },
+            "branch": "HEAD"
+          },
+          "actualWorkers": 2
+        },
+        "id": "desktop-chromium",
+        "name": "desktop-chromium",
+        "testDir": "/home/runner/work/panefold/panefold/site-e2e",
+        "testIgnore": [],
+        "testMatch": [
+          "**/*.@(spec|test).?(c|m)[jt]s?(x)"
+        ],
+        "timeout": 30000
+      },
+      {
+        "outputDir": "/home/runner/work/panefold/panefold/test-results",
+        "repeatEach": 1,
+        "retries": 2,
+        "metadata": {
+          "ci": {
+            "commitHref": "https://github.com/natanelia/panefold/commit/9a0fed12b90fbdbd07c53e246316b6333a90f94f",
+            "commitHash": "9a0fed12b90fbdbd07c53e246316b6333a90f94f",
+            "buildHref": "https://github.com/natanelia/panefold/actions/runs/36372474835"
+          },
+          "gitCommit": {
+            "shortHash": "e08334f",
+            "hash": "e08334f87dedb0d0418e8cf35fbc193a2db1984e",
+            "subject": "Merge pull request #45 from natanelia/perf/audit-drop-measurement-20260927",
+            "body": "Merge pull request #45 from natanelia/perf/audit-drop-measurement-20260927\n\nperf(react): index tab-strip labels once per drop measurement",
+            "author": {
+              "name": "Natan",
+              "email": "1708681+natanelia@users.noreply.github.com",
+              "time": 1790564832000
+            },
+            "committer": {
+              "name": "GitHub",
+              "email": "noreply@github.com",
+              "time": 1790564832000
+            },
+            "branch": "HEAD"
+          },
+          "actualWorkers": 2
+        },
+        "id": "mobile-chromium",
+        "name": "mobile-chromium",
+        "testDir": "/home/runner/work/panefold/panefold/site-e2e",
+        "testIgnore": [],
+        "testMatch": [
+          "**/*.@(spec|test).?(c|m)[jt]s?(x)"
+        ],
+        "timeout": 30000
+      }
+    ],
+    "quiet": false,
+    "reporter": [
+      [
+        "json"
+      ]
+    ],
+    "reportSlowTests": {
+      "max": 5,
+      "threshold": 300000
+    },
+    "shard": null,
+    "tags": [],
+    "updateSnapshots": "missing",
+    "updateSourceMethod": "patch",
+    "version": "1.62.1",
+    "workers": 2,
+    "webServer": {
+      "command": "pnpm build:site && pnpm --filter @panefold/site preview --host 127.0.0.1 --port 4174",
+      "url": "http://127.0.0.1:4174/panefold/",
+      "reuseExistingServer": false,
+      "timeout": 180000
+    }
+  },
+  "suites": [
+    {
+      "title": "site.spec.ts",
+      "file": "site.spec.ts",
+      "column": 0,
+      "line": 0,
+      "specs": [
+        {
+          "title": "presents the product story and live reference fixture",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 30000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "desktop-chromium",
+              "projectName": "desktop-chromium",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 1136,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-09-28T03:17:21.106Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "5c02723ad68c2a0d50c5-4b2a807d2ea83d22d68c",
+          "file": "site.spec.ts",
+          "line": 4,
+          "column": 1
+        },
+        {
+          "title": "navigates the repository-backed documentation",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 30000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "desktop-chromium",
+              "projectName": "desktop-chromium",
+              "results": [
+                {
+                  "workerIndex": 1,
+                  "parallelIndex": 1,
+                  "status": "passed",
+                  "duration": 763,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-09-28T03:17:21.116Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "5c02723ad68c2a0d50c5-ac6a70d55c8178669834",
+          "file": "site.spec.ts",
+          "line": 25,
+          "column": 1
+        },
+        {
+          "title": "normalizes static-host trailing-slash routes",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 30000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "desktop-chromium",
+              "projectName": "desktop-chromium",
+              "results": [
+                {
+                  "workerIndex": 1,
+                  "parallelIndex": 1,
+                  "status": "passed",
+                  "duration": 1181,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-09-28T03:17:22.020Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "5c02723ad68c2a0d50c5-4102054bbdd538133109",
+          "file": "site.spec.ts",
+          "line": 38,
+          "column": 1
+        },
+        {
+          "title": "publishes complete route and social metadata",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 30000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "desktop-chromium",
+              "projectName": "desktop-chromium",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 228,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-09-28T03:17:22.358Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "5c02723ad68c2a0d50c5-4a0ddbf2690f779d7a43",
+          "file": "site.spec.ts",
+          "line": 59,
+          "column": 1
+        },
+        {
+          "title": "keeps the standalone workbench fixture out of search while sharing the demo route",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 30000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "desktop-chromium",
+              "projectName": "desktop-chromium",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 41,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-09-28T03:17:22.599Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "5c02723ad68c2a0d50c5-6b3167a78294c807f3a5",
+          "file": "site.spec.ts",
+          "line": 86,
+          "column": 1
+        },
+        {
+          "title": "publishes every documentation route in the sitemap",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 30000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "desktop-chromium",
+              "projectName": "desktop-chromium",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 645,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-09-28T03:17:22.649Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "5c02723ad68c2a0d50c5-9bcefbe28ea4aa33f7e3",
+          "file": "site.spec.ts",
+          "line": 104,
+          "column": 1
+        },
+        {
+          "title": "publishes the complete decision and marketing documentation",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 30000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "desktop-chromium",
+              "projectName": "desktop-chromium",
+              "results": [
+                {
+                  "workerIndex": 1,
+                  "parallelIndex": 1,
+                  "status": "passed",
+                  "duration": 2278,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-09-28T03:17:23.222Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "5c02723ad68c2a0d50c5-23c6637daa307af5ad41",
+          "file": "site.spec.ts",
+          "line": 127,
+          "column": 1
+        },
+        {
+          "title": "renders the complete system design with its original figures",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 30000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "desktop-chromium",
+              "projectName": "desktop-chromium",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 1654,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-09-28T03:17:23.310Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "5c02723ad68c2a0d50c5-2eaf268b6c238a5b08bf",
+          "file": "site.spec.ts",
+          "line": 157,
+          "column": 1
+        },
+        {
+          "title": "has no automated WCAG A/AA violations on the landing page",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 30000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "desktop-chromium",
+              "projectName": "desktop-chromium",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 2302,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-09-28T03:17:24.976Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "5c02723ad68c2a0d50c5-dc88154faff68d496a29",
+          "file": "site.spec.ts",
+          "line": 193,
+          "column": 1
+        },
+        {
+          "title": "has no automated WCAG A/AA violations in documentation",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 30000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "desktop-chromium",
+              "projectName": "desktop-chromium",
+              "results": [
+                {
+                  "workerIndex": 1,
+                  "parallelIndex": 1,
+                  "status": "passed",
+                  "duration": 1400,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-09-28T03:17:25.511Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "5c02723ad68c2a0d50c5-25d494a2066c11c77687",
+          "file": "site.spec.ts",
+          "line": 206,
+          "column": 1
+        },
+        {
+          "title": "presents the product story and live reference fixture",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 30000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "mobile-chromium",
+              "projectName": "mobile-chromium",
+              "results": [
+                {
+                  "workerIndex": 2,
+                  "parallelIndex": 1,
+                  "status": "passed",
+                  "duration": 849,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-09-28T03:17:27.417Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "5c02723ad68c2a0d50c5-1e5bbd25637732c13ed8",
+          "file": "site.spec.ts",
+          "line": 4,
+          "column": 1
+        },
+        {
+          "title": "navigates the repository-backed documentation",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 30000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "mobile-chromium",
+              "projectName": "mobile-chromium",
+              "results": [
+                {
+                  "workerIndex": 3,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 607,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-09-28T03:17:27.872Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "5c02723ad68c2a0d50c5-282213350cb5061130ef",
+          "file": "site.spec.ts",
+          "line": 25,
+          "column": 1
+        },
+        {
+          "title": "normalizes static-host trailing-slash routes",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 30000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "mobile-chromium",
+              "projectName": "mobile-chromium",
+              "results": [
+                {
+                  "workerIndex": 2,
+                  "parallelIndex": 1,
+                  "status": "passed",
+                  "duration": 1073,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-09-28T03:17:28.389Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "5c02723ad68c2a0d50c5-5121a9a5c893d9121428",
+          "file": "site.spec.ts",
+          "line": 38,
+          "column": 1
+        },
+        {
+          "title": "publishes complete route and social metadata",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 30000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "mobile-chromium",
+              "projectName": "mobile-chromium",
+              "results": [
+                {
+                  "workerIndex": 3,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 201,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-09-28T03:17:28.609Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "5c02723ad68c2a0d50c5-418ddf5675c93c0125a9",
+          "file": "site.spec.ts",
+          "line": 59,
+          "column": 1
+        },
+        {
+          "title": "keeps the standalone workbench fixture out of search while sharing the demo route",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 30000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "mobile-chromium",
+              "projectName": "mobile-chromium",
+              "results": [
+                {
+                  "workerIndex": 3,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 37,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-09-28T03:17:28.823Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "5c02723ad68c2a0d50c5-b314a009b1bcc52ab954",
+          "file": "site.spec.ts",
+          "line": 86,
+          "column": 1
+        },
+        {
+          "title": "publishes every documentation route in the sitemap",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 30000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "mobile-chromium",
+              "projectName": "mobile-chromium",
+              "results": [
+                {
+                  "workerIndex": 3,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 640,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-09-28T03:17:28.870Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "5c02723ad68c2a0d50c5-065db3f408284b7913ed",
+          "file": "site.spec.ts",
+          "line": 104,
+          "column": 1
+        },
+        {
+          "title": "publishes the complete decision and marketing documentation",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 30000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "mobile-chromium",
+              "projectName": "mobile-chromium",
+              "results": [
+                {
+                  "workerIndex": 2,
+                  "parallelIndex": 1,
+                  "status": "passed",
+                  "duration": 2119,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-09-28T03:17:29.475Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "5c02723ad68c2a0d50c5-d5ebfe00b66ad7920839",
+          "file": "site.spec.ts",
+          "line": 127,
+          "column": 1
+        },
+        {
+          "title": "renders the complete system design with its original figures",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 30000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "mobile-chromium",
+              "projectName": "mobile-chromium",
+              "results": [
+                {
+                  "workerIndex": 3,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 1574,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-09-28T03:17:29.521Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "5c02723ad68c2a0d50c5-1ae3d915c8cbc3ffacaf",
+          "file": "site.spec.ts",
+          "line": 157,
+          "column": 1
+        },
+        {
+          "title": "has no automated WCAG A/AA violations on the landing page",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 30000,
+              "annotations": [
+                {
+                  "type": "skip",
+                  "description": "One desktop axe pass covers the same DOM projection",
+                  "location": {
+                    "file": "/home/runner/work/panefold/panefold/site-e2e/site.spec.ts",
+                    "line": 194,
+                    "column": 8
+                  }
+                }
+              ],
+              "expectedStatus": "skipped",
+              "projectId": "mobile-chromium",
+              "projectName": "mobile-chromium",
+              "results": [
+                {
+                  "workerIndex": 3,
+                  "parallelIndex": 0,
+                  "status": "skipped",
+                  "duration": 38,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-09-28T03:17:31.108Z",
+                  "annotations": [
+                    {
+                      "type": "skip",
+                      "description": "One desktop axe pass covers the same DOM projection",
+                      "location": {
+                        "file": "/home/runner/work/panefold/panefold/site-e2e/site.spec.ts",
+                        "line": 194,
+                        "column": 8
+                      }
+                    }
+                  ],
+                  "attachments": []
+                }
+              ],
+              "status": "skipped"
+            }
+          ],
+          "id": "5c02723ad68c2a0d50c5-22aa3e9a6d8ef99be297",
+          "file": "site.spec.ts",
+          "line": 193,
+          "column": 1
+        },
+        {
+          "title": "has no automated WCAG A/AA violations in documentation",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 30000,
+              "annotations": [
+                {
+                  "type": "skip",
+                  "description": "One desktop axe pass covers the same documentation projection",
+                  "location": {
+                    "file": "/home/runner/work/panefold/panefold/site-e2e/site.spec.ts",
+                    "line": 207,
+                    "column": 8
+                  }
+                }
+              ],
+              "expectedStatus": "skipped",
+              "projectId": "mobile-chromium",
+              "projectName": "mobile-chromium",
+              "results": [
+                {
+                  "workerIndex": 3,
+                  "parallelIndex": 0,
+                  "status": "skipped",
+                  "duration": 33,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-09-28T03:17:31.156Z",
+                  "annotations": [
+                    {
+                      "type": "skip",
+                      "description": "One desktop axe pass covers the same documentation projection",
+                      "location": {
+                        "file": "/home/runner/work/panefold/panefold/site-e2e/site.spec.ts",
+                        "line": 207,
+                        "column": 8
+                      }
+                    }
+                  ],
+                  "attachments": []
+                }
+              ],
+              "status": "skipped"
+            }
+          ],
+          "id": "5c02723ad68c2a0d50c5-b4d268779b297a675ef2",
+          "file": "site.spec.ts",
+          "line": 206,
+          "column": 1
+        }
+      ]
+    }
+  ],
+  "errors": [],
+  "stats": {
+    "startTime": "2026-09-28T03:17:05.690Z",
+    "duration": 25966.729,
+    "expected": 18,
+    "skipped": 2,
+    "unexpected": 0,
+    "flaky": 0
+  }
+}
