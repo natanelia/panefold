@@ -1,0 +1,21 @@
+name: Touch workspace evidence
+
+on:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  source:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v7
+      - name: Preserve exact source for browser reproduction
+        run: git archive --format=tar.gz HEAD > /tmp/touch-workspace-source.tar.gz
+      - uses: actions/upload-artifact@v7
+        with:
+          name: touch-workspace-source
+          path: /tmp/touch-workspace-source.tar.gz
+          retention-days: 3
