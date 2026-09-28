@@ -2,21 +2,20 @@
   "schemaVersion": 1,
   "kind": "protocol-motion-result",
   "profile": "compact-react-chromium-desktop",
-  "producedAt": "2026-09-27T13:19:03.555Z",
+  "producedAt": "2026-09-27T15:13:16.847Z",
   "status": "passed",
-  "runner": "Vitest 4.1.10",
-  "command": "pnpm exec vitest run --reporter=json --outputFile=artifacts/audit-rounding-unit.json",
+  "runner": "Vitest",
+  "command": "pnpm exec vitest run --reporter=json --outputFile=artifacts/preview-unit.json",
   "environment": {
-    "operatingSystem": "Linux 6.18.44 x64",
+    "operatingSystem": "Linux 6.17.0-1022-azure x64",
     "node": "v22.23.2",
-    "pnpm": "11.16.0",
-    "vitestMaxWorkers": 1
+    "browserVersion": "151.0.7922.34"
   },
   "summary": {
-    "tests": 552,
-    "passed": 552,
+    "tests": 559,
+    "passed": 559,
     "failed": 0,
-    "files": 71,
+    "files": 72,
     "protocolMotionTestFiles": 9,
     "protocolMotionTests": 86,
     "protocolMotionPassed": 86,
@@ -116,14 +115,29 @@
       "passed": 6
     },
     {
+      "file": "packages/geometry/test/group-constraints.test.ts",
+      "status": "passed",
+      "passed": 2
+    },
+    {
       "file": "packages/geometry/test/hit-test.test.ts",
       "status": "passed",
       "passed": 4
     },
     {
+      "file": "packages/geometry/test/invalidation-differential.test.ts",
+      "status": "passed",
+      "passed": 5
+    },
+    {
       "file": "packages/geometry/test/invalidation.test.ts",
       "status": "passed",
-      "passed": 4
+      "passed": 6
+    },
+    {
+      "file": "packages/geometry/test/rounding-compatibility.test.ts",
+      "status": "passed",
+      "passed": 2
     },
     {
       "file": "packages/geometry/test/solve-layout.test.ts",
@@ -216,11 +230,6 @@
       "passed": 3
     },
     {
-      "file": "packages/protocol/test/protocol.test.ts",
-      "status": "passed",
-      "passed": 3
-    },
-    {
       "file": "packages/motion/test/motion-lifecycle.test.ts",
       "status": "passed",
       "passed": 13
@@ -229,6 +238,11 @@
       "file": "packages/motion/test/motion.test.ts",
       "status": "passed",
       "passed": 7
+    },
+    {
+      "file": "packages/protocol/test/protocol.test.ts",
+      "status": "passed",
+      "passed": 3
     },
     {
       "file": "packages/protocol-xstate/test/catalog-machines.test.ts",
@@ -369,22 +383,13 @@
       "file": "packages/web-components/test/web-components.test.ts",
       "status": "passed",
       "passed": 2
-    },
-    {
-      "file": "packages/geometry/test/group-constraints.test.ts",
-      "status": "passed",
-      "passed": 2
-    },
-    {
-      "file": "packages/geometry/test/rounding-compatibility.test.ts",
-      "status": "passed",
-      "passed": 2
     }
   ],
   "rawReport": {
-    "path": "artifacts/audit-rounding-unit.json",
-    "sha256": "bcff95ea853b6655fd10f325af23f7e8b8ee9b42ebcf0de70eb8ddc84b741c7e",
-    "availability": "Included in the downloadable audit evidence; regenerate with the command above. The original output was copied without modification."
+    "path": "artifacts/preview-unit.json",
+    "sha256": "243769233cb281ba9952840ff026aa3edbb34c7df4e16bfa586baf196539a023",
+    "runUrl": "https://github.com/natanelia/panefold/actions/runs/36328396318",
+    "artifact": "invalidation-audit-node-22"
   },
   "sourceDigests": {
     "e2e/drag-parity.spec.ts": "a7c7da7513e3b56de9b832cce5fa2fc6236f55d74ba9ea3aa9be1600f6620bce",
@@ -393,9 +398,13 @@
     "packages/geometry/src/allocate-axis.ts": "a4317dea79bbb8986fc37ba48c1cec8f7089e6542d8955497d2d050c76d540cf",
     "packages/geometry/src/hit-test.ts": "2da9ca42d97c135f37d599bbaebed8f758343fa4e52fd647c05a4b179340c121",
     "packages/geometry/src/index.ts": "d033849f77196b6f518b4deadee9062b72a72e3362732e11fc512e7a78958d13",
-    "packages/geometry/src/invalidation.ts": "dfe873cb6df480d8ce023688e199463489877527b5b1c5155c4a7d1e234d4f1b",
+    "packages/geometry/src/invalidation.ts": "9d42bd81ccfc82cecac5d0a200bd889ae49c164acf5db44eaebdb445acff7906",
     "packages/geometry/src/solve-layout.ts": "0686fcb7b43b713abe13f81c93c84652fa9f78d192dd80211e56d10ca0c9c8ff",
     "packages/geometry/src/types.ts": "f8d663491053871b919c0b1782604fa74a740822e11eb2fba4470d505b6345fc",
+    "packages/geometry/test/invalidation-differential.test.ts": "08a35df8b58e62e58644a6eeefbf16e169809151aaaf4c4da5e70d75d7509fea",
+    "packages/geometry/test/invalidation.test.ts": "930cb0c67dabbff1e9ed542de171b51d91ae7365d1c20944e2a5be0c367989a6",
+    "packages/geometry/test/reference-invalidation.ts": "dfe873cb6df480d8ce023688e199463489877527b5b1c5155c4a7d1e234d4f1b",
+    "packages/geometry/test/reference/invalidation.ts": "dfe873cb6df480d8ce023688e199463489877527b5b1c5155c4a7d1e234d4f1b",
     "packages/geometry/tsconfig.json": "49477f7be8bc9f2976c250a0297c34809aed00c7d9e57115eaa4ad1722897e9c",
     "packages/model/package.json": "15e5054eb50fc8a0c54fcd593a9dfb71a4c10c2091e0af0477598a2b98f88f90",
     "packages/model/src/commands.ts": "e4d1dd8edd3fde607ae8f5640a2e9c9b7a4d571724b4847ab945d599d3fa32b7",
@@ -488,18 +497,14 @@
     "scripts/verify-protocol-coverage.mjs": "e6659c6d19bb29abd6ba2b9942639a9b9b3e83a2535ccf80e2d7a296b6805fc9",
     "tsconfig.base.json": "6a5180d481cd767365ec8da2257e5573e498c5802ce56bda99e0ac218baca818",
     "tsconfig.json": "b80805434d59ff95a362cfbff728ceab0e6313f80ea3c23853cb564c1dfc9a65",
-    "vitest.config.ts": "6f743b2639e8e091bdc454a4aaa6336a538b889e70af8814ee7d1f27c7a8769e",
-    "packages/geometry/test/group-constraints.test.ts": "d9fd32beebd962439cfbbe9d5954dcf9ad90b4c6817789706dfc23e602d71f08",
-    "packages/geometry/test/reference-group-constraints.ts": "803f2128d23692293afb053b1d480be0cdb7f90bd6a93b80975ee2911d960e88",
-    "packages/geometry/test/rounding-compatibility.test.ts": "01f48decc7b28b3de0b96bbd30411231684df8645f05fbbf68f7cb30458569b9",
-    "packages/geometry/test/reference/allocate-axis.ts": "436204e1521bf84052111a7ec254ef34600ee72b8396ef242d1dae6786b5e57b",
-    "packages/geometry/test/reference/types.ts": "3b77ea26c1b9d5923b32fffb61ab8515bff13e4a32a5e625b88093eb670e196e"
+    "vitest.config.ts": "6f743b2639e8e091bdc454a4aaa6336a538b889e70af8814ee7d1f27c7a8769e"
   },
   "limitations": [
     "Deterministic clocks, fake motion drivers, and jsdom do not establish browser or physical-system behavior.",
     "This run includes the full unit suite, not only the protocol and motion subset.",
+    "One automated Linux GitHub Actions run, not a stable browser or physical-device matrix.",
     "Emulated touch, automated axe, forced colors, and keyboard tests do not establish manual accessibility certification.",
     "The performance fixture measures splitter frames, not panel-drag latency or physical 60 Hz/120 Hz guarantees.",
-    "One local Linux x64 unit-test execution, not browser, physical-device, or external certification."
+    "Raw reports are also retained in the workflow artifact; artifact retention is 30 days."
   ]
 }

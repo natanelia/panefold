@@ -25,14 +25,10 @@ export interface LayoutInvalidationPlan {
 
 interface SnapshotIndex {
   readonly snapshot: WorkspaceSnapshot;
-  readonly parentByNode: Map<string, string>;
-  readonly nodeByGroup: Map<string, string>;
-  readonly groupByPanel: Map<string, string>;
+  readonly parentByNode: ReadonlyMap<string, string>;
+  readonly nodeByGroup: ReadonlyMap<string, string>;
+  readonly groupByPanel: ReadonlyMap<string, string>;
   readonly surfaceByNode: ReadonlyMap<string, string>;
-  constraintsIndexed: boolean;
-  // These visits belong to one snapshot and one plan, never to shared output.
-  visitedConstraints: Set<string> | undefined;
-  visitedGeometry: Set<string> | undefined;
 }
 
 function compare(left: string, right: string): number {
@@ -61,45 +57,6 @@ function createIndex(snapshot: WorkspaceSnapshot): SnapshotIndex {
   const groupByPanel = new Map<string, string>();
   const surfaceByNode = new Map<string, string>();
 
-  for (const surfaceId of snapshot.surfaces.ids) {
-    const surface = snapshot.surfaces.byId[String(surfaceId)];
-    if (surface === undefined) continue;
-    const stack = [String(surface.rootNodeId)];
-    const seen = new Set<string>();
-    while (stack.length > 0) {
-      const nodeId = stack.pop();
-      if (nodeId === undefined || seen.has(nodeId)) continue;
-      seen.add(nodeId);
-      surfaceByNode.set(nodeId, String(surface.id));
-      const node = snapshot.nodes.byId[nodeId];
-      if (node?.kind === "split") {
-        // Native bulk push is faster for wide splits; avoid its array for small splits.
-        if (node.children.length > 16) {
-          stack.push(...node.children.map(String));
-        } else {
-          for (let child = 0; child < node.children.length; child += 1) {
-            if (child in node.children) stack.push(String(node.children[child]));
-          }
-        }
-      }
-    }
-  }
-
-  return {
-    snapshot,
-    parentByNode,
-    nodeByGroup,
-    groupByPanel,
-    surfaceByNode,
-    constraintsIndexed: false,
-    visitedConstraints: undefined,
-    visitedGeometry: undefined,
-  };
-}
-
-function indexConstraints(index: SnapshotIndex): void {
-  if (index.constraintsIndexed) return;
-  const { snapshot, parentByNode, nodeByGroup, groupByPanel } = index;
   for (const groupId of snapshot.groups.ids) {
     const group = snapshot.groups.byId[String(groupId)];
     if (group === undefined) continue;
@@ -112,12 +69,27 @@ function indexConstraints(index: SnapshotIndex): void {
       for (const childId of node.children) parentByNode.set(String(childId), String(node.id));
     }
   }
-  index.constraintsIndexed = true;
+  for (const surfaceId of snapshot.surfaces.ids) {
+    const surface = snapshot.surfaces.byId[String(surfaceId)];
+    if (surface === undefined) continue;
+    const stack = [String(surface.rootNodeId)];
+    const seen = new Set<string>();
+    while (stack.length > 0) {
+      const nodeId = stack.pop();
+      if (nodeId === undefined || seen.has(nodeId)) continue;
+      seen.add(nodeId);
+      surfaceByNode.set(nodeId, String(surface.id));
+      const node = snapshot.nodes.byId[nodeId];
+      if (node?.kind === "split") stack.push(...node.children.map(String));
+    }
+  }
+
+  return { snapshot, parentByNode, nodeByGroup, groupByPanel, surfaceByNode };
 }
 
 function addAncestors(index: SnapshotIndex, nodeId: string, output: Set<string>): void {
   let current: string | undefined = nodeId;
-  const seen = (index.visitedConstraints ??= new Set<string>());
+  const seen = new Set<string>();
   while (current !== undefined && !seen.has(current)) {
     seen.add(current);
     output.add(current);
@@ -127,23 +99,14 @@ function addAncestors(index: SnapshotIndex, nodeId: string, output: Set<string>)
 
 function addDescendants(index: SnapshotIndex, nodeId: string, output: Set<string>): void {
   const stack = [nodeId];
-  const seen = (index.visitedGeometry ??= new Set<string>());
+  const seen = new Set<string>();
   while (stack.length > 0) {
     const current = stack.pop();
     if (current === undefined || seen.has(current)) continue;
     seen.add(current);
     output.add(current);
     const node = index.snapshot.nodes.byId[current];
-    if (node?.kind === "split") {
-      // Native bulk push is faster for wide splits; avoid its array for small splits.
-      if (node.children.length > 16) {
-        stack.push(...node.children.map(String));
-      } else {
-        for (let child = 0; child < node.children.length; child += 1) {
-          if (child in node.children) stack.push(String(node.children[child]));
-        }
-      }
-    }
+    if (node?.kind === "split") stack.push(...node.children.map(String));
   }
 }
 
@@ -231,15 +194,15 @@ function surfaceGeometryChanged(
   );
 }
 
-function nodeForPanel(index: SnapshotIndex, panelId: string): string | undefined {
+function nodesForPanel(index: SnapshotIndex, panelId: string): readonly string[] {
   const groupId = index.groupByPanel.get(panelId);
   const nodeId = groupId === undefined ? undefined : index.nodeByGroup.get(groupId);
-  return nodeId;
+  return nodeId === undefined ? [] : [nodeId];
 }
 
-function nodeForGroup(index: SnapshotIndex, groupId: string): string | undefined {
+function nodesForGroup(index: SnapshotIndex, groupId: string): readonly string[] {
   const nodeId = index.nodeByGroup.get(groupId);
-  return nodeId;
+  return nodeId === undefined ? [] : [nodeId];
 }
 
 /**
@@ -252,21 +215,8 @@ export function planLayoutInvalidation(
   after: WorkspaceSnapshot,
   patches: readonly WorkspacePatch[],
 ): LayoutInvalidationPlan {
-  // Metadata, focus and tab-order-only patches need no topology lookup.
-  // Build each index only when a patch actually invalidates geometry.
-  let beforeIndex: SnapshotIndex | undefined;
-  let afterIndex: SnapshotIndex | undefined;
-  const previous = (needsConstraints = false): SnapshotIndex => {
-    const index = (beforeIndex ??= createIndex(before));
-    if (needsConstraints) indexConstraints(index);
-    return index;
-  };
-  const next = (needsConstraints = false): SnapshotIndex => {
-    if (after === before) return previous(needsConstraints);
-    const index = (afterIndex ??= createIndex(after));
-    if (needsConstraints) indexConstraints(index);
-    return index;
-  };
+  const beforeIndex = createIndex(before);
+  const afterIndex = createIndex(after);
   const constraints = new Set<string>();
   const geometry = new Set<string>();
   const surfaces = new Set<string>();
@@ -287,43 +237,43 @@ export function planLayoutInvalidation(
 
   for (const patch of patches) {
     if (patch.kind === "panel" && panelAffectsConstraints(patch.before, patch.after)) {
-      const beforeIndex = previous(true);
-      const afterIndex = next(true);
-      const beforeNode = nodeForPanel(beforeIndex, String(patch.id));
-      const afterNode = nodeForPanel(afterIndex, String(patch.id));
-      if (beforeNode !== undefined) invalidateConstraintPath(beforeIndex, beforeNode);
-      if (afterNode !== undefined) invalidateConstraintPath(afterIndex, afterNode);
+      for (const nodeId of nodesForPanel(beforeIndex, String(patch.id))) {
+        invalidateConstraintPath(beforeIndex, nodeId);
+      }
+      for (const nodeId of nodesForPanel(afterIndex, String(patch.id))) {
+        invalidateConstraintPath(afterIndex, nodeId);
+      }
       continue;
     }
     if (patch.kind === "group" && groupAffectsConstraints(patch.before, patch.after)) {
-      const beforeIndex = previous(true);
-      const afterIndex = next(true);
-      const beforeNode = nodeForGroup(beforeIndex, String(patch.id));
-      const afterNode = nodeForGroup(afterIndex, String(patch.id));
-      if (beforeNode !== undefined) invalidateConstraintPath(beforeIndex, beforeNode);
-      if (afterNode !== undefined) invalidateConstraintPath(afterIndex, afterNode);
+      for (const nodeId of nodesForGroup(beforeIndex, String(patch.id))) {
+        invalidateConstraintPath(beforeIndex, nodeId);
+      }
+      for (const nodeId of nodesForGroup(afterIndex, String(patch.id))) {
+        invalidateConstraintPath(afterIndex, nodeId);
+      }
       continue;
     }
     if (patch.kind === "node") {
       const nodeId = String(patch.id);
       if (nodeTopologyChanged(patch.before, patch.after)) {
-        invalidateConstraintPath(previous(true), nodeId);
-        invalidateConstraintPath(next(true), nodeId);
-        invalidateSurfaceIndex(previous(), nodeId);
-        invalidateSurfaceIndex(next(), nodeId);
+        invalidateConstraintPath(beforeIndex, nodeId);
+        invalidateConstraintPath(afterIndex, nodeId);
+        invalidateSurfaceIndex(beforeIndex, nodeId);
+        invalidateSurfaceIndex(afterIndex, nodeId);
       } else if (nodeAllocationChanged(patch.before, patch.after)) {
-        invalidateSubtree(previous(), nodeId);
-        invalidateSubtree(next(), nodeId);
+        invalidateSubtree(beforeIndex, nodeId);
+        invalidateSubtree(afterIndex, nodeId);
       }
       continue;
     }
     if (patch.kind === "surface" && surfaceGeometryChanged(patch.before, patch.after)) {
       if (patch.before !== undefined) {
-        addDescendants(previous(), String(patch.before.rootNodeId), geometry);
+        addDescendants(beforeIndex, String(patch.before.rootNodeId), geometry);
         surfaces.add(String(patch.before.id));
       }
       if (patch.after !== undefined) {
-        addDescendants(next(), String(patch.after.rootNodeId), geometry);
+        addDescendants(afterIndex, String(patch.after.rootNodeId), geometry);
         surfaces.add(String(patch.after.id));
       }
       if (patch.before?.rootNodeId !== patch.after?.rootNodeId) {
