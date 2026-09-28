@@ -1,0 +1,196 @@
+name: Publish merged benchmark documentation
+
+on:
+  push:
+    branches: [perf/audit-20260927]
+    paths: [audit-publish-benchmarks.json]
+
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  document:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    env:
+      CI: "1"
+      VITEST_MAX_WORKERS: "1"
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: e08334f87dedb0d0418e8cf35fbc193a2db1984e
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Require completed merged-code verification
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh api repos/natanelia/panefold/actions/runs/36372474835 --jq '.conclusion' | grep -x success
+          test "$(git rev-parse origin/main)" = e08334f87dedb0d0418e8cf35fbc193a2db1984e
+      - uses: actions/download-artifact@v7
+        with:
+          pattern: merged-performance-node-*
+          run-id: 36372474835
+          github-token: ${{ github.token }}
+          path: /tmp/merged-results
+      - uses: pnpm/action-setup@v6
+        with:
+          version: 11.16.0
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - name: Import the reviewed generator, tests, and raw data
+        env:
+          AUDIT_TOOLS_SHA: ${{ github.sha }}
+        run: |
+          for file in scripts/update-performance-report.mjs scripts/performance-report.test.mjs site-e2e/performance-docs.spec.ts; do
+            git show "$AUDIT_TOOLS_SHA:$file" > "$file"
+          done
+          python3 - <<'PY'
+          import json, shutil
+          from pathlib import Path
+          for version in (22, 24):
+              source = Path('/tmp/merged-results/merged-performance-node-' + str(version))
+              target = Path('docs/benchmarks/2026-09-28/node-' + str(version))
+              target.mkdir(parents=True)
+              manifest = json.loads((source / 'manifest.json').read_text())
+              assert manifest['candidate'] == 'e08334f87dedb0d0418e8cf35fbc193a2db1984e'
+              for path in (source / 'merged-benchmarks').glob('*.json'):
+                  shutil.copy2(path, target / path.name)
+              for old, new in [('manifest.json','manifest.json'), ('preview-unit.json','unit.json')]:
+                  shutil.copy2(source / old, target / new)
+              if version == 24:
+                  for old, new in [('preview-browser.json','browser.json'), ('merged-site-browser.json','site-browser.json'), ('merged-semantic-campaign.json','semantic-campaign.json')]:
+                      shutil.copy2(source / old, target / new)
+                  Path('artifacts').mkdir(exist_ok=True)
+                  for name in ['preview-browser.json','preview-unit.json','preview-node-smoke.json']:
+                      shutil.copy2(source / name, Path('artifacts') / name)
+          config = Path('.oxfmtrc.json')
+          value = json.loads(config.read_text())
+          value['ignorePatterns'].append('docs/benchmarks')
+          config.write_text(json.dumps(value, indent=2) + '\n')
+          PY
+          node --test scripts/performance-report.test.mjs
+          node scripts/update-performance-report.mjs
+      - name: Publish the same Markdown through the docs router and static host
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          p = Path('apps/site/src/content/docs.ts')
+          s = p.read_text(); anchor = '  {\n    slug: "design-audit",'
+          assert anchor in s
+          s = s.replace(anchor, '  {\n    slug: "performance",\n    title: "Performance benchmarks",\n    description: "Merged-code measurements, raw samples, controls, and regression results.",\n    section: "Reference",\n    loadSource: raw(() => import("../../../../docs/PERFORMANCE.md?raw")),\n    eyebrow: "Measured 28 September 2026",\n  },\n' + anchor)
+          p.write_text(s)
+          p = Path('apps/site/src/pages/DocsPage.tsx'); s = p.read_text()
+          anchor = 'const markdownRouteMap: Readonly<Record<string, string>> = {'
+          assert anchor in s
+          p.write_text(s.replace(anchor, anchor + '\n  "docs/PERFORMANCE.md": "/docs/performance",\n  "PERFORMANCE.md": "/docs/performance",'))
+          p = Path('scripts/prepare-site-dist.mjs'); s = p.read_text(); anchor = '  {\n    path: "docs/design-audit",'
+          assert anchor in s
+          p.write_text(s.replace(anchor, '  {\n    path: "docs/performance",\n    title: "Performance benchmarks — Panefold documentation",\n    description: "Merged-code measurements, raw samples, controls, and regression results.",\n  },\n' + anchor))
+          p = Path('apps/site/public/sitemap.xml'); s = p.read_text()
+          p.write_text(s.replace('</urlset>', '  <url><loc>https://natanelia.github.io/panefold/docs/performance/</loc></url>\n</urlset>'))
+          p = Path('README.md')
+          p.write_text(p.read_text() + '\n## Measured performance\n\nSee [Performance benchmarks](docs/PERFORMANCE.md) for merged-code measurements, raw samples, controls, and limits. The documentation website renders the same report.\n')
+          PY
+          cat > .github/workflows/performance-report.yml <<'YAML'
+          name: Benchmark documentation consistency
+          on:
+            push:
+              branches: [main]
+            pull_request:
+          permissions:
+            contents: read
+          jobs:
+            verify:
+              runs-on: ubuntu-latest
+              timeout-minutes: 5
+              steps:
+                - uses: actions/checkout@v7
+                  with:
+                    persist-credentials: false
+                - uses: actions/setup-node@v7
+                  with:
+                    node-version: 24
+                    package-manager-cache: false
+                - run: node --test scripts/performance-report.test.mjs
+                - run: node scripts/update-performance-report.mjs --check
+          YAML
+      - run: pnpm build:packages
+      - run: pnpm exec playwright install --with-deps chromium
+      - name: Refresh the documented browser and smoke evidence from the executed merged run
+        run: |
+          GITHUB_RUN_ID=36372474835 node scripts/record-preview-evidence.mjs
+          python3 - <<'PY'
+          import json, re
+          from pathlib import Path
+          for name in ['chromium-reference', 'protocol-motion', 'interaction-performance']:
+              p = Path('conformance/results/' + name + '-2026-09-26.json')
+              value = json.loads(p.read_text())
+              value['rawReport']['artifact'] = 'merged-performance-node-24'
+              p.write_text(json.dumps(value, indent=2) + '\n')
+          performance = json.loads(Path('conformance/results/interaction-performance-2026-09-26.json').read_text())
+          smoke = performance['nodeSmoke']
+          summary = performance['summary']
+          p = Path('docs/DESIGN_AUDIT.md'); s = p.read_text()
+          section = ('## Performance truth\n\n'
+            'The current measurements follow the merge of PRs #39–#45. See [Performance benchmarks](PERFORMANCE.md) for paired results, all controls, raw samples, and the exact source commit. The documentation website renders that same Markdown report.\n\n'
+            f"The merged Linux Chromium capture contains {performance['sampleCount']} frame deltas, with p95 {summary['p95']} ms and p99 {summary['p99']} ms. It recorded {len(performance['longTasks'])} long tasks. The source is `conformance/results/interaction-performance-2026-09-26.json`; its production time identifies the new execution, not its historical filename.\n\n"
+            'The prior Apple M1 Max results are historical, not the current benchmark. Do not calculate a speedup between those numbers and this Linux runner. The paired report compares before and merged implementations on the same runner. Stable projections, pointer scheduling, and local DOM writes remain design properties, not physical performance certification. The performance hard gate remains blocked.\n\n')
+          s, count = re.subn(r'## Performance truth\n[\s\S]*?(?=## Hard-gate status)', section, s)
+          assert count == 1
+          p.write_text(s)
+          PY
+          pnpm exec oxfmt --write .oxfmtrc.json .github/workflows/performance-report.yml scripts/update-performance-report.mjs scripts/performance-report.test.mjs site-e2e/performance-docs.spec.ts apps/site/src/content/docs.ts apps/site/src/pages/DocsPage.tsx scripts/prepare-site-dist.mjs README.md docs/PERFORMANCE.md docs/DESIGN_AUDIT.md docs/CONFORMANCE.md conformance/results
+          node scripts/generate-conformance-data.mjs
+          node scripts/update-performance-report.mjs --check
+          git add .oxfmtrc.json .github/workflows/performance-report.yml scripts/update-performance-report.mjs scripts/performance-report.test.mjs site-e2e/performance-docs.spec.ts apps/site/src/content/docs.ts apps/site/src/pages/DocsPage.tsx scripts/prepare-site-dist.mjs apps/site/public/sitemap.xml README.md docs conformance
+          git -c user.name='Performance audit' -c user.email='audit@users.noreply.github.com' commit -m 'docs(perf): publish rerun merged benchmarks and source-backed website'
+      - name: Full repository and documentation regression checks
+        run: |
+          pnpm check
+          node --test scripts/performance-report.test.mjs scripts/pages-*.test.mjs
+          node scripts/update-performance-report.mjs --check
+          pnpm exec playwright test --config playwright.site.config.ts --reporter=json > artifacts/documentation-site-browser.json
+          git diff --exit-code
+      - name: Retain the verified documentation tree
+        run: |
+          git diff --binary e08334f87dedb0d0418e8cf35fbc193a2db1984e HEAD > artifacts/documentation.patch
+          git rev-parse HEAD^{tree} > artifacts/documentation-tree.txt
+          cp docs/PERFORMANCE.md artifacts/panefold-performance-audit-2026-09-28.md
+          tar -czf artifacts/merged-benchmark-evidence.tar.gz docs/benchmarks/2026-09-28
+      - uses: actions/upload-artifact@v7
+        if: always()
+        with:
+          name: merged-performance-documentation
+          path: artifacts
+          retention-days: 30
+
+  publish:
+    needs: document
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: write
+      actions: read
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: e08334f87dedb0d0418e8cf35fbc193a2db1984e
+      - uses: actions/download-artifact@v7
+        with:
+          name: merged-performance-documentation
+          path: /tmp/documentation
+      - name: Publish only the checked tree to a review branch
+        run: |
+          git fetch --no-tags origin main
+          test "$(git rev-parse FETCH_HEAD)" = e08334f87dedb0d0418e8cf35fbc193a2db1984e
+          git switch -c docs/merged-performance-20260928
+          git apply --check /tmp/documentation/documentation.patch
+          git apply --index /tmp/documentation/documentation.patch
+          test "$(git write-tree)" = "$(cat /tmp/documentation/documentation-tree.txt)"
+          git -c user.name='github-actions[bot]' -c user.email='41898282+github-actions[bot]@users.noreply.github.com' commit -m 'docs(perf): publish merged benchmarks and live documentation'
+          git push origin HEAD:refs/heads/docs/merged-performance-20260928
