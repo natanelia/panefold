@@ -4,6 +4,9 @@ import { SiteLink } from "../components/SiteLink";
 import { siteAsset } from "../lib/router";
 import "./playground.css";
 
+const description = "A live workbench. Your layout is saved in this browser.";
+const touchTip = "Switch panels below. Use a tab’s Actions menu to move or split it.";
+
 export function DemoPage({ navigate }: { readonly navigate: (path: string) => void }) {
   return (
     <main id="main-content" tabIndex={-1} className="playground-page">
@@ -18,9 +21,7 @@ export function DemoPage({ navigate }: { readonly navigate: (path: string) => vo
         >
           <ArrowLeft size={16} aria-hidden="true" /> Back to Panefold
         </SiteLink>
-        <p className="playground-description">
-          A live workbench. Your layout is saved in this browser.
-        </p>
+        <p className="playground-description">{description}</p>
         <a
           href={siteAsset("workbench/")}
           target="_blank"
@@ -31,9 +32,7 @@ export function DemoPage({ navigate }: { readonly navigate: (path: string) => vo
           Open alone <ExternalLink size={15} aria-hidden="true" />
         </a>
       </div>
-      <p className="playground-touch-tip">
-        Switch panels below. Use a tab’s Actions menu to move or split it.
-      </p>
+      <p className="playground-touch-tip">{touchTip}</p>
       <iframe
         title="Panefold Code live workbench demo"
         src={siteAsset("workbench/")}
