@@ -1,0 +1,273 @@
+/* Application-owned adaptation. The canonical layout is never replaced for a phone. */
+@layer demo {
+  .demo-activity-label,
+  .demo-command-mobile-label,
+  .demo-activity-bar .demo-mobile-editor {
+    display: none;
+  }
+
+  .demo-settings-heading,
+  .demo-palette-heading {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    color: var(--demo-text);
+    font-size: 13px;
+  }
+
+  .demo-settings-heading button,
+  .demo-palette-heading button {
+    flex: 0 0 44px;
+    min-inline-size: 44px;
+    min-block-size: 44px;
+    border: 1px solid var(--demo-border);
+    border-radius: 6px;
+    color: var(--demo-text);
+    background: var(--demo-surface);
+    font-size: 22px;
+  }
+
+  .demo-command-palette {
+    grid-template-rows: auto auto minmax(0, 1fr) auto;
+  }
+
+  .demo-palette-heading {
+    padding: 8px 12px;
+    border-block-end: 1px solid var(--demo-border);
+  }
+
+  .demo-command-palette input {
+    min-inline-size: 0;
+  }
+
+  /* Keep the compact renderer's chrome and hit targets the same size. */
+  @media (max-width: 700px), (pointer: coarse) {
+    .demo-app {
+      grid-template-rows: 52px minmax(0, 1fr) 32px;
+      padding: env(safe-area-inset-top, 0px) env(safe-area-inset-right, 0px)
+        env(safe-area-inset-bottom, 0px) env(safe-area-inset-left, 0px);
+    }
+
+    .demo-app .pf-workspace {
+      --pf-target-size: 44px;
+      --pf-tab-size: 48px;
+    }
+
+    .demo-topbar {
+      gap: 4px;
+      padding-inline: 6px;
+    }
+
+    .demo-brand,
+    .demo-topbar-button,
+    .demo-command-center {
+      min-inline-size: 44px;
+      min-block-size: 44px;
+      flex-shrink: 0;
+    }
+
+    .demo-brand {
+      justify-content: center;
+    }
+
+    .demo-app .pf-tab,
+    .demo-app .pf-tab-close,
+    .demo-app .pf-tab-more,
+    .demo-app .pf-menu button,
+    .demo-inspector > header button,
+    .demo-inspector-tabs button {
+      min-inline-size: 44px;
+      min-block-size: 44px;
+    }
+
+    .demo-app .pf-tab {
+      flex-shrink: 0;
+    }
+
+    /* Scroll along the tab rail; cross-axis drags and the Actions menu remain available.
+     * Native pan cancellation releases the renderer's pointer-drag lease. */
+    .demo-app .pf-workspace[data-panel-drop-enabled="true"] .pf-tab {
+      touch-action: pan-x pinch-zoom;
+    }
+
+    .demo-app
+      .pf-workspace[data-panel-drop-enabled="true"]
+      .pf-group[data-tab-orientation="vertical"]
+      .pf-tab {
+      touch-action: pan-y pinch-zoom;
+    }
+
+    .demo-app .pf-tab-close {
+      inline-size: 44px;
+      block-size: 44px;
+    }
+
+    .demo-app .pf-region-switcher select,
+    .demo-settings-popover select,
+    .demo-command-palette input,
+    .demo-panel-body input:not([type="checkbox"], [type="radio"], [type="range"]),
+    .demo-panel-body textarea {
+      font-size: 16px;
+    }
+
+    .demo-settings-popover {
+      inset-block-start: 48px;
+      max-inline-size: calc(100vw - 24px);
+      max-block-size: calc(100dvh - 100px);
+    }
+
+    .demo-settings-popover > label {
+      gap: 8px;
+      grid-template-columns: minmax(0, 1fr) minmax(0, 150px);
+      font-size: 13px;
+    }
+
+    .demo-settings-popover select {
+      inline-size: 100%;
+      min-inline-size: 0;
+    }
+
+    .demo-settings-popover fieldset label,
+    .demo-settings-reset {
+      min-block-size: 44px;
+      font-size: 13px;
+    }
+
+    .demo-statusbar {
+      block-size: auto;
+      min-block-size: 32px;
+      font-size: 11px;
+    }
+
+    .demo-statusbar > .demo-persistence-status {
+      max-inline-size: none;
+      flex: 1 1 auto;
+    }
+
+    .demo-dialog-backdrop {
+      padding-block: 12px;
+      align-items: start;
+    }
+
+    .demo-command-palette {
+      max-block-size: calc(100dvh - 24px);
+    }
+
+    .demo-command-results strong {
+      font-size: 13px;
+    }
+
+    .demo-command-results small,
+    .demo-command-results > p {
+      font-size: 11px;
+    }
+
+    .demo-command-results > button {
+      min-block-size: 52px;
+    }
+
+    .demo-command-results kbd {
+      display: none;
+    }
+  }
+
+  @media (max-width: 700px) {
+    .demo-topbar > .demo-toolbar-spacer,
+    .demo-command-center kbd,
+    .demo-command-center .demo-command-label {
+      display: none;
+    }
+
+    .demo-command-center .demo-command-mobile-label {
+      display: inline;
+      font-size: 12px;
+    }
+
+    .demo-main {
+      grid-template-columns: minmax(0, 1fr);
+      grid-template-rows: minmax(0, 1fr) 56px;
+    }
+
+    .demo-workspace {
+      grid-column: 1;
+      grid-row: 1;
+    }
+
+    .demo-activity-bar {
+      grid-column: 1;
+      grid-row: 2;
+      flex-direction: row;
+      inline-size: 100%;
+      padding: 0;
+      overflow-x: auto;
+      overflow-y: hidden;
+      border-inline-end: 0;
+      border-block-start: 1px solid var(--demo-border);
+      overscroll-behavior-inline: contain;
+    }
+
+    .demo-activity-bar button,
+    .demo-activity-bar .demo-mobile-editor {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      flex: 1 0 52px;
+      gap: 3px;
+      inline-size: auto;
+      block-size: 55px;
+      min-inline-size: 52px;
+      min-block-size: 44px;
+    }
+
+    .demo-activity-bar button::before {
+      inset: 0 10px auto;
+      inline-size: auto;
+      block-size: 2px;
+    }
+
+    .demo-activity-bar svg {
+      inline-size: 21px;
+      block-size: 21px;
+    }
+
+    .demo-activity-label {
+      display: block;
+      font-size: 10px;
+      line-height: 1.2;
+    }
+
+    .demo-activity-spacer,
+    .demo-activity-spacer ~ button {
+      display: none;
+    }
+
+    .demo-app .pf-group .pf-menu {
+      position: fixed;
+      inset-inline: 8px;
+      inset-block: auto 96px;
+      inline-size: auto;
+      min-inline-size: 0;
+      max-block-size: min(420px, calc(100dvh - 200px));
+      border-radius: 10px;
+    }
+
+    .demo-settings-popover {
+      position: fixed;
+      inset-inline: max(12px, env(safe-area-inset-left)) max(12px, env(safe-area-inset-right));
+      inset-block-start: calc(56px + env(safe-area-inset-top, 0px));
+      inline-size: auto;
+      max-block-size: calc(
+        100dvh - 100px - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px)
+      );
+      border-radius: 10px;
+    }
+
+    .demo-inspector {
+      inset: 0;
+      inline-size: 100%;
+      border-radius: 0;
+    }
+  }
+}

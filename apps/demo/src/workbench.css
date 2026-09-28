@@ -3,6 +3,7 @@
 @import "@panefold/react/styles.css";
 @import "./styles.css";
 @import "@panefold/react/hide-single-tab-row.css";
+@import "./mobile.css";
 
 @layer demo {
   .demo-external-app {
