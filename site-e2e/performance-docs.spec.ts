@@ -15,7 +15,9 @@ test("renders current benchmark numbers from the repository Markdown", async ({ 
   expect(rows.length).toBe(10);
   for (const sourceRow of rows) {
     const cells = sourceRow.split("|").slice(1, -1).map((cell) => cell.trim());
-    const row = article.getByRole("row").filter({ has: page.getByRole("cell", { name: cells[0], exact: true }) });
+    const [workload] = cells;
+    if (workload === undefined || workload.length === 0) throw new Error("Missing benchmark workload");
+    const row = article.getByRole("row").filter({ has: page.getByRole("cell", { name: workload, exact: true }) });
     await expect(row).toHaveCount(1);
     for (const cell of cells) await expect(row.getByRole("cell", { name: cell, exact: true })).toBeVisible();
   }
