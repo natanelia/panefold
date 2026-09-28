@@ -85,6 +85,7 @@ export function HomePage({ navigate }: { readonly navigate: (path: string) => vo
             </div>
             <div
               className="workspace-sketch"
+              role="img"
               aria-label="Illustration of a panel-based developer workspace"
             >
               <div className="sketch-sidebar">

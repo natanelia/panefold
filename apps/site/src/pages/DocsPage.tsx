@@ -10,6 +10,7 @@ import {
   Children,
   isValidElement,
   useEffect,
+  useLayoutEffect,
   useMemo,
   useRef,
   useState,
@@ -59,7 +60,7 @@ export function DocsPage({
   const searchRef = useRef<HTMLInputElement>(null);
   const menuRef = useRef<HTMLButtonElement>(null);
   const page = slug === undefined ? undefined : docBySlug(slug);
-  useEffect(() => {
+  useLayoutEffect(() => {
     const onKey = (event: KeyboardEvent) => {
       if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === "k") {
         event.preventDefault();

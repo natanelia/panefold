@@ -6,6 +6,7 @@ import "@fontsource-variable/manrope/wght.css";
 import App from "./App";
 import { installStructuredData } from "./lib/structuredData";
 import "./styles.css";
+import "./reading.css";
 
 const rootElement = document.getElementById("root");
 if (rootElement === null) throw new Error("Panefold site root element is missing");

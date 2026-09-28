@@ -203,18 +203,17 @@ function StarterSurface({ runtime }: { readonly runtime: WorkspaceRuntime }) {
   return (
     <>
       <div className="starter-toolbar">
-        <label>
-          Tab rail{" "}
-          <select
-            value={placement}
-            onChange={(event) => setPlacement(event.target.value as WorkspaceTabPlacement)}
-          >
-            <option value="block-start">Top</option>
-            <option value="block-end">Bottom</option>
-            <option value="inline-start">Start</option>
-            <option value="inline-end">End</option>
-          </select>
-        </label>
+        <label htmlFor="starter-tab-rail">Tab rail</label>
+        <select
+          id="starter-tab-rail"
+          value={placement}
+          onChange={(event) => setPlacement(event.target.value as WorkspaceTabPlacement)}
+        >
+          <option value="block-start">Top</option>
+          <option value="block-end">Bottom</option>
+          <option value="inline-start">Start</option>
+          <option value="inline-end">End</option>
+        </select>
         <label>
           <input
             type="checkbox"

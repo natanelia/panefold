@@ -5,6 +5,7 @@ test("searches document body text and navigates to the matching guide", async ({
   page,
 }, testInfo) => {
   await page.goto("./docs/");
+  await expect(page.getByRole("heading", { name: /From first panel/i })).toBeVisible();
   await page.keyboard.press("Control+k");
   const input = page.getByRole("searchbox", { name: "Search documentation" });
   await expect(input).toBeFocused();
@@ -55,6 +56,10 @@ test("opens every new guide on a direct static route, without horizontal overflo
 
 test("appearance controls update the exact props and respect keyboard input", async ({ page }) => {
   await page.goto("./#customize");
+  await expect(page.getByRole("heading", { level: 1 })).toBeVisible();
+  expect(
+    await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth + 1),
+  ).toBe(true);
   const playground = page.locator(".tab-playground");
   await playground.getByRole("button", { name: "Start", exact: true }).focus();
   await page.keyboard.press("Enter");
@@ -94,7 +99,7 @@ test("starter uses live panels and preserves note state across tab presentation 
   await expect(page.getByRole("heading", { name: "Your first workspace." })).toBeVisible();
   const note = page.getByRole("textbox", { name: "Your note" });
   await note.fill("My component state stays with the panel.");
-  await page.getByLabel("Tab rail", { exact: true }).selectOption("inline-start");
+  await page.getByRole("combobox", { name: "Tab rail", exact: true }).selectOption("inline-start");
   await page.getByRole("checkbox", { name: "Icons only" }).check();
   await expect(note).toHaveValue("My component state stays with the panel.");
   await page.getByRole("tab", { name: "Preview", exact: true }).click();
@@ -124,6 +129,6 @@ test("new docs index and guides have no automated WCAG A/AA violations", async (
     const result = await new AxeBuilder({ page })
       .withTags(["wcag2a", "wcag2aa", "wcag21aa", "wcag22aa"])
       .analyze();
-    expect(result.violations, path).toEqual([]);
+    expect.soft(result.violations, path).toEqual([]);
   }
 });

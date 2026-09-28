@@ -184,9 +184,17 @@ test("renders the complete system design with its original figures", async ({ pa
   await expect
     .poll(() => firstFigure.evaluate((image) => (image as HTMLImageElement).naturalWidth))
     .toBeGreaterThan(0);
-  await expect
-    .poll(() => firstFigure.evaluate((image) => image.getBoundingClientRect().height))
-    .toBeGreaterThan(100);
+  const figureSize = await firstFigure.evaluate((node) => {
+    const image = node as HTMLImageElement;
+    return {
+      width: image.getBoundingClientRect().width,
+      height: image.getBoundingClientRect().height,
+      aspectRatio: image.naturalWidth / image.naturalHeight,
+    };
+  });
+  expect(figureSize.width).toBeGreaterThan(200);
+  expect(figureSize.height).toBeGreaterThan(0);
+  expect(figureSize.width / figureSize.height).toBeCloseTo(figureSize.aspectRatio, 1);
   await expect(page.locator(".docs-prose blockquote").first()).not.toContainText("**");
   await expect(page.locator("#appendix-a-normative-requirement-register")).toHaveCount(1);
 });
