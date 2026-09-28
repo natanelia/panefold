@@ -1,0 +1,48 @@
+name: Publish tested documentation tree
+
+on:
+  push:
+    branches: [perf/audit-20260927]
+    paths: [.github/workflows/audit-publish-tested-docs.yml]
+
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: write
+      actions: read
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: 0d3de6553fd51682b62e41db9dd0dd5bebc280ba
+      - name: Require successful documentation and browser tests
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh api repos/natanelia/panefold/actions/runs/36373599151/jobs --jq '.jobs[] | select(.name == "document") | .conclusion' | grep -x success
+      - uses: actions/download-artifact@v7
+        with:
+          name: merged-performance-documentation
+          run-id: 36373599151
+          github-token: ${{ github.token }}
+          path: /tmp/documentation
+      - name: Publish the remaining files without changing workflow permissions
+        run: |
+          set -euo pipefail
+          git fetch --no-tags origin main docs/merged-performance-20260928
+          test "$(git rev-parse origin/main)" = e08334f87dedb0d0418e8cf35fbc193a2db1984e
+          test "$(git rev-parse origin/docs/merged-performance-20260928)" = 0d3de6553fd51682b62e41db9dd0dd5bebc280ba
+          git switch -c docs/merged-performance-20260928
+          git apply --check --exclude=.github/workflows/performance-report.yml /tmp/documentation/documentation.patch
+          git apply --index --exclude=.github/workflows/performance-report.yml /tmp/documentation/documentation.patch
+          test "$(git write-tree)" = b445e7add356e447f0e1e82c2d28f79b5d46a4c9
+          test "$(git write-tree)" = "$(cat /tmp/documentation/documentation-tree.txt)"
+          git diff --cached --check
+          git -c user.name='github-actions[bot]' -c user.email='41898282+github-actions[bot]@users.noreply.github.com' commit -m 'docs(perf): publish merged benchmarks and live documentation'
+          git push origin HEAD:refs/heads/docs/merged-performance-20260928
+          echo 'Published exact fully tested tree b445e7add356e447f0e1e82c2d28f79b5d46a4c9' >> "$GITHUB_STEP_SUMMARY"
