@@ -50,6 +50,14 @@ export const docPages = [
     loadSource: raw(() => import("../../../../docs/CONFORMANCE.md?raw")),
   },
   {
+    slug: "performance",
+    title: "Performance benchmarks",
+    description: "Merged-code measurements, raw samples, controls, and regression results.",
+    section: "Reference",
+    loadSource: raw(() => import("../../../../docs/PERFORMANCE.md?raw")),
+    eyebrow: "Measured 28 September 2026",
+  },
+  {
     slug: "design-audit",
     title: "System-design audit",
     description: "An exact 190-requirement implementation and evidence matrix.",

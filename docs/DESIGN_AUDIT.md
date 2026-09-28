@@ -369,17 +369,11 @@ protocol authority.
 
 ## Performance truth
 
-The implementation uses stable external-store projection, active-only protocol actors, one frame
-scheduler for pointer visuals, precomputed reorder slots, binary slot lookup, constant-time cached
-geometry translation during same-slot autoscroll, and local DOM style writes. Those are useful
-design properties, not certification. The checked-in local macOS capture retained 179 frame deltas
-with p95 10.11 ms, p99 10.3 ms, maximum 48.8 ms, and one observed long task of 56 ms. On the same
-Apple M1 Max machine, the Node smoke run measured 50-panel reorder at 0.2946 ms p95, 500-panel reorder
-at 2.1511 ms p95, 100/500/1,000-node hit testing at 3.201/17.61/38.067 microseconds mean, and 10,000
-reference kernel operations with zero invariant violations. These single-machine regression guards
-are neither a statistically separated history nor physical 60 Hz/120 Hz evidence. The performance
-hard gate therefore remains
-blocked.
+The current measurements follow the merge of PRs #39–#45. See [Performance benchmarks](PERFORMANCE.md) for paired results, all controls, raw samples, and the exact source commit. The documentation website renders that same Markdown report.
+
+The merged Linux Chromium capture contains 179 frame deltas, with p95 16.71 ms and p99 16.8 ms. It recorded 1 long tasks. The source is `conformance/results/interaction-performance-2026-09-26.json`; its production time identifies the new execution, not its historical filename.
+
+The prior Apple M1 Max results are historical, not the current benchmark. Do not calculate a speedup between those numbers and this Linux runner. The paired report compares before and merged implementations on the same runner. Stable projections, pointer scheduling, and local DOM writes remain design properties, not physical performance certification. The performance hard gate remains blocked.
 
 ## Hard-gate status
 

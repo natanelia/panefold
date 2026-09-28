@@ -16,6 +16,7 @@
     "conformance/evidence.json",
     "conformance/gates.json",
     "conformance/requirements.json",
-    "conformance/traces.json"
+    "conformance/traces.json",
+    "docs/benchmarks"
   ]
 }

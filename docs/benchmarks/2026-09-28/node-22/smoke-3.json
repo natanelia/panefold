@@ -1,0 +1,65 @@
+{
+  "schemaVersion": 1,
+  "environment": {
+    "node": "v22.23.2",
+    "v8": "12.4.254.21-node.56",
+    "platform": "linux",
+    "architecture": "x64",
+    "cpu": "AMD EPYC 9V74 80-Core Processor"
+  },
+  "kernel": {
+    "iterations": 10000,
+    "elapsedMs": 2214.14
+  },
+  "geometry": {
+    "iterations": 100000,
+    "elapsedMs": 328.02
+  },
+  "reorderProfiles": [
+    {
+      "panelCount": 50,
+      "warmupCount": 250,
+      "sampleCount": 2000,
+      "medianMs": 0.3318,
+      "p95Ms": 0.5266,
+      "p99Ms": 0.6223,
+      "designTargetMs": 1,
+      "withinDesignTargetOnThisMachine": true,
+      "invariantViolations": 0
+    },
+    {
+      "panelCount": 500,
+      "warmupCount": 100,
+      "sampleCount": 1000,
+      "medianMs": 3.1107,
+      "p95Ms": 3.4017,
+      "p99Ms": 3.515,
+      "designTargetMs": 5,
+      "withinDesignTargetOnThisMachine": true,
+      "invariantViolations": 0
+    }
+  ],
+  "hitTestProfiles": [
+    {
+      "nodeCount": 100,
+      "sampleCount": 10000,
+      "elapsedMs": 51.73,
+      "meanMicroseconds": 5.173
+    },
+    {
+      "nodeCount": 500,
+      "sampleCount": 10000,
+      "elapsedMs": 273.59,
+      "meanMicroseconds": 27.359
+    },
+    {
+      "nodeCount": 1000,
+      "sampleCount": 10000,
+      "elapsedMs": 564.9,
+      "meanMicroseconds": 56.49
+    }
+  ],
+  "totalElapsedMs": 7808.55,
+  "finalRevision": "10000",
+  "invariantViolations": 0
+}
