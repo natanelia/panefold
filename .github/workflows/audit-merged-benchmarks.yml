@@ -1,0 +1,91 @@
+name: Benchmark merged performance changes
+
+on:
+  push:
+    branches: [perf/audit-20260927]
+    paths: [.github/workflows/audit-merged-benchmarks.yml]
+
+permissions:
+  contents: read
+
+jobs:
+  measure:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      matrix:
+        node-version: [22, 24]
+    env:
+      VITEST_MAX_WORKERS: "1"
+      CI: "1"
+      PANEFOLD_BENCHMARK_BASE: 81b11b4fab78a8824243fd6b3a28e50131b997f0
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: e08334f87dedb0d0418e8cf35fbc193a2db1984e
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: pnpm/action-setup@v6
+        with:
+          version: 11.16.0
+      - uses: actions/setup-node@v7
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm build:packages
+      - name: Bind every measurement to the merged source
+        run: |
+          mkdir -p artifacts/merged-benchmarks
+          node --input-type=module <<'JS'
+          import {execFileSync} from 'node:child_process';
+          import {readFileSync,writeFileSync} from 'node:fs';
+          import {createHash} from 'node:crypto';
+          import os from 'node:os';
+          const git=(...args)=>execFileSync('git',args,{encoding:'utf8'}).trim();
+          const paths=git('ls-files','packages/*/src/*','scripts/benchmark-*.mjs','scripts/benchmarks/*').split('\n');
+          const sourceDigests=Object.fromEntries(paths.map(path=>[path,createHash('sha256').update(readFileSync(path)).digest('hex')]));
+          writeFileSync('artifacts/manifest.json',JSON.stringify({schemaVersion:1,candidate:git('rev-parse','HEAD'),baseline:process.env.PANEFOLD_BENCHMARK_BASE,tree:git('rev-parse','HEAD^{tree}'),node:process.version,cpu:os.cpus()[0]?.model,os:os.release(),producedAt:new Date().toISOString(),runUrl:`https://github.com/${process.env.GITHUB_REPOSITORY}/actions/runs/${process.env.GITHUB_RUN_ID}`,repeats:3,sourceDigests},null,2)+'\n');
+          JS
+      - name: Three sequential paired runs of every Node workload
+        shell: bash
+        run: |
+          set -euo pipefail
+          for repeat in 1 2 3; do
+            for benchmark in scripts/benchmark-*.mjs; do
+              node "$benchmark" > "artifacts/merged-benchmarks/$(basename "$benchmark" .mjs)-${repeat}.json"
+            done
+            node scripts/performance-smoke.mjs > "artifacts/merged-benchmarks/smoke-${repeat}.json"
+          done
+      - name: Strict types and full unit suite
+        run: |
+          pnpm exec tsc --noEmit -p tsconfig.json
+          pnpm exec vitest run --reporter=json --outputFile=artifacts/preview-unit.json
+          node --test scripts/pages-*.test.mjs > artifacts/pages-tests.txt
+      - name: Browser benchmarks and regression suites
+        if: matrix.node-version == 24
+        shell: bash
+        run: |
+          set -euo pipefail
+          pnpm exec playwright install --with-deps chromium
+          for repeat in 1 2 3; do
+            node scripts/benchmarks/drop-measurement-browser.mjs > "artifacts/merged-benchmarks/drop-measurement-${repeat}.json"
+          done
+          pnpm exec playwright test --reporter=json > artifacts/preview-browser.json
+          pnpm exec playwright test --config playwright.site.config.ts --reporter=json > artifacts/merged-site-browser.json
+          cp artifacts/merged-benchmarks/smoke-3.json artifacts/preview-node-smoke.json
+          pnpm exec tsup scripts/run-independent-semantic-campaign.ts --format esm --platform node --target node22 --out-dir artifacts/independent-merged --clean
+          node artifacts/independent-merged/run-independent-semantic-campaign.js --seed 20260812 --steps 10000 > artifacts/merged-semantic-campaign.json
+      - name: Full checks on the merged tree
+        run: pnpm check
+      - name: Export exact merged history
+        if: matrix.node-version == 24
+        run: git bundle create artifacts/merged-source.bundle --all
+      - uses: actions/upload-artifact@v7
+        if: always()
+        with:
+          name: merged-performance-node-${{ matrix.node-version }}
+          path: artifacts
+          if-no-files-found: error
+          retention-days: 30
