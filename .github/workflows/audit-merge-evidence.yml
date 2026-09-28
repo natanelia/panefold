@@ -1,0 +1,58 @@
+name: Reconcile final performance PR
+
+on:
+  push:
+    branches: [perf/audit-20260927]
+    paths: [.github/workflows/audit-merge-evidence.yml]
+
+permissions:
+  contents: read
+
+jobs:
+  reconcile:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: write
+      actions: read
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: 2c275368eef61e32c210db26bfacd1b4b76b7d3c
+          fetch-depth: 0
+      - uses: actions/download-artifact@v7
+        with:
+          name: combined-performance-audit
+          run-id: 36360058090
+          github-token: ${{ github.token }}
+          path: /tmp/known-evidence
+      - name: Resolve only generated evidence; require the exact previously tested tree
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git fetch --no-tags origin main perf/audit-drop-measurement-20260927
+          test "$(git rev-parse origin/main)" = e096b2237095896eaf079d146523a1dee822702a
+          test "$(git rev-parse origin/perf/audit-drop-measurement-20260927)" = 2c275368eef61e32c210db26bfacd1b4b76b7d3c
+          git worktree add --detach /tmp/known-tree 81b11b4fab78a8824243fd6b3a28e50131b997f0
+          git -C /tmp/known-tree apply --index /tmp/known-evidence/artifacts/combined-candidate.patch
+          expected=d053a4371387521ace7e893bca16ebc2a97a28fd
+          test "$(git -C /tmp/known-tree write-tree)" = "$expected"
+          git switch -c perf/audit-drop-measurement-20260927
+          git merge --no-ff --no-commit origin/main || {
+            test -f .git/MERGE_HEAD
+            python3 - <<'PY'
+          import subprocess
+          conflicts = subprocess.check_output(['git','diff','--name-only','--diff-filter=U'], text=True).splitlines()
+          allowed = {'conformance/evidence.json', 'conformance/results/chromium-reference-2026-09-26.json', 'conformance/results/interaction-performance-2026-09-26.json', 'conformance/results/protocol-motion-2026-09-26.json', 'docs/CONFORMANCE.md'}
+          if not conflicts or not set(conflicts) <= allowed:
+              raise RuntimeError('Unexpected conflict; no source conflict may be resolved automatically: ' + repr(conflicts))
+          PY
+          }
+          git restore --source="$expected" --staged --worktree -- conformance docs/CONFORMANCE.md scripts/generate-conformance-data.mjs
+          test "$(git write-tree)" = "$expected"
+          git diff --cached --check
+          git commit -m 'Merge main into PR #45; preserve exact passing combined evidence'
+          git push origin HEAD:refs/heads/perf/audit-drop-measurement-20260927
+          echo "Exact integration tree verified: $expected" >> "$GITHUB_STEP_SUMMARY"
