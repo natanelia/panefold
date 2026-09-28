@@ -2,26 +2,26 @@
   "schemaVersion": 1,
   "kind": "protocol-motion-result",
   "profile": "compact-react-chromium-desktop",
-  "producedAt": "2026-09-28T03:17:04.844Z",
+  "producedAt": "2026-09-28T15:43:00.432Z",
   "status": "passed",
   "runner": "Vitest",
   "command": "pnpm exec vitest run --reporter=json --outputFile=artifacts/preview-unit.json",
   "environment": {
-    "operatingSystem": "Linux 6.17.0-1022-azure x64",
+    "operatingSystem": "Ubuntu 24.04.5 (Linux x64)",
     "node": "v24.21.0",
     "browserVersion": "151.0.7922.34"
   },
   "summary": {
-    "tests": 578,
-    "passed": 578,
+    "tests": 579,
+    "passed": 579,
     "failed": 0,
     "files": 76,
     "protocolMotionTestFiles": 9,
     "protocolMotionTests": 86,
     "protocolMotionPassed": 86,
     "reactIntegrationTestFiles": 10,
-    "reactIntegrationTests": 152,
-    "reactIntegrationPassed": 152
+    "reactIntegrationTests": 153,
+    "reactIntegrationPassed": 153
   },
   "tests": [
     {
@@ -195,21 +195,6 @@
       "passed": 3
     },
     {
-      "file": "packages/model/test/effects.test.ts",
-      "status": "passed",
-      "passed": 3
-    },
-    {
-      "file": "packages/model/test/model.test.ts",
-      "status": "passed",
-      "passed": 7
-    },
-    {
-      "file": "packages/model/test/panel-registry.test.ts",
-      "status": "passed",
-      "passed": 3
-    },
-    {
       "file": "packages/kernel-optimized/test/benchmark.test.ts",
       "status": "passed",
       "passed": 1
@@ -235,14 +220,19 @@
       "passed": 5
     },
     {
-      "file": "packages/motion/test/motion-lifecycle.test.ts",
+      "file": "packages/model/test/effects.test.ts",
       "status": "passed",
-      "passed": 13
+      "passed": 3
     },
     {
-      "file": "packages/motion/test/motion.test.ts",
+      "file": "packages/model/test/model.test.ts",
       "status": "passed",
       "passed": 7
+    },
+    {
+      "file": "packages/model/test/panel-registry.test.ts",
+      "status": "passed",
+      "passed": 3
     },
     {
       "file": "packages/protocol/test/protocol.test.ts",
@@ -278,6 +268,66 @@
       "file": "packages/protocol-xstate/test/scoped-actor-deadline.test.ts",
       "status": "passed",
       "passed": 22
+    },
+    {
+      "file": "packages/motion/test/motion-lifecycle.test.ts",
+      "status": "passed",
+      "passed": 13
+    },
+    {
+      "file": "packages/motion/test/motion.test.ts",
+      "status": "passed",
+      "passed": 7
+    },
+    {
+      "file": "packages/react/test/WorkspaceSurface.test.tsx",
+      "status": "passed",
+      "passed": 83
+    },
+    {
+      "file": "packages/react/test/drag-parity.test.ts",
+      "status": "passed",
+      "passed": 5
+    },
+    {
+      "file": "packages/react/test/drop-header-index.test.ts",
+      "status": "passed",
+      "passed": 5
+    },
+    {
+      "file": "packages/react/test/drop-preview.test.ts",
+      "status": "passed",
+      "passed": 7
+    },
+    {
+      "file": "packages/react/test/drop-target.test.ts",
+      "status": "passed",
+      "passed": 23
+    },
+    {
+      "file": "packages/react/test/group-drop.test.ts",
+      "status": "passed",
+      "passed": 6
+    },
+    {
+      "file": "packages/react/test/node-motion.test.ts",
+      "status": "passed",
+      "passed": 4
+    },
+    {
+      "file": "packages/react/test/panel-drop.test.ts",
+      "status": "passed",
+      "passed": 10
+    },
+    {
+      "file": "packages/react/test/tab-insertion.test.ts",
+      "status": "passed",
+      "passed": 5
+    },
+    {
+      "file": "packages/react/test/tab-reorder.test.ts",
+      "status": "passed",
+      "passed": 5
     },
     {
       "file": "packages/runtime/test/envelope-serialization.test.ts",
@@ -340,56 +390,6 @@
       "passed": 6
     },
     {
-      "file": "packages/react/test/WorkspaceSurface.test.tsx",
-      "status": "passed",
-      "passed": 82
-    },
-    {
-      "file": "packages/react/test/drag-parity.test.ts",
-      "status": "passed",
-      "passed": 5
-    },
-    {
-      "file": "packages/react/test/drop-header-index.test.ts",
-      "status": "passed",
-      "passed": 5
-    },
-    {
-      "file": "packages/react/test/drop-preview.test.ts",
-      "status": "passed",
-      "passed": 7
-    },
-    {
-      "file": "packages/react/test/drop-target.test.ts",
-      "status": "passed",
-      "passed": 23
-    },
-    {
-      "file": "packages/react/test/group-drop.test.ts",
-      "status": "passed",
-      "passed": 6
-    },
-    {
-      "file": "packages/react/test/node-motion.test.ts",
-      "status": "passed",
-      "passed": 4
-    },
-    {
-      "file": "packages/react/test/panel-drop.test.ts",
-      "status": "passed",
-      "passed": 10
-    },
-    {
-      "file": "packages/react/test/tab-insertion.test.ts",
-      "status": "passed",
-      "passed": 5
-    },
-    {
-      "file": "packages/react/test/tab-reorder.test.ts",
-      "status": "passed",
-      "passed": 5
-    },
-    {
       "file": "packages/vue/test/vue.test.ts",
       "status": "passed",
       "passed": 1
@@ -407,12 +407,18 @@
   ],
   "rawReport": {
     "path": "artifacts/preview-unit.json",
-    "sha256": "1405212239c894ecfaf3464b8fe6cf816ca36ce2aa8f3a1676994ae35d82b141",
-    "runUrl": "https://github.com/natanelia/panefold/actions/runs/36372474835",
-    "artifact": "merged-performance-node-24"
+    "sha256": "85d1976f12a7f4454b90a85604cddc655807bdd64843e3bf2dc49bd1a6e459b0",
+    "runUrl": "https://github.com/natanelia/panefold/actions/runs/36445176424",
+    "artifact": "preview-executed-evidence"
   },
   "sourceDigests": {
+    "apps/demo/src/mobile.css": "71859290c3377d1a54bd9e5e9e44c17d0aa34bb699e3eff8c766a5287dfa36b8",
+    "apps/demo/src/responsive-layout.ts": "d9de1c955aa7fae483173d75b84f2575207a00c0450c57a9d831dacdab0e9020",
+    "apps/demo/src/use-touch-workbench.ts": "c913911471945a857994e2078eb36420b14cdcb8cd3d7437b5d562c32a02f04c",
     "e2e/drag-parity.spec.ts": "a7c7da7513e3b56de9b832cce5fa2fc6236f55d74ba9ea3aa9be1600f6620bce",
+    "e2e/mobile-playground.spec.ts": "29353d4fad1690ed94fff6136e3a6bd8f418472995427029a8128a4da0559673",
+    "e2e/touch-helpers.ts": "557037357dbf006c5e740f8d120cb28744f353b9400b93c5722de4d4e7afd619",
+    "e2e/touch-layout.spec.ts": "9eed3e88c00d23bf198d36bb4aaf45d5441e89291f927361616ba2ad4fcbc34f",
     "package.json": "acd970060c8df0d628cada8c1762111b9c3587031dbdc0e5815fb1e6159147ee",
     "packages/geometry/package.json": "c3455159603a71c37cb4a70e89083be28c1c8144cca8939bea4f544bd886ab38",
     "packages/geometry/src/allocate-axis.ts": "a4317dea79bbb8986fc37ba48c1cec8f7089e6542d8955497d2d050c76d540cf",
@@ -475,7 +481,7 @@
     "packages/protocol/test/protocol.test.ts": "dd118363496c22c9df3110c3a3ab05e7b1bee643fe0c613c75503c2f2262fd4f",
     "packages/protocol/tsconfig.json": "3f465de909ed88bb206aa2ee7095c56a63223c3a11efa84ad39e69b1d1abd1a8",
     "packages/react/package.json": "f3398780b1ec9266b02c73f85393d7bfab6fa8d782120698f420852b3eb62209",
-    "packages/react/src/WorkspaceSurface.tsx": "25c81bb51d017329d21d30b5feee3d068a71507727209728c79dc53b611f154a",
+    "packages/react/src/WorkspaceSurface.tsx": "9ccbd781042b211ad7694a260e7c59bf9520e44d4ed789b7b793c39fda6a30c0",
     "packages/react/src/drop-modifiers.ts": "542583898dfa7d121b0d91f51171df8a3db47a8e749422437da903372a60c6ee",
     "packages/react/src/drop-preview.ts": "7c84edb3ba5ee124e207ca6fc5fb3f2a8b8e07178d90f11b96a68504b4402de7",
     "packages/react/src/drop-target.ts": "46d7afa6f516ec67bcc0d1deaa7e905c2da826be516125a726a170d6a2523357",
@@ -489,12 +495,12 @@
     "packages/react/src/panel-drag.tsx": "e19befa4995182d66a76570990bcff60e2ab4ba5fb76f0fe8a63e020bca493cc",
     "packages/react/src/panel-drop.ts": "843ce1f6eaaf926bef54f7f9ae246072dbdd50e2f6ffa9976c93b6f7c1afd3e0",
     "packages/react/src/runtime-context.tsx": "1ed738fc2536846acb90e20afae73c7ee8b02fc7b1eef22cf1d8e336e1f8beaf",
-    "packages/react/src/styles.css": "3b705caba74cedd0c542102947c9a1e76b7dce53c89a94814a004ab2b8a415b9",
+    "packages/react/src/styles.css": "92270a5b8cb81e406579ce0efc865f13fc061007376f06f472c3a7f88e4298ec",
     "packages/react/src/tab-insertion.ts": "e611ecfe7cb4b0b9fb7e748a747f2584e35dbaa72111a907008f6dc6b11f1670",
     "packages/react/src/tab-presentation.ts": "eeeac41f560e89ed8db685a0df1d6190703ed306507e2cc3cff81f5f4e460143",
     "packages/react/src/tab-reorder.ts": "c139803bc37c5f2c6fc6a17eb836784ff8d203b7bae8acebedcbf290cdabc599",
     "packages/react/src/types.ts": "e5f3def8259ae492ac8802fe9b2c7b05b5b15a0cde5a66dd34f4ed570685c893",
-    "packages/react/test/WorkspaceSurface.test.tsx": "fca09cfb1a462edbee5277f34bc7407848a56f1632983a5461aab97ac1b36ef4",
+    "packages/react/test/WorkspaceSurface.test.tsx": "7db275aba0d8ec6b23570eda14c3ca3717cd394467b7f860db522950c941bc10",
     "packages/react/test/drag-parity.test.ts": "1f0bca650b8647cf7473639a0afa59839bdd60327892e428f30a98642cd67443",
     "packages/react/test/drop-preview.test.ts": "bdc1de685dce3a9bc5c073cf9fb7f2325de07251a8f71d4b318f09990c22211c",
     "packages/react/test/drop-target.test.ts": "2f28dc5a482cb6cc12fdbafb4e29ca3fba2a424dd1a5e9f822e9d95f4e9fc0a6",
@@ -507,7 +513,7 @@
     "pnpm-workspace.yaml": "d51950e32647c121ad667b578a448b703ea5f74637fd91524b7012dd53167169",
     "scripts/protocol-coverage-lib.d.mts": "ad9778fdda16883ddc6d8c8f366e119453673c61db21abc5a058e648f39e33ca",
     "scripts/protocol-coverage-lib.mjs": "a6172fbdc67ad48298c7866f47ff25895d255dcbb47976f65e7098825a758f8e",
-    "scripts/record-preview-evidence.mjs": "4dadc918ccf8699fa13f9cea14cd442de6f24aa544f147a18346168b60d2edbf",
+    "scripts/record-preview-evidence.mjs": "b2b513d04568f89e42e554f89ebc6640c209b40a3b135b18c22d2b503ac4c53e",
     "scripts/run-protocol-coverage.mjs": "51345937f17b41822986377ed74a6b6f52a88dcc1ac1482fc1580af9a8a0eb9a",
     "scripts/verify-protocol-coverage.d.mts": "353a5ec6ec45b69ccdac52b7f1d4cc5d308e9360fa7627241c178b52684643cf",
     "scripts/verify-protocol-coverage.mjs": "e6659c6d19bb29abd6ba2b9942639a9b9b3e83a2535ccf80e2d7a296b6805fc9",

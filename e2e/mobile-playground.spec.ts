@@ -7,7 +7,7 @@ async function openWorkspace(page: Page) {
   await page.goto("/");
   await expect(page.locator(".demo-workspace")).toHaveAttribute(
     "data-responsive-projection",
-    "single-region",
+    "full-layout",
   );
   await expect(page.getByRole("tab", { name: "App.tsx", exact: true })).toBeVisible();
 }
@@ -42,7 +42,7 @@ test("fits small phones, portrait, landscape and touch tablets without overlappi
       page.getByRole("button", { name: "Undo layout change", exact: true }),
       page.getByRole("button", { name: "Redo layout change", exact: true }),
       page.getByRole("button", { name: "Workspace appearance", exact: true }),
-      page.getByRole("combobox", { name: "Current workspace region" }),
+      page.getByRole("button", { name: "Layout", exact: true }),
     ]) {
       await insideViewport(page, target);
       const size = await target.boundingBox();
@@ -86,6 +86,7 @@ test("the panel picker reveals an already-active panel after a view-only region 
   page,
 }) => {
   await openWorkspace(page);
+  await page.getByRole("button", { name: "Focus", exact: true }).tap();
   const region = page.getByRole("combobox", { name: "Current workspace region" });
   const before = await revision(page);
   await region.selectOption("navigation");
@@ -104,6 +105,7 @@ test("appearance settings stay inside a short viewport in both directions and ca
 }) => {
   await page.setViewportSize({ width: 320, height: 568 });
   await openWorkspace(page);
+  await page.getByRole("button", { name: "Focus", exact: true }).tap();
   const trigger = page.getByRole("button", { name: "Workspace appearance", exact: true });
   await trigger.tap();
   const settings = page.getByRole("dialog", { name: "Workspace appearance", exact: true });
@@ -128,6 +130,7 @@ test("appearance settings stay inside a short viewport in both directions and ca
 
 test("touch menus can split and undo without losing editor content", async ({ page }) => {
   await openWorkspace(page);
+  await page.getByRole("button", { name: "Focus", exact: true }).tap();
   await page.getByRole("tab", { name: "workspace.ts", exact: true }).tap();
   const editor = page.getByRole("textbox", { name: "workspace.ts editor", exact: true });
   await editor.fill("A phone edit must survive layout changes.");
@@ -153,6 +156,7 @@ test("rotation and region browsing preserve the layout revision and live note", 
   page,
 }) => {
   await openWorkspace(page);
+  await page.getByRole("button", { name: "Focus", exact: true }).tap();
   await page.getByRole("tab", { name: "workspace.ts", exact: true }).tap();
   const editor = page.getByRole("textbox", { name: "workspace.ts editor", exact: true });
   await editor.fill("Keep this note after rotation.");

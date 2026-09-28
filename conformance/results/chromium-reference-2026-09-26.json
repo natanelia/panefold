@@ -2,22 +2,22 @@
   "schemaVersion": 1,
   "kind": "browser-profile-result",
   "profile": "compact-react-chromium-desktop",
-  "producedAt": "2026-09-28T03:17:04.844Z",
+  "producedAt": "2026-09-28T15:43:00.432Z",
   "status": "passed",
   "runner": "Playwright",
   "command": "pnpm exec playwright test --reporter=json",
   "project": "chromium",
   "environment": {
-    "operatingSystem": "Linux 6.17.0-1022-azure x64",
+    "operatingSystem": "Ubuntu 24.04.5 (Linux x64)",
     "node": "v24.21.0",
     "browserVersion": "151.0.7922.34"
   },
   "summary": {
-    "tests": 56,
-    "passed": 56,
+    "tests": 72,
+    "passed": 72,
     "skipped": 0,
     "failed": 0,
-    "durationMs": 50625.006
+    "durationMs": 75614.506
   },
   "tests": [
     {
@@ -281,6 +281,51 @@
       "ok": true
     },
     {
+      "file": "mobile-playground.spec.ts",
+      "title": "fits small phones, portrait, landscape and touch tablets without overlapping controls",
+      "ok": true
+    },
+    {
+      "file": "mobile-playground.spec.ts",
+      "title": "bottom navigation reveals the activated panel instead of leaving another region visible",
+      "ok": true
+    },
+    {
+      "file": "mobile-playground.spec.ts",
+      "title": "the panel picker reveals an already-active panel after a view-only region change",
+      "ok": true
+    },
+    {
+      "file": "mobile-playground.spec.ts",
+      "title": "appearance settings stay inside a short viewport in both directions and can be dismissed",
+      "ok": true
+    },
+    {
+      "file": "mobile-playground.spec.ts",
+      "title": "touch menus can split and undo without losing editor content",
+      "ok": true
+    },
+    {
+      "file": "mobile-playground.spec.ts",
+      "title": "rotation and region browsing preserve the layout revision and live note",
+      "ok": true
+    },
+    {
+      "file": "mobile-playground.spec.ts",
+      "title": "the command dialog traps keyboard focus and has a visible touch close control",
+      "ok": true
+    },
+    {
+      "file": "mobile-playground.spec.ts",
+      "title": "the phone workbench and settings pass automated accessibility checks",
+      "ok": true
+    },
+    {
+      "file": "mobile-playground.spec.ts",
+      "title": "native touch scrolling reveals overflow tabs without committing a drag",
+      "ok": true
+    },
+    {
       "file": "performance.spec.ts",
       "title": "preserves raw interaction frames and enforces the experimental CI guardrail",
       "ok": true
@@ -299,33 +344,74 @@
       "file": "single-tab-row.spec.ts",
       "title": "keeps the VS Code demo typography and compact header in a browser window",
       "ok": true
+    },
+    {
+      "file": "touch-layout.spec.ts",
+      "title": "native touch docks between groups in ltr, preserving the host and one undo step",
+      "ok": true
+    },
+    {
+      "file": "touch-layout.spec.ts",
+      "title": "native touch docks between groups in rtl, preserving the host and one undo step",
+      "ok": true
+    },
+    {
+      "file": "touch-layout.spec.ts",
+      "title": "native touch creates a split, nests an orthogonal split, resizes it and restores it after reload",
+      "ok": true
+    },
+    {
+      "file": "touch-layout.spec.ts",
+      "title": "native touch reorders tabs in the full landscape layout",
+      "ok": true
+    },
+    {
+      "file": "touch-layout.spec.ts",
+      "title": "native touch moves a whole container into another container",
+      "ok": true
+    },
+    {
+      "file": "touch-layout.spec.ts",
+      "title": "touchCancel cancels a real touch drag and releases capture without a layout change",
+      "ok": true
+    },
+    {
+      "file": "touch-layout.spec.ts",
+      "title": "rotation cancels a real touch drag and releases capture without a layout change",
+      "ok": true
     }
   ],
   "rawReport": {
     "path": "artifacts/preview-browser.json",
-    "sha256": "075252992dc58ceaaf10b2ea9517867a578e2d4fcd17f3cf672deaac271f8e61",
-    "runUrl": "https://github.com/natanelia/panefold/actions/runs/36372474835",
-    "artifact": "merged-performance-node-24"
+    "sha256": "7fe839bc13766957528bddb2396e97a3c2bc774949c3a37be06017afc7ae4cd6",
+    "runUrl": "https://github.com/natanelia/panefold/actions/runs/36445176424",
+    "artifact": "preview-executed-evidence"
   },
   "sourceDigests": {
-    "apps/demo/index.html": "c82b4b1af0fb76789fffcef28c7c785a078c7234f8f68be54e1000bc173f6848",
-    "apps/demo/src/App.tsx": "ce8a1cb754f58361e0cbf8896c730f45ffe55d834753ee237f5a86e0e20d34b3",
+    "apps/demo/index.html": "bdef651c363beb040b113c36e70f5fe773215b659502518879dc6e47d3c4900e",
+    "apps/demo/src/App.tsx": "d2fc74c5551f30c118c245cb925de1e7334a326af18fd4829c10aa8671382831",
     "apps/demo/src/demo-panels.tsx": "e0896a5cc259c6ea29db9e63bb6e181de1a2d08569fbd4b17c092c74b7a0ae7a",
     "apps/demo/src/external-panels.ts": "2836bab76f011fd9baa4db41be9d164cf450ee00b55933d21fce9c0744fd3b3e",
+    "apps/demo/src/mobile.css": "71859290c3377d1a54bd9e5e9e44c17d0aa34bb699e3eff8c766a5287dfa36b8",
+    "apps/demo/src/responsive-layout.ts": "d9de1c955aa7fae483173d75b84f2575207a00c0450c57a9d831dacdab0e9020",
     "apps/demo/src/runtime-session.ts": "1b09817f5f32bc10b8e574ac979f3bad472d5840ecb1c08bebdce6d62563c287",
     "apps/demo/src/styles.css": "686b97c0e150d34b8c6552a74e3e6d917796e619f5a800a81a2792868219e7c5",
-    "apps/demo/src/workspace-config.ts": "6eb5ec14a58d3acf6ffdc65df232eda213bf25773b1f4aacdf0357d2fcd1091f",
+    "apps/demo/src/use-touch-workbench.ts": "c913911471945a857994e2078eb36420b14cdcb8cd3d7437b5d562c32a02f04c",
+    "apps/demo/src/workspace-config.ts": "32b5e39026d01567a956a81fef19d81a96eed92f01156e3b3d8aea5338756002",
     "apps/demo/vite.config.ts": "70dd28bb53e3ea556d4c750aee26762312fa7884b2052c9c0cb073a1584cc663",
-    "e2e/demo.spec.ts": "c3a97de440920c85bc63a6b5fcfb3214ad3247031bc0ad1bd3f62ad0976df71f",
+    "e2e/demo.spec.ts": "e83979a7be6e659fa238414e65f7f28ec74828274567e8f181ea002ed3212d39",
     "e2e/drag-parity.spec.ts": "a7c7da7513e3b56de9b832cce5fa2fc6236f55d74ba9ea3aa9be1600f6620bce",
+    "e2e/mobile-playground.spec.ts": "29353d4fad1690ed94fff6136e3a6bd8f418472995427029a8128a4da0559673",
     "e2e/performance-baseline.json": "128b4c7dc2c7fc03372224828417f675b279359ebbe9bab7408b172ad76b48a9",
     "e2e/performance.spec.ts": "2bbc7b6cb40fd2ad97ba33824b5b8a0a3cf43a82ce638e432f13d29c8db164f3",
+    "e2e/touch-helpers.ts": "557037357dbf006c5e740f8d120cb28744f353b9400b93c5722de4d4e7afd619",
+    "e2e/touch-layout.spec.ts": "9eed3e88c00d23bf198d36bb4aaf45d5441e89291f927361616ba2ad4fcbc34f",
     "package.json": "acd970060c8df0d628cada8c1762111b9c3587031dbdc0e5815fb1e6159147ee",
     "packages/geometry/src/hit-test.ts": "2da9ca42d97c135f37d599bbaebed8f758343fa4e52fd647c05a4b179340c121",
     "packages/kernel/src/plan-panel-drop.ts": "61725af35d608d44bdbc6ec6a7079e7e41a9d39e7fcaccb3fae1477cca4df93f",
     "packages/motion/src/coordinator.ts": "50eff7dd6a1b8f6433ac3f5bfc5f8d74b99a501e43e712ccb3e1a82520574c6d",
     "packages/motion/src/motion-dom-driver.ts": "57092ac380b7d666ed807c31d2f691fea906d63d9cdff9095f5c2bc32260323b",
-    "packages/react/src/WorkspaceSurface.tsx": "25c81bb51d017329d21d30b5feee3d068a71507727209728c79dc53b611f154a",
+    "packages/react/src/WorkspaceSurface.tsx": "9ccbd781042b211ad7694a260e7c59bf9520e44d4ed789b7b793c39fda6a30c0",
     "packages/react/src/drop-modifiers.ts": "542583898dfa7d121b0d91f51171df8a3db47a8e749422437da903372a60c6ee",
     "packages/react/src/drop-preview.ts": "7c84edb3ba5ee124e207ca6fc5fb3f2a8b8e07178d90f11b96a68504b4402de7",
     "packages/react/src/drop-target.ts": "46d7afa6f516ec67bcc0d1deaa7e905c2da826be516125a726a170d6a2523357",
@@ -337,7 +423,7 @@
     "packages/react/src/node-motion.ts": "5f7efe09d09573ea1c2baa44744627d34fabe60cc6978f287da83e6b02ed52bb",
     "packages/react/src/panel-drag.tsx": "e19befa4995182d66a76570990bcff60e2ab4ba5fb76f0fe8a63e020bca493cc",
     "packages/react/src/panel-drop.ts": "843ce1f6eaaf926bef54f7f9ae246072dbdd50e2f6ffa9976c93b6f7c1afd3e0",
-    "packages/react/src/styles.css": "3b705caba74cedd0c542102947c9a1e76b7dce53c89a94814a004ab2b8a415b9",
+    "packages/react/src/styles.css": "92270a5b8cb81e406579ce0efc865f13fc061007376f06f472c3a7f88e4298ec",
     "packages/react/src/tab-insertion.ts": "e611ecfe7cb4b0b9fb7e748a747f2584e35dbaa72111a907008f6dc6b11f1670",
     "packages/react/src/tab-reorder.ts": "c139803bc37c5f2c6fc6a17eb836784ff8d203b7bae8acebedcbf290cdabc599",
     "packages/react/src/types.ts": "e5f3def8259ae492ac8802fe9b2c7b05b5b15a0cde5a66dd34f4ed570685c893",
@@ -351,7 +437,7 @@
     "packages/surfaces/src/types.ts": "119ae61f47124f0d7bb4c9f2b74afd3fa5510f27cb3e928fe328590488b029e6",
     "playwright.config.ts": "1488b4ef7257ef5a6dc5505148550cbb6ed89e9488b2c9e39e874f15469cc245",
     "pnpm-lock.yaml": "e659e90970ee34935228595f2297da307495a7a7b01202ecfa67deaf1ac53209",
-    "scripts/record-preview-evidence.mjs": "4dadc918ccf8699fa13f9cea14cd442de6f24aa544f147a18346168b60d2edbf",
+    "scripts/record-preview-evidence.mjs": "b2b513d04568f89e42e554f89ebc6640c209b40a3b135b18c22d2b503ac4c53e",
     "vitest.config.ts": "6f743b2639e8e091bdc454a4aaa6336a538b889e70af8814ee7d1f27c7a8769e"
   },
   "limitations": [

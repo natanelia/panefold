@@ -484,6 +484,10 @@
     scrollbar-width: thin;
   }
 
+  .pf-tab-drag-handle {
+    display: none;
+  }
+
   .pf-tab {
     position: relative;
     display: inline-flex;
@@ -994,6 +998,32 @@
     clip: rect(0 0 0 0) !important;
     white-space: nowrap !important;
     border: 0 !important;
+  }
+
+  @media (any-pointer: coarse) {
+    .pf-workspace[data-panel-drop-enabled="true"] .pf-tab-drag-handle {
+      display: inline-flex;
+      flex: 0 0 44px;
+      align-items: center;
+      justify-content: center;
+      align-self: stretch;
+      min-block-size: 44px;
+      touch-action: none;
+      user-select: none;
+      -webkit-touch-callout: none;
+      cursor: grab;
+    }
+
+    .pf-workspace[data-panel-drop-enabled="true"] .pf-tab {
+      touch-action: pan-x pinch-zoom;
+      padding-inline-start: 0;
+    }
+
+    .pf-workspace[data-panel-drop-enabled="true"]
+      .pf-group[data-tab-orientation="vertical"]
+      .pf-tab {
+      touch-action: pan-y pinch-zoom;
+    }
   }
 
   @media (pointer: coarse) {

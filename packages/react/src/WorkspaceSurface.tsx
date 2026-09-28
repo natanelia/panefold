@@ -2405,6 +2405,15 @@ function PanelGroup<TCommand, TResult>({
                   onPointerDown={(event) => {
                     if (isTabCloseAffordance(event.target)) return;
                     pointerFocusPanelRef.current = panel.id;
+                    // A touch on the label belongs to native tab-rail scrolling.
+                    // The grip reserves both axes before the gesture starts.
+                    if (
+                      event.pointerType === "touch" &&
+                      !event.currentTarget
+                        .querySelector(".pf-tab-drag-handle")
+                        ?.contains(event.target as Node)
+                    )
+                      return;
                     panelDrag.begin(panel, group, event);
                   }}
                   onPointerMove={panelDrag.move}
@@ -2474,6 +2483,9 @@ function PanelGroup<TCommand, TResult>({
                     }
                   }}
                 >
+                  <span className="pf-tab-drag-handle" aria-hidden="true">
+                    ⋮⋮
+                  </span>
                   {definition?.icon === undefined ||
                   presentation.content === "label-only" ? null : (
                     <span className="pf-tab-icon" aria-hidden="true">

@@ -1,5 +1,22 @@
 /* Application-owned adaptation. The canonical layout is never replaced for a phone. */
 @layer demo {
+  .demo-workspace-shell {
+    display: flex;
+    flex-direction: column;
+    min-inline-size: 0;
+    min-block-size: 0;
+    overflow: hidden;
+  }
+
+  .demo-workspace-shell > .demo-workspace {
+    flex: 1 1 0;
+    block-size: auto;
+  }
+
+  .demo-layout-modes {
+    display: none;
+  }
+
   .demo-activity-label,
   .demo-command-mobile-label,
   .demo-activity-bar .demo-mobile-editor {
@@ -43,6 +60,111 @@
 
   /* Keep the compact renderer's chrome and hit targets the same size. */
   @media (max-width: 700px), (pointer: coarse) {
+    .demo-layout-modes {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      flex: 0 0 auto;
+      min-block-size: 48px;
+      padding-inline: 4px;
+      border-block-end: 1px solid var(--demo-border);
+      background: var(--demo-surface-raised);
+    }
+
+    .demo-layout-modes button {
+      flex: 0 0 auto;
+      min-inline-size: 52px;
+      min-block-size: 44px;
+      border: 1px solid transparent;
+      border-radius: 4px;
+      background: transparent;
+      color: var(--demo-text);
+      font: inherit;
+      font-size: 12px;
+    }
+
+    .demo-layout-modes button[aria-pressed="true"] {
+      border-color: var(--demo-accent);
+      background: var(--demo-surface);
+    }
+
+    .demo-layout-modes span {
+      min-inline-size: 0;
+      padding-inline: 4px;
+      color: var(--demo-text);
+      font-size: 11px;
+      line-height: 1.35;
+    }
+
+    /* Controls must not consume the entire tab rail in a narrow split. */
+    .demo-app .pf-group[data-tab-orientation="horizontal"] .pf-tab-strip {
+      display: grid;
+      grid-template-rows: 48px 44px;
+      grid-template-columns: minmax(0, 1fr);
+      flex-basis: 92px;
+    }
+
+    .demo-app .pf-group[data-tab-orientation="horizontal"] .pf-tab-list {
+      grid-row: 1;
+      grid-column: 1;
+      min-inline-size: 0;
+      scrollbar-width: none;
+    }
+
+    .demo-app .pf-group[data-tab-orientation="horizontal"] .pf-group-drag-region {
+      grid-row: 2;
+      grid-column: 1;
+      justify-self: start;
+      inline-size: 44px;
+      color: var(--demo-muted);
+      border-block-start: 1px solid var(--demo-border);
+    }
+
+    .demo-app .pf-group-drag-region::before {
+      content: "⠿";
+      font-size: 20px;
+    }
+
+    .demo-app .pf-group[data-tab-orientation="horizontal"] .pf-tab-controls {
+      grid-row: 2;
+      grid-column: 1;
+      margin-inline-start: 44px;
+      justify-content: flex-start;
+      min-inline-size: 0;
+      overflow-x: auto;
+      border-inline-start: 0;
+      border-block-start: 1px solid var(--demo-border);
+    }
+
+    .demo-app .pf-tab-controls > button {
+      flex: 0 0 44px;
+      min-inline-size: 44px;
+      min-block-size: 44px;
+    }
+
+    .demo-app .pf-tab {
+      max-inline-size: 100%;
+      gap: 3px;
+      padding-inline: 0 4px;
+    }
+
+    .demo-app .pf-tab .pf-tab-close {
+      display: none;
+    }
+
+    .demo-app .pf-group:not([data-tab-content="icon-only"]) .pf-tab-icon {
+      display: none;
+    }
+
+    .demo-app .pf-tab-drag-handle {
+      color: var(--demo-muted);
+      font-size: 16px;
+    }
+
+    .demo-app .pf-splitter::before {
+      inset: -6px;
+    }
+
     .demo-app {
       grid-template-rows: 52px minmax(0, 1fr) 32px;
       padding: env(safe-area-inset-top, 0px) env(safe-area-inset-right, 0px)
@@ -83,19 +205,6 @@
 
     .demo-app .pf-tab {
       flex-shrink: 0;
-    }
-
-    /* Scroll along the tab rail; cross-axis drags and the Actions menu remain available.
-     * Native pan cancellation releases the renderer's pointer-drag lease. */
-    .demo-app .pf-workspace[data-panel-drop-enabled="true"] .pf-tab {
-      touch-action: pan-x pinch-zoom;
-    }
-
-    .demo-app
-      .pf-workspace[data-panel-drop-enabled="true"]
-      .pf-group[data-tab-orientation="vertical"]
-      .pf-tab {
-      touch-action: pan-y pinch-zoom;
     }
 
     .demo-app .pf-tab-close {
@@ -201,7 +310,7 @@
       grid-template-rows: minmax(0, 1fr) 56px;
     }
 
-    .demo-workspace {
+    .demo-workspace-shell {
       grid-column: 1;
       grid-row: 1;
     }

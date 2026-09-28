@@ -1360,6 +1360,7 @@ test.describe("compact touch projection", () => {
     page,
   }) => {
     await page.goto("/");
+    await page.getByRole("button", { name: "Focus", exact: true }).tap();
     const workspace = page.getByLabel("Panefold Code workbench");
     await expect(workspace).toHaveAttribute("data-responsive-projection", "single-region");
     const region = page.getByRole("combobox", { name: "Current workspace region" });

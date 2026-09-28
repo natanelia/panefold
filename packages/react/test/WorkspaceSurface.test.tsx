@@ -1749,6 +1749,35 @@ describe("WorkspaceSurface", () => {
     expect(unmounts.get("gamma")).toBe(1);
   });
 
+  it("reserves touch dragging for the grip without consuming label scroll gestures", async () => {
+    const runtime = new FixtureRuntime(initialProjection);
+    const view = renderWorkspace(runtime, { commands: directManipulationCommands });
+    const alpha = await screen.findByRole("tab", { name: "Alpha" });
+    installPointerCapture(alpha);
+    const grip = alpha.querySelector<HTMLElement>(".pf-tab-drag-handle");
+    if (grip === null) throw new Error("Expected a touch drag grip");
+    expect(grip.getAttribute("aria-hidden")).toBe("true");
+    const start = { button: 0, pointerId: 181, pointerType: "touch", clientX: 100, clientY: 20 };
+    const move = { ...start, clientX: 750, clientY: 350 };
+    const actorsBefore = protocolActorInventory.drag.created;
+    fireEvent.pointerDown(alpha, start);
+    fireEvent.pointerMove(alpha, move);
+    fireEvent.pointerUp(alpha, move);
+    expect(protocolActorInventory.drag.created).toBe(actorsBefore);
+    expect(runtime.transactions).toHaveLength(0);
+    expect(alpha.hasPointerCapture(181)).toBe(false);
+
+    fireEvent.pointerDown(grip, start);
+    fireEvent.pointerMove(alpha, move);
+    const overlay = await waitForElement(view.container, "[data-workspace-panel-drag]");
+    expect(overlay.dataset.workspaceDropKind).toBe("center");
+    fireEvent.pointerUp(alpha, move);
+    expect(runtime.transactions).toHaveLength(1);
+    expect(runtime.getSnapshot().projection.groups.right?.panelIds).toContain("alpha");
+    expect(view.container.querySelector("[data-workspace-panel-drag]")).toBeNull();
+    expect(alpha.hasPointerCapture(181)).toBe(false);
+  });
+
   it("drags a tab to another group through one revision-bound drop command", async () => {
     const runtime = new FixtureRuntime(initialProjection);
     const view = renderWorkspace(runtime, { commands: directManipulationCommands });

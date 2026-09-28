@@ -11,7 +11,6 @@ import {
   type ReactNode,
 } from "react";
 import { validateWorkspace } from "@panefold/kernel";
-import { solveLayout } from "@panefold/geometry";
 import {
   getEntity,
   nodeId,
@@ -48,6 +47,8 @@ import {
   type DemoViewPreferences,
 } from "./view-preferences";
 import { createDemoCommands, projectWorkspace } from "./workspace-config";
+import { solveDemoLayout } from "./responsive-layout";
+import { useTouchWorkbench } from "./use-touch-workbench";
 
 const LazyWorkspaceInspector = lazy(async () => {
   const module = await import("./optional-tools");
@@ -156,6 +157,8 @@ function CodeWorkspaceApp({ session }: { readonly session: DemoWorkspaceSession 
   const [inspectorOpen, setInspectorOpen] = useState(false);
   const [paletteOpen, setPaletteOpen] = useState(false);
   const [compactGroupId, setCompactGroupId] = useState("primary");
+  const [focusMode, setFocusMode] = useState(false);
+  const touchWorkbench = useTouchWorkbench();
   // The compact view must follow activation from menus, history and panel moves.
   // Changing the region selector itself stays a view-only operation.
   const activeGroupId = snapshot.groups.ids.find(
@@ -251,7 +254,7 @@ function CodeWorkspaceApp({ session }: { readonly session: DemoWorkspaceSession 
   );
   const layoutSolver = useCallback<WorkspaceLayoutSolver<WorkspaceSnapshot>>(
     (layoutSnapshot, request) =>
-      solveLayout(layoutSnapshot, nodeId(request.rootNodeId), request.bounds, {
+      solveDemoLayout(layoutSnapshot, nodeId(request.rootNodeId), request.bounds, {
         splitterSize: request.splitterSize,
         splitOverrides: request.splitOverrides,
       }),
@@ -463,22 +466,38 @@ function CodeWorkspaceApp({ session }: { readonly session: DemoWorkspaceSession 
             <WorkbenchIcon name="manage" />
           </button>
         </aside>
-        <WorkspaceSurface
-          projector={projector}
-          commands={commands}
-          panels={panelRegistry}
-          layoutSolver={layoutSolver}
-          direction={direction}
-          motion={motion}
-          workspaceLabel="Panefold Code workbench"
-          className="demo-workspace"
-          responsive="auto"
-          compactGroupId={compactGroupId}
-          onCompactGroupChange={setCompactGroupId}
-          tabPresentation={{ placement: tabPlacement, content: tabContent }}
-          dropBehavior={{ centerGroupDrop: "merge" }}
-          onExternalPanelRequest={externalPanels.handleRequest}
-        />
+        <div className="demo-workspace-shell" data-focus-mode={String(focusMode)}>
+          <nav className="demo-layout-modes" aria-label="Workspace view">
+            <button type="button" aria-pressed={!focusMode} onClick={() => setFocusMode(false)}>
+              Layout
+            </button>
+            <button type="button" aria-pressed={focusMode} onClick={() => setFocusMode(true)}>
+              Focus
+            </button>
+            <span>
+              {focusMode
+                ? "Read one group. Layout shows all splits."
+                : "Drag ⋮⋮ to move. Drop at an edge to split."}
+            </span>
+          </nav>
+          <WorkspaceSurface
+            projector={projector}
+            commands={commands}
+            panels={panelRegistry}
+            layoutSolver={layoutSolver}
+            direction={direction}
+            motion={motion}
+            workspaceLabel="Panefold Code workbench"
+            className="demo-workspace"
+            responsive={focusMode ? "auto" : false}
+            splitterSize={touchWorkbench ? 16 : 6}
+            compactGroupId={compactGroupId}
+            onCompactGroupChange={setCompactGroupId}
+            tabPresentation={{ placement: tabPlacement, content: tabContent }}
+            dropBehavior={{ centerGroupDrop: "merge" }}
+            onExternalPanelRequest={externalPanels.handleRequest}
+          />
+        </div>
         {inspectorOpen ? (
           <DeferredToolBoundary
             label="Workspace inspector"

@@ -1,4 +1,5 @@
 import { expect, test } from "@playwright/test";
+import { touchPanelDrop } from "../e2e/touch-helpers";
 
 test.describe("embedded phone playground", () => {
   test.use({ viewport: { width: 390, height: 844 }, hasTouch: true, isMobile: true });
@@ -13,7 +14,7 @@ test.describe("embedded phone playground", () => {
     const workbench = page.frameLocator('iframe[title="Panefold Code live workbench demo"]');
     await expect(workbench.locator(".demo-workspace")).toHaveAttribute(
       "data-responsive-projection",
-      "single-region",
+      "full-layout",
     );
     const bounds = await iframe.boundingBox();
     if (bounds === null) throw new Error("The workbench frame did not render");
@@ -37,6 +38,19 @@ test.describe("embedded phone playground", () => {
       viewport: innerWidth,
     }));
     expect(widths.document).toBeLessThanOrEqual(widths.viewport);
+
+    // Bounding boxes are in the outer page coordinates. Native touch must work
+    // inside the iframe too, without scrolling the parent documentation page.
+    const parentScroll = await page.evaluate(() => scrollY);
+    await touchPanelDrop(
+      page,
+      workbench.locator('[data-workspace-panel-tab="notes"]'),
+      workbench.locator('[data-workspace-group="primary"]'),
+      workbench.locator("[data-workspace-panel-drag]"),
+      "block-end",
+    );
+    await expect(workbench.locator(".pf-group")).toHaveCount(5);
+    expect(await page.evaluate(() => scrollY)).toBe(parentScroll);
     const screenshot = testInfo.outputPath("phone-playground.png");
     await page.screenshot({ path: screenshot });
     await testInfo.attach("Phone playground", { path: screenshot, contentType: "image/png" });
