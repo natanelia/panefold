@@ -272,7 +272,9 @@ export function assertBoundedValue(
     }
     if (typeof current === "number") {
       if (!Number.isFinite(current)) invalidEnvelope("Non-finite numbers are not allowed");
-      bytes += JSON.stringify(Object.is(current, -0) ? 0 : current).length;
+      bytes += new TextEncoder().encode(
+        JSON.stringify(Object.is(current, -0) ? 0 : current),
+      ).byteLength;
       if (bytes > limits.maxBytes) limitFailure("encoded byte size", limits.maxBytes);
       continue;
     }
@@ -280,7 +282,7 @@ export function assertBoundedValue(
       if (current.length > limits.maxStringLength) {
         limitFailure("string length", limits.maxStringLength);
       }
-      bytes += jsonStringByteLength(current);
+      bytes += new TextEncoder().encode(JSON.stringify(current)).byteLength;
       if (bytes > limits.maxBytes) limitFailure("encoded byte size", limits.maxBytes);
       continue;
     }
@@ -337,36 +339,12 @@ export function assertBoundedValue(
       if (descriptor === undefined || !("value" in descriptor) || !descriptor.enumerable) {
         invalidEnvelope("Persisted object properties must be enumerable data properties");
       }
-      bytes += jsonStringByteLength(key) + 1;
+      bytes += new TextEncoder().encode(JSON.stringify(key)).byteLength + 1;
       if (bytes > limits.maxBytes) limitFailure("encoded byte size", limits.maxBytes);
       stack.push({ value: descriptor.value, depth: frame.depth + 1 });
     }
     if (bytes > limits.maxBytes) limitFailure("encoded byte size", limits.maxBytes);
   }
-}
-
-/** Exact UTF-8 size of JSON's quoted string, without short-lived byte arrays. */
-function jsonStringByteLength(value: string): number {
-  // Native encoding wins for long strings. Keep this scan bounded to short
-  // fields and keys, which dominate normal workspace envelopes.
-  if (value.length > 128) return new TextEncoder().encode(JSON.stringify(value)).byteLength;
-  let bytes = 2; // Opening and closing quotes.
-  for (let index = 0; index < value.length; index += 1) {
-    const code = value.charCodeAt(index);
-    if (code === 0x22 || code === 0x5c) bytes += 2;
-    else if (code < 0x20) {
-      bytes += code === 8 || code === 9 || code === 10 || code === 12 || code === 13 ? 2 : 6;
-    } else if (code < 0x80) bytes += 1;
-    else if (code < 0x800) bytes += 2;
-    else if (code >= 0xd800 && code <= 0xdfff) {
-      const next = value.charCodeAt(index + 1);
-      if (code <= 0xdbff && next >= 0xdc00 && next <= 0xdfff) {
-        bytes += 4;
-        index += 1;
-      } else bytes += 6; // JSON escapes each unpaired surrogate as \uXXXX.
-    } else bytes += 3;
-  }
-  return bytes;
 }
 
 export const SHA256_CHECKSUM: ChecksumProvider = Object.freeze({
