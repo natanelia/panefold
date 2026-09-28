@@ -1,0 +1,26 @@
+name: Documentation review
+
+on:
+  push:
+    branches: [docs/developer-first-site]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  source:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+      - name: Export the exact reviewed source
+        run: git archive --format=tar.gz HEAD -o /tmp/panefold-source.tar.gz
+      - uses: actions/upload-artifact@v7
+        with:
+          name: docs-review-source
+          path: /tmp/panefold-source.tar.gz
+          if-no-files-found: error
+          retention-days: 1
