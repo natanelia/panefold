@@ -1075,8 +1075,8 @@
       "verificationClass": "environment-verifiable",
       "artifactRole": "result",
       "uri": "repo://conformance/results/protocol-motion-2026-09-26.json",
-      "sha256": "ea7a0961d02fd5d1d34d417524a282ee1b5a52eec3eb230f4850479e837890ed",
-      "producedAt": "2026-09-27T13:02:17.986Z",
+      "sha256": "69d02b805d4984337c5e5a2f6cf5512ed4c12133ccbf867d2877d2b7da9c8bc3",
+      "producedAt": "2026-09-27T13:19:03.555Z",
       "requirementIds": [
         "A11Y-002",
         "ARC-002",
