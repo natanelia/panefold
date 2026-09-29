@@ -60,15 +60,18 @@ describe("touch button activation", () => {
     expect(press).toHaveBeenCalledTimes(3);
   });
   it("does not activate a swipe, cancellation, or release outside the button", () => {
-    const { press, pointer } = setup();
+    const { press, pointer, button } = setup();
     pointer("pointerdown");
     pointer("pointermove", 40);
     pointer("pointerup");
+    fireEvent.click(button, { detail: 1 });
     pointer("pointerdown");
     pointer("pointercancel");
     pointer("pointerup");
+    fireEvent.click(button, { detail: 1 });
     pointer("pointerdown");
     pointer("pointerup", 60);
+    fireEvent.click(button, { detail: 1 });
     expect(press).not.toHaveBeenCalled();
   });
   it("does not activate disabled controls", () => {

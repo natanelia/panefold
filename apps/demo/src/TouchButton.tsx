@@ -9,7 +9,7 @@ type Props = Omit<ButtonHTMLAttributes<HTMLButtonElement>, "onClick"> & {
  */
 export function TouchButton({ onClick, disabled, type = "button", ...props }: Props) {
   const touch = useRef<{ id: number; x: number; y: number; moved: boolean } | undefined>(undefined);
-  const activatedAt = useRef<number | undefined>(undefined);
+  const touchEndedAt = useRef<number | undefined>(undefined);
   const frame = useRef<number | undefined>(undefined);
   useEffect(
     () => () => {
@@ -23,7 +23,7 @@ export function TouchButton({ onClick, disabled, type = "button", ...props }: Pr
       type={type}
       disabled={disabled}
       onPointerDown={(event) => {
-        activatedAt.current = undefined;
+        touchEndedAt.current = undefined;
         touch.current =
           !disabled && event.pointerType === "touch" && event.isPrimary
             ? { id: event.pointerId, x: event.clientX, y: event.clientY, moved: false }
@@ -37,13 +37,20 @@ export function TouchButton({ onClick, disabled, type = "button", ...props }: Pr
         )
           start.moved = true;
       }}
-      onPointerCancel={() => {
-        touch.current = undefined;
+      onPointerCancel={(event) => {
+        if (touch.current?.id === event.pointerId) {
+          touchEndedAt.current = event.timeStamp;
+          touch.current = undefined;
+        }
       }}
       onPointerUp={(event) => {
         const start = touch.current;
         touch.current = undefined;
-        if (disabled || start?.id !== event.pointerId || start.moved) return;
+        if (start?.id !== event.pointerId) return;
+        // A cancelled gesture must not activate through a later compatibility
+        // click either. Some engines still emit one after a short swipe.
+        touchEndedAt.current = event.timeStamp;
+        if (disabled || start.moved) return;
         const bounds = event.currentTarget.getBoundingClientRect();
         if (
           event.clientX < bounds.left ||
@@ -52,7 +59,6 @@ export function TouchButton({ onClick, disabled, type = "button", ...props }: Pr
           event.clientY > bounds.bottom
         )
           return;
-        activatedAt.current = event.timeStamp;
         const button = event.currentTarget;
         // Complete the native touch sequence before removing or opening a dialog.
         // This prevents the browser's remaining default focus action from undoing
@@ -65,11 +71,11 @@ export function TouchButton({ onClick, disabled, type = "button", ...props }: Pr
         });
       }}
       onClick={(event) => {
-        const touchTime = activatedAt.current;
+        const touchTime = touchEndedAt.current;
         // Native touch may emit a compatibility click after pointerup. Keyboard and
         // assistive-technology clicks (detail=0) are independent activations.
         if (event.detail !== 0 && touchTime !== undefined && event.timeStamp - touchTime < 1000) {
-          activatedAt.current = undefined;
+          touchEndedAt.current = undefined;
           return;
         }
         if (!disabled) onClick();
