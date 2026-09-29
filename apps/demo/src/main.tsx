@@ -2,6 +2,7 @@ import { lazy, Suspense } from "react";
 import { createRoot } from "react-dom/client";
 
 import App from "./App";
+import "./touch-floating.css";
 
 const root = document.getElementById("root");
 if (root === null) throw new Error("Demo root element is missing");
