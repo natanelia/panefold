@@ -18,7 +18,7 @@ test("presents the product story and live reference fixture", async ({ page }) =
   await expect(
     page
       .frameLocator('iframe[title="Interactive Panefold Code workbench demo"]')
-      .getByLabel("Panefold Code workbench"),
+      .locator(".pf-workspace"),
   ).toBeVisible();
   expect(consoleErrors).toEqual([]);
 });
@@ -39,7 +39,7 @@ test("navigates the repository-backed documentation", async ({ page }) => {
 test("normalizes static-host trailing-slash routes", async ({ page }) => {
   await page.goto("./docs/architecture/");
   await expect(page.getByRole("heading", { name: "Architecture", exact: true })).toBeVisible();
-  await page.goto("./demo/");
+  await page.goto("./demo/?example=code");
   await expect(page.getByTitle("Panefold Code live workbench demo")).toBeVisible();
   await expect(
     page

@@ -5,9 +5,12 @@ import { siteAsset } from "../lib/router";
 import "./playground.css";
 
 const description = "A live workbench. Your layout is saved in this browser.";
-const touchTip = "Switch panels below. Use a tab’s Actions menu to move or split it.";
 
 export function DemoPage({ navigate }: { readonly navigate: (path: string) => void }) {
+  const workbench =
+    new URLSearchParams(location.search).get("example") === "code"
+      ? "workbench/?fixture=code"
+      : "workbench/";
   return (
     <main id="main-content" tabIndex={-1} className="playground-page">
       <h1 className="sr-only">Panefold Code live workbench demo</h1>
@@ -23,7 +26,7 @@ export function DemoPage({ navigate }: { readonly navigate: (path: string) => vo
         </SiteLink>
         <p className="playground-description">{description}</p>
         <a
-          href={siteAsset("workbench/")}
+          href={siteAsset(workbench)}
           target="_blank"
           rel="noreferrer"
           data-track="demo_open_standalone"
@@ -32,10 +35,9 @@ export function DemoPage({ navigate }: { readonly navigate: (path: string) => vo
           Open alone <ExternalLink size={15} aria-hidden="true" />
         </a>
       </div>
-      <p className="playground-touch-tip">{touchTip}</p>
       <iframe
         title="Panefold Code live workbench demo"
-        src={siteAsset("workbench/")}
+        src={siteAsset(workbench)}
         className="playground-workbench"
       />
     </main>

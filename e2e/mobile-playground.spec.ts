@@ -4,7 +4,7 @@ import { expect, test, type Locator, type Page } from "@playwright/test";
 test.use({ viewport: { width: 390, height: 844 }, hasTouch: true, isMobile: true });
 
 async function openWorkspace(page: Page) {
-  await page.goto("/");
+  await page.goto("/?fixture=code");
   await expect(page.locator(".demo-workspace")).toHaveAttribute(
     "data-responsive-projection",
     "full-layout",

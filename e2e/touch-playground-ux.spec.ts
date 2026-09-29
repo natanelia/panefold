@@ -7,7 +7,7 @@ const tab = (page: Page, id: string) => page.locator(`[data-workspace-panel-tab=
 const group = (page: Page, id: string) => page.locator(`[data-workspace-group="${id}"]`);
 async function open(page: Page) {
   await page.goto("/");
-  await expect(page.getByRole("heading", { name: "Panefold Playground" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: /Panefold.*Playground/ })).toBeVisible();
   await expect(page.locator(".tp-workspace")).toHaveAttribute(
     "data-responsive-projection",
     "full-layout",

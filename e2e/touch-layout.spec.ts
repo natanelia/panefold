@@ -15,7 +15,7 @@ const owner = (page: Page, id: string) =>
   );
 
 async function open(page: Page) {
-  await page.goto("/");
+  await page.goto("/?fixture=code");
   await expect(page.locator(".demo-workspace")).toHaveAttribute(
     "data-responsive-projection",
     "full-layout",

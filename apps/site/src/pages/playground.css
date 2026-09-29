@@ -53,8 +53,16 @@
   }
 
   @media (max-width: 700px) {
+    body:has(.playground-page) .site-header {
+      display: none;
+    }
     .playground-page {
-      height: calc(100dvh - 64px);
+      height: 100dvh;
+      background: #eff3ec;
+      color: #203a2e;
+    }
+    .playground-open {
+      color: #226447;
     }
 
     .playground-toolbar {
