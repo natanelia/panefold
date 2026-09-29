@@ -1,0 +1,42 @@
+name: Apply reviewed playground fixes
+on:
+  push:
+    branches: [audit/pr47-feature-fixes]
+    paths: [.audit-transfer/**, .github/workflows/audit-apply.yml]
+permissions:
+  contents: write
+jobs:
+  apply:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+      - name: Check transfer integrity before applying the reviewed patch
+        run: |
+          python3 - <<'PY'
+          import base64, gzip, hashlib, pathlib, subprocess
+          raw = pathlib.Path('.audit-transfer/fixes.patch.gz').read_bytes()
+          expected = '14f357adef7aafbc429dce55af90c5314416bfd5fff713ea6ff11fa567021470'
+          data = gzip.decompress(raw)
+          assert hashlib.sha256(data).hexdigest() == expected, 'Patch transfer checksum mismatch'
+          pathlib.Path('/tmp/playground-fixes.patch').write_bytes(data)
+          subprocess.run(['git', 'apply', '--check', '/tmp/playground-fixes.patch'], check=True)
+          subprocess.run(['git', 'apply', '--index', '/tmp/playground-fixes.patch'], check=True)
+          PY
+      - name: Commit only on the temporary review branch
+        run: |
+          test "$GITHUB_REF" = refs/heads/audit/pr47-feature-fixes
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git diff --cached --check
+          git commit -m 'fix(playground): apply reviewed control and geometry corrections'
+          git push origin HEAD:refs/heads/audit/pr47-feature-fixes
+      - uses: actions/upload-artifact@v7
+        if: always()
+        with:
+          name: playground-patch-transfer
+          path: .audit-transfer
+          include-hidden-files: true
+          retention-days: 1
