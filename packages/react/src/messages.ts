@@ -38,6 +38,8 @@ export interface WorkspaceMessageCatalog {
   actionsForPanel(values: { readonly title: string }): string;
   panelActions(values: { readonly title: string }): string;
   chooseDestination(): string;
+  cancelMove?(): string;
+  moveHere?(): string;
   moveToGroup(values: { readonly group: string }): string;
   /** Optional group-container strings; omitted methods use the English fallback. */
   removePanelContainer?(values: { readonly target: string }): string;
@@ -134,6 +136,8 @@ export const ENGLISH_WORKSPACE_MESSAGES = Object.freeze({
   actionsForPanel: ({ title }) => `Actions for ${title}`,
   panelActions: ({ title }) => `${title} actions`,
   chooseDestination: () => "Choose destination…",
+  cancelMove: () => "Cancel move",
+  moveHere: () => "Move here",
   moveToGroup: ({ group }) => `Move to ${group}`,
   removePanelContainer: ({ target }) => `Remove panel container (merge into ${target})`,
   removedPanelContainer: ({ group, target }) =>

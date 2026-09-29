@@ -7,10 +7,12 @@ import {
   panelId,
   surfaceId,
   type PanelRecord,
+  type SurfaceRecord,
   type WorkspaceSnapshot,
   type WorkspaceCommand,
 } from "@panefold/model";
 import { canonicalizeWorkspace, reduceWorkspace, validateWorkspace } from "@panefold/kernel";
+import { resolveFloatingSurfaceBounds, floatingSurfaceContentBounds } from "@panefold/react";
 import { solveLayout, type LogicalRect } from "@panefold/geometry";
 import type {
   WorkspaceCommandAdapter,
@@ -23,6 +25,44 @@ import { createDemoCommands, projectWorkspace } from "./workspace-config";
 export const PANE_MIN_WIDTH = 176;
 export const PANE_MIN_HEIGHT = 208;
 export const PLAYGROUND_SPLITTER = 16;
+export const PLAYGROUND_TITLEBAR = 52;
+
+export function playgroundSurfaceForGroup(snapshot: WorkspaceSnapshot, id: string) {
+  return snapshot.surfaces.ids
+    .map((id) => getEntity(snapshot.surfaces, id))
+    .find((surface) => surface && containsGroup(snapshot, surface.rootNodeId, id));
+}
+
+function containsGroup(snapshot: WorkspaceSnapshot, root: string, id: string) {
+  const pending = [root];
+  const seen = new Set<string>();
+  while (pending.length) {
+    const current = pending.pop();
+    if (!current || seen.has(current)) continue;
+    seen.add(current);
+    const node = getEntity(snapshot.nodes, nodeId(current));
+    if (node?.kind === "group" && String(node.groupId) === id) return true;
+    if (node?.kind === "split") pending.push(...node.children);
+  }
+  return false;
+}
+
+/** Match the renderer's clamped frame and titlebar, including floating destinations. */
+export function playgroundSurfaceBounds(
+  snapshot: WorkspaceSnapshot,
+  surface: SurfaceRecord,
+  viewport: LogicalRect,
+) {
+  if (surface.kind !== "floating") return playgroundBounds(snapshot, surface.rootNodeId, viewport);
+  const view = projectPlayground(snapshot).floatingSurfaces?.find((item) => item.id === surface.id);
+  if (!view) return viewport;
+  return floatingSurfaceContentBounds(
+    resolveFloatingSurfaceBounds(view, viewport.inlineSize, viewport.blockSize),
+    viewport,
+    "ltr",
+    PLAYGROUND_TITLEBAR,
+  );
+}
 export const playgroundPanelNames = {
   notes: "Notes",
   checklist: "Checklist",
@@ -175,8 +215,29 @@ export function previewPlaygroundCommand(snapshot: WorkspaceSnapshot, command: W
 
 export function createPlaygroundCommands(
   getSnapshot: () => WorkspaceSnapshot,
+  getViewport?: () => LogicalRect,
 ): WorkspaceCommandAdapter<WorkspaceCommand> {
   const base = createDemoCommands(getSnapshot);
+  const revealDestination = (command: WorkspaceCommand, targetGroup: string): WorkspaceCommand => {
+    const target = playgroundSurfaceForGroup(getSnapshot(), targetGroup);
+    if (target?.kind !== "floating") return command;
+    // A destination selected from a sheet may be minimized or behind another float.
+    // Keep restoration, placement, and activation in the same undoable transaction.
+    if (
+      command.type === "undo-workspace-operation" ||
+      command.type === "redo-workspace-operation" ||
+      command.type === "apply-remote-transaction"
+    )
+      return command;
+    return {
+      type: "batch",
+      commands: [
+        ...(target.minimized ? [{ type: "restore-surface" as const, surfaceId: target.id }] : []),
+        ...(command.type === "batch" ? command.commands : [command]),
+        { type: "raise-surface", surfaceId: target.id },
+      ],
+    };
+  };
   const preview = (
     next: WorkspaceSnapshot,
     groupId: string,
@@ -185,9 +246,11 @@ export function createPlaygroundCommands(
     const projection = projectPlayground(next);
     for (const surfaceId of next.surfaces.ids) {
       const surface = getEntity(next.surfaces, surfaceId);
-      if (!surface) continue;
+      if (!surface || !containsGroup(next, surface.rootNodeId, groupId)) continue;
+      const viewport = getViewport?.();
       const layout = solvePlayground(next, {
         ...context,
+        bounds: viewport ? playgroundSurfaceBounds(next, surface, viewport) : context.bounds,
         projection,
         rootNodeId: surface.rootNodeId,
         splitOverrides: {},
@@ -203,7 +266,8 @@ export function createPlaygroundCommands(
     const snapshot = getSnapshot();
     const plan = base.planPanelDrop?.(request, context);
     if (!plan) return undefined;
-    const next = previewPlaygroundCommand(snapshot, plan.command);
+    const command = revealDestination(plan.command, request.targetGroup.id);
+    const next = previewPlaygroundCommand(snapshot, command);
     if (!next) return undefined;
     const projection = projectPlayground(next);
     const group = Object.values(projection.groups).find((group) =>
@@ -211,10 +275,54 @@ export function createPlaygroundCommands(
     );
     if (!group) return undefined;
     const rect = preview(next, group.id, context);
-    return rect ? { command: plan.command, previewRect: rect } : undefined;
+    return rect ? { command, previewRect: rect } : undefined;
   };
   return {
     ...base,
+    movePanel: (id, target) =>
+      revealDestination(
+        base.movePanel?.(id, target) ?? {
+          type: "move-panel",
+          panelId: panelId(id),
+          target: { groupId: groupId(target) },
+          select: true,
+          activate: true,
+        },
+        target,
+      ),
+    redockFloatingSurface: (id) => {
+      const snapshot = getSnapshot();
+      const surface = getEntity(snapshot.surfaces, surfaceId(id));
+      const root = surface && getEntity(snapshot.nodes, surface.rootNodeId);
+      if (surface?.kind === "floating" && root?.kind === "split") {
+        const main = snapshot.surfaces.ids
+          .map((id) => getEntity(snapshot.surfaces, id))
+          .find((item) => item?.kind === "main");
+        const target =
+          main && snapshot.groups.ids.find((id) => containsGroup(snapshot, main.rootNodeId, id));
+        if (target) {
+          let index = 1;
+          while (getEntity(snapshot.nodes, nodeId(`playground-redock:${id}:${index}`))) index++;
+          // This existing semantic operation rehomes the entire root without flattening nested panes.
+          return {
+            type: "recover-orphaned-surface",
+            surfaceId: surface.id,
+            expectedOwnerEpoch: surface.ownerEpoch ?? 0,
+            targetGroupId: target,
+            edge: "block-end",
+            splitNodeId: nodeId(`playground-redock:${id}:${index}`),
+            ratio: 0.5,
+          };
+        }
+      }
+      return (
+        base.redockFloatingSurface?.(id) ?? {
+          type: "redock-surface",
+          surfaceId: surfaceId(id),
+          target: { groupId: groupId("primary") },
+        }
+      );
+    },
     planPanelDrop: panelPlan,
     planPanelTabDrop: panelPlan,
     planGroupDrop: (request, context) => {
@@ -249,15 +357,21 @@ export function planPlaygroundMove(
     (node) => node.kind === "group" && node.groupId === targetId,
   );
   if (!sourceGroup || !targetGroup || !source || !targetNode) return undefined;
+  const surface = playgroundSurfaceForGroup(snapshot, targetId);
+  if (!surface) return undefined;
+  const surfaceBounds = playgroundSurfaceBounds(snapshot, surface, bounds);
   const targetRect = solvePlayground(snapshot, {
     projection,
-    rootNodeId: projection.rootNodeId,
-    bounds,
+    rootNodeId: surface.rootNodeId,
+    bounds: surfaceBounds,
     splitterSize: PLAYGROUND_SPLITTER,
     splitOverrides: {},
   }).groupRects[targetId];
   if (!targetRect) return undefined;
-  return createPlaygroundCommands(() => snapshot).planPanelDrop?.(
+  return createPlaygroundCommands(
+    () => snapshot,
+    () => bounds,
+  ).planPanelDrop?.(
     {
       revision: projection.revision,
       panel: source,
@@ -275,6 +389,6 @@ export function planPlaygroundMove(
           ? { kind: "center", ratio: 1 }
           : { kind: "edge", edge: placement, ratio: 0.5 },
     },
-    { bounds, targetRect, splitterSize: PLAYGROUND_SPLITTER },
+    { bounds: surfaceBounds, targetRect, splitterSize: PLAYGROUND_SPLITTER },
   );
 }

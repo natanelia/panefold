@@ -3,6 +3,7 @@ import {
   useContext,
   useEffect,
   useLayoutEffect,
+  useId,
   useMemo,
   useRef,
   useState,
@@ -27,6 +28,9 @@ import {
   playgroundBounds,
   playgroundPanelNames,
   PLAYGROUND_SPLITTER,
+  PLAYGROUND_TITLEBAR,
+  playgroundSurfaceForGroup,
+  playgroundSurfaceBounds,
   playgroundSnapshot,
   previewPlaygroundCommand,
   projectPlayground,
@@ -113,7 +117,7 @@ function PanelContent({
   readonly note?: boolean;
 }) {
   return (
-    <div className={`tp-content${note ? " tp-note" : ""}`}>
+    <div className={`tp-content${note ? " tp-note" : ""}`} tabIndex={0}>
       {children}
       <div className="tp-drop-guide" aria-hidden="true">
         <span className="tp-guide-above">↑ Above</span>
@@ -203,7 +207,6 @@ function Playground({
     runtime.getSnapshot,
   );
   const projection = useMemo(() => projectPlayground(snapshot), [snapshot]);
-  const commands = useMemo(() => createPlaygroundCommands(runtime.getSnapshot), [runtime]);
   const [text, setText] = useState(
     "Build something that fits.\n\nMove Notes beside Preview, or split Checklist below it.",
   );
@@ -213,6 +216,16 @@ function Playground({
   const [message, setMessage] = useState("Drag a grip to move. Drop at an edge to split.");
   const [durable, setDurable] = useState(() => session?.durable.getStatus());
   const viewportRef = useRef<HTMLDivElement>(null);
+  const commands = useMemo(
+    () =>
+      createPlaygroundCommands(runtime.getSnapshot, () => ({
+        inlineStart: 0,
+        blockStart: 0,
+        inlineSize: viewportRef.current?.clientWidth ?? 360,
+        blockSize: viewportRef.current?.clientHeight ?? 500,
+      })),
+    [runtime],
+  );
   const [viewport, setViewport] = useState({ width: 360, height: 500 });
   useLayoutEffect(() => {
     const element = viewportRef.current;
@@ -260,8 +273,21 @@ function Playground({
     report(runtime.dispatch(command, { origin: "menu", label: "Arrange playground" }));
   const select = (id: string) => {
     const record = getEntity(snapshot.panels, panelId(id));
-    if (record) run({ type: "select-panel", panelId: panelId(id), activate: true });
-    else {
+    if (record) {
+      const group = Object.values(projection.groups).find((group) => group.panelIds.includes(id));
+      const surface = group && playgroundSurfaceForGroup(snapshot, group.id);
+      const restore = surface?.kind === "floating" && surface.minimized;
+      run({
+        type: "batch",
+        commands: [
+          ...(restore ? [{ type: "restore-surface" as const, surfaceId: surface.id }] : []),
+          ...(surface?.kind === "floating"
+            ? [{ type: "raise-surface" as const, surfaceId: surface.id }]
+            : []),
+          { type: "select-panel", panelId: panelId(id), activate: true },
+        ],
+      });
+    } else {
       const closed = [...snapshot.recoverableClosedPanels]
         .reverse()
         .find((entry) => String(entry.panel.id) === id);
@@ -320,6 +346,7 @@ function Playground({
               layoutSolver={solvePlayground}
               layoutBounds={bounds}
               splitterSize={PLAYGROUND_SPLITTER}
+              floatingTitlebarSize={PLAYGROUND_TITLEBAR}
               responsive={false}
               motion="off"
               dropBehavior={dropBehavior}
@@ -406,7 +433,12 @@ function Playground({
               <MoveSheet
                 snapshot={snapshot}
                 initialPanelId={activePanelId}
-                bounds={bounds}
+                bounds={{
+                  inlineStart: 0,
+                  blockStart: 0,
+                  inlineSize: viewport.width,
+                  blockSize: viewport.height,
+                }}
                 onMove={(command, id) => {
                   run(command);
                   setSheet(undefined);
@@ -503,6 +535,7 @@ function MoveSheet({
   readonly onMove: (command: WorkspaceCommand, id: string) => void;
 }) {
   const projection = useMemo(() => projectPlayground(snapshot), [snapshot]);
+  const fieldId = useId();
   const [source, setSource] = useState(initialPanelId);
   const [target, setTarget] = useState(
     () =>
@@ -521,26 +554,30 @@ function MoveSheet({
   );
   return (
     <div className="tp-move-sheet">
-      <label>
-        Panel
-        <select value={source} onChange={(event) => setSource(event.target.value)}>
-          {Object.values(projection.panels).map((panel) => (
-            <option key={panel.id} value={panel.id}>
-              {panel.title}
-            </option>
-          ))}
-        </select>
-      </label>
-      <label>
-        Destination pane
-        <select value={target} onChange={(event) => setTarget(event.target.value)}>
-          {Object.values(projection.groups).map((group) => (
-            <option key={group.id} value={group.id}>
-              {group.label}
-            </option>
-          ))}
-        </select>
-      </label>
+      <label htmlFor={`${fieldId}-panel`}>Panel</label>
+      <select
+        id={`${fieldId}-panel`}
+        value={source}
+        onChange={(event) => setSource(event.target.value)}
+      >
+        {Object.values(projection.panels).map((panel) => (
+          <option key={panel.id} value={panel.id}>
+            {panel.title}
+          </option>
+        ))}
+      </select>
+      <label htmlFor={`${fieldId}-target`}>Destination pane</label>
+      <select
+        id={`${fieldId}-target`}
+        value={target}
+        onChange={(event) => setTarget(event.target.value)}
+      >
+        {Object.values(projection.groups).map((group) => (
+          <option key={group.id} value={group.id}>
+            {group.label}
+          </option>
+        ))}
+      </select>
       <fieldset>
         <legend>Place the panel</legend>
         <div className="tp-placements">
@@ -585,22 +622,27 @@ function LayoutPreview({
   readonly selected: string;
 }) {
   const projection = projectPlayground(snapshot);
-  const bounds = playgroundBounds(snapshot, projection.rootNodeId, {
-    inlineStart: 0,
-    blockStart: 0,
-    inlineSize: 368,
-    blockSize: 440,
-  });
+  const group = Object.values(projection.groups).find((group) => group.panelIds.includes(selected));
+  const surface = group && playgroundSurfaceForGroup(snapshot, group.id);
+  const rootNodeId = surface?.rootNodeId ?? projection.rootNodeId;
+  const viewport = { inlineStart: 0, blockStart: 0, inlineSize: 368, blockSize: 440 };
+  const bounds = playgroundBounds(
+    snapshot,
+    rootNodeId,
+    surface ? playgroundSurfaceBounds(snapshot, surface, viewport) : viewport,
+  );
   const layout = solvePlayground(snapshot, {
     projection,
-    rootNodeId: projection.rootNodeId,
+    rootNodeId,
     bounds,
     splitterSize: PLAYGROUND_SPLITTER,
     splitOverrides: {},
   });
   return (
     <div>
-      <p className="tp-preview-label">After this move</p>
+      <p className="tp-preview-label">
+        After this move{surface?.kind === "floating" ? " · Floating window" : ""}
+      </p>
       <div
         className="tp-layout-preview"
         role="img"
@@ -611,8 +653,8 @@ function LayoutPreview({
             key={id}
             data-selected={projection.groups[id]?.panelIds.includes(selected)}
             style={{
-              left: `${(rect.inlineStart / bounds.inlineSize) * 100}%`,
-              top: `${(rect.blockStart / bounds.blockSize) * 100}%`,
+              left: `${((rect.inlineStart - bounds.inlineStart) / bounds.inlineSize) * 100}%`,
+              top: `${((rect.blockStart - bounds.blockStart) / bounds.blockSize) * 100}%`,
               width: `${(rect.inlineSize / bounds.inlineSize) * 100}%`,
               height: `${(rect.blockSize / bounds.blockSize) * 100}%`,
             }}

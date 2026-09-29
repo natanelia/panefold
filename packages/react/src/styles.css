@@ -929,6 +929,41 @@
     pointer-events: auto;
   }
 
+  .pf-move-controls {
+    display: grid;
+    gap: 8px;
+    margin-block: 12px;
+  }
+  .pf-move-controls label {
+    font-size: 12px;
+  }
+  .pf-move-controls select,
+  .pf-move-controls button {
+    min-width: 0;
+    min-height: 44px;
+    padding: 8px;
+    border: 1px solid var(--pf-border-strong);
+    border-radius: 6px;
+    background: var(--pf-surface);
+    color: var(--pf-text);
+    font: inherit;
+    touch-action: manipulation;
+  }
+  .pf-move-controls select {
+    width: 100%;
+    font-size: 16px;
+  }
+  .pf-move-controls > div {
+    display: flex;
+    gap: 8px;
+  }
+  .pf-move-controls button {
+    flex: 1;
+  }
+  .pf-move-controls button:disabled {
+    opacity: 0.5;
+  }
+
   .pf-keyboard-move-eyebrow {
     margin: 0 0 8px;
     color: var(--pf-valid);
