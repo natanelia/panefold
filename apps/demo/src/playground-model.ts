@@ -367,6 +367,9 @@ export function planPlaygroundMove(
     (node) => node.kind === "group" && node.groupId === targetId,
   );
   if (!sourceGroup || !targetGroup || !source || !targetNode) return undefined;
+  // The sheet chooses a pane, not a tab index. Dropping into the current pane
+  // must not silently reorder its tabs or create a redundant history entry.
+  if (placement === "center" && sourceGroup.id === targetId) return undefined;
   const surface = playgroundSurfaceForGroup(snapshot, targetId);
   if (!surface) return undefined;
   const surfaceBounds = playgroundSurfaceBounds(snapshot, surface, bounds);

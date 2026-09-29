@@ -82,6 +82,19 @@ describe("readable touch playground", () => {
       runtime.dispose();
     }
   });
+  it("does not treat an existing pane as a move or silently reorder its tabs", () => {
+    const original = structuredClone(playgroundSnapshot);
+    for (const [id, group] of [
+      ["notes", "primary"],
+      ["checklist", "primary"],
+      ["preview", "secondary"],
+      ["activity", "secondary"],
+    ] as const) {
+      expect(planPlaygroundMove(original, id, group, "center", phone)).toBeUndefined();
+      expect(planPlaygroundMove(original, id, group, "block-end", phone)).toBeDefined();
+    }
+    expect(original).toEqual(playgroundSnapshot);
+  });
   it("rejects missing panels and destinations without mutating the workspace", () => {
     expect(
       planPlaygroundMove(playgroundSnapshot, "missing", "secondary", "center", phone),
