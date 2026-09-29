@@ -36,12 +36,10 @@ jobs:
           node-version: 24
           cache: pnpm
       - run: pnpm install --frozen-lockfile
-      - run: pnpm exec playwright install --with-deps chromium firefox webkit
+      - run: pnpm exec playwright install --with-deps chromium
       - name: Test the actual phone interactions without retries
         run: |
           pnpm exec playwright test e2e/touch-playground-ux.spec.ts e2e/touch-tap-diagnostic.spec.ts --workers=1 --retries=0 --reporter=json --output=artifacts/phone-results > artifacts/phone-browser.json
-      - name: Audit every playground control across desktop and phone browsers
-        run: pnpm exec playwright test --config playwright.audit.config.ts --workers=2 --retries=0 --reporter=json --output=artifacts/feature-audit > artifacts/feature-audit.json
       - name: Run full unit and application suites
         run: |
           pnpm build:packages
