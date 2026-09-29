@@ -36,6 +36,7 @@ import {
 import { openPlaygroundSession, type PlaygroundSession } from "./playground-session";
 import type { LogicalRect } from "@panefold/geometry";
 import "./touch-playground.css";
+import { TouchButton } from "./TouchButton";
 
 const NoteContext = createContext({
   text: "Build something that fits.\n\nMove Notes beside Preview, or split Checklist below it.",
@@ -168,14 +169,14 @@ export default function TouchPlayground() {
             <p role="alert">
               The saved workspace could not be opened. Your saved data has not been removed.
             </p>
-            <button
+            <TouchButton
               onClick={() =>
                 setTemporary(createWorkspaceRuntime({ initialSnapshot: playgroundSnapshot }))
               }
             >
               Continue without saving
-            </button>
-            <button onClick={() => location.reload()}>Retry</button>
+            </TouchButton>
+            <TouchButton onClick={() => location.reload()}>Retry</TouchButton>
           </>
         ) : (
           <p role="status">Opening your workspace…</p>
@@ -298,9 +299,9 @@ function Playground({
             </h1>
             <p>Arrange it around your work.</p>
           </div>
-          <button type="button" onClick={() => setSheet("help")} aria-label="Playground help">
+          <TouchButton type="button" onClick={() => setSheet("help")} aria-label="Playground help">
             ?
-          </button>
+          </TouchButton>
         </header>
         <div className="tp-hint" aria-live="polite">
           {arranging ? "Arrange: drag any tab. Use Move for tap-to-place." : message}
@@ -337,7 +338,7 @@ function Playground({
             <span>{snapshot.groups.ids.length} panes</span>
           )}
           {durable?.error ? (
-            <button
+            <TouchButton
               onClick={() => {
                 void session?.durable
                   .retry()
@@ -345,38 +346,38 @@ function Playground({
               }}
             >
               Retry save
-            </button>
+            </TouchButton>
           ) : null}
         </div>
         <nav className="tp-toolbar" aria-label="Workspace tools">
-          <button type="button" onClick={() => setSheet("panels")}>
+          <TouchButton type="button" onClick={() => setSheet("panels")}>
             <span aria-hidden="true">▦</span>Panels
-          </button>
-          <button
+          </TouchButton>
+          <TouchButton
             type="button"
             aria-pressed={arranging}
             onClick={() => setArranging((value) => !value)}
           >
             <span aria-hidden="true">⠿</span>
             {arranging ? "Done" : "Arrange"}
-          </button>
-          <button type="button" onClick={() => setSheet("move")} disabled={!activePanelId}>
+          </TouchButton>
+          <TouchButton type="button" onClick={() => setSheet("move")} disabled={!activePanelId}>
             <span aria-hidden="true">↗</span>Move
-          </button>
-          <button
+          </TouchButton>
+          <TouchButton
             type="button"
             disabled={!runtime.canUndo()}
             onClick={() => report(runtime.undo())}
           >
             <span aria-hidden="true">↶</span>Undo
-          </button>
-          <button
+          </TouchButton>
+          <TouchButton
             type="button"
             disabled={!runtime.canRedo()}
             onClick={() => report(runtime.redo())}
           >
             <span aria-hidden="true">↷</span>Redo
-          </button>
+          </TouchButton>
         </nav>
         {sheet ? (
           <Sheet
@@ -394,10 +395,10 @@ function Playground({
                 <p>Open a panel or return to one you closed.</p>
                 <div className="tp-panel-picker">
                   {Object.entries(playgroundPanelNames).map(([id, title]) => (
-                    <button key={id} onClick={() => select(id)}>
+                    <TouchButton key={id} onClick={() => select(id)}>
                       <strong>{title}</strong>
                       <span>{projection.panels[id] ? "Show panel →" : "Reopen panel →"}</span>
-                    </button>
+                    </TouchButton>
                   ))}
                 </div>
               </>
@@ -474,9 +475,9 @@ function Sheet({
     <dialog ref={ref} className="tp-sheet" aria-label={title} onCancel={onClose}>
       <header>
         <h2>{title}</h2>
-        <button type="button" autoFocus aria-label="Close panel sheet" onClick={onClose}>
+        <TouchButton type="button" autoFocus aria-label="Close panel sheet" onClick={onClose}>
           ×
-        </button>
+        </TouchButton>
       </header>
       <div className="tp-sheet-body">{children}</div>
     </dialog>
@@ -544,7 +545,7 @@ function MoveSheet({
         <legend>Place the panel</legend>
         <div className="tp-placements">
           {placements.map(([value, label, icon]) => (
-            <button
+            <TouchButton
               key={value}
               type="button"
               data-place={value}
@@ -553,7 +554,7 @@ function MoveSheet({
             >
               <span aria-hidden="true">{icon}</span>
               {label}
-            </button>
+            </TouchButton>
           ))}
         </div>
       </fieldset>
@@ -562,7 +563,7 @@ function MoveSheet({
       ) : (
         <p role="status">Choose another position or pane. This move would not change the layout.</p>
       )}
-      <button
+      <TouchButton
         type="button"
         className="tp-apply"
         disabled={!plan}
@@ -571,7 +572,7 @@ function MoveSheet({
         }}
       >
         Apply move
-      </button>
+      </TouchButton>
       <p className="tp-muted">You can undo this change. Larger layouts remain scrollable.</p>
     </div>
   );
