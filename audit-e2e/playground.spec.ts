@@ -11,9 +11,16 @@ async function press(locator: Locator) {
   else await locator.click();
 }
 async function owner(page: Page, id: string) {
-  return tab(page, id).evaluate((el) =>
-    el.closest("[data-workspace-group]")?.getAttribute("data-workspace-group"),
-  );
+  // Query the current DOM atomically. A layout commit can detach the previous tab
+  // between Playwright's handle resolution and evaluate, especially after touch.
+  return page.evaluate((panelId) => {
+    const el = document.querySelector(`[data-workspace-panel-tab="${panelId}"]`);
+    const label = el?.closest('[role="tablist"]')?.getAttribute("aria-labelledby");
+    const group =
+      el?.closest("[data-workspace-group]") ??
+      (label ? document.getElementById(label)?.closest("[data-workspace-group]") : null);
+    return group?.getAttribute("data-workspace-group");
+  }, id);
 }
 async function picker(page: Page, title: string) {
   await press(tool(page, "Panels"));
@@ -82,6 +89,10 @@ for (const [id, title] of Object.entries(titles)) {
       await dialog.getByLabel("Panel", { exact: true }).selectOption(id);
       await dialog.getByLabel("Destination pane").selectOption(to);
       await press(dialog.getByRole("button", { name: placement, exact: true }));
+      await expect(dialog.getByRole("button", { name: placement, exact: true })).toHaveAttribute(
+        "aria-pressed",
+        "true",
+      );
       const revision = await page
         .locator(".touch-playground")
         .getAttribute("data-workspace-revision");
@@ -91,7 +102,7 @@ for (const [id, title] of Object.entries(titles)) {
       );
       await press(dialog.getByRole("button", { name: "Apply move" }));
       await expect(dialog).toHaveCount(0);
-      expect(await owner(page, id)).not.toBe(from);
+      await expect.poll(() => owner(page, id)).not.toBe(from);
       await expect(page.locator(".pf-group")).toHaveCount(placement === "As tab" ? 2 : 3);
       const movedOwner = await owner(page, id);
       if (placement !== "As tab") {
@@ -105,9 +116,9 @@ for (const [id, title] of Object.entries(titles)) {
           expect(moved.y).toBeGreaterThanOrEqual(target.y + target.height - 1);
       } else expect(movedOwner).toBe(to);
       await press(tool(page, "Undo"));
-      expect(await owner(page, id)).toBe(from);
+      await expect.poll(() => owner(page, id)).toBe(from);
       await press(tool(page, "Redo"));
-      expect(await owner(page, id)).toBe(movedOwner);
+      await expect.poll(() => owner(page, id)).toBe(movedOwner);
     });
   }
 }
@@ -138,12 +149,12 @@ test("panel menus reorder, move, and remove a container without losing panels", 
 }) => {
   let menu = await actions(page, "Notes");
   await press(menu.getByRole("menuitem", { name: "Move Notes tab after Checklist", exact: true }));
-  await expect(group(page, "primary").getByRole("tab")).toHaveText(["⋮⋮Checklist", "⋮⋮Notes"]);
+  await expect(group(page, "primary").locator(".pf-tab-title")).toHaveText(["Checklist", "Notes"]);
   menu = await actions(page, "Notes");
   await press(menu.getByRole("menuitem", { name: "Move Notes tab before Checklist", exact: true }));
   menu = await actions(page, "Notes");
   await press(menu.getByRole("menuitem", { name: "Move to Preview + Activity", exact: true }));
-  expect(await owner(page, "notes")).toBe("secondary");
+  await expect.poll(() => owner(page, "notes")).toBe("secondary");
   menu = await actions(page, "Checklist");
   await press(menu.getByRole("menuitem", { name: /Remove panel container/ }));
   await expect(page.locator(".pf-group")).toHaveCount(1);
@@ -157,7 +168,7 @@ for (const edge of ["left", "right", "above", "below"]) {
     const menu = await actions(page, "Notes");
     await press(menu.getByRole("menuitem", { name: `Split ${edge}`, exact: true }));
     await expect(page.locator(".pf-group")).toHaveCount(3);
-    expect(await owner(page, "notes")).not.toBe("primary");
+    await expect.poll(() => owner(page, "notes")).not.toBe("primary");
     await press(tool(page, "Undo"));
     await expect(page.locator(".pf-group")).toHaveCount(2);
   });
@@ -170,7 +181,7 @@ test("menu destination and group-move dialogs also work without a keyboard", asy
   await expect(dialog.getByRole("button", { name: "Cancel move", exact: true })).toBeVisible();
   await dialog.getByRole("combobox").selectOption({ label: "Preview + Activity" });
   await press(dialog.getByRole("button", { name: "Move here", exact: true }));
-  expect(await owner(page, "notes")).toBe("secondary");
+  await expect.poll(() => owner(page, "notes")).toBe("secondary");
   await press(tool(page, "Undo"));
   menu = await actions(page, "Notes");
   await press(
@@ -237,9 +248,9 @@ test("Move sheet reaches floating destinations and shows the moved panel in its 
   await expect(dialog.getByRole("button", { name: "Apply move" })).toBeEnabled();
   await expect(dialog.locator('[data-selected="true"]')).toContainText("Checklist");
   await press(dialog.getByRole("button", { name: "Apply move" }));
-  expect(await owner(page, "checklist")).toBe(destination);
+  await expect.poll(() => owner(page, "checklist")).toBe(destination);
   await press(tool(page, "Undo"));
-  expect(await owner(page, "checklist")).toBe("primary");
+  await expect.poll(() => owner(page, "checklist")).toBe("primary");
 });
 
 test("short-screen menus stay inside the visible viewport", async ({ page }, info) => {
@@ -335,6 +346,10 @@ for (const placement of ["Above", "Left", "Right", "Below", "As tab"]) {
     await sheet.getByLabel("Panel", { exact: true }).selectOption("checklist");
     await sheet.getByLabel("Destination pane").selectOption(destination ?? "missing");
     await press(sheet.getByRole("button", { name: placement, exact: true }));
+    await expect(sheet.getByRole("button", { name: placement, exact: true })).toHaveAttribute(
+      "aria-pressed",
+      "true",
+    );
     await expect(sheet.locator('[data-selected="true"]')).toContainText("Checklist");
     await press(sheet.getByRole("button", { name: "Apply move" }));
     await expect(frame).toHaveAttribute("data-minimized", "false");
@@ -356,9 +371,9 @@ test("floating move and resize controls commit once and keep state through reloa
   const frame = await floating(page);
   const before = await box(frame);
   await frame.locator(".pf-floating-titlebar").focus();
-  await page.keyboard.press("ArrowLeft");
+  await page.keyboard.press("ArrowUp");
   const moved = await box(frame);
-  expect(moved.x).toBeLessThan(before.x);
+  expect(moved.y).toBeLessThan(before.y);
   const handle = frame.locator('[data-resize-edge="bottom"]');
   await handle.focus();
   await page.keyboard.press("ArrowDown");
