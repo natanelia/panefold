@@ -50,6 +50,10 @@
   margin: 0;
   letter-spacing: -0.5px;
 }
+.tp-header h1 a {
+  color: inherit;
+  text-decoration: none;
+}
 .tp-header h1 span {
   font-weight: 450;
 }
@@ -235,7 +239,10 @@
   position: fixed;
   inset: 64px 12px auto;
   transform: none;
-  translate: none;
+  /* Keep this a translate declaration through CSS lowering. Resetting transform
+   * alone does not cancel the library's individual translate property. */
+  --tp-ghost-translate: 0px 0px;
+  translate: var(--tp-ghost-translate);
   width: auto;
   max-width: none;
   padding: 10px 14px;
