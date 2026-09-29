@@ -1,4 +1,4 @@
-import { useRef, type ButtonHTMLAttributes } from "react";
+import { useEffect, useRef, type ButtonHTMLAttributes } from "react";
 
 type Props = Omit<ButtonHTMLAttributes<HTMLButtonElement>, "onClick"> & {
   readonly onClick: () => void;
@@ -10,6 +10,13 @@ type Props = Omit<ButtonHTMLAttributes<HTMLButtonElement>, "onClick"> & {
 export function TouchButton({ onClick, disabled, type = "button", ...props }: Props) {
   const touch = useRef<{ id: number; x: number; y: number; moved: boolean } | undefined>(undefined);
   const activatedAt = useRef<number | undefined>(undefined);
+  const frame = useRef<number | undefined>(undefined);
+  useEffect(
+    () => () => {
+      if (frame.current !== undefined) cancelAnimationFrame(frame.current);
+    },
+    [],
+  );
   return (
     <button
       {...props}
@@ -46,8 +53,16 @@ export function TouchButton({ onClick, disabled, type = "button", ...props }: Pr
         )
           return;
         activatedAt.current = event.timeStamp;
-        event.currentTarget.focus({ preventScroll: true });
-        onClick();
+        const button = event.currentTarget;
+        // Complete the native touch sequence before removing or opening a dialog.
+        // This prevents the browser's remaining default focus action from undoing
+        // the dialog's focus restoration.
+        frame.current = requestAnimationFrame(() => {
+          frame.current = undefined;
+          if (!button.isConnected || button.disabled) return;
+          button.focus({ preventScroll: true });
+          onClick();
+        });
       }}
       onClick={(event) => {
         const touchTime = activatedAt.current;

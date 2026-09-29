@@ -4,8 +4,16 @@ import { cleanup, fireEvent, render } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { TouchButton } from "./TouchButton";
 
-afterEach(cleanup);
+afterEach(() => {
+  cleanup();
+  vi.unstubAllGlobals();
+});
 function setup(disabled = false) {
+  vi.stubGlobal("requestAnimationFrame", (callback: FrameRequestCallback) => {
+    callback(0);
+    return 1;
+  });
+  vi.stubGlobal("cancelAnimationFrame", vi.fn());
   const press = vi.fn();
   const view = render(createElement(TouchButton, { onClick: press, disabled }, "Arrange"));
   const button = view.getByRole("button");
