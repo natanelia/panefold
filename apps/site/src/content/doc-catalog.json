@@ -42,6 +42,13 @@
     "sourcePath": "docs/guides/layouts.md"
   },
   {
+    "slug": "mobile-playground",
+    "title": "The touch playground",
+    "description": "Drag, split, resize, or tap to place panels without shrinking your content.",
+    "section": "Customize",
+    "sourcePath": "docs/guides/mobile-playground.md"
+  },
+  {
     "slug": "tabs",
     "title": "Tabs and tab rails",
     "description": "Top, bottom, vertical, icon-only, or different treatments for different groups.",

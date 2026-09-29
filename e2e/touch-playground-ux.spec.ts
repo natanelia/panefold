@@ -45,7 +45,7 @@ async function drop(
     );
     if (edge !== "center") await expect(overlay).toHaveAttribute("data-workspace-drop-edge", edge);
     await expect(destination.locator(".tp-drop-guide").first()).toBeVisible();
-    const label = await visibleBox(page.locator(".pf-panel-drag-ghost"));
+    const label = await visibleBox(overlay.locator(".pf-panel-drag-ghost"));
     expect(label.x).toBeGreaterThanOrEqual(0);
     expect(label.x + label.width).toBeLessThanOrEqual(390);
     await endTouch(cdp);
