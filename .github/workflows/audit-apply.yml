@@ -13,47 +13,14 @@ jobs:
       - uses: actions/checkout@v7
         with:
           fetch-depth: 0
-      - name: Apply exact reviewed test corrections
+      - name: Verify and apply the exact reviewed patch
         run: |
           test "$GITHUB_REF" = refs/heads/audit/pr47-feature-fixes
-          python3 - <<'PY'
-          from pathlib import Path
-          p = Path('audit-e2e/playground.spec.ts')
-          s = p.read_text()
-          old = '''  return tab(page, id).evaluate((el) =>
-              el.closest("[data-workspace-group]")?.getAttribute("data-workspace-group"),
-            );'''
-          new = '''  // Query the current DOM atomically. A layout commit can detach the previous tab
-            // between Playwright's handle resolution and evaluate, especially after touch.
-            return page.evaluate((panelId) => {
-              const el = document.querySelector(`[data-workspace-panel-tab="${panelId}"]`);
-              const label = el?.closest('[role="tablist"]')?.getAttribute("aria-labelledby");
-              const group =
-                el?.closest("[data-workspace-group]") ??
-                (label ? document.getElementById(label)?.closest("[data-workspace-group]") : null);
-              return group?.getAttribute("data-workspace-group");
-            }, id);'''
-          assert s.count(old) == 1
-          s = s.replace(old, new)
-          import re
-          s = re.sub(r'expect\(await owner\(page, ([^\n]+?)\)\)\.(not\.)?toBe\(([^\n;]+)\);', r'await expect.poll(() => owner(page, \1)).\2toBe(\3);', s)
-          s = s.replace('group(page, "primary").getByRole("tab")).toHaveText(["⋮⋮Checklist", "⋮⋮Notes"])', 'group(page, "primary").locator(".pf-tab-title")).toHaveText(["Checklist", "Notes"])')
-          s = s.replace('await page.keyboard.press("ArrowLeft");\n  const moved', 'await page.keyboard.press("ArrowUp");\n  const moved').replace('expect(moved.x).toBeLessThan(before.x);', 'expect(moved.y).toBeLessThan(before.y);')
-          s = s.replace('await press(dialog.getByRole("button", { name: placement, exact: true }));', '''await press(dialog.getByRole("button", { name: placement, exact: true }));
-                await expect(dialog.getByRole("button", { name: placement, exact: true })).toHaveAttribute(
-                  "aria-pressed",
-                  "true",
-                );''')
-          s = s.replace('await press(sheet.getByRole("button", { name: placement, exact: true }));', '''await press(sheet.getByRole("button", { name: placement, exact: true }));
-              await expect(sheet.getByRole("button", { name: placement, exact: true })).toHaveAttribute(
-                "aria-pressed",
-                "true",
-              );''')
-          p.write_text(s)
-          PY
-          git add audit-e2e/playground.spec.ts
+          echo '8d692ab6b98898e27b8bfeb8b93baac3d1cd9c19b54a6c3f52c83014449cf51e  .audit-transfer/update.patch' | sha256sum --check
+          git apply --check .audit-transfer/update.patch
+          git apply --index .audit-transfer/update.patch
           git diff --cached --check
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git commit -m 'test(playground): assert current tab ownership after completed touch commits'
+          git commit -m 'fix(playground): preserve one-step docking history and isolate floating keyboard controls'
           git push origin HEAD:refs/heads/audit/pr47-feature-fixes

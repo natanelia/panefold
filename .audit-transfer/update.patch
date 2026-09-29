@@ -1,0 +1,356 @@
+diff --git a/apps/demo/src/playground-model.ts b/apps/demo/src/playground-model.ts
+index bd1294b4..eedf706c 100644
+--- a/apps/demo/src/playground-model.ts
++++ b/apps/demo/src/playground-model.ts
+@@ -315,13 +315,23 @@ export function createPlaygroundCommands(
+           };
+         }
+       }
+-      return (
+-        base.redockFloatingSurface?.(id) ?? {
+-          type: "redock-surface",
+-          surfaceId: surfaceId(id),
+-          target: { groupId: groupId("primary") },
+-        }
+-      );
++      const redock = base.redockFloatingSurface?.(id) ?? {
++        type: "redock-surface" as const,
++        surfaceId: surfaceId(id),
++        target: { groupId: groupId("primary") },
++      };
++      if (redock.type !== "redock-surface") return redock;
++      const group = root?.kind === "group" ? getEntity(snapshot.groups, root.groupId) : undefined;
++      // Commit docking and the focus destination together, not as a second history entry.
++      return group
++        ? {
++            type: "batch",
++            commands: [
++              redock,
++              { type: "select-panel", panelId: group.selectedPanelId, activate: true },
++            ],
++          }
++        : redock;
+     },
+     planPanelDrop: panelPlan,
+     planPanelTabDrop: panelPlan,
+diff --git a/apps/demo/src/touch-playground.css b/apps/demo/src/touch-playground.css
+index a0346c28..5967651d 100644
+--- a/apps/demo/src/touch-playground.css
++++ b/apps/demo/src/touch-playground.css
+@@ -667,3 +667,16 @@
+ .tp-workspace .pf-floating-header-slot .pf-tab {
+   min-width: 0;
+ }
++
++/* A floating window needs a finger-sized move grip, not only empty header space. */
++.tp-workspace .pf-floating-header-drag-region {
++  flex: 0 0 44px;
++  align-self: stretch;
++  display: grid;
++  place-items: center;
++}
++.tp-workspace .pf-floating-header-drag-region::after {
++  content: "⋮⋮";
++  font-size: 18px;
++  color: var(--tp-ink);
++}
+diff --git a/audit-e2e/playground.spec.ts b/audit-e2e/playground.spec.ts
+index fa69bbbb..bba38b20 100644
+--- a/audit-e2e/playground.spec.ts
++++ b/audit-e2e/playground.spec.ts
+@@ -354,14 +354,22 @@ for (const placement of ["Above", "Left", "Right", "Below", "As tab"]) {
+     await press(sheet.getByRole("button", { name: "Apply move" }));
+     await expect(frame).toHaveAttribute("data-minimized", "false");
+     await expect(frame.getByRole("tab", { name: "Checklist", exact: true })).toBeVisible();
++    const revision = Number(
++      await page.locator(".touch-playground").getAttribute("data-workspace-revision"),
++    );
+     await press(frame.getByRole("button", { name: /^Dock / }));
+     await expect(frame).toHaveCount(0);
++    await expect(page.locator(".touch-playground")).toHaveAttribute(
++      "data-workspace-revision",
++      String(revision + 1),
++    );
+     await expect(page.getByRole("tab")).toHaveCount(4);
++    await press(tool(page, "Undo"));
++    await expect(frame).toHaveCount(1);
++    await press(tool(page, "Redo"));
++    await expect(frame).toHaveCount(0);
+     await picker(page, "Notes");
+     await expect(note).toHaveValue("State across surfaces");
+-    await press(tool(page, "Undo")); // panel selection
+-    await press(tool(page, "Undo")); // redock
+-    await expect(frame).toHaveCount(1);
+   });
+ }
+ 
+diff --git a/audit-e2e/recovery.spec.ts b/audit-e2e/recovery.spec.ts
+new file mode 100644
+index 00000000..239734e0
+--- /dev/null
++++ b/audit-e2e/recovery.spec.ts
+@@ -0,0 +1,92 @@
++import { expect, test, type Locator, type Page } from "@playwright/test";
++
++const tools = (page: Page, name: string) =>
++  page.locator(".tp-toolbar").getByRole("button", { name, exact: true });
++async function press(button: Locator) {
++  if (test.info().project.use.hasTouch) await button.tap();
++  else await button.click();
++}
++async function notesMenu(page: Page) {
++  await press(page.getByRole("button", { name: "Actions for Notes", exact: true }));
++  return page.getByRole("menu", { name: "Notes actions", exact: true });
++}
++
++test.beforeEach(async ({ page }) => {
++  await page.goto("./?fixture=touch");
++  await expect(page.locator(".tp-workspace")).toBeVisible();
++  await expect(page.locator(".tp-save")).toContainText("Layout saved");
++});
++
++test("Retry save preserves the in-memory change and writes the recovered layout", async ({
++  page,
++}) => {
++  await page.evaluate(() => {
++    const original = IDBObjectStore.prototype.put;
++    IDBObjectStore.prototype.put = function () {
++      IDBObjectStore.prototype.put = original;
++      throw new DOMException("Simulated full storage", "QuotaExceededError");
++    };
++  });
++  const menu = await notesMenu(page);
++  await press(menu.getByRole("menuitem", { name: "Split below", exact: true }));
++  await expect(page.locator(".pf-group")).toHaveCount(3);
++  await expect(page.locator(".tp-save")).toContainText("Layout not saved");
++  await press(page.getByRole("button", { name: "Retry save", exact: true }));
++  await expect(page.locator(".tp-save")).toContainText("Layout saved");
++  await expect(page.getByRole("button", { name: "Retry save", exact: true })).toHaveCount(0);
++  await page.reload();
++  await expect(page.locator(".pf-group")).toHaveCount(3);
++});
++
++test("Retry opening recovers the existing layout without clearing saved data", async ({ page }) => {
++  const menu = await notesMenu(page);
++  await press(menu.getByRole("menuitem", { name: "Split below", exact: true }));
++  await expect(page.locator(".pf-group")).toHaveCount(3);
++  await expect(page.locator(".tp-save")).toContainText("Layout saved");
++  await page.addInitScript(() => {
++    if (sessionStorage.getItem("audit-storage-blocked") === "once") return;
++    sessionStorage.setItem("audit-storage-blocked", "once");
++    Object.defineProperty(window, "indexedDB", {
++      get() {
++        throw new Error("Temporarily unavailable");
++      },
++    });
++  });
++  await page.reload();
++  await expect(page.getByRole("alert")).toContainText("saved data has not been removed");
++  await press(page.getByRole("button", { name: "Retry", exact: true }));
++  await expect(page.locator(".pf-group")).toHaveCount(3);
++  await expect(page.locator(".tp-save")).toContainText("Layout saved");
++});
++
++test("an unchanged placement is disabled, and cancellation leaves history unchanged", async ({
++  page,
++}) => {
++  const revision = await page.locator(".touch-playground").getAttribute("data-workspace-revision");
++  await press(tools(page, "Move"));
++  const sheet = page.getByRole("dialog", { name: "Move or split a panel" });
++  await sheet.getByLabel("Panel", { exact: true }).selectOption("notes");
++  await sheet.getByLabel("Destination pane").selectOption("primary");
++  await press(sheet.getByRole("button", { name: "As tab", exact: true }));
++  await expect(sheet.getByRole("button", { name: "Apply move" })).toBeDisabled();
++  await expect(sheet.getByRole("status")).toContainText("would not change the layout");
++  await press(sheet.getByRole("button", { name: "Close panel sheet" }));
++  await expect(page.locator(".touch-playground")).toHaveAttribute(
++    "data-workspace-revision",
++    revision ?? "missing",
++  );
++  await expect(tools(page, "Undo")).toBeDisabled();
++});
++
++test("floating tab keyboard navigation never moves or resizes the window", async ({ page }) => {
++  const menu = await notesMenu(page);
++  await press(menu.getByRole("menuitem", { name: "Float Notes", exact: true }));
++  const frame = page.locator(".pf-floating-surface");
++  await expect(frame).toBeVisible();
++  const before = await frame.boundingBox();
++  await frame.getByRole("tab", { name: "Notes", exact: true }).focus();
++  await page.keyboard.press("ArrowLeft");
++  await page.keyboard.press("ArrowUp");
++  await page.keyboard.press("Home");
++  expect(await frame.boundingBox()).toEqual(before);
++});
+diff --git a/e2e/touch-playground-operations.spec.ts b/e2e/touch-playground-operations.spec.ts
+new file mode 100644
+index 00000000..5d71cff9
+--- /dev/null
++++ b/e2e/touch-playground-operations.spec.ts
+@@ -0,0 +1,102 @@
++import { expect, test, type Page } from "@playwright/test";
++import { beginTouch, endTouch, moveTouch, visibleBox } from "./touch-helpers";
++
++test.use({ viewport: { width: 390, height: 844 }, hasTouch: true, isMobile: true });
++const group = (page: Page, id: string) => page.locator(`[data-workspace-group="${id}"]`);
++const revision = async (page: Page) =>
++  Number(await page.locator(".touch-playground").getAttribute("data-workspace-revision"));
++
++test.beforeEach(async ({ page }) => {
++  await page.goto("/?fixture=touch");
++  await expect(page.locator(".tp-workspace")).toBeVisible();
++  await page.evaluate(() =>
++    document.addEventListener(
++      "pointerdown",
++      (event) => {
++        if (event.isTrusted && event.pointerType === "touch")
++          document.documentElement.dataset.nativeAuditTouch = "true";
++      },
++      { capture: true },
++    ),
++  );
++});
++
++test("touch moves a whole playground container with one undo step", async ({ page }) => {
++  await page.getByRole("button", { name: "Arrange", exact: true }).tap();
++  await expect(page.locator(".touch-playground")).toHaveAttribute("data-arranging", "true");
++  const before = await revision(page);
++  const target = await visibleBox(group(page, "secondary").locator(".pf-panel-slot"));
++  const drag = await beginTouch(
++    page,
++    group(page, "primary").locator("[data-workspace-group-drag-handle]"),
++  );
++  await moveTouch(page, drag.cdp, drag.from, {
++    x: target.x + target.width / 2,
++    y: target.y + target.height / 2,
++  });
++  await expect(page.locator("[data-workspace-group-drag]")).toHaveAttribute(
++    "data-workspace-drop-kind",
++    "merge",
++  );
++  await endTouch(drag.cdp);
++  await expect(page.locator(".pf-group")).toHaveCount(1);
++  await expect(page.getByRole("tab")).toHaveCount(4);
++  expect(await revision(page)).toBe(before + 1);
++  await page.getByRole("button", { name: "Undo", exact: true }).tap();
++  await expect(page.locator(".pf-group")).toHaveCount(2);
++  await expect(page.locator("html")).toHaveAttribute("data-native-audit-touch", "true");
++});
++
++test("touch reorders playground tabs and cancellation leaves the order unchanged", async ({
++  page,
++}) => {
++  const titles = group(page, "primary").locator(".pf-tab-title");
++  const notes = page.locator('[data-workspace-panel-tab="notes"] .pf-tab-drag-handle');
++  const target = await visibleBox(page.locator('[data-workspace-panel-tab="checklist"]'));
++  for (const cancel of [true, false]) {
++    const before = await revision(page);
++    const drag = await beginTouch(page, notes);
++    await moveTouch(page, drag.cdp, drag.from, {
++      x: target.x + target.width - 5,
++      y: target.y + target.height / 2,
++    });
++    await endTouch(drag.cdp, cancel);
++    await expect(titles).toHaveText(cancel ? ["Notes", "Checklist"] : ["Checklist", "Notes"]);
++    expect(await revision(page)).toBe(before + (cancel ? 0 : 1));
++  }
++  await expect(page.locator("html")).toHaveAttribute("data-native-audit-touch", "true");
++});
++
++test("touch floating move and resize commit only on release, cancel safely, and retain editor text", async ({
++  page,
++}, info) => {
++  const note = page.getByRole("textbox", { name: "Your working note" });
++  await note.fill("Keep this text during floating gestures.");
++  await note.blur();
++  await page.getByRole("button", { name: "Actions for Notes", exact: true }).tap();
++  await page.getByRole("menuitem", { name: "Float Notes", exact: true }).tap();
++  const frame = page.locator(".pf-floating-surface");
++  await expect(frame).toBeVisible();
++  for (const mode of ["move", "resize"] as const) {
++    const handle = frame.locator(
++      mode === "move" ? ".pf-floating-header-drag-region" : '[data-resize-edge="bottom"]',
++    );
++    for (const cancel of [true, false]) {
++      const beforeRevision = await revision(page);
++      const before = await visibleBox(frame);
++      const drag = await beginTouch(page, handle);
++      await moveTouch(page, drag.cdp, drag.from, { x: drag.from.x, y: drag.from.y + 36 });
++      expect(await revision(page)).toBe(beforeRevision);
++      await endTouch(drag.cdp, cancel);
++      await expect(frame).toHaveAttribute("data-floating-manipulation", "idle");
++      await expect.poll(() => revision(page)).toBe(beforeRevision + (cancel ? 0 : 1));
++      const after = await visibleBox(frame);
++      const dimension = mode === "move" ? "y" : "height";
++      if (cancel) expect(after[dimension]).toBeCloseTo(before[dimension], 0);
++      else expect(after[dimension]).toBeGreaterThan(before[dimension] + 20);
++      await expect(note).toHaveValue("Keep this text during floating gestures.");
++    }
++  }
++  await expect(page.locator("html")).toHaveAttribute("data-native-audit-touch", "true");
++  await page.screenshot({ path: info.outputPath("floating-native-touch.png") });
++});
+diff --git a/packages/react/src/WorkspaceSurface.tsx b/packages/react/src/WorkspaceSurface.tsx
+index 780980d2..a4baa0f3 100644
+--- a/packages/react/src/WorkspaceSurface.tsx
++++ b/packages/react/src/WorkspaceSurface.tsx
+@@ -4062,9 +4062,12 @@ function floatingSurfaceSelectedPanelId(
+   surface: WorkspaceFloatingSurfaceView,
+   projection: WorkspaceProjection,
+ ): string | undefined {
+-  return orderedGroups(projection, surface.rootNodeId, false).find(
+-    (group) => projection.panels[group.selectedPanelId] !== undefined,
+-  )?.selectedPanelId;
++  const groups = orderedGroups(projection, surface.rootNodeId, false);
++  const active = projection.activePanelId;
++  if (active !== undefined && groups.some((group) => group.selectedPanelId === active))
++    return active;
++  return groups.find((group) => projection.panels[group.selectedPanelId] !== undefined)
++    ?.selectedPanelId;
+ }
+ 
+ function defaultResultInterpreter<TCommand, TResult>(
+diff --git a/packages/react/src/floating-surface.tsx b/packages/react/src/floating-surface.tsx
+index 784624d3..06f81ff0 100644
+--- a/packages/react/src/floating-surface.tsx
++++ b/packages/react/src/floating-surface.tsx
+@@ -406,7 +406,7 @@ export function FloatingSurfaceFrame({
+   };
+ 
+   const moveByKeyboard = (event: KeyboardEvent<HTMLElement>) => {
+-    if (!canMove) return;
++    if (event.target !== event.currentTarget || event.defaultPrevented || !canMove) return;
+     if (
+       (event.key === "Enter" || event.key === " ") &&
+       (!frontmost || !active) &&
+@@ -505,6 +505,7 @@ export function FloatingSurfaceFrame({
+           ) : null}
+           <div
+             className="pf-floating-controls"
++            onDoubleClick={(event) => event.stopPropagation()}
+             onPointerDown={(event) => {
+               event.stopPropagation();
+             }}
+diff --git a/scripts/record-preview-evidence.mjs b/scripts/record-preview-evidence.mjs
+index 7b13ae24..c89096c2 100644
+--- a/scripts/record-preview-evidence.mjs
++++ b/scripts/record-preview-evidence.mjs
+@@ -71,12 +71,18 @@ const sourceDigests = async (name) => {
+     "scripts/record-preview-evidence.mjs",
+     "apps/demo/src/mobile.css",
+     "apps/demo/src/TouchPlayground.tsx",
++    "apps/demo/src/TouchButton.tsx",
++    "packages/react/src/floating-surface.tsx",
++    "packages/react/src/move-destination-controls.tsx",
++    "packages/react/src/messages.ts",
++    "packages/react/src/index.ts",
+     "apps/demo/src/playground-model.ts",
+     "apps/demo/src/playground-model.test.ts",
+     "apps/demo/src/playground-session.ts",
+     "apps/demo/src/touch-playground.css",
+     "apps/demo/src/main.tsx",
+     "e2e/touch-playground-ux.spec.ts",
++    "e2e/touch-playground-operations.spec.ts",
+     "e2e/code-workbench-cases.ts",
+     "packages/react/test/touch-drop-policy.test.ts",
+     "apps/demo/src/responsive-layout.ts",

@@ -13,6 +13,10 @@ jobs:
   features:
     runs-on: ubuntu-latest
     timeout-minutes: 20
+    strategy:
+      fail-fast: false
+      matrix:
+        project: [desktop-chromium, phone-chromium, phone-webkit, desktop-firefox]
     steps:
       - uses: actions/checkout@v7
         with:
@@ -26,10 +30,10 @@ jobs:
           cache: pnpm
       - run: pnpm install --frozen-lockfile
       - run: pnpm exec playwright install --with-deps chromium firefox webkit
-      - name: Exercise all playground controls on four browser profiles
+      - name: Exercise all playground controls on ${{ matrix.project }}
         run: |
           mkdir -p artifacts
-          pnpm exec playwright test --config playwright.audit.config.ts --reporter=json --output=artifacts/audit-results > artifacts/playground-audit.json
+          pnpm exec playwright test --config playwright.audit.config.ts --project="${{ matrix.project }}" --workers=2 --retries=0 --reporter=json --output=artifacts/audit-results > artifacts/playground-audit.json
       - name: Preserve exact source and evidence
         if: always()
         run: |
@@ -38,6 +42,6 @@ jobs:
       - uses: actions/upload-artifact@v7
         if: always()
         with:
-          name: playground-feature-audit
+          name: playground-feature-audit-${{ matrix.project }}
           path: artifacts
           retention-days: 30
