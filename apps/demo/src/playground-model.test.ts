@@ -107,9 +107,9 @@ describe("readable touch playground", () => {
         expect(receipt.status).toBe("committed");
       }
       expect(projectPlayground(runtime.getSnapshot()).panels.notes?.floatable).toBe(false);
-      const closed = runtime.getSnapshot().recoverableClosedPanels.find(
-        (entry) => entry.panel.id === "checklist",
-      );
+      const closed = runtime
+        .getSnapshot()
+        .recoverableClosedPanels.find((entry) => entry.panel.id === "checklist");
       if (!closed) throw new Error("Expected a recoverable panel");
       expect(runtime.dispatch({ type: "reopen-panel", closedPanelId: closed.id }).status).toBe(
         "committed",

@@ -1,4 +1,5 @@
 import { expect, test, type Page } from "@playwright/test";
+import { prepareNativeTouchAudit, attachNativeTouchFailure } from "./native-touch-audit";
 import { beginTouch, endTouch, moveTouch, visibleBox } from "./touch-helpers";
 
 test.use({ viewport: { width: 390, height: 844 }, hasTouch: true, isMobile: true });
@@ -9,6 +10,7 @@ const revision = async (page: Page) =>
 test.beforeEach(async ({ page }) => {
   await page.goto("/?fixture=touch");
   await expect(page.locator(".tp-workspace")).toBeVisible();
+  await prepareNativeTouchAudit(page);
   await page.evaluate(() =>
     document.addEventListener(
       "pointerdown",
@@ -20,6 +22,8 @@ test.beforeEach(async ({ page }) => {
     ),
   );
 });
+
+test.afterEach(async ({ page }, info) => attachNativeTouchFailure(page, info));
 
 test("touch moves a whole playground container with one undo step", async ({ page }) => {
   await page.getByRole("button", { name: "Arrange", exact: true }).tap();
