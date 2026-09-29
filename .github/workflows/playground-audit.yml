@@ -1,0 +1,43 @@
+name: Playground feature audit
+on:
+  pull_request:
+    paths:
+      - "apps/demo/**"
+      - "packages/**"
+      - "audit-e2e/**"
+      - "playwright.audit.config.ts"
+      - ".github/workflows/playground-audit.yml"
+permissions:
+  contents: read
+jobs:
+  features:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+      - uses: pnpm/action-setup@v6
+        with:
+          version: 11.16.0
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm exec playwright install --with-deps chromium firefox webkit
+      - name: Exercise all playground controls on four browser profiles
+        run: |
+          mkdir -p artifacts
+          pnpm exec playwright test --config playwright.audit.config.ts --reporter=json --output=artifacts/audit-results > artifacts/playground-audit.json
+      - name: Preserve exact source and evidence
+        if: always()
+        run: |
+          mkdir -p artifacts
+          git archive --format=tar.gz HEAD -o artifacts/audit-source.tar.gz
+      - uses: actions/upload-artifact@v7
+        if: always()
+        with:
+          name: playground-feature-audit
+          path: artifacts
+          retention-days: 30
