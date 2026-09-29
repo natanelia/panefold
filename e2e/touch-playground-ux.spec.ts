@@ -99,6 +99,8 @@ test("uses broad touch targets for nested splits and keeps panel content", async
   expect(notesGroup).not.toBe("primary");
   await expect(page.locator(".pf-group")).toHaveCount(3);
   await page.getByRole("button", { name: "Arrange", exact: true }).tap();
+  await expect(page.locator(".touch-playground")).toHaveAttribute("data-arranging", "true");
+  await expect(page.getByRole("button", { name: "Done", exact: true })).toBeVisible();
   await drop(page, tab(page, "checklist"), group(page, notesGroup), "block-end", true);
   expect(await owner(page, "checklist")).not.toBe(notesGroup);
   // The empty old source is removed, not left as another unusable pane.

@@ -31,6 +31,7 @@
   color: inherit;
   min-height: 44px;
   cursor: pointer;
+  touch-action: manipulation;
 }
 .touch-playground :focus-visible,
 .tp-sheet :focus-visible {
