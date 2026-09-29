@@ -165,6 +165,9 @@
   display: none;
 }
 .touch-playground[data-arranging="true"] .pf-group-drag-region {
+  /* Override the generic button's manipulation policy: this grip must capture a drag. */
+  touch-action: none;
+  -webkit-touch-callout: none;
   display: grid;
   place-items: center;
   min-width: 44px;

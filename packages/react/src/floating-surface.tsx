@@ -469,7 +469,7 @@ export function FloatingSurfaceFrame({
           tabIndex={canMove && (onMove !== undefined || onRaise !== undefined) ? 0 : -1}
           aria-label={messages.moveFloatingSurface({ title })}
           onPointerDown={(event) => {
-            if (eventStartsInsideTabStrip(event.target)) return;
+            if (eventStartsInsideTitlebarControl(event.target)) return;
             begin("move", undefined, event);
           }}
           onPointerMove={move}
@@ -478,7 +478,7 @@ export function FloatingSurfaceFrame({
           onLostPointerCapture={cancel}
           onKeyDown={moveByKeyboard}
           onDoubleClick={(event) => {
-            if (eventStartsInsideTabStrip(event.target)) return;
+            if (eventStartsInsideTitlebarControl(event.target)) return;
             if (surface.maximized && onRestore !== undefined) {
               focusAfterStateChangeRef.current = "titlebar";
               const outcome = onRestore("pointer");
@@ -505,7 +505,6 @@ export function FloatingSurfaceFrame({
           ) : null}
           <div
             className="pf-floating-controls"
-            onDoubleClick={(event) => event.stopPropagation()}
             onPointerDown={(event) => {
               event.stopPropagation();
             }}
@@ -758,8 +757,10 @@ function floatingResizePositionPercent(
   return clamp(Math.round((position / extent) * 100), 0, 100);
 }
 
-function eventStartsInsideTabStrip(target: EventTarget): boolean {
-  return target instanceof Element && target.closest(".pf-tab-strip") !== null;
+function eventStartsInsideTitlebarControl(target: EventTarget): boolean {
+  return (
+    target instanceof Element && target.closest(".pf-tab-strip, .pf-floating-controls") !== null
+  );
 }
 
 function acceptedOutcome(outcome: WorkspaceDispatchOutcome): boolean {
