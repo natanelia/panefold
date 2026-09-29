@@ -18,6 +18,10 @@ jobs:
           python3 - <<'PY'
           import base64, gzip, hashlib, pathlib, subprocess
           raw = pathlib.Path('.audit-transfer/fixes.patch.gz').read_bytes()
+          # Correct the single inserted character identified by byte comparison of the transfer artifact.
+          encoded = base64.b64encode(raw).decode()
+          assert encoded.count('cvEhII/DU') == 1
+          raw = base64.b64decode(encoded.replace('cvEhII/DU', 'cvEhI/DU') + 'A')
           expected = '14f357adef7aafbc429dce55af90c5314416bfd5fff713ea6ff11fa567021470'
           data = gzip.decompress(raw)
           assert hashlib.sha256(data).hexdigest() == expected, 'Patch transfer checksum mismatch'
