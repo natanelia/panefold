@@ -406,7 +406,7 @@ export function FloatingSurfaceFrame({
   };
 
   const moveByKeyboard = (event: KeyboardEvent<HTMLElement>) => {
-    if (!canMove) return;
+    if (event.target !== event.currentTarget || event.defaultPrevented || !canMove) return;
     if (
       (event.key === "Enter" || event.key === " ") &&
       (!frontmost || !active) &&
@@ -505,6 +505,7 @@ export function FloatingSurfaceFrame({
           ) : null}
           <div
             className="pf-floating-controls"
+            onDoubleClick={(event) => event.stopPropagation()}
             onPointerDown={(event) => {
               event.stopPropagation();
             }}

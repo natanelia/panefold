@@ -315,13 +315,23 @@ export function createPlaygroundCommands(
           };
         }
       }
-      return (
-        base.redockFloatingSurface?.(id) ?? {
-          type: "redock-surface",
-          surfaceId: surfaceId(id),
-          target: { groupId: groupId("primary") },
-        }
-      );
+      const redock = base.redockFloatingSurface?.(id) ?? {
+        type: "redock-surface" as const,
+        surfaceId: surfaceId(id),
+        target: { groupId: groupId("primary") },
+      };
+      if (redock.type !== "redock-surface") return redock;
+      const group = root?.kind === "group" ? getEntity(snapshot.groups, root.groupId) : undefined;
+      // Commit docking and the focus destination together, not as a second history entry.
+      return group
+        ? {
+            type: "batch",
+            commands: [
+              redock,
+              { type: "select-panel", panelId: group.selectedPanelId, activate: true },
+            ],
+          }
+        : redock;
     },
     planPanelDrop: panelPlan,
     planPanelTabDrop: panelPlan,
