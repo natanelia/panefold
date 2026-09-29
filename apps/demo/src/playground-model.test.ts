@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { validateWorkspace } from "@panefold/kernel";
 import { createWorkspaceRuntime } from "@panefold/runtime";
+import { panelId, closedPanelId } from "@panefold/model";
 import {
   playgroundSnapshot,
   projectPlayground,
@@ -94,6 +95,30 @@ describe("readable touch playground", () => {
       expect(planPlaygroundMove(original, id, group, "block-end", phone)).toBeDefined();
     }
     expect(original).toEqual(playgroundSnapshot);
+  });
+  it("does not offer floating for the last docked panel and enables it after reopening", () => {
+    const runtime = createWorkspaceRuntime({ initialSnapshot: playgroundSnapshot });
+    try {
+      for (const id of ["checklist", "preview", "activity"]) {
+        const receipt = runtime.dispatch({
+          type: "close-panels",
+          targets: [{ panelId: panelId(id), closedPanelId: closedPanelId(`audit-closed-${id}`) }],
+        });
+        expect(receipt.status).toBe("committed");
+      }
+      expect(projectPlayground(runtime.getSnapshot()).panels.notes?.floatable).toBe(false);
+      const closed = runtime.getSnapshot().recoverableClosedPanels.find(
+        (entry) => entry.panel.id === "checklist",
+      );
+      if (!closed) throw new Error("Expected a recoverable panel");
+      expect(runtime.dispatch({ type: "reopen-panel", closedPanelId: closed.id }).status).toBe(
+        "committed",
+      );
+      expect(projectPlayground(runtime.getSnapshot()).panels.notes?.floatable).toBe(true);
+      expect(validateWorkspace(runtime.getSnapshot())).toEqual([]);
+    } finally {
+      runtime.dispose();
+    }
   });
   it("rejects missing panels and destinations without mutating the workspace", () => {
     expect(

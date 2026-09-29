@@ -90,3 +90,32 @@ test("floating tab keyboard navigation never moves or resizes the window", async
   await page.keyboard.press("Home");
   expect(await frame.boundingBox()).toEqual(before);
 });
+
+test("the last docked panel has no impossible Float action; reopening enables it", async ({
+  page,
+}) => {
+  for (const title of ["Checklist", "Preview", "Activity"]) {
+    await press(tools(page, "Panels"));
+    await press(
+      page.locator(".tp-panel-picker button").filter({
+        has: page.getByText(title, { exact: true }),
+      }),
+    );
+    await press(page.getByRole("button", { name: `Actions for ${title}`, exact: true }));
+    await press(page.getByRole("menuitem", { name: `Close ${title}`, exact: true }));
+  }
+  await expect(page.getByRole("tab")).toHaveCount(1);
+  const menu = await notesMenu(page);
+  await expect(menu.getByRole("menuitem", { name: "Float Notes", exact: true })).toHaveCount(0);
+  await page.keyboard.press("Escape");
+  await press(tools(page, "Panels"));
+  await press(
+    page.locator(".tp-panel-picker button").filter({
+      has: page.getByText("Checklist", { exact: true }),
+    }),
+  );
+  await expect(page.getByRole("tab")).toHaveCount(2);
+  await press(page.getByRole("button", { name: "Actions for Checklist", exact: true }));
+  await press(page.getByRole("menuitem", { name: "Float Checklist", exact: true }));
+  await expect(page.locator(".pf-floating-surface")).toHaveCount(1);
+});

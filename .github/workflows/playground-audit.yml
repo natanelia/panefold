@@ -45,3 +45,40 @@ jobs:
           name: playground-feature-audit-${{ matrix.project }}
           path: artifacts
           retention-days: 30
+
+  hosted:
+    needs: features
+    if: github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    strategy:
+      fail-fast: false
+      matrix:
+        project: [desktop-chromium, phone-chromium, phone-webkit, desktop-firefox]
+    env:
+      PREVIEW_NUMBER: ${{ github.event.pull_request.number }}
+      PREVIEW_SHA: ${{ github.event.pull_request.head.sha }}
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+      - uses: pnpm/action-setup@v6
+        with:
+          version: 11.16.0
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm exec playwright install --with-deps chromium firefox webkit
+      - name: Verify the deployed revision, then audit the public playground
+        run: |
+          mkdir -p artifacts
+          node scripts/verify-playground-preview.mjs
+          PANEFOLD_AUDIT_URL="https://natanelia.github.io/panefold/previews/pr-${PREVIEW_NUMBER}/workbench/site/workbench/" pnpm exec playwright test --config playwright.audit.config.ts --project="${{ matrix.project }}" --workers=2 --retries=0 --reporter=json --output=artifacts/hosted-results > artifacts/hosted-audit.json
+      - uses: actions/upload-artifact@v7
+        if: always()
+        with:
+          name: playground-hosted-audit-${{ matrix.project }}
+          path: artifacts
+          retention-days: 30

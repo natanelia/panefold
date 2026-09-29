@@ -39,3 +39,9 @@ Read [TouchPlayground.tsx](../../apps/demo/src/TouchPlayground.tsx), [playground
 The optional `dropBehavior.edgeBandRatio` sets the edge-drop band as a fraction of each pane. Values are bounded from zero to one third. The touch example uses one third; existing integrations retain their current default. `preferredSplitDirection` resolves corner overlap. The visible guides must agree with that policy.
 
 Automated Chromium touch tests check interactions, minimum sizes, cancellation, undo and saved-layout restoration. They do not establish physical iPhone, Safari or assistive-technology certification. Read the [support matrix](../SUPPORT.md) before choosing a product support policy.
+
+## The last docked panel
+
+Keep one panel docked as a return destination for floating panels. The menu does not offer Float for the last docked panel. Reopen another panel from Panels to make floating available again.
+
+Choosing As tab in the panel's current pane is not a move. Apply move stays disabled and does not add a history entry. Use the tab grip or the menu's before/after actions to reorder tabs.

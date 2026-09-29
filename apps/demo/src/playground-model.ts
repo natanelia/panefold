@@ -140,8 +140,21 @@ export const playgroundSnapshot = createWorkspaceSnapshot({
 
 export function projectPlayground(snapshot: WorkspaceSnapshot) {
   const projection = projectWorkspace(snapshot);
+  const mainRoot = projection.nodes[projection.rootNodeId];
+  const mainGroup = mainRoot?.kind === "group" ? projection.groups[mainRoot.groupId] : undefined;
+  const lastDockedPanel = mainGroup?.panelIds.length === 1 ? mainGroup.panelIds[0] : undefined;
+  const lastDockedView =
+    lastDockedPanel === undefined ? undefined : projection.panels[lastDockedPanel];
   return {
     ...projection,
+    // The kernel must retain a docked destination. Do not offer an action that
+    // cannot float the sole remaining root panel; reopening a second enables it.
+    panels: lastDockedView
+      ? {
+          ...projection.panels,
+          [lastDockedView.id]: { ...lastDockedView, floatable: false },
+        }
+      : projection.panels,
     groups: Object.fromEntries(
       Object.entries(projection.groups).map(([id, group]) => [
         id,
