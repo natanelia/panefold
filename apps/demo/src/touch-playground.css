@@ -667,3 +667,16 @@
 .tp-workspace .pf-floating-header-slot .pf-tab {
   min-width: 0;
 }
+
+/* A floating window needs a finger-sized move grip, not only empty header space. */
+.tp-workspace .pf-floating-header-drag-region {
+  flex: 0 0 44px;
+  align-self: stretch;
+  display: grid;
+  place-items: center;
+}
+.tp-workspace .pf-floating-header-drag-region::after {
+  content: "⋮⋮";
+  font-size: 18px;
+  color: var(--tp-ink);
+}

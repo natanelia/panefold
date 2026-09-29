@@ -354,14 +354,22 @@ for (const placement of ["Above", "Left", "Right", "Below", "As tab"]) {
     await press(sheet.getByRole("button", { name: "Apply move" }));
     await expect(frame).toHaveAttribute("data-minimized", "false");
     await expect(frame.getByRole("tab", { name: "Checklist", exact: true })).toBeVisible();
+    const revision = Number(
+      await page.locator(".touch-playground").getAttribute("data-workspace-revision"),
+    );
     await press(frame.getByRole("button", { name: /^Dock / }));
     await expect(frame).toHaveCount(0);
+    await expect(page.locator(".touch-playground")).toHaveAttribute(
+      "data-workspace-revision",
+      String(revision + 1),
+    );
     await expect(page.getByRole("tab")).toHaveCount(4);
+    await press(tool(page, "Undo"));
+    await expect(frame).toHaveCount(1);
+    await press(tool(page, "Redo"));
+    await expect(frame).toHaveCount(0);
     await picker(page, "Notes");
     await expect(note).toHaveValue("State across surfaces");
-    await press(tool(page, "Undo")); // panel selection
-    await press(tool(page, "Undo")); // redock
-    await expect(frame).toHaveCount(1);
   });
 }
 

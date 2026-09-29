@@ -4062,9 +4062,12 @@ function floatingSurfaceSelectedPanelId(
   surface: WorkspaceFloatingSurfaceView,
   projection: WorkspaceProjection,
 ): string | undefined {
-  return orderedGroups(projection, surface.rootNodeId, false).find(
-    (group) => projection.panels[group.selectedPanelId] !== undefined,
-  )?.selectedPanelId;
+  const groups = orderedGroups(projection, surface.rootNodeId, false);
+  const active = projection.activePanelId;
+  if (active !== undefined && groups.some((group) => group.selectedPanelId === active))
+    return active;
+  return groups.find((group) => projection.panels[group.selectedPanelId] !== undefined)
+    ?.selectedPanelId;
 }
 
 function defaultResultInterpreter<TCommand, TResult>(
