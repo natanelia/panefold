@@ -12,3 +12,9 @@
   flex: 1 1 auto;
   padding-inline-end: 0;
 }
+@media (max-width: 360px) {
+  .touch-playground .tp-viewport {
+    /* Spend less width on outer margins, not on the finger-sized controls. */
+    margin-inline: 4px;
+  }
+}
