@@ -17,6 +17,7 @@ import {
   type ReactNode,
 } from "react";
 import { createPortal } from "react-dom";
+import { MoveDestinationControls } from "./move-destination-controls";
 import type {
   LogicalRect,
   ResolvedLayout,
@@ -124,6 +125,8 @@ export interface WorkspaceSurfaceProps<TSnapshot, TCommand, TResult> {
   /** Deterministic logical bounds, primarily for embedded and test surfaces. */
   readonly layoutBounds?: LogicalRect;
   readonly splitterSize?: number;
+  /** Floating titlebar height in CSS pixels; shared by chrome and docking geometry. */
+  readonly floatingTitlebarSize?: number;
   /**
    * Reversible single-region projection for narrow/coarse-pointer surfaces.
    * It changes only the rendered root; canonical desktop topology is untouched.
@@ -245,6 +248,7 @@ function SurfaceRenderer<TSnapshot, TCommand, TResult>({
   layoutSolver,
   layoutBounds,
   splitterSize = 6,
+  floatingTitlebarSize = 34,
   responsive = false,
   compactBreakpoint = 720,
   compactGroupId,
@@ -328,6 +332,9 @@ function SurfaceRenderer<TSnapshot, TCommand, TResult>({
         : { ...projection, rootNodeId: renderedRootNodeId },
     [projection, renderedRootNodeId],
   );
+  const floatingChromeSize = Number.isFinite(floatingTitlebarSize)
+    ? Math.max(34, floatingTitlebarSize)
+    : 34;
   const floatingSurfaces = projection.floatingSurfaces ?? EMPTY_FLOATING_SURFACES;
   const floatingFrameBounds = useMemo(
     () =>
@@ -378,7 +385,7 @@ function SurfaceRenderer<TSnapshot, TCommand, TResult>({
         return [
           solveRoot(
             surface.rootNodeId,
-            floatingSurfaceContentBounds(frameBounds, logicalBounds, direction),
+            floatingSurfaceContentBounds(frameBounds, logicalBounds, direction, floatingChromeSize),
           ),
         ];
       });
@@ -387,6 +394,7 @@ function SurfaceRenderer<TSnapshot, TCommand, TResult>({
     [
       direction,
       floatingFrameBounds,
+      floatingChromeSize,
       floatingSurfaces,
       layoutSolver,
       logicalBounds,
@@ -1230,6 +1238,7 @@ function SurfaceRenderer<TSnapshot, TCommand, TResult>({
               <FloatingSurfaceFrame
                 key={surface.id}
                 surface={surface}
+                titlebarSize={floatingChromeSize}
                 {...(compactGroupId === undefined ? {} : { compactGroupId })}
                 bounds={frameBounds}
                 projectionRevision={projection.revision}
@@ -3071,7 +3080,9 @@ function KeyboardMoveOverlay({
         if (event.key === "Escape") {
           event.preventDefault();
           onCancel();
+          return;
         }
+        if (event.target !== event.currentTarget) return;
         if (event.key === "ArrowRight" || event.key === "ArrowDown") {
           event.preventDefault();
           setIndex((value) => (value + 1) % Math.max(1, destinations.length));
@@ -3106,6 +3117,14 @@ function KeyboardMoveOverlay({
       <p className="pf-keyboard-move-eyebrow">{messages.chooseDestination()}</p>
       <strong>{selectedDestination?.label ?? messages.noAvailableGroup()}</strong>
       <p>{messages.moveInstructions()}</p>
+      <MoveDestinationControls
+        options={destinations}
+        index={index}
+        messages={messages}
+        onChange={setIndex}
+        onMove={() => selectedDestination?.commit()}
+        onCancel={onCancel}
+      />
       <div className="pf-keyboard-move-dots" aria-hidden="true">
         {destinations.map((destination, destinationIndex) => (
           <span key={destination.id} data-current={String(destinationIndex === index)} />
@@ -3169,6 +3188,7 @@ function KeyboardGroupMoveOverlay<TCommand>({
           onCancel();
           return;
         }
+        if (event.target !== event.currentTarget) return;
         if (event.key === "ArrowRight" || event.key === "ArrowDown" || event.key === "Tab") {
           event.preventDefault();
           const delta = event.key === "Tab" && event.shiftKey ? -1 : 1;
@@ -3205,6 +3225,16 @@ function KeyboardGroupMoveOverlay<TCommand>({
       <p className="pf-keyboard-move-eyebrow">{messages.chooseDestination()}</p>
       <strong>{selectedCandidate?.label ?? messages.noAvailableGroup()}</strong>
       <p>{messages.moveInstructions()}</p>
+      <MoveDestinationControls
+        options={candidates}
+        index={normalizedIndex}
+        messages={messages}
+        onChange={setIndex}
+        onMove={() => {
+          if (selectedCandidate) onMove(selectedCandidate);
+        }}
+        onCancel={onCancel}
+      />
       <div className="pf-keyboard-move-dots" aria-hidden="true">
         {candidates.map((candidate, candidateIndex) => (
           <span key={candidate.id} data-current={String(candidateIndex === normalizedIndex)} />

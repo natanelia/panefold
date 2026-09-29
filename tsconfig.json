@@ -11,6 +11,7 @@
     "scripts/**/*.ts",
     "e2e",
     "site-e2e",
+    "audit-e2e",
     "*.ts"
   ],
   "exclude": ["**/dist", "**/node_modules"]

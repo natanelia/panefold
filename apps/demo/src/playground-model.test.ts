@@ -92,3 +92,59 @@ describe("readable touch playground", () => {
     expect(validateWorkspace(playgroundSnapshot)).toEqual([]);
   });
 });
+
+describe("floating placement policy", () => {
+  it("restores a minimized destination atomically and redocks a nested float without flattening it", async () => {
+    const { createPlaygroundCommands, playgroundSurfaceForGroup, playgroundSurfaceBounds } =
+      await import("./playground-model");
+    const { surfaceId } = await import("@panefold/model");
+    const runtime = createWorkspaceRuntime({ initialSnapshot: playgroundSnapshot });
+    try {
+      const commands = createPlaygroundCommands(runtime.getSnapshot);
+      const float = commands.floatPanel?.("notes");
+      if (!float) throw new Error("Missing float command");
+      expect(runtime.dispatch(float).status).toBe("committed");
+      let snapshot = runtime.getSnapshot();
+      const group = Object.values(projectPlayground(snapshot).groups).find((g) =>
+        g.panelIds.includes("notes"),
+      );
+      if (!group) throw new Error("Missing floating group");
+      const surface = playgroundSurfaceForGroup(snapshot, group.id);
+      if (!surface) throw new Error("Missing floating surface");
+      expect(
+        runtime.dispatch({ type: "minimize-surface", surfaceId: surfaceId(surface.id) }).status,
+      ).toBe("committed");
+      snapshot = runtime.getSnapshot();
+      const move = planPlaygroundMove(snapshot, "checklist", group.id, "block-end", phone);
+      if (!move) throw new Error("Cannot split a floating destination");
+      const predicted = previewPlaygroundCommand(snapshot, move.command);
+      expect(predicted).toBeDefined();
+      expect(runtime.dispatch(move.command).status).toBe("committed");
+      const next = runtime.getSnapshot();
+      const floatingSurface = playgroundSurfaceForGroup(next, group.id);
+      if (!floatingSurface) throw new Error("Lost floating surface");
+      expect(floatingSurface.minimized).not.toBe(true);
+      const projection = projectPlayground(next);
+      const moved = Object.values(projection.groups).find((g) => g.panelIds.includes("checklist"));
+      if (!moved) throw new Error("Lost checklist");
+      const layout = solvePlayground(next, {
+        projection,
+        rootNodeId: floatingSurface.rootNodeId,
+        bounds: playgroundSurfaceBounds(next, floatingSurface, phone),
+        splitterSize: PLAYGROUND_SPLITTER,
+        splitOverrides: {},
+      });
+      expect(move.previewRect).toEqual(layout.groupRects[moved.id]);
+      const redock = commands.redockFloatingSurface?.(surface.id);
+      if (!redock) throw new Error("Missing redock command");
+      expect(runtime.dispatch(redock).status).toBe("committed");
+      expect(runtime.getSnapshot().floatingOrder).toHaveLength(0);
+      expect(runtime.getSnapshot().groups.ids).toHaveLength(3);
+      expect(validateWorkspace(runtime.getSnapshot())).toEqual([]);
+      expect(runtime.undo().status).toBe("committed");
+      expect(runtime.getSnapshot().floatingOrder).toHaveLength(1);
+    } finally {
+      runtime.dispose();
+    }
+  });
+});

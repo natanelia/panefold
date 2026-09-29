@@ -37,7 +37,8 @@ async function floating(page: Page) {
 async function box(locator: Locator) {
   const result = await locator.boundingBox();
   expect(result).not.toBeNull();
-  return result!;
+  if (!result) throw new Error("Expected visible geometry");
+  return result;
 }
 async function saved(page: Page) {
   await expect(page.locator(".tp-save")).toContainText("Layout saved");
@@ -94,7 +95,7 @@ for (const [id, title] of Object.entries(titles)) {
       await expect(page.locator(".pf-group")).toHaveCount(placement === "As tab" ? 2 : 3);
       const movedOwner = await owner(page, id);
       if (placement !== "As tab") {
-        const moved = await box(group(page, movedOwner!));
+        const moved = await box(group(page, movedOwner ?? "missing"));
         const target = await box(group(page, to));
         if (placement === "Left") expect(moved.x + moved.width).toBeLessThanOrEqual(target.x + 1);
         if (placement === "Right")
@@ -136,10 +137,10 @@ test("panel menus reorder, move, and remove a container without losing panels", 
   page,
 }) => {
   let menu = await actions(page, "Notes");
-  await press(menu.getByRole("menuitem", { name: "Move Notes after Checklist", exact: true }));
-  await expect(group(page, "primary").getByRole("tab")).toHaveText(["⠿Checklist", "⠿Notes"]);
+  await press(menu.getByRole("menuitem", { name: "Move Notes tab after Checklist", exact: true }));
+  await expect(group(page, "primary").getByRole("tab")).toHaveText(["⋮⋮Checklist", "⋮⋮Notes"]);
   menu = await actions(page, "Notes");
-  await press(menu.getByRole("menuitem", { name: "Move Notes before Checklist", exact: true }));
+  await press(menu.getByRole("menuitem", { name: "Move Notes tab before Checklist", exact: true }));
   menu = await actions(page, "Notes");
   await press(menu.getByRole("menuitem", { name: "Move to Preview + Activity", exact: true }));
   expect(await owner(page, "notes")).toBe("secondary");
@@ -231,7 +232,7 @@ test("Move sheet reaches floating destinations and shows the moved panel in its 
   await press(tool(page, "Move"));
   const dialog = page.getByRole("dialog", { name: "Move or split a panel" });
   await dialog.getByLabel("Panel", { exact: true }).selectOption("checklist");
-  await dialog.getByLabel("Destination pane").selectOption(destination!);
+  await dialog.getByLabel("Destination pane").selectOption(destination ?? "missing");
   await press(dialog.getByRole("button", { name: "As tab", exact: true }));
   await expect(dialog.getByRole("button", { name: "Apply move" })).toBeEnabled();
   await expect(dialog.locator('[data-selected="true"]')).toContainText("Checklist");
@@ -292,7 +293,7 @@ test("keyboard tab navigation, reordering and splitter resizing work", async ({ 
   const before = await splitter.getAttribute("aria-valuenow");
   await splitter.focus();
   await page.keyboard.press("ArrowDown");
-  await expect(splitter).not.toHaveAttribute("aria-valuenow", before!);
+  await expect(splitter).not.toHaveAttribute("aria-valuenow", before ?? "missing");
 });
 
 test("automatic accessibility checks include every sheet and a floating panel", async ({
@@ -320,4 +321,75 @@ test("automatic accessibility checks include every sheet and a floating panel", 
         .analyze()
     ).violations,
   ).toEqual([]);
+});
+
+for (const placement of ["Above", "Left", "Right", "Below", "As tab"]) {
+  test(`floating destination: ${placement}, preview and reversible redock`, async ({ page }) => {
+    const note = page.getByRole("textbox", { name: "Your working note" });
+    await note.fill("State across surfaces");
+    const frame = await floating(page);
+    const destination = await owner(page, "notes");
+    await press(frame.getByRole("button", { name: /Minimize Notes/ }));
+    await press(tool(page, "Move"));
+    const sheet = page.getByRole("dialog", { name: "Move or split a panel" });
+    await sheet.getByLabel("Panel", { exact: true }).selectOption("checklist");
+    await sheet.getByLabel("Destination pane").selectOption(destination ?? "missing");
+    await press(sheet.getByRole("button", { name: placement, exact: true }));
+    await expect(sheet.locator('[data-selected="true"]')).toContainText("Checklist");
+    await press(sheet.getByRole("button", { name: "Apply move" }));
+    await expect(frame).toHaveAttribute("data-minimized", "false");
+    await expect(frame.getByRole("tab", { name: "Checklist", exact: true })).toBeVisible();
+    await press(frame.getByRole("button", { name: /^Dock / }));
+    await expect(frame).toHaveCount(0);
+    await expect(page.getByRole("tab")).toHaveCount(4);
+    await picker(page, "Notes");
+    await expect(note).toHaveValue("State across surfaces");
+    await press(tool(page, "Undo")); // panel selection
+    await press(tool(page, "Undo")); // redock
+    await expect(frame).toHaveCount(1);
+  });
+}
+
+test("floating move and resize controls commit once and keep state through reload", async ({
+  page,
+}) => {
+  const frame = await floating(page);
+  const before = await box(frame);
+  await frame.locator(".pf-floating-titlebar").focus();
+  await page.keyboard.press("ArrowLeft");
+  const moved = await box(frame);
+  expect(moved.x).toBeLessThan(before.x);
+  const handle = frame.locator('[data-resize-edge="bottom"]');
+  await handle.focus();
+  await page.keyboard.press("ArrowDown");
+  expect((await box(frame)).height).toBeGreaterThan(moved.height);
+  await saved(page);
+  const finalBox = await box(frame);
+  await page.reload();
+  await expect(page.locator(".pf-floating-surface")).toBeVisible();
+  const restored = await box(page.locator(".pf-floating-surface"));
+  expect(restored.x).toBeCloseTo(finalBox.x, 0);
+  expect(restored.height).toBeCloseTo(finalBox.height, 0);
+});
+
+test("unavailable storage is explicit and temporary mode retains all layout controls", async ({
+  page,
+}) => {
+  await page.addInitScript(() => {
+    Object.defineProperty(window, "indexedDB", {
+      configurable: true,
+      get() {
+        throw new Error("Storage disabled");
+      },
+    });
+  });
+  await page.reload();
+  await expect(page.getByRole("alert")).toContainText("saved data has not been removed");
+  await press(page.getByRole("button", { name: "Continue without saving" }));
+  await expect(page.locator(".tp-save")).toContainText("not saved");
+  const menu = await actions(page, "Notes");
+  await press(menu.getByRole("menuitem", { name: "Split below", exact: true }));
+  await expect(page.locator(".pf-group")).toHaveCount(3);
+  await press(tool(page, "Undo"));
+  await expect(page.locator(".pf-group")).toHaveCount(2);
 });

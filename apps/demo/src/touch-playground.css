@@ -649,3 +649,21 @@
 .tp-guide-below {
   grid-column: span 3;
 }
+
+.tp-workspace .pf-keyboard-move {
+  position: fixed;
+  inset: auto 12px 80px;
+  translate: none;
+  inline-size: auto;
+  max-height: calc(100dvh - 104px);
+  overflow: auto;
+}
+.tp-workspace .pf-floating-content {
+  overflow: auto;
+}
+.tp-workspace .pf-floating-header-slot {
+  flex-basis: 180px;
+}
+.tp-workspace .pf-floating-header-slot .pf-tab {
+  min-width: 0;
+}
