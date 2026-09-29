@@ -39,7 +39,7 @@ jobs:
       - run: pnpm exec playwright install --with-deps chromium
       - name: Test the actual phone interactions without retries
         run: |
-          pnpm exec playwright test e2e/touch-playground-ux.spec.ts --workers=1 --retries=0 --reporter=json --output=artifacts/phone-results > artifacts/phone-browser.json
+          pnpm exec playwright test e2e/touch-playground-ux.spec.ts e2e/touch-tap-diagnostic.spec.ts --workers=1 --retries=0 --reporter=json --output=artifacts/phone-results > artifacts/phone-browser.json
       - name: Run full unit and application suites
         run: |
           pnpm build:packages
