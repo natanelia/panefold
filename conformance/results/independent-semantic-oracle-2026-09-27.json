@@ -2,20 +2,20 @@
   "schemaVersion": 1,
   "kind": "differential-model-result",
   "profile": "compact-react-chromium-desktop",
-  "producedAt": "2026-09-27T12:39:29.762Z",
+  "producedAt": "2026-09-30T12:56:00.489976+00:00",
   "status": "passed-with-thresholds-unmet",
   "runner": "panefold-differential-campaign",
   "commands": {
     "prerequisite": "pnpm install --frozen-lockfile && pnpm build:packages",
     "build": "pnpm exec tsup scripts/run-independent-semantic-campaign.ts --format esm --platform node --target node22 --out-dir artifacts/independent-audit --clean",
     "campaign": "node artifacts/independent-audit/run-independent-semantic-campaign.js --seed 20260812 --steps 10000",
-    "suite": "pnpm exec vitest run packages/kernel-optimized/test/benchmark.test.ts packages/kernel-optimized/test/differential.test.ts packages/kernel-optimized/test/independent-reducer.test.ts packages/kernel-optimized/test/persistent-bucket-map.test.ts packages/kernel-optimized/test/projection.test.ts --reporter=json"
+    "suite": "pnpm exec vitest run packages/kernel-optimized/test/benchmark.test.ts packages/kernel-optimized/test/differential.test.ts packages/kernel-optimized/test/independent-reducer.test.ts packages/kernel-optimized/test/persistent-bucket-map.test.ts packages/kernel-optimized/test/projection.test.ts --reporter=json --outputFile=artifacts/independent-suite.json"
   },
   "environment": {
-    "operatingSystem": "Linux 6.18.44 x86_64",
-    "node": "22.23.2",
+    "operatingSystem": "Linux-6.17.0-1022-azure-x86_64-with-glibc2.39",
+    "node": "v24.21.0",
     "pnpm": "11.16.0",
-    "dependencies": "Frozen-lockfile workspace exported by GitHub Actions run 36318570589; executed offline after package builds.",
+    "dependencies": "Installed with pnpm install --frozen-lockfile in this workflow.",
     "vitestMaxWorkers": 1
   },
   "campaign": {
@@ -31,14 +31,14 @@
     "missingCommandTypes": [],
     "divergenceCount": 0,
     "finalHash": "fnv1a64-v1:a1f58a1b0c635ad1",
-    "elapsedMs": 41889
+    "elapsedMs": 29179
   },
   "suite": {
     "testFiles": 5,
     "tests": 25,
     "passed": 25,
     "failed": 0,
-    "durationMs": 16918
+    "durationMs": 10526.96923828125
   },
   "checks": {
     "curatedCommandDiscriminants": 36,
@@ -64,7 +64,7 @@
     "package.json": "acd970060c8df0d628cada8c1762111b9c3587031dbdc0e5815fb1e6159147ee",
     "pnpm-lock.yaml": "e659e90970ee34935228595f2297da307495a7a7b01202ecfa67deaf1ac53209",
     "pnpm-workspace.yaml": "d51950e32647c121ad667b578a448b703ea5f74637fd91524b7012dd53167169",
-    "tsconfig.json": "b80805434d59ff95a362cfbff728ceab0e6313f80ea3c23853cb564c1dfc9a65",
+    "tsconfig.json": "ba7a45d0184771111310a1c6503d1ab957ee05c7ad538f3ade8070acefdd9a8f",
     "tsconfig.base.json": "6a5180d481cd767365ec8da2257e5573e498c5802ce56bda99e0ac218baca818",
     "vitest.config.ts": "6f743b2639e8e091bdc454a4aaa6336a538b889e70af8814ee7d1f27c7a8769e",
     "scripts/model-dist.d.ts": "027ab4756f50827bf9ed633e358de80accd725aa55bbdfc628245d1126cb4ee3",
@@ -116,5 +116,19 @@
     "Ten thousand generated attempts are far below the ten-million stable threshold.",
     "The reproducible evidence runner bundles internal source imports because the independent candidate is intentionally not part of the public package API.",
     "A clean clone must install dependencies and build workspace packages before bundling the campaign runner because it imports generated package declarations and runtime entry points."
+  ],
+  "rawReports": [
+    {
+      "path": "artifacts/independent-campaign.json",
+      "sha256": "a9ebcee862ec9b9e68194171488a024435058a23292631c0fcf1537146217337",
+      "runUrl": "https://github.com/natanelia/panefold/actions/runs/36717852627",
+      "artifact": "playground-evidence-finalized"
+    },
+    {
+      "path": "artifacts/independent-suite.json",
+      "sha256": "022affd5379dbf0bc3a9e47932f9ea8457aadad66f319e2e76ff2356c547dda1",
+      "runUrl": "https://github.com/natanelia/panefold/actions/runs/36717852627",
+      "artifact": "playground-evidence-finalized"
+    }
   ]
 }
