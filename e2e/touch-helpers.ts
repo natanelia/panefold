@@ -56,6 +56,9 @@ export async function touchPanelDrop(
   overlay: Locator,
   edge: "center" | "inline-start" | "inline-end" | "block-start" | "block-end",
 ) {
+  // Scrolling the source into view can move a nested target inside the workspace canvas.
+  // Do it before measuring the destination so touch coordinates stay current.
+  await source.locator(".pf-tab-drag-handle").scrollIntoViewIfNeeded();
   const slot = target.locator(".pf-panel-slot");
   const rect = await visibleBox(slot);
   const rtl = await target.evaluate((element) => getComputedStyle(element).direction === "rtl");
