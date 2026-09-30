@@ -17,7 +17,8 @@ import {
   type WorkspaceCommand,
   type WorkspaceSnapshot,
 } from "@panefold/model";
-import { solveLayout, type LogicalRect } from "@panefold/geometry";
+import type { LogicalRect } from "@panefold/geometry";
+import { solveDemoLayout } from "./responsive-layout";
 import {
   canonicalizeWorkspace,
   planGroupDropCommand,
@@ -638,7 +639,7 @@ function previewDemoDrop<TCommand extends WorkspaceCommand>(
         collectReachableNodeIds(next, surface.rootNodeId).includes(resultingNode.id),
     );
   if (resultingSurface === undefined) return undefined;
-  const layout = solveLayout(next, resultingSurface.rootNodeId, context.bounds, {
+  const layout = solveDemoLayout(next, resultingSurface.rootNodeId, context.bounds, {
     splitterSize: context.splitterSize,
   });
   const previewRect = layout.groupRects[String(resultingGroup.id)];

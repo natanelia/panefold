@@ -1,0 +1,72 @@
+name: Touch playground review
+
+on:
+  pull_request:
+    paths:
+      - "apps/demo/src/**"
+      - "apps/site/**"
+      - "packages/react/**"
+      - "e2e/**"
+      - "site-e2e/**"
+      - "scripts/record-preview-evidence.mjs"
+      - ".github/workflows/playground-review.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  review:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    env:
+      VITEST_MAX_WORKERS: "1"
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+      - name: Preserve the reviewed source
+        run: |
+          mkdir -p artifacts
+          git archive --format=tar.gz HEAD -o artifacts/review-source.tar.gz
+      - uses: pnpm/action-setup@v6
+        with:
+          version: 11.16.0
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm exec playwright install --with-deps chromium
+      - name: Test the actual phone interactions without retries
+        run: |
+          pnpm exec playwright test e2e/touch-playground-ux.spec.ts e2e/touch-tap-diagnostic.spec.ts --workers=1 --retries=0 --reporter=json --output=artifacts/phone-results > artifacts/phone-browser.json
+      - name: Run full unit and application suites
+        run: |
+          pnpm build:packages
+          pnpm exec vitest run --reporter=json --outputFile=artifacts/preview-unit.json
+          pnpm --filter @panefold/demo test
+          pnpm --filter @panefold/site test
+      - name: Run all reference browser tests without retries
+        run: pnpm exec playwright test --workers=2 --retries=0 --reporter=json > artifacts/preview-browser.json
+      - name: Test the site and embedded playground
+        run: pnpm exec playwright test --config playwright.site.config.ts --workers=2 --retries=0 --reporter=json --output=artifacts/site-results > artifacts/site-browser.json
+      - name: Export freshly executed evidence for review
+        run: |
+          pnpm performance:smoke > artifacts/preview-node-smoke.json
+          node scripts/record-preview-evidence.mjs
+          pnpm exec oxfmt conformance/results docs/CONFORMANCE.md
+          pnpm conformance:data:generate
+          mkdir -p artifacts/generated/conformance/results artifacts/generated/docs
+          cp conformance/results/*-2026-09-26.json artifacts/generated/conformance/results/
+          cp conformance/evidence.json artifacts/generated/conformance/
+          cp docs/CONFORMANCE.md artifacts/generated/docs/
+          git diff --binary > artifacts/generated-evidence.patch
+      - name: Retain screenshots, traces, and test reports
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: preview-executed-evidence
+          path: |
+            artifacts
+            test-results
+          retention-days: 30

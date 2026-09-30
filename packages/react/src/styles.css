@@ -484,6 +484,10 @@
     scrollbar-width: thin;
   }
 
+  .pf-tab-drag-handle {
+    display: none;
+  }
+
   .pf-tab {
     position: relative;
     display: inline-flex;
@@ -925,6 +929,41 @@
     pointer-events: auto;
   }
 
+  .pf-move-controls {
+    display: grid;
+    gap: 8px;
+    margin-block: 12px;
+  }
+  .pf-move-controls label {
+    font-size: 12px;
+  }
+  .pf-move-controls select,
+  .pf-move-controls button {
+    min-width: 0;
+    min-height: 44px;
+    padding: 8px;
+    border: 1px solid var(--pf-border-strong);
+    border-radius: 6px;
+    background: var(--pf-surface);
+    color: var(--pf-text);
+    font: inherit;
+    touch-action: manipulation;
+  }
+  .pf-move-controls select {
+    width: 100%;
+    font-size: 16px;
+  }
+  .pf-move-controls > div {
+    display: flex;
+    gap: 8px;
+  }
+  .pf-move-controls button {
+    flex: 1;
+  }
+  .pf-move-controls button:disabled {
+    opacity: 0.5;
+  }
+
   .pf-keyboard-move-eyebrow {
     margin: 0 0 8px;
     color: var(--pf-valid);
@@ -994,6 +1033,32 @@
     clip: rect(0 0 0 0) !important;
     white-space: nowrap !important;
     border: 0 !important;
+  }
+
+  @media (any-pointer: coarse) {
+    .pf-workspace[data-panel-drop-enabled="true"] .pf-tab-drag-handle {
+      display: inline-flex;
+      flex: 0 0 44px;
+      align-items: center;
+      justify-content: center;
+      align-self: stretch;
+      min-block-size: 44px;
+      touch-action: none;
+      user-select: none;
+      -webkit-touch-callout: none;
+      cursor: grab;
+    }
+
+    .pf-workspace[data-panel-drop-enabled="true"] .pf-tab {
+      touch-action: pan-x pinch-zoom;
+      padding-inline-start: 0;
+    }
+
+    .pf-workspace[data-panel-drop-enabled="true"]
+      .pf-group[data-tab-orientation="vertical"]
+      .pf-tab {
+      touch-action: pan-y pinch-zoom;
+    }
   }
 
   @media (pointer: coarse) {

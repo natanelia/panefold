@@ -11,7 +11,6 @@ import {
   type ReactNode,
 } from "react";
 import { validateWorkspace } from "@panefold/kernel";
-import { solveLayout } from "@panefold/geometry";
 import {
   getEntity,
   nodeId,
@@ -48,6 +47,8 @@ import {
   type DemoViewPreferences,
 } from "./view-preferences";
 import { createDemoCommands, projectWorkspace } from "./workspace-config";
+import { solveDemoLayout } from "./responsive-layout";
+import { useTouchWorkbench } from "./use-touch-workbench";
 
 const LazyWorkspaceInspector = lazy(async () => {
   const module = await import("./optional-tools");
@@ -156,6 +157,18 @@ function CodeWorkspaceApp({ session }: { readonly session: DemoWorkspaceSession 
   const [inspectorOpen, setInspectorOpen] = useState(false);
   const [paletteOpen, setPaletteOpen] = useState(false);
   const [compactGroupId, setCompactGroupId] = useState("primary");
+  const [focusMode, setFocusMode] = useState(false);
+  const touchWorkbench = useTouchWorkbench();
+  // The compact view must follow activation from menus, history and panel moves.
+  // Changing the region selector itself stays a view-only operation.
+  const activeGroupId = snapshot.groups.ids.find(
+    (id) =>
+      snapshot.activation.activePanelId !== undefined &&
+      getEntity(snapshot.groups, id)?.panelIds.includes(snapshot.activation.activePanelId),
+  );
+  useEffect(() => {
+    if (activeGroupId !== undefined) setCompactGroupId(activeGroupId);
+  }, [activeGroupId, snapshot.activation.activePanelId]);
   const [surfaceStatus, setSurfaceStatus] = useState(
     "Drag a tab to reorder, dock, split, or open it beyond the workspace",
   );
@@ -241,7 +254,7 @@ function CodeWorkspaceApp({ session }: { readonly session: DemoWorkspaceSession 
   );
   const layoutSolver = useCallback<WorkspaceLayoutSolver<WorkspaceSnapshot>>(
     (layoutSnapshot, request) =>
-      solveLayout(layoutSnapshot, nodeId(request.rootNodeId), request.bounds, {
+      solveDemoLayout(layoutSnapshot, nodeId(request.rootNodeId), request.bounds, {
         splitterSize: request.splitterSize,
         splitOverrides: request.splitOverrides,
       }),
@@ -261,11 +274,20 @@ function CodeWorkspaceApp({ session }: { readonly session: DemoWorkspaceSession 
       setSurfaceStatus(`${label} is closed. Undo the layout change to restore it.`);
       return;
     }
-    runtime.dispatch(
+    const receipt = runtime.dispatch(
       { type: "select-panel", panelId: panelId(id), activate: true },
       { origin: "menu", label: `Show ${label}` },
     );
-    setSurfaceStatus(`${label} focused`);
+    if (receipt.status === "rejected") {
+      setSurfaceStatus(`${label}: ${receipt.result.error.remediation}`);
+      return;
+    }
+    // A panel can already be active while a different region is being viewed.
+    const group = snapshot.groups.ids.find((group) =>
+      getEntity(snapshot.groups, group)?.panelIds.includes(panelId(id)),
+    );
+    if (group !== undefined) setCompactGroupId(group);
+    setSurfaceStatus(receipt.status === "queued" ? `${label} queued` : `${label} focused`);
   };
 
   const handleApplicationMenu = (item: (typeof applicationMenuItems)[number]["label"]) => {
@@ -325,7 +347,8 @@ function CodeWorkspaceApp({ session }: { readonly session: DemoWorkspaceSession 
           }}
         >
           <WorkbenchIcon name="search" />
-          <span>panefold-demo</span>
+          <span className="demo-command-label">panefold-demo</span>
+          <span className="demo-command-mobile-label">Panels</span>
           <kbd>⌘K</kbd>
         </button>
         <span className="demo-toolbar-spacer" />
@@ -387,6 +410,17 @@ function CodeWorkspaceApp({ session }: { readonly session: DemoWorkspaceSession 
 
       <main className="demo-main" ref={workspaceFrameRef}>
         <aside className="demo-activity-bar" aria-label="Activity bar">
+          <button
+            type="button"
+            className="demo-mobile-editor"
+            aria-label="Editor"
+            aria-pressed={String(snapshot.activation.activePanelId ?? "") === "map-canvas"}
+            disabled={getEntity(snapshot.panels, panelId("map-canvas")) === undefined}
+            onClick={() => activateWorkbenchPanel("map-canvas", "Editor")}
+          >
+            <WorkbenchIcon name="source" />
+            <span className="demo-activity-label">Editor</span>
+          </button>
           {activityItems.map((item) => {
             const active = String(snapshot.activation.activePanelId ?? "") === item.panelId;
             const available = getEntity(snapshot.panels, panelId(item.panelId)) !== undefined;
@@ -403,6 +437,9 @@ function CodeWorkspaceApp({ session }: { readonly session: DemoWorkspaceSession 
                 }}
               >
                 <WorkbenchIcon name={item.icon} />
+                <span className="demo-activity-label">
+                  {item.label === "Source Control" ? "Source" : item.label}
+                </span>
               </button>
             );
           })}
@@ -429,22 +466,38 @@ function CodeWorkspaceApp({ session }: { readonly session: DemoWorkspaceSession 
             <WorkbenchIcon name="manage" />
           </button>
         </aside>
-        <WorkspaceSurface
-          projector={projector}
-          commands={commands}
-          panels={panelRegistry}
-          layoutSolver={layoutSolver}
-          direction={direction}
-          motion={motion}
-          workspaceLabel="Panefold Code workbench"
-          className="demo-workspace"
-          responsive="auto"
-          compactGroupId={compactGroupId}
-          onCompactGroupChange={setCompactGroupId}
-          tabPresentation={{ placement: tabPlacement, content: tabContent }}
-          dropBehavior={{ centerGroupDrop: "merge" }}
-          onExternalPanelRequest={externalPanels.handleRequest}
-        />
+        <div className="demo-workspace-shell" data-focus-mode={String(focusMode)}>
+          <nav className="demo-layout-modes" aria-label="Workspace view">
+            <button type="button" aria-pressed={!focusMode} onClick={() => setFocusMode(false)}>
+              Layout
+            </button>
+            <button type="button" aria-pressed={focusMode} onClick={() => setFocusMode(true)}>
+              Focus
+            </button>
+            <span>
+              {focusMode
+                ? "Read one group. Layout shows all splits."
+                : "Drag ⋮⋮ to move. Drop at an edge to split."}
+            </span>
+          </nav>
+          <WorkspaceSurface
+            projector={projector}
+            commands={commands}
+            panels={panelRegistry}
+            layoutSolver={layoutSolver}
+            direction={direction}
+            motion={motion}
+            workspaceLabel="Panefold Code workbench"
+            className="demo-workspace"
+            responsive={focusMode ? "auto" : false}
+            splitterSize={touchWorkbench ? 16 : 6}
+            compactGroupId={compactGroupId}
+            onCompactGroupChange={setCompactGroupId}
+            tabPresentation={{ placement: tabPlacement, content: tabContent }}
+            dropBehavior={{ centerGroupDrop: "merge" }}
+            onExternalPanelRequest={externalPanels.handleRequest}
+          />
+        </div>
         {inspectorOpen ? (
           <DeferredToolBoundary
             label="Workspace inspector"
@@ -525,6 +578,7 @@ function CodeWorkspaceApp({ session }: { readonly session: DemoWorkspaceSession 
             <LazyCommandPalette
               runtime={runtime}
               snapshot={snapshot}
+              onSelectPanel={activateWorkbenchPanel}
               onClose={() => {
                 setPaletteOpen(false);
               }}
@@ -834,9 +888,17 @@ function SettingsMenu({
     const onPointerDown = (event: PointerEvent) => {
       if (menuRef.current?.contains(event.target as Node) !== true) setOpen(false);
     };
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key !== "Escape") return;
+      event.preventDefault();
+      setOpen(false);
+      menuRef.current?.querySelector<HTMLButtonElement>("button")?.focus();
+    };
     window.addEventListener("pointerdown", onPointerDown);
+    window.addEventListener("keydown", onKeyDown);
     return () => {
       window.removeEventListener("pointerdown", onPointerDown);
+      window.removeEventListener("keydown", onKeyDown);
     };
   }, [open]);
 
@@ -853,6 +915,19 @@ function SettingsMenu({
       </ToolbarButton>
       {open ? (
         <div className="demo-settings-popover" role="dialog" aria-label="Workspace appearance">
+          <header className="demo-settings-heading">
+            <strong>Workspace appearance</strong>
+            <button
+              type="button"
+              aria-label="Close appearance settings"
+              onClick={() => {
+                setOpen(false);
+                menuRef.current?.querySelector<HTMLButtonElement>("button")?.focus();
+              }}
+            >
+              ×
+            </button>
+          </header>
           <label>
             Theme
             <select

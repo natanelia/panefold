@@ -64,3 +64,5 @@ export type {
   WorkspaceResultInterpreter,
   WorkspaceSplitView,
 } from "./types";
+
+export { resolveFloatingSurfaceBounds, floatingSurfaceContentBounds } from "./floating-surface";

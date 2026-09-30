@@ -5,7 +5,7 @@ import { Header } from "./components/Header";
 import { HomePage } from "./pages/HomePage";
 import { SocialCardPage } from "./pages/SocialCardPage";
 import { updatePageMetadata } from "./lib/structuredData";
-import { useRoute } from "./lib/router";
+import { sitePath, useRoute } from "./lib/router";
 import { useMarketingAnalytics } from "./lib/analytics";
 
 const DemoPage = lazy(() =>
@@ -51,6 +51,21 @@ export default function App() {
     );
   }
 
+  if (cleanPath !== "/")
+    return (
+      <>
+        <SkipLink />
+        <Header path={cleanPath} navigate={navigate} />
+        <main id="main-content" tabIndex={-1} className="docs-message">
+          <p className="section-eyebrow">404</p>
+          <h1>Page not found</h1>
+          <p>
+            Head back to <a href={sitePath("/docs")}>the documentation</a> to find your next step.
+          </p>
+        </main>
+      </>
+    );
+
   return (
     <>
       <SkipLink />
@@ -71,11 +86,7 @@ function SkipLink() {
 
 function RouteLoading() {
   return (
-    <main
-      id="main-content"
-      tabIndex={-1}
-      className="grid min-h-screen place-items-center bg-[#080c12] pt-[68px]"
-    >
+    <main id="main-content" tabIndex={-1} className="grid min-h-[70vh] place-items-center">
       <span className="font-mono text-[10px] uppercase tracking-[0.16em] text-slate-400">
         Loading Panefold…
       </span>

@@ -105,6 +105,21 @@ test("keeps the VS Code demo typography and compact header in a browser window",
     "11px",
   );
 
-  await header.getByRole("button", { name: "Return to main window" }).click();
+  const closed = popup.waitForEvent("close");
+  try {
+    await header
+      .getByRole("button", { name: "Return to main window" })
+      .click({ noWaitAfter: true });
+  } catch (error) {
+    // Closing the child is the action's expected result. Some Chromium runs
+    // acknowledge that close before acknowledging the input dispatch.
+    if (
+      !popup.isClosed() ||
+      !(error instanceof Error) ||
+      !error.message.includes("has been closed")
+    )
+      throw error;
+  }
+  await closed;
   await expect(page.getByRole("tab", { name: "workspace.ts" })).toBeVisible();
 });

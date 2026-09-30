@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "kind": "browser-profile-result",
   "profile": "compact-react-chromium-desktop",
-  "producedAt": "2026-09-28T03:17:04.844Z",
+  "producedAt": "2026-09-30T11:55:54.787Z",
   "status": "passed",
   "runner": "Playwright",
   "command": "pnpm exec playwright test --reporter=json",
@@ -13,220 +13,220 @@
     "browserVersion": "151.0.7922.34"
   },
   "summary": {
-    "tests": 56,
-    "passed": 56,
+    "tests": 82,
+    "passed": 82,
     "skipped": 0,
     "failed": 0,
-    "durationMs": 50625.006
+    "durationMs": 90772.999
   },
   "tests": [
     {
-      "file": "demo.spec.ts",
+      "file": "code-workbench-cases.ts",
       "title": "projects semantic commands through accessible workspace chrome",
       "ok": true
     },
     {
-      "file": "demo.spec.ts",
+      "file": "code-workbench-cases.ts",
       "title": "has no automated WCAG A/AA violations in the initial projection",
       "ok": true
     },
     {
-      "file": "demo.spec.ts",
+      "file": "code-workbench-cases.ts",
       "title": "uses solved geometry for keyboard resize in LTR and RTL",
       "ok": true
     },
     {
-      "file": "demo.spec.ts",
+      "file": "code-workbench-cases.ts",
       "title": "honors OS and explicit motion preferences without remounting panel hosts",
       "ok": true
     },
     {
-      "file": "demo.spec.ts",
+      "file": "code-workbench-cases.ts",
       "title": "pauses and resumes expensive panel work without remounting its stable host",
       "ok": true
     },
     {
-      "file": "demo.spec.ts",
+      "file": "code-workbench-cases.ts",
       "title": "drags a stateful panel into another container and undoes it atomically",
       "ok": true
     },
     {
-      "file": "demo.spec.ts",
+      "file": "code-workbench-cases.ts",
       "title": "moves a whole multi-tab panel container in one undoable drag",
       "ok": true
     },
     {
-      "file": "demo.spec.ts",
+      "file": "code-workbench-cases.ts",
       "title": "reorders tabs by drag in horizontal LTR, RTL, and vertical rails without remounting",
       "ok": true
     },
     {
-      "file": "demo.spec.ts",
+      "file": "code-workbench-cases.ts",
       "title": "autoscrolls an overflowing tab strip and retains the final insertion target",
       "ok": true
     },
     {
-      "file": "demo.spec.ts",
+      "file": "code-workbench-cases.ts",
       "title": "creates new containers on all four logical sides through the shared drop planner",
       "ok": true
     },
     {
-      "file": "demo.spec.ts",
+      "file": "code-workbench-cases.ts",
       "title": "removes a split panel container in one undoable action",
       "ok": true
     },
     {
-      "file": "demo.spec.ts",
+      "file": "code-workbench-cases.ts",
       "title": "removes an empty retained panel container without discarding panels",
       "ok": true
     },
     {
-      "file": "demo.spec.ts",
+      "file": "code-workbench-cases.ts",
       "title": "redocks into a persistent group after its last tab moves away",
       "ok": true
     },
     {
-      "file": "demo.spec.ts",
+      "file": "code-workbench-cases.ts",
       "title": "allocates a fresh split identity from persisted topology after reload",
       "ok": true
     },
     {
-      "file": "demo.spec.ts",
+      "file": "code-workbench-cases.ts",
       "title": "dragging a tab to the right browser edge creates a new container in one transaction",
       "ok": true
     },
     {
-      "file": "demo.spec.ts",
+      "file": "code-workbench-cases.ts",
       "title": "split menu, vertical rails, icon-only tabs, and pointer splitter remain usable",
       "ok": true
     },
     {
-      "file": "demo.spec.ts",
+      "file": "code-workbench-cases.ts",
       "title": "floats, moves, resizes, minimizes, maximizes, restores, and redocks a live panel",
       "ok": true
     },
     {
-      "file": "demo.spec.ts",
+      "file": "code-workbench-cases.ts",
       "title": "persists canonical panel configuration and view preferences across reload",
       "ok": true
     },
     {
-      "file": "demo.spec.ts",
+      "file": "code-workbench-cases.ts",
       "title": "runs all normative heavy-content fixture classes in a real browser lifecycle",
       "ok": true
     },
     {
-      "file": "demo.spec.ts",
+      "file": "code-workbench-cases.ts",
       "title": "keeps dynamic settings usable with forced colors",
       "ok": true
     },
     {
-      "file": "demo.spec.ts",
+      "file": "code-workbench-cases.ts",
       "title": "keeps light-theme persistence and dynamic settings accessible",
       "ok": true
     },
     {
-      "file": "demo.spec.ts",
+      "file": "code-workbench-cases.ts",
       "title": "keeps persistence proof visible from desktop through 320px",
       "ok": true
     },
     {
-      "file": "demo.spec.ts",
+      "file": "code-workbench-cases.ts",
       "title": "caps and scrolls appearance settings in a low viewport",
       "ok": true
     },
     {
-      "file": "demo.spec.ts",
+      "file": "code-workbench-cases.ts",
       "title": "fails closed instead of hanging when IndexedDB open rejects",
       "ok": true
     },
     {
-      "file": "demo.spec.ts",
+      "file": "code-workbench-cases.ts",
       "title": "drags a live panel beyond the workspace into a popup and redocks it",
       "ok": true
     },
     {
-      "file": "demo.spec.ts",
+      "file": "code-workbench-cases.ts",
       "title": "a blocked popup leaves the panel and semantic revision in the source workspace",
       "ok": true
     },
     {
-      "file": "demo.spec.ts",
+      "file": "code-workbench-cases.ts",
       "title": "unexpected popup loss recovers the authoritative panel into the main workspace",
       "ok": true
     },
     {
-      "file": "demo.spec.ts",
+      "file": "code-workbench-cases.ts",
       "title": "reload closes an external window, restores its panel, and permits a fresh popout",
       "ok": true
     },
     {
-      "file": "demo.spec.ts",
+      "file": "code-workbench-cases.ts",
       "title": "VS Code preview matches the committed inline-start pane in horizontal",
       "ok": true
     },
     {
-      "file": "demo.spec.ts",
+      "file": "code-workbench-cases.ts",
       "title": "VS Code preview matches the committed inline-end pane in horizontal",
       "ok": true
     },
     {
-      "file": "demo.spec.ts",
+      "file": "code-workbench-cases.ts",
       "title": "VS Code preview matches the committed block-start pane in horizontal",
       "ok": true
     },
     {
-      "file": "demo.spec.ts",
+      "file": "code-workbench-cases.ts",
       "title": "VS Code preview matches the committed block-end pane in horizontal",
       "ok": true
     },
     {
-      "file": "demo.spec.ts",
+      "file": "code-workbench-cases.ts",
       "title": "VS Code preview matches the committed inline-start pane in vertical",
       "ok": true
     },
     {
-      "file": "demo.spec.ts",
+      "file": "code-workbench-cases.ts",
       "title": "VS Code preview matches the committed inline-end pane in vertical",
       "ok": true
     },
     {
-      "file": "demo.spec.ts",
+      "file": "code-workbench-cases.ts",
       "title": "VS Code preview matches the committed block-start pane in vertical",
       "ok": true
     },
     {
-      "file": "demo.spec.ts",
+      "file": "code-workbench-cases.ts",
       "title": "VS Code preview matches the committed block-end pane in vertical",
       "ok": true
     },
     {
-      "file": "demo.spec.ts",
+      "file": "code-workbench-cases.ts",
       "title": "VS Code preview matches the committed inline-start pane in rtl",
       "ok": true
     },
     {
-      "file": "demo.spec.ts",
+      "file": "code-workbench-cases.ts",
       "title": "VS Code preview matches the committed inline-end pane in rtl",
       "ok": true
     },
     {
-      "file": "demo.spec.ts",
+      "file": "code-workbench-cases.ts",
       "title": "VS Code preview matches the committed block-start pane in rtl",
       "ok": true
     },
     {
-      "file": "demo.spec.ts",
+      "file": "code-workbench-cases.ts",
       "title": "VS Code preview matches the committed block-end pane in rtl",
       "ok": true
     },
     {
-      "file": "demo.spec.ts",
+      "file": "code-workbench-cases.ts",
       "title": "VS Code acquisition uses content edges, a broad merge center, and deterministic corners",
       "ok": true
     },
     {
-      "file": "demo.spec.ts",
+      "file": "code-workbench-cases.ts",
       "title": "switches full-screen regions with coarse targets without mutating canonical topology",
       "ok": true
     },
@@ -281,6 +281,51 @@
       "ok": true
     },
     {
+      "file": "mobile-playground.spec.ts",
+      "title": "fits small phones, portrait, landscape and touch tablets without overlapping controls",
+      "ok": true
+    },
+    {
+      "file": "mobile-playground.spec.ts",
+      "title": "bottom navigation reveals the activated panel instead of leaving another region visible",
+      "ok": true
+    },
+    {
+      "file": "mobile-playground.spec.ts",
+      "title": "the panel picker reveals an already-active panel after a view-only region change",
+      "ok": true
+    },
+    {
+      "file": "mobile-playground.spec.ts",
+      "title": "appearance settings stay inside a short viewport in both directions and can be dismissed",
+      "ok": true
+    },
+    {
+      "file": "mobile-playground.spec.ts",
+      "title": "touch menus can split and undo without losing editor content",
+      "ok": true
+    },
+    {
+      "file": "mobile-playground.spec.ts",
+      "title": "rotation and region browsing preserve the layout revision and live note",
+      "ok": true
+    },
+    {
+      "file": "mobile-playground.spec.ts",
+      "title": "the command dialog traps keyboard focus and has a visible touch close control",
+      "ok": true
+    },
+    {
+      "file": "mobile-playground.spec.ts",
+      "title": "the phone workbench and settings pass automated accessibility checks",
+      "ok": true
+    },
+    {
+      "file": "mobile-playground.spec.ts",
+      "title": "native touch scrolling reveals overflow tabs without committing a drag",
+      "ok": true
+    },
+    {
       "file": "performance.spec.ts",
       "title": "preserves raw interaction frames and enforces the experimental CI guardrail",
       "ok": true
@@ -299,59 +344,165 @@
       "file": "single-tab-row.spec.ts",
       "title": "keeps the VS Code demo typography and compact header in a browser window",
       "ok": true
+    },
+    {
+      "file": "touch-layout.spec.ts",
+      "title": "native touch docks between groups in ltr, preserving the host and one undo step",
+      "ok": true
+    },
+    {
+      "file": "touch-layout.spec.ts",
+      "title": "native touch docks between groups in rtl, preserving the host and one undo step",
+      "ok": true
+    },
+    {
+      "file": "touch-layout.spec.ts",
+      "title": "native touch creates a split, nests an orthogonal split, resizes it and restores it after reload",
+      "ok": true
+    },
+    {
+      "file": "touch-layout.spec.ts",
+      "title": "native touch reorders tabs in the full landscape layout",
+      "ok": true
+    },
+    {
+      "file": "touch-layout.spec.ts",
+      "title": "native touch moves a whole container into another container",
+      "ok": true
+    },
+    {
+      "file": "touch-layout.spec.ts",
+      "title": "touchCancel cancels a real touch drag and releases capture without a layout change",
+      "ok": true
+    },
+    {
+      "file": "touch-layout.spec.ts",
+      "title": "rotation cancels a real touch drag and releases capture without a layout change",
+      "ok": true
+    },
+    {
+      "file": "touch-playground-operations.spec.ts",
+      "title": "touch moves a whole playground container with one undo step",
+      "ok": true
+    },
+    {
+      "file": "touch-playground-operations.spec.ts",
+      "title": "touch reorders playground tabs and cancellation leaves the order unchanged",
+      "ok": true
+    },
+    {
+      "file": "touch-playground-operations.spec.ts",
+      "title": "touch floating move and resize commit only on release, cancel safely, and retain editor text",
+      "ok": true
+    },
+    {
+      "file": "touch-playground-ux.spec.ts",
+      "title": "starts with readable content and one control row per pane",
+      "ok": true
+    },
+    {
+      "file": "touch-playground-ux.spec.ts",
+      "title": "uses broad touch targets for nested splits and keeps panel content",
+      "ok": true
+    },
+    {
+      "file": "touch-playground-ux.spec.ts",
+      "title": "offers a previewed tap-to-place operation and durable restoration",
+      "ok": true
+    },
+    {
+      "file": "touch-playground-ux.spec.ts",
+      "title": "cancels a touch drag and a move sheet without committing",
+      "ok": true
+    },
+    {
+      "file": "touch-playground-ux.spec.ts",
+      "title": "resizes a pane with touch instead of shrinking text",
+      "ok": true
+    },
+    {
+      "file": "touch-playground-ux.spec.ts",
+      "title": "passes automatic accessibility checks on the phone and the move sheet",
+      "ok": true
+    },
+    {
+      "file": "touch-tap-diagnostic.spec.ts",
+      "title": "records the toolbar event sequence after a native panel move",
+      "ok": true
     }
   ],
   "rawReport": {
     "path": "artifacts/preview-browser.json",
-    "sha256": "075252992dc58ceaaf10b2ea9517867a578e2d4fcd17f3cf672deaac271f8e61",
-    "runUrl": "https://github.com/natanelia/panefold/actions/runs/36372474835",
-    "artifact": "merged-performance-node-24"
+    "sha256": "bf923cd482c1deb03e1ec6920cf8118298e3738709eb2c3b9d0303966d81382c",
+    "runUrl": "https://github.com/natanelia/panefold/actions/runs/36711088102",
+    "artifact": "preview-executed-evidence"
   },
   "sourceDigests": {
-    "apps/demo/index.html": "c82b4b1af0fb76789fffcef28c7c785a078c7234f8f68be54e1000bc173f6848",
-    "apps/demo/src/App.tsx": "ce8a1cb754f58361e0cbf8896c730f45ffe55d834753ee237f5a86e0e20d34b3",
+    "apps/demo/index.html": "bdef651c363beb040b113c36e70f5fe773215b659502518879dc6e47d3c4900e",
+    "apps/demo/src/App.tsx": "d2fc74c5551f30c118c245cb925de1e7334a326af18fd4829c10aa8671382831",
+    "apps/demo/src/TouchButton.tsx": "13e7301be325cd1f03fb9a47d48e955b3db3a156fec38c70ec2370189d0c109a",
+    "apps/demo/src/TouchPlayground.tsx": "2afb246e15de0cb41e7f830ce3d5e044e0fb78aba72c051df87c9c3567a1abca",
     "apps/demo/src/demo-panels.tsx": "e0896a5cc259c6ea29db9e63bb6e181de1a2d08569fbd4b17c092c74b7a0ae7a",
     "apps/demo/src/external-panels.ts": "2836bab76f011fd9baa4db41be9d164cf450ee00b55933d21fce9c0744fd3b3e",
+    "apps/demo/src/main.tsx": "7b437cb000879d31587a91fa6082861a3f41cb14fc9e7d0084912b4992fdd721",
+    "apps/demo/src/mobile.css": "71859290c3377d1a54bd9e5e9e44c17d0aa34bb699e3eff8c766a5287dfa36b8",
+    "apps/demo/src/playground-model.test.ts": "54d584cdd971e62348e025b85cc20db34987bb9cd463ffa1348fc43c22d57194",
+    "apps/demo/src/playground-model.ts": "2b8f146a48ceb0c087f817d296216ab151ea89d50426fcdef7679f044b59bb97",
+    "apps/demo/src/playground-session.ts": "0d62e5cda460a0889f7fafd9f46f244de23fc5c3d24ced2e544e71783a51c6cb",
+    "apps/demo/src/responsive-layout.ts": "d9de1c955aa7fae483173d75b84f2575207a00c0450c57a9d831dacdab0e9020",
     "apps/demo/src/runtime-session.ts": "1b09817f5f32bc10b8e574ac979f3bad472d5840ecb1c08bebdce6d62563c287",
     "apps/demo/src/styles.css": "686b97c0e150d34b8c6552a74e3e6d917796e619f5a800a81a2792868219e7c5",
-    "apps/demo/src/workspace-config.ts": "6eb5ec14a58d3acf6ffdc65df232eda213bf25773b1f4aacdf0357d2fcd1091f",
+    "apps/demo/src/touch-floating.css": "3a7e05c611f84b8e9552d9d177a685d3756d1ec34942541ed25b64c20d2394cb",
+    "apps/demo/src/touch-playground.css": "f85cd5505e93e38f3301c5d419a6790e16edde937c0eea2c061213a8fc182d6c",
+    "apps/demo/src/use-touch-workbench.ts": "c913911471945a857994e2078eb36420b14cdcb8cd3d7437b5d562c32a02f04c",
+    "apps/demo/src/workspace-config.ts": "32b5e39026d01567a956a81fef19d81a96eed92f01156e3b3d8aea5338756002",
     "apps/demo/vite.config.ts": "70dd28bb53e3ea556d4c750aee26762312fa7884b2052c9c0cb073a1584cc663",
-    "e2e/demo.spec.ts": "c3a97de440920c85bc63a6b5fcfb3214ad3247031bc0ad1bd3f62ad0976df71f",
+    "e2e/code-workbench-cases.ts": "e83979a7be6e659fa238414e65f7f28ec74828274567e8f181ea002ed3212d39",
+    "e2e/demo.spec.ts": "bb53cbcba475d8957c6f89bf398f005d63320e90f92448a118045e69ac87b889",
     "e2e/drag-parity.spec.ts": "a7c7da7513e3b56de9b832cce5fa2fc6236f55d74ba9ea3aa9be1600f6620bce",
+    "e2e/mobile-playground.spec.ts": "fd45fe0690c8edbb380193d2525ed07a565ce2b1acb186207bc9d88e96d1d25c",
+    "e2e/native-touch-audit.ts": "31e07885233945c7f47f7965a0fa66df5d73973ece27a211cc952e34c76d183b",
     "e2e/performance-baseline.json": "128b4c7dc2c7fc03372224828417f675b279359ebbe9bab7408b172ad76b48a9",
     "e2e/performance.spec.ts": "2bbc7b6cb40fd2ad97ba33824b5b8a0a3cf43a82ce638e432f13d29c8db164f3",
+    "e2e/touch-helpers.ts": "656bb325633317a76e1f0d803bc95a3b22b418142be7daad50c3724fa667c19e",
+    "e2e/touch-layout.spec.ts": "b2b1633c8edb751f7fdf45e1d25072b4e6393146c8ebb9b44d49f772ce443e44",
+    "e2e/touch-playground-operations.spec.ts": "d594a5a80b176d7be8c721d13546aede0b69e7ce72dea879d59498dc69123d5b",
+    "e2e/touch-playground-ux.spec.ts": "17748d80e1de9cb6a5ab9443fd9992635cb82cd2fb77112185e1ad3eb63ce7ac",
     "package.json": "acd970060c8df0d628cada8c1762111b9c3587031dbdc0e5815fb1e6159147ee",
     "packages/geometry/src/hit-test.ts": "2da9ca42d97c135f37d599bbaebed8f758343fa4e52fd647c05a4b179340c121",
     "packages/kernel/src/plan-panel-drop.ts": "61725af35d608d44bdbc6ec6a7079e7e41a9d39e7fcaccb3fae1477cca4df93f",
     "packages/motion/src/coordinator.ts": "50eff7dd6a1b8f6433ac3f5bfc5f8d74b99a501e43e712ccb3e1a82520574c6d",
     "packages/motion/src/motion-dom-driver.ts": "57092ac380b7d666ed807c31d2f691fea906d63d9cdff9095f5c2bc32260323b",
-    "packages/react/src/WorkspaceSurface.tsx": "25c81bb51d017329d21d30b5feee3d068a71507727209728c79dc53b611f154a",
+    "packages/react/src/WorkspaceSurface.tsx": "318fd8cde7c010ecd6e89cb9bbb3901d11d1a03fc7d85fe981a357d17a61b78f",
     "packages/react/src/drop-modifiers.ts": "542583898dfa7d121b0d91f51171df8a3db47a8e749422437da903372a60c6ee",
     "packages/react/src/drop-preview.ts": "7c84edb3ba5ee124e207ca6fc5fb3f2a8b8e07178d90f11b96a68504b4402de7",
-    "packages/react/src/drop-target.ts": "46d7afa6f516ec67bcc0d1deaa7e905c2da826be516125a726a170d6a2523357",
-    "packages/react/src/floating-surface.tsx": "ce26f0641e9fea4d2349255feae86f0d9b3158a6cb8812d09d96b8c55481835c",
+    "packages/react/src/drop-target.ts": "6626985475da22f7a7938e2c7dd59cd6ce83f07902561a1cf6b77fec3ed361ff",
+    "packages/react/src/floating-surface.tsx": "a89136a0685a1b87f97a15b324198c498d45cf382843fe34dbbf9a963b98225b",
     "packages/react/src/group-drag.tsx": "bb30a15666da3c6fbcfa53b443b023393ea85bec33ee3da750e9f67384694f26",
     "packages/react/src/group-drop.ts": "85a436f15d973eacf1a7d556b467a75e56ed484fb1add90e95d2b3e1c4c137dd",
-    "packages/react/src/index.ts": "6cd934f63b725c64260cc060f07463e02c963656ac86a2f23128a86acd15d449",
-    "packages/react/src/messages.ts": "7f8597f1501a1fab6b0cdc06398ed8bc3cf28e6e2faeca3be7de6707f4bfadfd",
+    "packages/react/src/index.ts": "091c9aec1f4bf40b9968e5387462582549bcf033b4983dfb4b5e7230ee47cc00",
+    "packages/react/src/messages.ts": "cd68829f5ead5ffd616dc93b22a57a76117e142395acda4a88c6f560d7751a47",
+    "packages/react/src/move-destination-controls.tsx": "c72fd93fc63ecefa7f732dde93291f04f1f3d075b9bee3e0b1b4d52ed18bd19d",
     "packages/react/src/node-motion.ts": "5f7efe09d09573ea1c2baa44744627d34fabe60cc6978f287da83e6b02ed52bb",
     "packages/react/src/panel-drag.tsx": "e19befa4995182d66a76570990bcff60e2ab4ba5fb76f0fe8a63e020bca493cc",
     "packages/react/src/panel-drop.ts": "843ce1f6eaaf926bef54f7f9ae246072dbdd50e2f6ffa9976c93b6f7c1afd3e0",
-    "packages/react/src/styles.css": "3b705caba74cedd0c542102947c9a1e76b7dce53c89a94814a004ab2b8a415b9",
+    "packages/react/src/styles.css": "5ce0dc5fcdafaa04e9593212eecdcac4012ebde9b56894d4294cbdc6a07ba144",
     "packages/react/src/tab-insertion.ts": "e611ecfe7cb4b0b9fb7e748a747f2584e35dbaa72111a907008f6dc6b11f1670",
     "packages/react/src/tab-reorder.ts": "c139803bc37c5f2c6fc6a17eb836784ff8d203b7bae8acebedcbf290cdabc599",
-    "packages/react/src/types.ts": "e5f3def8259ae492ac8802fe9b2c7b05b5b15a0cde5a66dd34f4ed570685c893",
+    "packages/react/src/types.ts": "18f7ddb00c47413938ad34d0117d970024a2c1a945b27b7086d4e63b329194a5",
     "packages/react/test/drag-parity.test.ts": "1f0bca650b8647cf7473639a0afa59839bdd60327892e428f30a98642cd67443",
     "packages/react/test/drop-preview.test.ts": "bdc1de685dce3a9bc5c073cf9fb7f2325de07251a8f71d4b318f09990c22211c",
     "packages/react/test/drop-target.test.ts": "2f28dc5a482cb6cc12fdbafb4e29ca3fba2a424dd1a5e9f822e9d95f4e9fc0a6",
+    "packages/react/test/floating-input.test.tsx": "0251984dd7a1e52ef0e2560d8a3f36ccfdc394ae5c9b2545f05b7a119a958d3e",
     "packages/react/test/tab-insertion.test.ts": "5c65997257abdca9b2605b13ed733bc9670991b962cd3096674d503f2ed77960",
+    "packages/react/test/touch-drop-policy.test.ts": "b58dba1e8cc540085ddde1e90538ccecbaaaef9a1fa519331d71399293d538f5",
     "packages/runtime/src/durable-runtime.ts": "e89cd98a92aa51de7c9eae88aa6eced0f48fb8e3ff3a739526a447786b527595",
     "packages/surfaces/src/browser-adapter.ts": "1e452c51b94eb96d640defb858d05f28bad3c76550982a20bbcc1ab379cc2d42",
     "packages/surfaces/src/transfer.ts": "2ae27ae6d5f76269d2e49f9649f5e2cf51792441460b13fceee9c7bfabe4318f",
     "packages/surfaces/src/types.ts": "119ae61f47124f0d7bb4c9f2b74afd3fa5510f27cb3e928fe328590488b029e6",
     "playwright.config.ts": "1488b4ef7257ef5a6dc5505148550cbb6ed89e9488b2c9e39e874f15469cc245",
     "pnpm-lock.yaml": "e659e90970ee34935228595f2297da307495a7a7b01202ecfa67deaf1ac53209",
-    "scripts/record-preview-evidence.mjs": "4dadc918ccf8699fa13f9cea14cd442de6f24aa544f147a18346168b60d2edbf",
+    "scripts/record-preview-evidence.mjs": "9918258288f54dd3d93f8cebb895107dca13e9b7c58130234071c70a47411e2c",
     "vitest.config.ts": "6f743b2639e8e091bdc454a4aaa6336a538b889e70af8814ee7d1f27c7a8769e"
   },
   "limitations": [

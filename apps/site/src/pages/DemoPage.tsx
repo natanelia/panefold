@@ -1,40 +1,44 @@
-import { ArrowLeft, ExternalLink, Info } from "lucide-react";
+import { ArrowLeft, ExternalLink } from "lucide-react";
 
 import { SiteLink } from "../components/SiteLink";
 import { siteAsset } from "../lib/router";
+import "./playground.css";
+
+const description = "A live workbench. Your layout is saved in this browser.";
 
 export function DemoPage({ navigate }: { readonly navigate: (path: string) => void }) {
+  const workbench =
+    new URLSearchParams(location.search).get("example") === "code"
+      ? "workbench/?fixture=code"
+      : "workbench/";
   return (
-    <main id="main-content" tabIndex={-1} className="flex h-dvh min-h-0 flex-col pt-[68px]">
+    <main id="main-content" tabIndex={-1} className="playground-page">
       <h1 className="sr-only">Panefold Code live workbench demo</h1>
-      <div className="flex min-h-[54px] shrink-0 flex-wrap items-center gap-x-3 gap-y-2 border-b border-white/[0.08] bg-[#080c12] px-4 py-2 md:px-6">
+      <div className="playground-toolbar">
         <SiteLink
+          aria-label="Back to Panefold home"
           to="/"
           navigate={navigate}
           data-track="demo_back_home"
-          className="inline-flex items-center gap-2 text-xs font-medium text-slate-400 hover:text-white"
+          className="playground-back"
         >
-          <ArrowLeft className="size-3.5" /> Back to Panefold
+          <ArrowLeft size={16} aria-hidden="true" /> Back to Panefold
         </SiteLink>
-        <span className="h-4 w-px bg-white/10" />
-        <div className="flex min-w-0 items-start gap-2 text-[11px] leading-5 text-slate-400">
-          <Info className="size-3.5 text-cyan-300" /> Panefold Code is an interactive workbench
-          fixture. Its panel layout is saved in IndexedDB in this browser.
-        </div>
+        <p className="playground-description">{description}</p>
         <a
-          href={siteAsset("workbench/")}
+          href={siteAsset(workbench)}
           target="_blank"
           rel="noreferrer"
           data-track="demo_open_standalone"
-          className="ml-auto hidden items-center gap-2 text-[11px] font-medium text-slate-400 hover:text-white sm:flex"
+          className="playground-open"
         >
-          Open alone <ExternalLink className="size-3" />
+          Open alone <ExternalLink size={15} aria-hidden="true" />
         </a>
       </div>
       <iframe
         title="Panefold Code live workbench demo"
-        src={siteAsset("workbench/")}
-        className="block min-h-0 flex-1 w-full bg-[#08101d]"
+        src={siteAsset(workbench)}
+        className="playground-workbench"
       />
     </main>
   );

@@ -1,74 +1,37 @@
-# Panefold marketing and launch system
+# Marketing and launch
 
-Panefold is positioned as **workspace state you can reason about**: infrastructure for teams
-building panel-heavy products whose layout, focus, history, rendering, persistence, and surface
-behavior must remain coherent as complexity grows.
+## Positioning
 
-## Audience
+**Build tools. Not tab management.** Panefold is an experimental TypeScript workspace runtime for web applications that need dockable panels, resizable splits, layout history and explicit persistence.
 
-1. Engineers building IDEs, map tools, operations consoles, creative tools, and data workbenches.
-2. Technical product leaders deciding whether to build workspace infrastructure in-house.
-3. Framework and accessibility contributors evaluating Panefold's architecture and evidence.
+The website leads with the developer's task: run a working workspace, bring a component, then make the interaction and appearance fit the product. It does not advertise an npm package, stable certification, customer logos, invented adoption statistics or unrestricted browser windows.
 
-## Message hierarchy
+## The developer journey
 
-1. **Outcome:** complex workspace state remains understandable and testable.
-2. **Mechanism:** one immutable semantic model and one authoritative command kernel.
-3. **Craft:** solver-backed geometry, stable hosts, semantic undo, accessible projections, bounded
-   failure, and evidence-backed support claims.
-4. **Proof:** a real interactive Panefold Code fixture, a reproducible interaction film, public tests, and
-   repository-backed documentation.
-5. **Boundary:** version 0.1 is experimental and does not claim stable conformance or product
-   certification.
+The home page combines a product narrative, an explicitly labeled workspace illustration, an on-demand real workbench, an appearance sketch with exact renderer props, and a source-first quickstart. The sketch is not represented as the docking runtime. The full workbench starts only after a deliberate action on the landing page.
 
-## Site architecture
+The documentation begins with practical guides for the mental model, React wiring, panel registration, commands, tab rails, styling, persistence and external windows. The API field guide distinguishes public library exports from reference application glue. Existing architecture, support, performance, conformance, decisions and normative specification remain available.
 
-- `/` — product narrative, animated workspace hero, feature proof, craftsmanship, interaction film,
-  embedded live fixture, framework story, and calls to action.
-- `/demo` — full-height VS Code-like workbench with explicit IndexedDB save/restore status and boundaries.
-- `/docs` — searchable documentation index.
-- `/docs/:slug` — repository Markdown rendered with navigation, headings, tables, and copyable code.
+The smaller starter at `workbench/?fixture=starter` uses the actual model, runtime and renderer. It intentionally keeps state in memory and has no browser-window controller. The full workbench remains the durable-storage and controlled-popout reference fixture.
 
-The live fixture is built from `apps/demo`; the website does not recreate product interactions with
-a marketing-only mock. Documentation imports the canonical repository Markdown at build time.
+## Content and route ownership
 
-## Visual direction
+Repository Markdown remains the source of truth. `apps/site/src/content/doc-catalog.json` owns titles, descriptions, sections, source paths and slugs. Both the browser registry and static route/sitemap generator consume it; new guides must not be added to only one of those surfaces.
 
-The interface uses a precision-instrument vocabulary: ink surfaces, thin topology lines, restrained
-cobalt and mint signals, Manrope typography, JetBrains Mono evidence labels, small radii, and motion
-that explains state changes. It deliberately avoids stock artwork and generic decorative gradients.
+Documentation links resolve against each Markdown source directory. Source links identify the checked-out commit in a built site. Full-text search loads the source documents on demand, not at homepage startup. Duplicate headings and code fences must not produce broken table-of-contents links. The original specification's fourteen figures and chapter hierarchy remain intact.
 
-## Reproducible assets
+## Review and preview
 
-```bash
-PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH=/path/to/chromium pnpm marketing:capture
-pnpm build:site
-PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH=/path/to/chromium pnpm marketing:social
-```
+The current trusted main-branch Pages pipeline continues to own deployment. It builds same-repository PR workbenches with read-only permissions. A preview-only demo build hook also packages the complete website under the existing artifact at `previews/pr-N/workbench/site/`. Production builds are unchanged, and the hook accepts only the exact expected PR path shape.
 
-The video is assembled from deterministic Playwright screenshots of Panefold Code and encoded to VP9 WebM.
-The social card is rendered from the same Tailwind design system at exactly 1200×630.
+The nested website uses its own asset/router base and noindex metadata. Direct guide URLs must work on refresh. Production canonical URLs are retained. Existing preview pages identify the exact built commit and warn about origin-shared browser storage; reviewers should use a separate private browser session.
 
-## Measurement contract
+## Verification before launch
 
-The site does not ship a tracker. It emits privacy-neutral `panefold:marketing` browser events and,
-when a host supplies `window.dataLayer`, mirrors named page-view and CTA events into that array. A
-future analytics provider can consume the contract without coupling page components to a vendor.
+Run `pnpm check`, `pnpm test:e2e` and `pnpm test:site:e2e`. CI also runs application tests, document-source contracts and static catalog validation. Browser coverage includes developer navigation, full-text search, mobile overflow, the appearance controls, copied-code error handling, the real starter, metadata, source-backed benchmarks and normative figures. Screenshots of the desktop and mobile experience are retained in browser artifacts.
 
-Initial decisions to measure:
+Automated accessibility results are engineering evidence, not WCAG certification. Physical device, assistive-technology, crash, workload and independent security gaps stay visible in the support and conformance references. Marketing wording must not turn an implemented primitive or a passing fixture into a broader certification claim.
 
-- landing → live-demo engagement;
-- landing → GitHub engagement;
-- documentation entry and most-read sections;
-- live-demo → documentation continuation;
-- repeat visits after a release.
+## Analytics and privacy
 
-## Launch checklist
-
-- `pnpm check` and both Playwright suites pass.
-- Landing, documentation, and demo are inspected at desktop and mobile viewports.
-- Reduced-motion behavior is verified; the film does not autoplay for those users.
-- Social metadata, canonical URL, manifest, robots, and sitemap resolve from the production base.
-- GitHub Pages deploys from `main`; the public URL and nested routes are checked after deployment.
-- Repository About text, homepage, and topics point to the site.
-- Claims remain within `docs/SUPPORT.md` and `docs/CONFORMANCE.md`.
+The existing opt-in marketing analytics bridge remains separate from the workspace runtime. Documentation search and the starter do not add external services, trackers, cookies or hosted dependencies. Assets and fonts are served by the site itself.

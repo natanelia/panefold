@@ -24,6 +24,7 @@ export function createEditorDropArea(
   draggingGroup = false,
   behavior?: WorkspaceDropBehavior,
 ): EditorDropArea {
+  edgeRatio = behavior?.edgeBandRatio ?? edgeRatio;
   const ratio = Number.isFinite(edgeRatio) ? Math.min(1 / 3, Math.max(0, edgeRatio)) : 0.1;
   return {
     groupRect,

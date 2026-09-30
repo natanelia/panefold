@@ -76,6 +76,7 @@ export function useFloatingSurfaceHeaderSlot(groupId: string): HTMLDivElement | 
 export interface FloatingSurfaceFrameProps {
   readonly surface: WorkspaceFloatingSurfaceView;
   readonly compactGroupId?: string;
+  readonly titlebarSize?: number;
   readonly bounds: WorkspaceFloatingBounds;
   readonly projectionRevision: string;
   readonly title: string;
@@ -119,6 +120,7 @@ export interface FloatingSurfaceFrameProps {
 export function FloatingSurfaceFrame({
   surface,
   compactGroupId,
+  titlebarSize = FLOATING_SURFACE_CHROME_SIZE,
   bounds,
   projectionRevision,
   title,
@@ -171,9 +173,9 @@ export function FloatingSurfaceFrame({
       frame.style.left = `${String(next.x)}px`;
       frame.style.top = `${String(next.y)}px`;
       frame.style.width = `${String(next.width)}px`;
-      frame.style.height = `${String(minimized ? FLOATING_SURFACE_CHROME_SIZE : next.height)}px`;
+      frame.style.height = `${String(minimized ? titlebarSize : next.height)}px`;
     },
-    [minimized],
+    [minimized, titlebarSize],
   );
 
   const publishState = useCallback((value: unknown) => {
@@ -404,7 +406,7 @@ export function FloatingSurfaceFrame({
   };
 
   const moveByKeyboard = (event: KeyboardEvent<HTMLElement>) => {
-    if (!canMove) return;
+    if (event.target !== event.currentTarget || event.defaultPrevented || !canMove) return;
     if (
       (event.key === "Enter" || event.key === " ") &&
       (!frontmost || !active) &&
@@ -434,11 +436,11 @@ export function FloatingSurfaceFrame({
   };
 
   const frameStyle = {
-    "--pf-floating-surface-chrome-size": `${String(FLOATING_SURFACE_CHROME_SIZE)}px`,
+    "--pf-floating-surface-chrome-size": `${String(titlebarSize)}px`,
     left: `${String(bounds.x)}px`,
     top: `${String(bounds.y)}px`,
     width: `${String(bounds.width)}px`,
-    height: `${String(minimized ? FLOATING_SURFACE_CHROME_SIZE : bounds.height)}px`,
+    height: `${String(minimized ? titlebarSize : bounds.height)}px`,
     zIndex,
   } satisfies CSSProperties & { readonly "--pf-floating-surface-chrome-size": string };
 
@@ -467,7 +469,7 @@ export function FloatingSurfaceFrame({
           tabIndex={canMove && (onMove !== undefined || onRaise !== undefined) ? 0 : -1}
           aria-label={messages.moveFloatingSurface({ title })}
           onPointerDown={(event) => {
-            if (eventStartsInsideTabStrip(event.target)) return;
+            if (eventStartsInsideTitlebarControl(event.target)) return;
             begin("move", undefined, event);
           }}
           onPointerMove={move}
@@ -476,7 +478,7 @@ export function FloatingSurfaceFrame({
           onLostPointerCapture={cancel}
           onKeyDown={moveByKeyboard}
           onDoubleClick={(event) => {
-            if (eventStartsInsideTabStrip(event.target)) return;
+            if (eventStartsInsideTitlebarControl(event.target)) return;
             if (surface.maximized && onRestore !== undefined) {
               focusAfterStateChangeRef.current = "titlebar";
               const outcome = onRestore("pointer");
@@ -642,14 +644,15 @@ export function floatingSurfaceContentBounds(
   bounds: WorkspaceFloatingBounds,
   workspaceBounds: LogicalRect,
   direction: WorkspaceDirection,
+  titlebarSize = FLOATING_SURFACE_CHROME_SIZE,
 ): LogicalRect {
   const inlineOffset =
     direction === "ltr" ? bounds.x : workspaceBounds.inlineSize - bounds.x - bounds.width;
   return {
     inlineStart: workspaceBounds.inlineStart + inlineOffset,
-    blockStart: workspaceBounds.blockStart + bounds.y + FLOATING_SURFACE_CHROME_SIZE,
+    blockStart: workspaceBounds.blockStart + bounds.y + titlebarSize,
     inlineSize: bounds.width,
-    blockSize: Math.max(0, bounds.height - FLOATING_SURFACE_CHROME_SIZE),
+    blockSize: Math.max(0, bounds.height - titlebarSize),
   };
 }
 
@@ -754,8 +757,10 @@ function floatingResizePositionPercent(
   return clamp(Math.round((position / extent) * 100), 0, 100);
 }
 
-function eventStartsInsideTabStrip(target: EventTarget): boolean {
-  return target instanceof Element && target.closest(".pf-tab-strip") !== null;
+function eventStartsInsideTitlebarControl(target: EventTarget): boolean {
+  return (
+    target instanceof Element && target.closest(".pf-tab-strip, .pf-floating-controls") !== null
+  );
 }
 
 function acceptedOutcome(outcome: WorkspaceDispatchOutcome): boolean {

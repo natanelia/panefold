@@ -1,0 +1,394 @@
+/* Application-owned adaptation. The canonical layout is never replaced for a phone. */
+@layer demo {
+  .demo-workspace-shell {
+    display: flex;
+    flex-direction: column;
+    min-inline-size: 0;
+    min-block-size: 0;
+    overflow: hidden;
+  }
+
+  .demo-workspace-shell > .demo-workspace {
+    flex: 1 1 0;
+    block-size: auto;
+  }
+
+  .demo-layout-modes {
+    display: none;
+  }
+
+  .demo-activity-label,
+  .demo-command-mobile-label,
+  .demo-activity-bar .demo-mobile-editor {
+    display: none;
+  }
+
+  .demo-settings-heading,
+  .demo-palette-heading {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    color: var(--demo-text);
+    font-size: 13px;
+  }
+
+  .demo-settings-heading button,
+  .demo-palette-heading button {
+    flex: 0 0 44px;
+    min-inline-size: 44px;
+    min-block-size: 44px;
+    border: 1px solid var(--demo-border);
+    border-radius: 6px;
+    color: var(--demo-text);
+    background: var(--demo-surface);
+    font-size: 22px;
+  }
+
+  .demo-command-palette {
+    grid-template-rows: auto auto minmax(0, 1fr) auto;
+  }
+
+  .demo-palette-heading {
+    padding: 8px 12px;
+    border-block-end: 1px solid var(--demo-border);
+  }
+
+  .demo-command-palette input {
+    min-inline-size: 0;
+  }
+
+  /* Keep the compact renderer's chrome and hit targets the same size. */
+  @media (max-width: 700px), (pointer: coarse) {
+    .demo-layout-modes {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      flex: 0 0 auto;
+      min-block-size: 48px;
+      padding-inline: 4px;
+      border-block-end: 1px solid var(--demo-border);
+      background: var(--demo-surface-raised);
+    }
+
+    .demo-layout-modes button {
+      flex: 0 0 auto;
+      min-inline-size: 52px;
+      min-block-size: 44px;
+      border: 1px solid transparent;
+      border-radius: 4px;
+      background: transparent;
+      color: var(--demo-text);
+      font: inherit;
+      font-size: 12px;
+    }
+
+    .demo-layout-modes button[aria-pressed="true"] {
+      border-color: var(--demo-accent);
+      background: var(--demo-surface);
+    }
+
+    .demo-layout-modes span {
+      min-inline-size: 0;
+      padding-inline: 4px;
+      color: var(--demo-text);
+      font-size: 11px;
+      line-height: 1.35;
+    }
+
+    /* Controls must not consume the entire tab rail in a narrow split. */
+    .demo-app .pf-group[data-tab-orientation="horizontal"] .pf-tab-strip {
+      display: grid;
+      grid-template-rows: 48px 44px;
+      grid-template-columns: minmax(0, 1fr);
+      flex-basis: 92px;
+    }
+
+    .demo-app .pf-group[data-tab-orientation="horizontal"] .pf-tab-list {
+      grid-row: 1;
+      grid-column: 1;
+      min-inline-size: 0;
+      scrollbar-width: none;
+    }
+
+    .demo-app .pf-group[data-tab-orientation="horizontal"] .pf-group-drag-region {
+      grid-row: 2;
+      grid-column: 1;
+      justify-self: start;
+      inline-size: 44px;
+      color: var(--demo-muted);
+      border-block-start: 1px solid var(--demo-border);
+    }
+
+    .demo-app .pf-group-drag-region::before {
+      content: "⠿";
+      font-size: 20px;
+    }
+
+    .demo-app .pf-group[data-tab-orientation="horizontal"] .pf-tab-controls {
+      grid-row: 2;
+      grid-column: 1;
+      margin-inline-start: 44px;
+      justify-content: flex-start;
+      min-inline-size: 0;
+      overflow-x: auto;
+      border-inline-start: 0;
+      border-block-start: 1px solid var(--demo-border);
+    }
+
+    .demo-app .pf-tab-controls > button {
+      flex: 0 0 44px;
+      min-inline-size: 44px;
+      min-block-size: 44px;
+    }
+
+    .demo-app .pf-tab {
+      max-inline-size: 100%;
+      gap: 3px;
+      padding-inline: 0 4px;
+    }
+
+    .demo-app .pf-tab .pf-tab-close {
+      display: none;
+    }
+
+    .demo-app .pf-group:not([data-tab-content="icon-only"]) .pf-tab-icon {
+      display: none;
+    }
+
+    .demo-app .pf-tab-drag-handle {
+      color: var(--demo-muted);
+      font-size: 16px;
+    }
+
+    .demo-app .pf-splitter::before {
+      inset: -6px;
+    }
+
+    .demo-app {
+      grid-template-rows: 52px minmax(0, 1fr) 32px;
+      padding: env(safe-area-inset-top, 0px) env(safe-area-inset-right, 0px)
+        env(safe-area-inset-bottom, 0px) env(safe-area-inset-left, 0px);
+    }
+
+    .demo-app .pf-workspace {
+      --pf-target-size: 44px;
+      --pf-tab-size: 48px;
+    }
+
+    .demo-topbar {
+      gap: 4px;
+      padding-inline: 6px;
+    }
+
+    .demo-brand,
+    .demo-topbar-button,
+    .demo-command-center {
+      min-inline-size: 44px;
+      min-block-size: 44px;
+      flex-shrink: 0;
+    }
+
+    .demo-brand {
+      justify-content: center;
+    }
+
+    .demo-app .pf-tab,
+    .demo-app .pf-tab-close,
+    .demo-app .pf-tab-more,
+    .demo-app .pf-menu button,
+    .demo-inspector > header button,
+    .demo-inspector-tabs button {
+      min-inline-size: 44px;
+      min-block-size: 44px;
+    }
+
+    .demo-app .pf-tab {
+      flex-shrink: 0;
+    }
+
+    .demo-app .pf-tab-close {
+      inline-size: 44px;
+      block-size: 44px;
+    }
+
+    .demo-app .pf-region-switcher select,
+    .demo-settings-popover select,
+    .demo-command-palette input,
+    .demo-panel-body input:not([type="checkbox"], [type="radio"], [type="range"]),
+    .demo-panel-body textarea {
+      font-size: 16px;
+    }
+
+    .demo-settings-popover {
+      inset-block-start: 48px;
+      max-inline-size: calc(100vw - 24px);
+      max-block-size: calc(100dvh - 100px);
+    }
+
+    .demo-settings-popover > label {
+      gap: 8px;
+      grid-template-columns: minmax(0, 1fr) minmax(0, 150px);
+      font-size: 13px;
+    }
+
+    .demo-settings-popover select {
+      inline-size: 100%;
+      min-inline-size: 0;
+    }
+
+    .demo-settings-popover fieldset label,
+    .demo-settings-reset {
+      min-block-size: 44px;
+      font-size: 13px;
+    }
+
+    .demo-statusbar {
+      block-size: auto;
+      min-block-size: 32px;
+      font-size: 11px;
+    }
+
+    .demo-statusbar > .demo-persistence-status {
+      max-inline-size: none;
+      flex: 1 1 auto;
+    }
+
+    .demo-dialog-backdrop {
+      padding-block: 12px;
+      align-items: start;
+    }
+
+    .demo-command-palette {
+      max-block-size: calc(100dvh - 24px);
+    }
+
+    .demo-command-results strong {
+      font-size: 13px;
+    }
+
+    .demo-command-results small,
+    .demo-command-results > p {
+      font-size: 11px;
+    }
+
+    .demo-command-results > button {
+      min-block-size: 52px;
+    }
+
+    .demo-command-results kbd {
+      display: none;
+    }
+  }
+
+  @media (max-width: 700px) {
+    /* Let the panel picker give up width before any 44px action is clipped. */
+    .demo-command-center {
+      flex: 1 1 0;
+      padding-inline: 6px;
+      gap: 4px;
+    }
+
+    .demo-settings {
+      flex-shrink: 0;
+      margin-inline-start: 0;
+    }
+
+    .demo-topbar > .demo-toolbar-spacer,
+    .demo-command-center kbd,
+    .demo-command-center .demo-command-label {
+      display: none;
+    }
+
+    .demo-command-center .demo-command-mobile-label {
+      display: inline;
+      font-size: 12px;
+    }
+
+    .demo-main {
+      grid-template-columns: minmax(0, 1fr);
+      grid-template-rows: minmax(0, 1fr) 56px;
+    }
+
+    .demo-workspace-shell {
+      grid-column: 1;
+      grid-row: 1;
+    }
+
+    .demo-activity-bar {
+      grid-column: 1;
+      grid-row: 2;
+      flex-direction: row;
+      inline-size: 100%;
+      padding: 0;
+      overflow-x: auto;
+      overflow-y: hidden;
+      border-inline-end: 0;
+      border-block-start: 1px solid var(--demo-border);
+      overscroll-behavior-inline: contain;
+    }
+
+    .demo-activity-bar button,
+    .demo-activity-bar .demo-mobile-editor {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      flex: 1 0 52px;
+      gap: 3px;
+      inline-size: auto;
+      block-size: 55px;
+      min-inline-size: 52px;
+      min-block-size: 44px;
+    }
+
+    .demo-activity-bar button::before {
+      inset: 0 10px auto;
+      inline-size: auto;
+      block-size: 2px;
+    }
+
+    .demo-activity-bar svg {
+      inline-size: 21px;
+      block-size: 21px;
+    }
+
+    .demo-activity-label {
+      display: block;
+      font-size: 10px;
+      line-height: 1.2;
+    }
+
+    .demo-activity-spacer,
+    .demo-activity-spacer ~ button {
+      display: none;
+    }
+
+    .demo-app .pf-group .pf-menu {
+      position: fixed;
+      inset-inline: 8px;
+      inset-block: auto 96px;
+      inline-size: auto;
+      min-inline-size: 0;
+      max-block-size: min(420px, calc(100dvh - 200px));
+      border-radius: 10px;
+    }
+
+    .demo-settings-popover {
+      position: fixed;
+      inset-inline: max(12px, env(safe-area-inset-left)) max(12px, env(safe-area-inset-right));
+      inset-block-start: calc(56px + env(safe-area-inset-top, 0px));
+      inline-size: auto;
+      max-block-size: calc(
+        100dvh - 100px - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px)
+      );
+      border-radius: 10px;
+    }
+
+    .demo-inspector {
+      inset: 0;
+      inline-size: 100%;
+      border-radius: 0;
+    }
+  }
+}

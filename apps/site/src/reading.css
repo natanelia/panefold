@@ -1,0 +1,94 @@
+/* Reading and accessibility tokens are shared by the product page and the guides.
+ * Loaded after the structural stylesheet, in the same cascade layer.
+ */
+@layer components {
+  :root {
+    --site-text-muted: #54684a;
+  }
+
+  .hero-note span,
+  .visual-caption,
+  .use-case-strip span:first-child,
+  .preview-tabs button,
+  .preview-content p,
+  .fine-print,
+  .learning-path > a > span,
+  .learning-path p,
+  .trust-links small,
+  .site-footer p,
+  .docs-search-label,
+  .docs-nav-group > p,
+  .doc-header > p:last-child,
+  .docs-toc > p,
+  .docs-toc a,
+  .doc-source,
+  .doc-pagination small,
+  .docs-index-intro,
+  .docs-card p,
+  .docs-search-status {
+    color: var(--site-text-muted);
+  }
+  .hero-note,
+  .visual-caption,
+  .fine-print {
+    font-size: 11px;
+  }
+  .docs-prose {
+    font-size: 15px;
+    line-height: 1.85;
+  }
+  .doc-header > p:last-child,
+  .docs-index-intro {
+    font-size: 15px;
+  }
+  .docs-nav-group a {
+    font-size: 13px;
+    padding-block: 8px;
+  }
+  .docs-nav-group > p,
+  .docs-toc > p {
+    font-size: 10px;
+  }
+  .docs-search-label input,
+  .docs-toc a {
+    font-size: 12px;
+  }
+  .docs-search-label kbd {
+    font-size: 10px;
+  }
+  .docs-card p,
+  .docs-prose table,
+  .docs-prose .code-frame pre {
+    font-size: 13px;
+  }
+  .docs-prose .code-frame pre {
+    line-height: 1.8;
+  }
+  .doc-source,
+  .doc-pagination small {
+    font-size: 11px;
+  }
+  .heading-anchor {
+    color: var(--site-text-muted);
+  }
+  .build-grid > *,
+  .learning-path > a > div {
+    min-width: 0;
+  }
+  .learning-path > a > svg {
+    flex-shrink: 0;
+  }
+  @media (max-width: 700px) {
+    .docs-search-label input {
+      font-size: 16px;
+    }
+    .docs-prose,
+    .doc-header > p:last-child,
+    .docs-index-intro {
+      font-size: 14px;
+    }
+    .docs-prose .code-frame pre {
+      font-size: 12px;
+    }
+  }
+}

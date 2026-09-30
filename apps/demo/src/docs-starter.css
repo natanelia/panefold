@@ -1,0 +1,154 @@
+/* Unlayered application styles intentionally override the optional demo skin. */
+.starter-app {
+  position: fixed;
+  inset: 0;
+  overflow: auto;
+  color: #273b2c;
+  background: #f5f7ef;
+  font:
+    14px/1.7 system-ui,
+    sans-serif;
+  color-scheme: light;
+}
+.starter-container {
+  max-width: 1080px;
+  margin: auto;
+  padding: 32px;
+}
+.starter-container > a {
+  color: #326341;
+  font-size: 12px;
+}
+.starter-container h1 {
+  font-size: 38px;
+  letter-spacing: -0.04em;
+  line-height: 1.2;
+  margin: 12px 0;
+}
+.starter-kicker {
+  text-transform: uppercase;
+  font-size: 10px;
+  letter-spacing: 0.09em;
+  color: #526e48;
+  margin-top: 25px;
+}
+.starter-lead {
+  max-width: 660px;
+  color: #5d7152;
+}
+.starter-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+  margin: 25px 0 14px;
+  font-size: 11px;
+}
+.starter-toolbar label {
+  display: flex;
+  gap: 7px;
+  align-items: center;
+}
+.starter-toolbar select,
+.starter-toolbar button {
+  color: #2d5636;
+  background: #fff;
+  border: 1px solid #bfceb2;
+  border-radius: 4px;
+  padding: 6px 10px;
+  min-height: 32px;
+}
+.starter-toolbar button:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+.starter-toolbar > span {
+  margin-left: auto;
+  color: #577248;
+}
+.starter-surface {
+  width: 100%;
+  height: min(65vh, 640px);
+  min-height: 380px;
+  border: 1px solid #bfceb2;
+  border-radius: 6px;
+  --pf-bg: #f1f5e9;
+  --pf-surface: #fff;
+  --pf-surface-raised: #edf3e4;
+  --pf-surface-soft: #e4edd9;
+  --pf-text: #263f2a;
+  --pf-text-muted: #5f7252;
+  --pf-accent: #347646;
+  --pf-accent-soft: #e1eed7;
+  --pf-border: #cad8bd;
+  --pf-border-strong: #92aa7e;
+  --pf-focus: #367d45;
+}
+.starter-panel {
+  padding: 22px;
+  height: 100%;
+  overflow: auto;
+}
+.starter-panel .starter-kicker {
+  margin-top: 0;
+  font-size: 9px;
+}
+.starter-panel h2 {
+  margin-block: 12px;
+  font-size: 22px;
+  line-height: 1.4;
+}
+.starter-panel p {
+  font-size: 12px;
+  color: #5e7352;
+  margin-bottom: 16px;
+}
+.starter-panel label {
+  font-size: 13px;
+  font-weight: 600;
+  display: block;
+  margin-bottom: 8px;
+}
+.starter-panel textarea {
+  width: 100%;
+  min-height: 160px;
+  resize: vertical;
+  padding: 13px;
+  background: #f8faf4;
+  color: #365130;
+  border: 1px solid #cbd8be;
+  border-radius: 4px;
+  font:
+    12px/1.8 ui-monospace,
+    monospace;
+}
+.starter-status,
+.starter-footnote {
+  font-size: 11px;
+  color: #5d7351;
+}
+.starter-footnote {
+  border-top: 1px solid #d5dfcc;
+  padding-top: 15px;
+}
+.starter-app :focus-visible {
+  outline: 3px solid #327747;
+  outline-offset: 3px;
+}
+@media (max-width: 600px) {
+  .starter-container {
+    padding: 22px 14px;
+  }
+  .starter-container h1 {
+    font-size: 32px;
+  }
+  .starter-panel {
+    padding: 12px;
+  }
+  .starter-surface {
+    min-height: 420px;
+  }
+  .starter-toolbar > span {
+    margin-left: 0;
+  }
+}

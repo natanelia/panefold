@@ -1,0 +1,20 @@
+/* Docked tab strips use a column layout. Inside a floating titlebar, the
+ * same strip must grow horizontally instead of inheriting a 52px width.
+ * These rules are scoped to the touch example, including its lazy panels.
+ */
+.tp-workspace .pf-floating-header-slot {
+  flex: 1 1 180px;
+}
+.tp-workspace .pf-floating-header-slot .pf-tab-strip {
+  flex: 1 1 auto;
+}
+.tp-workspace .pf-floating-header-slot .pf-tab {
+  flex: 1 1 auto;
+  padding-inline-end: 0;
+}
+@media (max-width: 360px) {
+  .touch-playground .tp-viewport {
+    /* Spend less width on outer margins, not on the finger-sized controls. */
+    margin-inline: 4px;
+  }
+}

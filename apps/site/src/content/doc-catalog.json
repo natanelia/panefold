@@ -1,0 +1,278 @@
+[
+  {
+    "slug": "overview",
+    "title": "Meet Panefold",
+    "description": "Build the tool your users need. Let them arrange it around the way they work.",
+    "section": "Start",
+    "sourcePath": "docs/guides/overview.md"
+  },
+  {
+    "slug": "quickstart",
+    "title": "Quickstart",
+    "description": "Run the workbench, open the small React starter, and make your first change.",
+    "section": "Start",
+    "sourcePath": "docs/guides/quickstart.md"
+  },
+  {
+    "slug": "mental-model",
+    "title": "The mental model",
+    "description": "Panels are content. Groups are tabs. Nodes arrange groups. Surfaces host the result.",
+    "section": "Start",
+    "sourcePath": "docs/guides/mental-model.md"
+  },
+  {
+    "slug": "react",
+    "title": "React integration",
+    "description": "Wire a runtime, a projection, command factories, and your own panel components.",
+    "section": "Build",
+    "sourcePath": "docs/guides/react.md"
+  },
+  {
+    "slug": "panels",
+    "title": "Your first panel",
+    "description": "Register a component, declare capabilities, and keep expensive work out of hidden panels.",
+    "section": "Build",
+    "sourcePath": "docs/guides/panels.md"
+  },
+  {
+    "slug": "layouts",
+    "title": "Layouts and commands",
+    "description": "Create a layout, move and split panels, handle rejections, and wire undo and redo.",
+    "section": "Build",
+    "sourcePath": "docs/guides/layouts.md"
+  },
+  {
+    "slug": "mobile-playground",
+    "title": "The touch playground",
+    "description": "Drag, split, resize, or tap to place panels without shrinking your content.",
+    "section": "Customize",
+    "sourcePath": "docs/guides/mobile-playground.md"
+  },
+  {
+    "slug": "tabs",
+    "title": "Tabs and tab rails",
+    "description": "Top, bottom, vertical, icon-only, or different treatments for different groups.",
+    "section": "Customize",
+    "sourcePath": "docs/guides/tabs.md"
+  },
+  {
+    "slug": "styling",
+    "title": "Themes and styling",
+    "description": "Make the workspace feel like your product with scoped CSS tokens and deliberate sizing.",
+    "section": "Customize",
+    "sourcePath": "docs/guides/styling.md"
+  },
+  {
+    "slug": "persistence",
+    "title": "Save and restore",
+    "description": "Restore before rendering, show save status, and separate layout state from application data.",
+    "section": "Operate",
+    "sourcePath": "docs/guides/persistence.md"
+  },
+  {
+    "slug": "windows",
+    "title": "Floating and browser windows",
+    "description": "Choose an in-page float or a controlled popup—and understand the different lifecycle costs.",
+    "section": "Operate",
+    "sourcePath": "docs/guides/windows.md"
+  },
+  {
+    "slug": "production",
+    "title": "Ship with confidence",
+    "description": "An adoption checklist for keyboard access, performance, cleanup, recovery, and experimental support.",
+    "section": "Operate",
+    "sourcePath": "docs/guides/production.md"
+  },
+  {
+    "slug": "troubleshooting",
+    "title": "Troubleshooting",
+    "description": "Fix blank workspaces, inert drag targets, disappearing changes, and blocked popups.",
+    "section": "Operate",
+    "sourcePath": "docs/guides/troubleshooting.md"
+  },
+  {
+    "slug": "api",
+    "title": "API field guide",
+    "description": "A task-oriented map of packages, renderer props, and the source definitions behind them.",
+    "section": "Reference",
+    "sourcePath": "docs/guides/api.md"
+  },
+  {
+    "slug": "architecture",
+    "title": "Architecture",
+    "description": "Authority boundaries, state flow, and package responsibilities.",
+    "section": "Build",
+    "sourcePath": "docs/ARCHITECTURE.md"
+  },
+  {
+    "slug": "commands",
+    "title": "Command catalog",
+    "description": "All 36 semantic commands and their current support boundaries.",
+    "section": "Build",
+    "sourcePath": "docs/COMMANDS.md"
+  },
+  {
+    "slug": "support",
+    "title": "Support matrix",
+    "description": "Framework, browser, surface, and capability status without hand-waving.",
+    "section": "Reference",
+    "sourcePath": "docs/SUPPORT.md"
+  },
+  {
+    "slug": "conformance",
+    "title": "Conformance",
+    "description": "Evidence inventory, hard gates, and the meaning of experimental.",
+    "section": "Reference",
+    "sourcePath": "docs/CONFORMANCE.md"
+  },
+  {
+    "slug": "performance",
+    "title": "Performance benchmarks",
+    "description": "Merged-code measurements, raw samples, controls, and regression results.",
+    "section": "Reference",
+    "sourcePath": "docs/PERFORMANCE.md",
+    "eyebrow": "Measured 28 September 2026"
+  },
+  {
+    "slug": "design-audit",
+    "title": "System-design audit",
+    "description": "An exact 190-requirement implementation and evidence matrix.",
+    "section": "Reference",
+    "sourcePath": "docs/DESIGN_AUDIT.md",
+    "eyebrow": "Audited 13 August 2026"
+  },
+  {
+    "slug": "roadmap",
+    "title": "Roadmap",
+    "description": "Completed engineering and the external evidence still required.",
+    "section": "Reference",
+    "sourcePath": "docs/ROADMAP.md"
+  },
+  {
+    "slug": "marketing",
+    "title": "Marketing and launch",
+    "description": "Product narrative, interaction media, measurement, and launch operations.",
+    "section": "Reference",
+    "sourcePath": "docs/MARKETING.md"
+  },
+  {
+    "slug": "adr-authoritative-kernel",
+    "title": "Authoritative kernel",
+    "description": "Why all committed workspace state has one semantic owner.",
+    "section": "Decisions",
+    "sourcePath": "docs/adr/0001-authoritative-kernel.md",
+    "eyebrow": "ADR 0001"
+  },
+  {
+    "slug": "adr-experimental-scope",
+    "title": "Experimental scope",
+    "description": "Why feature implementation and stable conformance are separate claims.",
+    "section": "Decisions",
+    "sourcePath": "docs/adr/0002-experimental-scope.md",
+    "eyebrow": "ADR 0002"
+  },
+  {
+    "slug": "adr-schema-command-catalog",
+    "title": "Schema v2 and commands",
+    "description": "Snapshot evolution and the single command inventory.",
+    "section": "Decisions",
+    "sourcePath": "docs/adr/0003-schema-v2-and-command-catalog.md",
+    "eyebrow": "ADR 0003"
+  },
+  {
+    "slug": "adr-panel-lifecycle",
+    "title": "Panel lifecycle",
+    "description": "Stable hosts, suspension, cancellation, and renderer policy.",
+    "section": "Decisions",
+    "sourcePath": "docs/adr/0004-panel-lifecycle-contract.md",
+    "eyebrow": "ADR 0004"
+  },
+  {
+    "slug": "adr-persistence-trust",
+    "title": "Persistence and trust",
+    "description": "Durable journals, decoder bounds, and security boundaries.",
+    "section": "Decisions",
+    "sourcePath": "docs/adr/0005-durable-journal-and-trust-boundaries.md",
+    "eyebrow": "ADR 0005"
+  },
+  {
+    "slug": "adr-external-surfaces",
+    "title": "External surfaces",
+    "description": "Prepared transfer, ownership epochs, and orphan recovery.",
+    "section": "Decisions",
+    "sourcePath": "docs/adr/0006-prepared-external-surface-ownership.md",
+    "eyebrow": "ADR 0006"
+  },
+  {
+    "slug": "adr-panel-plugin-boundaries",
+    "title": "Panel and plugin boundaries",
+    "description": "Versioned codecs, deterministic registration, and missing-provider recovery.",
+    "section": "Decisions",
+    "sourcePath": "docs/adr/0007-versioned-panel-and-plugin-boundaries.md",
+    "eyebrow": "ADR 0007"
+  },
+  {
+    "slug": "adr-single-writer-coordination",
+    "title": "Single-writer coordination",
+    "description": "Authenticated intake, revision assignment, epochs, and presence separation.",
+    "section": "Decisions",
+    "sourcePath": "docs/adr/0008-single-writer-remote-coordination.md",
+    "eyebrow": "ADR 0008"
+  },
+  {
+    "slug": "adr-fail-closed-runtime",
+    "title": "Fail-closed runtime",
+    "description": "How invariant defects preserve the last valid state and a redacted reproduction.",
+    "section": "Decisions",
+    "sourcePath": "docs/adr/0009-fail-closed-runtime.md",
+    "eyebrow": "ADR 0009"
+  },
+  {
+    "slug": "adr-evidence-taxonomy",
+    "title": "Executable evidence taxonomy",
+    "description": "Proof classes, immutable artifacts, trace coverage, and hard-gate rules.",
+    "section": "Decisions",
+    "sourcePath": "docs/adr/0010-executable-evidence-taxonomy.md",
+    "eyebrow": "ADR 0010"
+  },
+  {
+    "slug": "adr-independent-oracle",
+    "title": "Independent semantic oracle",
+    "description": "Why semantic independence and production optimization remain separate claims.",
+    "section": "Decisions",
+    "sourcePath": "docs/adr/0011-independent-semantic-oracle.md",
+    "eyebrow": "ADR 0011"
+  },
+  {
+    "slug": "adr-protocol-motion-lifecycles",
+    "title": "Protocol and motion lifecycles",
+    "description": "Bounded actors, disposable leases, and progressive animation fallback.",
+    "section": "Decisions",
+    "sourcePath": "docs/adr/0012-bounded-protocol-and-motion-lifecycles.md",
+    "eyebrow": "ADR 0012"
+  },
+  {
+    "slug": "adr-direct-placement-durable-demo",
+    "title": "Direct placement and durable demo",
+    "description": "Revision-bound docking, controlled live popouts, tab presentation, and restore-before-render persistence.",
+    "section": "Decisions",
+    "sourcePath": "docs/adr/0013-direct-placement-durable-demo.md",
+    "eyebrow": "ADR 0013"
+  },
+  {
+    "slug": "adr-post-commit-effects",
+    "title": "Post-commit effect delivery",
+    "description": "Deterministic effect identity, bounded duplicate suppression, and honest retry guarantees.",
+    "section": "Decisions",
+    "sourcePath": "docs/adr/0014-post-commit-effect-delivery.md",
+    "eyebrow": "ADR 0014"
+  },
+  {
+    "slug": "system-design",
+    "title": "System design",
+    "description": "The complete normative design and 190-requirement register source.",
+    "section": "Specification",
+    "sourcePath": "docs/spec/SYSTEM_DESIGN.md",
+    "eyebrow": "Normative source"
+  }
+]

@@ -177,7 +177,7 @@ function FocusInspector({ snapshot }: { readonly snapshot: WorkspaceSnapshot }) 
       <dl className="demo-inspector-dl">
         <div>
           <dt>Active panel</dt>
-          <dd>{activePanel?.id ?? "—"}</dd>
+          <dd>{snapshot.activation.activePanelId ?? "—"}</dd>
         </div>
         <div>
           <dt>Active surface</dt>
@@ -218,16 +218,25 @@ function InspectorMetric({ label, value }: { readonly label: string; readonly va
 export function CommandPalette({
   runtime,
   snapshot,
+  onSelectPanel,
   onClose,
 }: {
   readonly runtime: WorkspaceRuntime;
   readonly snapshot: WorkspaceSnapshot;
+  readonly onSelectPanel: (id: string, label: string) => void;
   readonly onClose: () => void;
 }) {
   const [query, setQuery] = useState("");
   const inputRef = useRef<HTMLInputElement>(null);
+  const dialogRef = useRef<HTMLElement>(null);
   useEffect(() => {
-    inputRef.current?.focus();
+    const previousFocus = document.activeElement;
+    // Do not open the phone keyboard before the user chooses to search.
+    if (window.matchMedia("(pointer: coarse)").matches) dialogRef.current?.focus();
+    else inputRef.current?.focus();
+    return () => {
+      if (previousFocus instanceof HTMLElement && previousFocus.isConnected) previousFocus.focus();
+    };
   }, []);
   const panels = snapshot.panels.ids
     .map((id) => getEntity(snapshot.panels, id))
@@ -244,17 +253,47 @@ export function CommandPalette({
     >
       <section
         className="demo-command-palette"
+        ref={dialogRef}
+        tabIndex={-1}
         role="dialog"
         aria-modal="true"
         aria-label="Command Palette"
         onKeyDown={(event) => {
-          if (event.key === "Escape") onClose();
+          if (event.key === "Escape") {
+            event.preventDefault();
+            onClose();
+          }
+          if (event.key !== "Tab") return;
+          const controls = Array.from(
+            event.currentTarget.querySelectorAll<HTMLElement>(
+              'button:not([disabled]), input:not([disabled]), [tabindex="0"]',
+            ),
+          ).filter((element) => element.getClientRects().length > 0);
+          const first = controls[0];
+          const last = controls.at(-1);
+          if (
+            event.shiftKey &&
+            (document.activeElement === first || document.activeElement === event.currentTarget)
+          ) {
+            event.preventDefault();
+            last?.focus();
+          } else if (!event.shiftKey && document.activeElement === last) {
+            event.preventDefault();
+            first?.focus();
+          }
         }}
       >
+        <header className="demo-palette-heading">
+          <strong>Panels and commands</strong>
+          <button type="button" aria-label="Close Command Palette" onClick={onClose}>
+            ×
+          </button>
+        </header>
         <label>
           <span aria-hidden="true">⌕</span>
           <input
             ref={inputRef}
+            aria-label="Search panels and commands"
             value={query}
             onChange={(event) => {
               setQuery(event.target.value);
@@ -269,10 +308,7 @@ export function CommandPalette({
               key={panel.id}
               type="button"
               onClick={() => {
-                runtime.dispatch(
-                  { type: "select-panel", panelId: panel.id, activate: true },
-                  { origin: "menu", label: `Selected ${panel.title ?? panel.type}` },
-                );
+                onSelectPanel(panel.id, panel.title ?? panel.type);
                 onClose();
               }}
             >
