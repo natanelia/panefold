@@ -229,7 +229,9 @@ function allocatePlaygroundDropIds(snapshot: WorkspaceSnapshot, panel: string) {
       getEntity(snapshot.groups, group) === undefined &&
       getEntity(snapshot.nodes, groupNode) === undefined &&
       getEntity(snapshot.nodes, splitNode) === undefined
-    ) return { group, groupNode, splitNode };
+    ) {
+      return { group, groupNode, splitNode };
+    }
   }
   throw new Error(`No playground drop identity remains for panel ${panel}`);
 }
