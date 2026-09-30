@@ -1,0 +1,145 @@
+name: Finalize audited playground evidence
+
+on:
+  push:
+    branches: [docs/developer-first-site]
+    paths: [.github/workflows/playground-evidence-finalize.yml]
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    if: github.repository == 'natanelia/panefold' && github.ref == 'refs/heads/docs/developer-first-site'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      contents: read
+      actions: read
+    env:
+      VITEST_MAX_WORKERS: "1"
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 2
+          persist-credentials: false
+      - name: Require the exact reviewed source
+        run: |
+          test "$(git rev-parse HEAD^)" = effda86c1aba3c0478beef1bb6b45bc9cac975d6
+          test "$(git diff --name-only HEAD^ HEAD)" = .github/workflows/playground-evidence-finalize.yml
+      - uses: actions/download-artifact@v7
+        with:
+          name: preview-executed-evidence
+          run-id: 36711088102
+          github-token: ${{ github.token }}
+          path: /tmp/retained-playground-review
+      - name: Import only successful source-matched browser and unit evidence
+        run: |
+          python3 - <<'PY'
+          import hashlib, json, pathlib, shutil
+          root = pathlib.Path('/tmp/retained-playground-review/artifacts')
+          for name in ['phone-browser.json', 'preview-browser.json', 'site-browser.json']:
+              result = json.loads((root / name).read_text())
+              assert result['stats']['unexpected'] == result['stats']['flaky'] == 0
+              assert not result['errors']
+          assert json.loads((root / 'preview-unit.json').read_text())['success']
+          paths = ['conformance/results/' + name + '-2026-09-26.json' for name in ['chromium-reference', 'protocol-motion', 'interaction-performance']]
+          for name in paths:
+              result = json.loads((root / 'generated' / name).read_text())
+              for source, expected in result['sourceDigests'].items():
+                  assert hashlib.sha256(pathlib.Path(source).read_bytes()).hexdigest() == expected, source
+          for name in paths + ['conformance/evidence.json', 'docs/CONFORMANCE.md']:
+              shutil.copyfile(root / 'generated' / name, name)
+          PY
+      - uses: pnpm/action-setup@v6
+        with:
+          version: 11.16.0
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - name: Re-execute protocol coverage and the independent semantic oracle
+        run: |
+          mkdir -p artifacts
+          pnpm build:packages
+          pnpm protocol:coverage:generate
+          pnpm exec tsup scripts/run-independent-semantic-campaign.ts --format esm --platform node --target node22 --out-dir artifacts/independent-audit --clean
+          node artifacts/independent-audit/run-independent-semantic-campaign.js --seed 20260812 --steps 10000 > artifacts/independent-campaign.json
+          pnpm exec vitest run packages/kernel-optimized/test/benchmark.test.ts packages/kernel-optimized/test/differential.test.ts packages/kernel-optimized/test/independent-reducer.test.ts packages/kernel-optimized/test/persistent-bucket-map.test.ts packages/kernel-optimized/test/projection.test.ts --reporter=json --outputFile=artifacts/independent-suite.json
+      - name: Record the newly executed oracle, without upgrading certification claims
+        run: |
+          python3 - <<'PY'
+          import datetime, hashlib, json, os, pathlib, platform, subprocess
+          path = pathlib.Path('conformance/results/independent-semantic-oracle-2026-09-27.json')
+          result = json.loads(path.read_text())
+          execution = json.loads(pathlib.Path('artifacts/independent-campaign.json').read_text())
+          campaign = execution['report']
+          suite = json.loads(pathlib.Path('artifacts/independent-suite.json').read_text())
+          assert campaign['completedSteps'] == 10000 and campaign['divergenceCount'] == 0
+          assert len(campaign['commandCounts']) == 36 and not campaign['divergences']
+          assert suite['success'] and suite['numFailedTests'] == suite['numPendingTests'] == 0
+          assert suite['numPassedTests'] == 25
+          result['producedAt'] = datetime.datetime.now(datetime.timezone.utc).isoformat()
+          result['environment'] = dict(operatingSystem=platform.platform(), node=subprocess.check_output(['node', '--version'], text=True).strip(), pnpm='11.16.0', dependencies='Installed with pnpm install --frozen-lockfile in this workflow.', vitestMaxWorkers=1)
+          for key in ['seed', 'generatorId', 'randomAlgorithm', 'randomState', 'initialHash', 'completedSteps', 'accepted', 'rejected', 'divergenceCount', 'finalHash']:
+              result['campaign'][key] = campaign[key]
+          result['campaign'].update(generatedCommandTypeCount=len(campaign['commandCounts']), missingCommandTypes=[], elapsedMs=execution['elapsedMs'])
+          tests = suite['testResults']
+          result['suite'] = dict(testFiles=len(tests), tests=suite['numTotalTests'], passed=suite['numPassedTests'], failed=suite['numFailedTests'], durationMs=max(x['endTime'] for x in tests)-min(x['startTime'] for x in tests))
+          result['commands']['suite'] += ' --outputFile=artifacts/independent-suite.json'
+          run = 'https://github.com/' + os.environ['GITHUB_REPOSITORY'] + '/actions/runs/' + os.environ['GITHUB_RUN_ID']
+          result['rawReports'] = [dict(path=name, sha256=hashlib.sha256(pathlib.Path(name).read_bytes()).hexdigest(), runUrl=run, artifact='playground-evidence-finalized') for name in ['artifacts/independent-campaign.json', 'artifacts/independent-suite.json']]
+          result['sourceDigests'] = {name:hashlib.sha256(pathlib.Path(name).read_bytes()).hexdigest() for name in result['sourceDigests']}
+          path.write_text(json.dumps(result, indent=2)+'\n')
+          PY
+          pnpm exec oxfmt conformance/results docs/CONFORMANCE.md
+          pnpm conformance:data:generate
+      - name: Validate the complete candidate and remove this one-time workflow
+        run: |
+          git add conformance/results conformance/evidence.json docs/CONFORMANCE.md
+          git rm .github/workflows/playground-evidence-finalize.yml
+          pnpm check
+          pnpm --filter @panefold/demo test
+          pnpm --filter @panefold/site test
+          node --test scripts/site-catalog.test.mjs scripts/pages-*.test.mjs
+          git diff --exit-code
+          git diff --cached --binary > artifacts/finalized-evidence.patch
+          git write-tree > artifacts/verified-tree.txt
+      - uses: actions/upload-artifact@v7
+        if: always()
+        with:
+          name: playground-evidence-finalized
+          path: artifacts
+          retention-days: 30
+
+  publish:
+    needs: verify
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: write
+      actions: read
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: ${{ github.sha }}
+      - uses: actions/download-artifact@v7
+        with:
+          name: playground-evidence-finalized
+          path: /tmp/finalized-evidence
+      - name: Publish only the verified evidence to the existing PR branch
+        run: |
+          git apply --index /tmp/finalized-evidence/finalized-evidence.patch
+          test "$(git write-tree)" = "$(cat /tmp/finalized-evidence/verified-tree.txt)"
+          python3 - <<'PY'
+          import subprocess
+          allowed = {'.github/workflows/playground-evidence-finalize.yml', 'conformance/evidence.json', 'docs/CONFORMANCE.md'}
+          allowed.update('conformance/results/' + name for name in ['chromium-reference-2026-09-26.json', 'protocol-motion-2026-09-26.json', 'interaction-performance-2026-09-26.json', 'independent-semantic-oracle-2026-09-27.json', 'protocol-state-machine-coverage-2026-08-14.json'])
+          actual = set(subprocess.check_output(['git','diff','--cached','--name-only'], text=True).splitlines())
+          assert actual <= allowed, actual - allowed
+          PY
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git commit -m 'test: retain executed playground, protocol and semantic verification evidence'
+          git push origin HEAD:refs/heads/docs/developer-first-site
