@@ -36,11 +36,6 @@ jobs:
           node-version: 24
           cache: pnpm
       - run: pnpm install --frozen-lockfile
-      - name: Capture formatter output for edited playground sources
-        run: |
-          pnpm exec oxfmt apps/demo/src/playground-model.ts apps/demo/src/playground-model.test.ts
-          mkdir -p artifacts/formatted/apps/demo/src
-          cp apps/demo/src/playground-model.ts apps/demo/src/playground-model.test.ts artifacts/formatted/apps/demo/src/
       - run: pnpm exec playwright install --with-deps chromium
       - name: Test the actual phone interactions without retries
         run: |
