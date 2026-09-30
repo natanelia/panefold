@@ -219,6 +219,62 @@ export const solvePlayground: WorkspaceLayoutSolver<WorkspaceSnapshot> = (snapsh
     },
   );
 
+function allocatePlaygroundDropIds(snapshot: WorkspaceSnapshot, panel: string) {
+  for (let candidate = 1; candidate < Number.MAX_SAFE_INTEGER; candidate += 1) {
+    const suffix = `playground-drop:${panel}:${String(candidate)}`;
+    const group = groupId(`${suffix}:group`);
+    const groupNode = nodeId(`${suffix}:node`);
+    const splitNode = nodeId(`${suffix}:split`);
+    if (
+      getEntity(snapshot.groups, group) === undefined &&
+      getEntity(snapshot.nodes, groupNode) === undefined &&
+      getEntity(snapshot.nodes, splitNode) === undefined
+    ) return { group, groupNode, splitNode };
+  }
+  throw new Error(`No playground drop identity remains for panel ${panel}`);
+}
+
+/**
+ * Cross-surface edge moves are expressed as move-then-split. This keeps the
+ * destination floating surface authoritative for every logical edge instead of
+ * relying on topology cleanup to preserve a foreign surface root.
+ */
+function floatingEdgeMoveCommand(
+  snapshot: WorkspaceSnapshot,
+  panel: string,
+  targetGroup: string,
+  edge: Exclude<Placement, "center">,
+  ratio: number,
+): WorkspaceCommand | undefined {
+  const surface = playgroundSurfaceForGroup(snapshot, targetGroup);
+  if (surface?.kind !== "floating") return undefined;
+  const ids = allocatePlaygroundDropIds(snapshot, panel);
+  return {
+    type: "batch",
+    commands: [
+      ...(surface.minimized ? [{ type: "restore-surface" as const, surfaceId: surface.id }] : []),
+      {
+        type: "move-panel",
+        panelId: panelId(panel),
+        target: { groupId: groupId(targetGroup) },
+        select: true,
+        activate: true,
+      },
+      {
+        type: "split-group",
+        targetGroupId: groupId(targetGroup),
+        panelIds: [panelId(panel)],
+        newGroupId: ids.group,
+        newGroupNodeId: ids.groupNode,
+        splitNodeId: ids.splitNode,
+        edge,
+        ratio,
+      },
+      { type: "raise-surface", surfaceId: surface.id },
+    ],
+  };
+}
+
 export function previewPlaygroundCommand(snapshot: WorkspaceSnapshot, command: WorkspaceCommand) {
   const result = reduceWorkspace(snapshot, command);
   if (!result.ok) return undefined;
@@ -277,9 +333,19 @@ export function createPlaygroundCommands(
     context: WorkspacePanelDropPlanContext,
   ) => {
     const snapshot = getSnapshot();
-    const plan = base.planPanelDrop?.(request, context);
+    const planned =
+      request.target.kind === "edge"
+        ? floatingEdgeMoveCommand(
+            snapshot,
+            request.panel.id,
+            request.targetGroup.id,
+            request.target.edge,
+            request.target.ratio,
+          )
+        : undefined;
+    const plan = planned === undefined ? base.planPanelDrop?.(request, context) : { command: planned };
     if (!plan) return undefined;
-    const command = revealDestination(plan.command, request.targetGroup.id);
+    const command = planned === undefined ? revealDestination(plan.command, request.targetGroup.id) : planned;
     const next = previewPlaygroundCommand(snapshot, command);
     if (!next) return undefined;
     const projection = projectPlayground(next);
