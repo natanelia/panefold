@@ -132,6 +132,36 @@ describe("readable touch playground", () => {
 });
 
 describe("floating placement policy", () => {
+  it("keeps the floating destination for every edge and viewport shape", async () => {
+    const { createPlaygroundCommands, playgroundSurfaceForGroup } = await import("./playground-model");
+    for (const bounds of [phone, { ...phone, inlineSize: 900, blockSize: 620 }]) {
+      for (const placement of ["inline-start", "inline-end", "block-start", "block-end"] as const) {
+        const runtime = createWorkspaceRuntime({ initialSnapshot: playgroundSnapshot });
+        try {
+          const commands = createPlaygroundCommands(runtime.getSnapshot, () => bounds);
+          const float = commands.floatPanel?.("notes");
+          if (!float) throw new Error("Missing float command");
+          expect(runtime.dispatch(float).status).toBe("committed");
+          const snapshot = runtime.getSnapshot();
+          const group = Object.values(projectPlayground(snapshot).groups).find((g) =>
+            g.panelIds.includes("notes"),
+          );
+          if (!group) throw new Error("Missing floating group");
+          const surface = playgroundSurfaceForGroup(snapshot, group.id);
+          if (!surface || surface.kind !== "floating") throw new Error("Missing floating surface");
+          const move = planPlaygroundMove(snapshot, "checklist", group.id, placement, bounds);
+          if (!move) throw new Error(`Missing ${placement} move`);
+          expect(runtime.dispatch(move.command).status).toBe("committed");
+          const next = runtime.getSnapshot();
+          expect(next.floatingOrder).toContain(surface.id);
+          expect(playgroundSurfaceForGroup(next, group.id)?.id).toBe(surface.id);
+          expect(validateWorkspace(next)).toEqual([]);
+        } finally {
+          runtime.dispose();
+        }
+      }
+    }
+  });
   it("restores a minimized destination atomically and redocks a nested float without flattening it", async () => {
     const { createPlaygroundCommands, playgroundSurfaceForGroup, playgroundSurfaceBounds } =
       await import("./playground-model");
