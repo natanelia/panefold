@@ -136,12 +136,7 @@ describe("floating placement policy", () => {
     const { createPlaygroundCommands, playgroundSurfaceForGroup } =
       await import("./playground-model");
     for (const bounds of [phone, { ...phone, inlineSize: 900, blockSize: 620 }]) {
-      for (const placement of [
-        "inline-start",
-        "inline-end",
-        "block-start",
-        "block-end",
-      ] as const) {
+      for (const placement of ["inline-start", "inline-end", "block-start", "block-end"] as const) {
         const runtime = createWorkspaceRuntime({ initialSnapshot: playgroundSnapshot });
         try {
           const commands = createPlaygroundCommands(runtime.getSnapshot, () => bounds);
