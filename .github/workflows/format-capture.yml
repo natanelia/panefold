@@ -1,0 +1,33 @@
+name: Playground format capture
+on:
+  pull_request:
+    paths:
+      - "apps/demo/src/playground-model.ts"
+      - "apps/demo/src/playground-model.test.ts"
+      - ".github/workflows/format-capture.yml"
+permissions:
+  contents: read
+jobs:
+  format:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+      - uses: pnpm/action-setup@v6
+        with:
+          version: 11.16.0
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm exec oxfmt apps/demo/src/playground-model.ts apps/demo/src/playground-model.test.ts
+      - uses: actions/upload-artifact@v7
+        with:
+          name: playground-formatted-source
+          path: |
+            apps/demo/src/playground-model.ts
+            apps/demo/src/playground-model.test.ts
+          retention-days: 1
