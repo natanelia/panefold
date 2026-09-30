@@ -79,6 +79,9 @@
     flex-shrink: 0;
   }
   @media (max-width: 700px) {
+    .docs-search-label input {
+      font-size: 16px;
+    }
     .docs-prose,
     .doc-header > p:last-child,
     .docs-index-intro {
