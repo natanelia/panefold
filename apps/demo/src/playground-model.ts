@@ -345,9 +345,11 @@ export function createPlaygroundCommands(
             request.target.ratio,
           )
         : undefined;
-    const plan = planned === undefined ? base.planPanelDrop?.(request, context) : { command: planned };
+    const plan =
+      planned === undefined ? base.planPanelDrop?.(request, context) : { command: planned };
     if (!plan) return undefined;
-    const command = planned === undefined ? revealDestination(plan.command, request.targetGroup.id) : planned;
+    const command =
+      planned === undefined ? revealDestination(plan.command, request.targetGroup.id) : planned;
     const next = previewPlaygroundCommand(snapshot, command);
     if (!next) return undefined;
     const projection = projectPlayground(next);
