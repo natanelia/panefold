@@ -1,0 +1,37 @@
+name: Linked context generated inventory
+
+on:
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  inventory:
+    if: github.head_ref == 'feat/linked-panel-context'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+      - name: Regenerate inventories and capture differences
+        run: |
+          mkdir -p artifacts
+          git log -1 --format='%H %P'
+          node scripts/generate-conformance-data.mjs
+          git diff --stat
+          git diff -- conformance > artifacts/generated.patch
+          cat artifacts/generated.patch
+          cp conformance/capabilities.json conformance/command-parity.json conformance/traces.json artifacts/
+      - uses: actions/upload-artifact@v7
+        if: always()
+        with:
+          name: linked-context-generated-inventory
+          path: artifacts
+          if-no-files-found: error
+          retention-days: 7
