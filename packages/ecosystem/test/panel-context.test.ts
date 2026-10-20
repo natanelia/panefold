@@ -4,7 +4,7 @@ import {
   createPanelContextHub,
   type PanelContextHubOptions,
   type PanelContextPublishResult,
-} from "./panel-context";
+} from "../src/panel-context";
 
 type RoadId = `road-${number}`;
 interface Selection {

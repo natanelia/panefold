@@ -186,9 +186,7 @@ interface Session {
 function isSelection(value: unknown): value is LinkedContexts["selection"] {
   return (
     value === null ||
-    (typeof value === "object" &&
-      "roadId" in value &&
-      roadIds.some((id) => id === value.roadId))
+    (typeof value === "object" && "roadId" in value && roadIds.some((id) => id === value.roadId))
   );
 }
 export default function LinkedPanelsWorkspace() {
@@ -243,7 +241,8 @@ function LinkedSurface({ runtime }: { readonly runtime: WorkspaceRuntime }) {
   return (
     <>
       <p>
-        Layout revision: <output aria-label="Layout revision">{snapshot.revision.toString()}</output>
+        Layout revision:{" "}
+        <output aria-label="Layout revision">{snapshot.revision.toString()}</output>
       </p>
       <WorkspaceSurface
         projector={projectWorkspace}

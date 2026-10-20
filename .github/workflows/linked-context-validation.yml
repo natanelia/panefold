@@ -34,7 +34,7 @@ jobs:
           cat artifacts/format.patch
       - run: pnpm build:packages
       - run: pnpm exec tsc --noEmit -p tsconfig.json
-      - run: pnpm exec vitest run packages/ecosystem/src/panel-context.test.ts packages/react/src/panel-context.test.tsx
+      - run: pnpm exec vitest run packages/ecosystem/test/panel-context.test.ts packages/react/test/panel-context.test.tsx
       - run: pnpm exec playwright install --with-deps chromium
       - run: pnpm exec playwright test e2e/linked-panels.spec.ts
       - name: Preserve focused validation artifacts

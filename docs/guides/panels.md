@@ -92,7 +92,9 @@ The React hook observes a connection without owning it:
 import { usePanelContext } from "@panefold/react";
 import type { PanelContextConnection } from "@panefold/ecosystem";
 
-function RoadInspector({ connection }: {
+function RoadInspector({
+  connection,
+}: {
   readonly connection: PanelContextConnection<{ selection: Selection }>;
 }) {
   const snapshot = usePanelContext(connection);

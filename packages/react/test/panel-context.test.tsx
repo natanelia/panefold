@@ -7,7 +7,7 @@ import {
   createPanelContextHub,
   type PanelContextConnection,
 } from "../../ecosystem/src/panel-context";
-import { usePanelContext } from "./panel-context";
+import { usePanelContext } from "../src/panel-context";
 
 interface Channels {
   readonly selection: string;
