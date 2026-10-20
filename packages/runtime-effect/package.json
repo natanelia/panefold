@@ -18,7 +18,7 @@
     "effect": "catalog:"
   },
   "devDependencies": {
-    "fake-indexeddb": "6.2.5"
+    "fake-indexeddb": "6.2.6"
   },
   "scripts": {
     "build": "tsup src/index.ts --format esm --dts --clean"
