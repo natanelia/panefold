@@ -58,7 +58,7 @@ const initialSnapshot = createWorkspaceSnapshot({
       floatable: true,
       popout: false,
       pictureInPicture: false,
-      singleton: true,
+      singleton: false,
     },
     constraints: { hardMinInline: 160, hardMinBlock: 220 },
     lifecycle: {
