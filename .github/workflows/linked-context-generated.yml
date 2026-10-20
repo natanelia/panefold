@@ -19,15 +19,20 @@ jobs:
       - uses: actions/setup-node@v7
         with:
           node-version: 24
-      - name: Regenerate inventories and capture differences
+      - name: Check and capture source inventories
         run: |
           mkdir -p artifacts
           git log -1 --format='%H %P'
+          cp scripts/generate-conformance-data.mjs package.json artifacts/
+          cp conformance/capabilities.json artifacts/capabilities-before.json
+          node scripts/generate-conformance-data.mjs --check
           node scripts/generate-conformance-data.mjs
+          node scripts/generate-conformance-data.mjs --check
           git diff --stat
           git diff -- conformance > artifacts/generated.patch
           cat artifacts/generated.patch
-          cp conformance/capabilities.json conformance/command-parity.json conformance/traces.json artifacts/
+          cp conformance/capabilities.json conformance/traces.json artifacts/
+          tar -czf artifacts/source.tar.gz scripts conformance packages apps/demo/src apps/site/src docs/guides tsconfig.json vitest.config.ts package.json .github/workflows/ci.yml
       - uses: actions/upload-artifact@v7
         if: always()
         with:
