@@ -1,0 +1,31 @@
+name: Panel context formatting
+
+on:
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  format:
+    if: github.head_ref == 'feat/linked-panel-context'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+      - uses: pnpm/action-setup@v6
+        with:
+          version: 11.16.0
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - name: Format and show exact source diff
+        run: |
+          pnpm exec oxfmt --write packages/ecosystem/src/panel-context.ts
+          git diff -- packages/ecosystem/src/panel-context.ts
+          pnpm exec oxfmt --check packages/ecosystem/src/panel-context.ts
