@@ -1,0 +1,162 @@
+{
+  "sourceSha": "e2c70426dbf6ebbd998a08f7bf9f2409848d4bcd",
+  "capturedAt": "2026-10-21T05:48:00.797Z",
+  "workflowRun": "https://github.com/natanelia/panefold/actions/runs/39551520733",
+  "browser": "151.0.7922.34",
+  "viewport": {
+    "width": 1280,
+    "height": 1100
+  },
+  "deviceScaleFactor": 2,
+  "fixture": "?fixture=linked",
+  "application": "Unmodified production demo build from the pinned source commit, served locally in GitHub Actions.",
+  "capture": "Real Chromium screenshots after UI interactions and assertions. No DOM replacement, mock data injection, CSS overrides, or image editing.",
+  "checks": {
+    "initialRoad": "road-1",
+    "emptyDestinationGroup": "None",
+    "browserErrors": [],
+    "screenshotStatesPassed": 5
+  },
+  "screenshots": [
+    {
+      "file": "01-shared-selection.png",
+      "caption": "Map publishes road-2; Table and Inspector follow in Review A.",
+      "sha256": "1ca5c769979c72757d2ce13719a9d03af6f219c42def836adc33992e8168b01a",
+      "panels": [
+        {
+          "panel": "Map",
+          "road": "road-2",
+          "group": "review-a",
+          "locked": false,
+          "source": "Source: linked-map"
+        },
+        {
+          "panel": "Table",
+          "road": "road-2",
+          "group": "review-a",
+          "locked": false,
+          "source": "Source: linked-map"
+        },
+        {
+          "panel": "Inspector",
+          "road": "road-2",
+          "group": "review-a",
+          "locked": false,
+          "source": "Source: linked-map"
+        }
+      ]
+    },
+    {
+      "file": "02-locked-inspector.png",
+      "caption": "Map and Table show road-3; locked Inspector keeps road-2 and its road control is disabled.",
+      "sha256": "047d0b510841ad5c4708f3eef0b525378e79820478b00495ffbca0541fd4d9fa",
+      "panels": [
+        {
+          "panel": "Map",
+          "road": "road-3",
+          "group": "review-a",
+          "locked": false,
+          "source": "Source: linked-map"
+        },
+        {
+          "panel": "Table",
+          "road": "road-3",
+          "group": "review-a",
+          "locked": false,
+          "source": "Source: linked-map"
+        },
+        {
+          "panel": "Inspector",
+          "road": "road-2",
+          "group": "review-a",
+          "locked": true,
+          "source": "Source: linked-map"
+        }
+      ]
+    },
+    {
+      "file": "03-resume-follow.png",
+      "caption": "Follow group immediately catches Inspector up to road-3 and enables its road control.",
+      "sha256": "e6e43fb640dabe48ba4fbd6197d76dce71014e7dac34edf135044371a4b7cf67",
+      "panels": [
+        {
+          "panel": "Map",
+          "road": "road-3",
+          "group": "review-a",
+          "locked": false,
+          "source": "Source: linked-map"
+        },
+        {
+          "panel": "Table",
+          "road": "road-3",
+          "group": "review-a",
+          "locked": false,
+          "source": "Source: linked-map"
+        },
+        {
+          "panel": "Inspector",
+          "road": "road-3",
+          "group": "review-a",
+          "locked": false,
+          "source": "Source: linked-map"
+        }
+      ]
+    },
+    {
+      "file": "04-isolated-groups.png",
+      "caption": "Inspector publishes road-1 in Review B. Map and Table remain on road-2 in Review A.",
+      "sha256": "be9daeed0d29c65275ca3dfe155234ba1b15e7cb9b93c3b1d55caba9a3791708",
+      "panels": [
+        {
+          "panel": "Map",
+          "road": "road-2",
+          "group": "review-a",
+          "locked": false,
+          "source": "Source: linked-map"
+        },
+        {
+          "panel": "Table",
+          "road": "road-2",
+          "group": "review-a",
+          "locked": false,
+          "source": "Source: linked-map"
+        },
+        {
+          "panel": "Inspector",
+          "road": "road-1",
+          "group": "review-b",
+          "locked": false,
+          "source": "Source: linked-inspector"
+        }
+      ]
+    },
+    {
+      "file": "05-rejoin-group.png",
+      "caption": "Returning Inspector to Review A adopts its latest road-2 selection and Map source.",
+      "sha256": "1ca5c769979c72757d2ce13719a9d03af6f219c42def836adc33992e8168b01a",
+      "panels": [
+        {
+          "panel": "Map",
+          "road": "road-2",
+          "group": "review-a",
+          "locked": false,
+          "source": "Source: linked-map"
+        },
+        {
+          "panel": "Table",
+          "road": "road-2",
+          "group": "review-a",
+          "locked": false,
+          "source": "Source: linked-map"
+        },
+        {
+          "panel": "Inspector",
+          "road": "road-2",
+          "group": "review-a",
+          "locked": false,
+          "source": "Source: linked-map"
+        }
+      ]
+    }
+  ]
+}
