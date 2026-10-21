@@ -1,0 +1,166 @@
+name: PR 49 linked-panel screenshots
+
+on:
+  push:
+    branches: [docs/pr-49-linked-panel-screenshots]
+    paths: [.github/workflows/pr-49-screenshots.yml]
+
+permissions:
+  contents: write
+
+jobs:
+  capture:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      SOURCE_SHA: e2c70426dbf6ebbd998a08f7bf9f2409848d4bcd
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: docs/pr-49-linked-panel-screenshots
+          path: evidence
+      - uses: actions/checkout@v7
+        with:
+          ref: e2c70426dbf6ebbd998a08f7bf9f2409848d4bcd
+          path: source
+          persist-credentials: false
+      - uses: pnpm/action-setup@v6
+        with:
+          version: 11.16.0
+          package_json_file: source/package.json
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          cache: pnpm
+          cache-dependency-path: source/pnpm-lock.yaml
+      - name: Build the exact reviewed demo
+        working-directory: source
+        run: |
+          test "$(git rev-parse HEAD)" = "$SOURCE_SHA"
+          pnpm install --frozen-lockfile
+          pnpm build:packages
+          PANEFOLD_DEMO_BASE=/ pnpm --filter @panefold/demo run build
+          pnpm exec playwright install --with-deps chromium
+      - name: Exercise the real UI and capture five verified states
+        working-directory: source
+        run: |
+          node --input-type=module <<'NODE'
+          import assert from 'node:assert/strict';
+          import { spawn, execFileSync } from 'node:child_process';
+          import { createHash } from 'node:crypto';
+          import { mkdir, readFile, writeFile } from 'node:fs/promises';
+          import { resolve } from 'node:path';
+          import { chromium, expect } from '@playwright/test';
+
+          const sourceSha = execFileSync('git', ['rev-parse', 'HEAD'], { encoding: 'utf8' }).trim();
+          assert.equal(sourceSha, process.env.SOURCE_SHA);
+          const output = resolve('../evidence/docs/pr-evidence/pr-49/e2c7042');
+          await mkdir(output, { recursive: true });
+          const server = spawn('pnpm', ['--filter', '@panefold/demo', 'exec', 'vite', 'preview', '--host', '127.0.0.1', '--port', '4173', '--strictPort'], { stdio: 'inherit' });
+          let browser;
+          try {
+            const url = 'http://127.0.0.1:4173/?fixture=linked';
+            let ready = false;
+            for (let attempt = 0; attempt < 100; attempt++) {
+              if (server.exitCode !== null) throw new Error('Demo server exited');
+              try {
+                const response = await fetch(url, { signal: AbortSignal.timeout(1000) });
+                ready = response.ok;
+              } catch {}
+              if (ready) break;
+              await new Promise((done) => setTimeout(done, 200));
+            }
+            assert.ok(ready, 'Demo server must be ready');
+            browser = await chromium.launch();
+            const viewport = { width: 1280, height: 1100 };
+            const context = await browser.newContext({ viewport, deviceScaleFactor: 2, colorScheme: 'light', reducedMotion: 'reduce' });
+            const page = await context.newPage();
+            const errors = [];
+            page.on('pageerror', (error) => errors.push(error.message));
+            page.on('console', (message) => { if (message.type() === 'error') errors.push(message.text()); });
+            await page.goto(url, { waitUntil: 'networkidle' });
+            await page.evaluate(() => document.fonts.ready);
+            const names = ['Map', 'Table', 'Inspector'];
+            const road = (name) => page.getByLabel(`${name} road`, { exact: true });
+            const selected = (name) => page.getByLabel(`${name} selected road`, { exact: true });
+            const group = (name) => page.getByLabel(`${name} link group`, { exact: true });
+            const lock = page.getByRole('button', { name: 'Inspector lock selection', exact: true });
+            const records = [];
+            async function capture(file, caption, expected) {
+              const panels = [];
+              for (const [index, name] of names.entries()) {
+                const wanted = expected[index];
+                await expect(selected(name)).toHaveText(wanted.road);
+                await expect(road(name)).toHaveValue(wanted.road === 'None' ? '' : wanted.road);
+                await expect(group(name)).toHaveValue(wanted.group);
+                const button = page.getByRole('button', { name: `${name} lock selection`, exact: true });
+                await expect(button).toHaveAttribute('aria-pressed', String(wanted.locked));
+                if (wanted.locked) await expect(road(name)).toBeDisabled();
+                else await expect(road(name)).toBeEnabled();
+                const source = page.getByRole('region', { name: `${name} linked content`, exact: true }).getByText(/^Source:/);
+                await expect(source).toHaveText(`Source: ${wanted.source}`);
+                panels.push({ panel: name, road: await selected(name).innerText(), group: await group(name).inputValue(), locked: (await button.getAttribute('aria-pressed')) === 'true', source: await source.innerText() });
+              }
+              assert.deepEqual(errors, [], 'No browser errors before capture');
+              await page.mouse.move(0, 0);
+              const bytes = await page.locator('.starter-container').screenshot({ path: resolve(output, file), animations: 'disabled' });
+              records.push({ file, caption, sha256: createHash('sha256').update(bytes).digest('hex'), panels });
+              console.log(`PASS ${file}: ${caption}`);
+            }
+            const state = (road, group = 'review-a', locked = false, source = 'linked-map') => ({ road, group, locked, source });
+            await expect(selected('Inspector')).toHaveText('road-1');
+            await road('Map').selectOption('road-2');
+            await capture('01-shared-selection.png', 'Map publishes road-2; Table and Inspector follow in Review A.', [state('road-2'), state('road-2'), state('road-2')]);
+            await lock.click();
+            await road('Map').selectOption('road-3');
+            await capture('02-locked-inspector.png', 'Map and Table show road-3; locked Inspector keeps road-2 and its road control is disabled.', [state('road-3'), state('road-3'), state('road-2', 'review-a', true)]);
+            await lock.click();
+            await capture('03-resume-follow.png', 'Follow group immediately catches Inspector up to road-3 and enables its road control.', [state('road-3'), state('road-3'), state('road-3')]);
+            await group('Inspector').selectOption('review-b');
+            await expect(selected('Inspector')).toHaveText('None');
+            await road('Inspector').selectOption('road-1');
+            await road('Map').selectOption('road-2');
+            await capture('04-isolated-groups.png', 'Inspector publishes road-1 in Review B. Map and Table remain on road-2 in Review A.', [state('road-2'), state('road-2'), state('road-1', 'review-b', false, 'linked-inspector')]);
+            await group('Inspector').selectOption('review-a');
+            await capture('05-rejoin-group.png', 'Returning Inspector to Review A adopts its latest road-2 selection and Map source.', [state('road-2'), state('road-2'), state('road-2')]);
+            assert.deepEqual(errors, []);
+            const manifest = {
+              sourceSha,
+              capturedAt: new Date().toISOString(),
+              workflowRun: `https://github.com/${process.env.GITHUB_REPOSITORY}/actions/runs/${process.env.GITHUB_RUN_ID}`,
+              browser: browser.version(),
+              viewport,
+              deviceScaleFactor: 2,
+              fixture: '?fixture=linked',
+              application: 'Unmodified production demo build from the pinned source commit, served locally in GitHub Actions.',
+              capture: 'Real Chromium screenshots after UI interactions and assertions. No DOM replacement, mock data injection, CSS overrides, or image editing.',
+              checks: { initialRoad: 'road-1', emptyDestinationGroup: 'None', browserErrors: errors, screenshotStatesPassed: records.length },
+              screenshots: records
+            };
+            await writeFile(resolve(output, 'capture.json'), `${JSON.stringify(manifest, null, 2)}\n`);
+            await writeFile(resolve(output, 'README.md'), `# PR #49: linked-panel screenshot evidence\n\nSource: \`${sourceSha}\`.\n\n${manifest.capture}\n\n[Capture run](${manifest.workflowRun})\n\n${records.map((item, index) => `## ${index + 1}. ${item.caption}\n\n![${item.caption}](${item.file})`).join('\n\n')}\n\nSee capture.json for asserted panel states and PNG SHA-256 checksums.\n`);
+          } finally {
+            if (browser) await browser.close();
+            server.kill('SIGTERM');
+          }
+          NODE
+      - name: Preserve screenshot evidence
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: pr-49-linked-panel-screenshots-e2c7042
+          path: evidence/docs/pr-evidence/pr-49/e2c7042
+          if-no-files-found: warn
+          retention-days: 30
+      - name: Publish images only on the evidence branch
+        working-directory: evidence
+        run: |
+          test "$GITHUB_REF" = "refs/heads/docs/pr-49-linked-panel-screenshots"
+          test -f docs/pr-evidence/pr-49/e2c7042/capture.json
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add docs/pr-evidence/pr-49/e2c7042
+          if ! git diff --cached --quiet; then
+            git commit -m 'docs: capture verified linked-panel UI states for PR 49'
+            git push origin HEAD:refs/heads/docs/pr-49-linked-panel-screenshots
+          fi
