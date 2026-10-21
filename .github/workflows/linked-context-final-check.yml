@@ -1,0 +1,52 @@
+name: Linked context final check
+
+on:
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    if: github.head_ref == 'feat/linked-panel-context'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      VITEST_MAX_WORKERS: "1"
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+          persist-credentials: false
+      - uses: pnpm/action-setup@v6
+        with:
+          version: 11.16.0
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - name: Capture exact source and full-repository formatting
+        run: |
+          mkdir -p artifacts
+          git log -1 --format='%H %P' | tee artifacts/commit.txt
+          cp package.json .oxfmtrc.json artifacts/
+          git hash-object packages/ecosystem/src/panel-context.ts | tee artifacts/before-sha.txt
+          pnpm exec oxfmt --version | tee artifacts/formatter-version.txt
+          formatter_root=$(dirname "$(realpath node_modules/oxfmt)")
+          tar -czhf artifacts/formatter.tar.gz -C "$formatter_root" .
+          pnpm format
+          git hash-object packages/ecosystem/src/panel-context.ts | tee artifacts/after-sha.txt
+          git diff --binary | tee artifacts/format.patch
+          cp packages/ecosystem/src/panel-context.ts artifacts/panel-context.ts
+      - name: Run unchanged repository checks
+        run: pnpm check 2>&1 | tee artifacts/check.log
+      - name: Preserve exact formatter and check evidence
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: linked-context-final-check
+          path: artifacts
+          if-no-files-found: error
+          retention-days: 7
