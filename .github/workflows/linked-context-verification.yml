@@ -1,0 +1,48 @@
+name: Linked context verification
+
+on:
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    if: github.head_ref == 'feat/linked-panel-context'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      VITEST_MAX_WORKERS: "1"
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: pnpm/action-setup@v6
+        with:
+          version: 11.16.0
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - name: Capture exact formatting
+        run: |
+          mkdir -p artifacts
+          git log -1 --format='%H %P' | tee artifacts/commit.txt
+          pnpm exec oxfmt --version | tee artifacts/formatter-version.txt
+          cp packages/ecosystem/src/panel-context.ts artifacts/panel-context-before.ts
+          pnpm exec oxfmt --write packages/ecosystem/src/panel-context.ts
+          cp packages/ecosystem/src/panel-context.ts artifacts/panel-context.ts
+          git diff -- packages/ecosystem/src/panel-context.ts | tee artifacts/format.patch
+      - name: Verify formatted source
+        run: pnpm check 2>&1 | tee artifacts/check.log
+      - name: Preserve evidence
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: linked-context-verification
+          path: artifacts
+          if-no-files-found: error
+          retention-days: 7
