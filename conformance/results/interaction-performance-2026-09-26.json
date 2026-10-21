@@ -11,37 +11,37 @@
       "width": 1280,
       "height": 720
     },
-    "operatingSystem": "Linux 6.17.0-1022-azure x64",
-    "node": "v24.21.0",
+    "operatingSystem": "Linux 7.0.0-1017-azure x64",
+    "node": "v24.22.0",
     "browserVersion": "151.0.7922.34"
   },
   "sampleCount": 179,
   "summary": {
     "minimum": 16.5,
-    "maximum": 33.3,
-    "mean": 16.759,
+    "maximum": 33.4,
+    "mean": 16.946,
     "median": 16.7,
-    "p95": 16.7,
-    "p99": 16.8
+    "p95": 16.8,
+    "p99": 33.244
   },
   "rawFrameDeltasMs": [
-    16.6, 16.6, 16.7, 16.6, 16.7, 16.7, 16.7, 16.7, 16.7, 16.5, 16.8, 16.7, 16.6, 16.7, 16.6, 16.6,
-    16.7, 16.7, 16.7, 16.6, 16.7, 16.7, 16.7, 16.6, 16.6, 16.7, 16.7, 16.6, 16.7, 16.7, 16.7, 16.7,
-    16.6, 16.7, 16.6, 16.7, 16.6, 16.7, 16.7, 16.6, 16.7, 16.7, 16.6, 16.7, 16.7, 16.7, 16.6, 16.7,
-    16.6, 16.7, 16.7, 16.7, 16.6, 16.7, 16.7, 16.6, 16.7, 16.7, 16.7, 16.6, 16.6, 16.7, 16.7, 16.7,
-    16.6, 16.7, 16.7, 16.6, 16.7, 16.6, 16.7, 16.7, 16.6, 16.8, 16.6, 16.6, 16.7, 16.7, 16.7, 16.6,
-    16.7, 16.6, 16.7, 16.7, 16.6, 16.7, 16.6, 16.7, 16.7, 16.7, 16.7, 16.6, 16.7, 16.7, 16.6, 16.6,
-    16.7, 16.7, 16.6, 16.8, 16.6, 16.7, 16.6, 16.7, 16.7, 16.6, 16.7, 16.6, 16.7, 16.7, 16.6, 16.8,
-    16.5, 16.7, 16.7, 16.7, 16.6, 16.7, 16.6, 16.8, 16.6, 16.7, 16.7, 16.6, 16.7, 16.6, 16.7, 16.7,
-    16.6, 16.7, 16.7, 16.7, 16.6, 16.6, 16.7, 16.7, 16.6, 16.7, 16.7, 16.6, 16.7, 16.7, 16.7, 16.6,
-    16.7, 16.7, 16.7, 16.6, 16.6, 16.7, 16.7, 16.6, 16.7, 33.3, 16.7, 16.7, 16.7, 16.6, 16.7, 16.7,
-    16.6, 16.7, 16.6, 16.7, 16.7, 16.6, 16.7, 16.7, 16.6, 16.7, 16.7, 16.7, 16.6, 16.7, 16.7, 16.6,
-    16.6, 16.7, 16.7
+    16.7, 16.6, 16.7, 16.7, 16.7, 16.6, 16.6, 16.7, 16.7, 16.7, 16.7, 16.6, 16.7, 16.7, 16.7, 16.6,
+    16.7, 16.6, 16.7, 16.7, 16.6, 16.7, 16.6, 16.7, 16.6, 16.8, 16.6, 16.7, 16.7, 16.6, 16.7, 16.6,
+    16.7, 16.6, 16.8, 16.6, 16.6, 16.8, 16.6, 16.7, 16.6, 16.7, 16.6, 16.7, 16.7, 16.6, 16.8, 16.6,
+    16.7, 16.6, 16.7, 16.7, 16.6, 16.7, 16.7, 16.6, 16.7, 16.7, 16.7, 16.6, 16.7, 16.6, 16.7, 16.7,
+    16.6, 16.7, 16.7, 16.7, 16.6, 16.6, 16.8, 16.5, 16.8, 16.6, 16.7, 16.7, 16.6, 16.7, 16.6, 16.7,
+    16.7, 16.7, 16.6, 16.7, 16.7, 16.6, 16.7, 16.6, 16.7, 16.6, 16.8, 16.6, 16.7, 16.6, 16.7, 16.6,
+    16.8, 16.6, 16.6, 16.8, 16.6, 16.7, 16.7, 16.6, 16.7, 16.6, 16.7, 16.7, 16.6, 16.7, 16.7, 16.7,
+    16.6, 16.6, 16.7, 16.7, 16.6, 16.7, 16.7, 16.6, 16.8, 16.6, 16.6, 16.7, 16.7, 16.7, 16.6, 16.6,
+    16.8, 16.6, 16.7, 16.6, 16.7, 16.7, 16.6, 16.8, 16.6, 16.6, 16.7, 16.7, 16.6, 16.7, 16.7, 16.6,
+    16.7, 16.6, 16.7, 16.7, 16.7, 16.7, 16.6, 16.7, 16.6, 16.6, 16.8, 16.6, 16.7, 16.7, 16.7, 33.2,
+    16.7, 16.7, 16.6, 16.7, 16.7, 16.7, 16.6, 33.4, 16.6, 33.4, 16.6, 16.7, 16.6, 16.8, 16.6, 16.7,
+    16.7, 16.5, 16.8
   ],
   "longTasks": [
     {
-      "startTime": 172.09999999997672,
-      "duration": 66
+      "startTime": 227.89999999996508,
+      "duration": 67
     }
   ],
   "baseline": {
@@ -53,32 +53,32 @@
     "longTaskMaximumCount": 12,
     "minimumSamples": 120
   },
-  "producedAt": "2026-09-30T11:55:54.787Z",
+  "producedAt": "2026-10-21T02:11:06.616Z",
   "nodeSmoke": {
     "schemaVersion": 1,
     "environment": {
-      "node": "v24.21.0",
-      "v8": "13.6.233.17-node.53",
+      "node": "v24.22.0",
+      "v8": "13.6.233.17-node.57",
       "platform": "linux",
       "architecture": "x64",
       "cpu": "AMD EPYC 7763 64-Core Processor"
     },
     "kernel": {
       "iterations": 10000,
-      "elapsedMs": 2431.32
+      "elapsedMs": 2404.12
     },
     "geometry": {
       "iterations": 100000,
-      "elapsedMs": 329.81
+      "elapsedMs": 344.05
     },
     "reorderProfiles": [
       {
         "panelCount": 50,
         "warmupCount": 250,
         "sampleCount": 2000,
-        "medianMs": 0.3541,
-        "p95Ms": 0.5855,
-        "p99Ms": 0.7013,
+        "medianMs": 0.3639,
+        "p95Ms": 0.6255,
+        "p99Ms": 0.8331,
         "designTargetMs": 1,
         "withinDesignTargetOnThisMachine": true,
         "invariantViolations": 0
@@ -87,9 +87,9 @@
         "panelCount": 500,
         "warmupCount": 100,
         "sampleCount": 1000,
-        "medianMs": 3.1384,
-        "p95Ms": 3.4876,
-        "p99Ms": 4.0558,
+        "medianMs": 3.1593,
+        "p95Ms": 3.8008,
+        "p99Ms": 5.7005,
         "designTargetMs": 5,
         "withinDesignTargetOnThisMachine": true,
         "invariantViolations": 0
@@ -99,36 +99,37 @@
       {
         "nodeCount": 100,
         "sampleCount": 10000,
-        "elapsedMs": 49,
-        "meanMicroseconds": 4.9
+        "elapsedMs": 49.27,
+        "meanMicroseconds": 4.927
       },
       {
         "nodeCount": 500,
         "sampleCount": 10000,
-        "elapsedMs": 256.61,
-        "meanMicroseconds": 25.661
+        "elapsedMs": 257.45,
+        "meanMicroseconds": 25.745
       },
       {
         "nodeCount": 1000,
         "sampleCount": 10000,
-        "elapsedMs": 547.07,
-        "meanMicroseconds": 54.707
+        "elapsedMs": 542.06,
+        "meanMicroseconds": 54.206
       }
     ],
-    "totalElapsedMs": 8066.09,
+    "totalElapsedMs": 8207.33,
     "finalRevision": "10000",
     "invariantViolations": 0
   },
   "rawReport": {
     "path": "artifacts/preview-browser.json",
-    "sha256": "bf923cd482c1deb03e1ec6920cf8118298e3738709eb2c3b9d0303966d81382c",
-    "runUrl": "https://github.com/natanelia/panefold/actions/runs/36711088102",
+    "sha256": "0e5d1de7762d34aadac028c389673a54b1d444f13c64343960be062563c39037",
+    "runUrl": "https://github.com/natanelia/panefold/actions/runs/39531208466",
     "artifact": "preview-executed-evidence"
   },
   "sourceDigests": {
     "apps/demo/src/TouchButton.tsx": "13e7301be325cd1f03fb9a47d48e955b3db3a156fec38c70ec2370189d0c109a",
     "apps/demo/src/TouchPlayground.tsx": "2afb246e15de0cb41e7f830ce3d5e044e0fb78aba72c051df87c9c3567a1abca",
-    "apps/demo/src/main.tsx": "7b437cb000879d31587a91fa6082861a3f41cb14fc9e7d0084912b4992fdd721",
+    "apps/demo/src/linked-panels.tsx": "8dcd10ae99fde4f62e679c2a31cb35f1be24ab2d4db0490b1aea68cf063c212e",
+    "apps/demo/src/main.tsx": "104a6c69b551df3f05e097340fa2b8af3b4d645c4b7664dead2031e8ed15dc8c",
     "apps/demo/src/mobile.css": "71859290c3377d1a54bd9e5e9e44c17d0aa34bb699e3eff8c766a5287dfa36b8",
     "apps/demo/src/playground-model.test.ts": "54d584cdd971e62348e025b85cc20db34987bb9cd463ffa1348fc43c22d57194",
     "apps/demo/src/playground-model.ts": "2b8f146a48ceb0c087f817d296216ab151ea89d50426fcdef7679f044b59bb97",
@@ -139,6 +140,7 @@
     "apps/demo/src/use-touch-workbench.ts": "c913911471945a857994e2078eb36420b14cdcb8cd3d7437b5d562c32a02f04c",
     "e2e/code-workbench-cases.ts": "e83979a7be6e659fa238414e65f7f28ec74828274567e8f181ea002ed3212d39",
     "e2e/drag-parity.spec.ts": "a7c7da7513e3b56de9b832cce5fa2fc6236f55d74ba9ea3aa9be1600f6620bce",
+    "e2e/linked-panels.spec.ts": "4206d0acd8ebc9ad78e5d29c655b79ca4c1f34608c5490032264d4dbae2dcf77",
     "e2e/mobile-playground.spec.ts": "fd45fe0690c8edbb380193d2525ed07a565ce2b1acb186207bc9d88e96d1d25c",
     "e2e/native-touch-audit.ts": "31e07885233945c7f47f7965a0fa66df5d73973ece27a211cc952e34c76d183b",
     "e2e/performance-baseline.json": "128b4c7dc2c7fc03372224828417f675b279359ebbe9bab7408b172ad76b48a9",
@@ -148,6 +150,10 @@
     "e2e/touch-playground-operations.spec.ts": "d594a5a80b176d7be8c721d13546aede0b69e7ce72dea879d59498dc69123d5b",
     "e2e/touch-playground-ux.spec.ts": "17748d80e1de9cb6a5ab9443fd9992635cb82cd2fb77112185e1ad3eb63ce7ac",
     "package.json": "acd970060c8df0d628cada8c1762111b9c3587031dbdc0e5815fb1e6159147ee",
+    "packages/ecosystem/src/boundary.ts": "4a1c4b23617574ae1f4dfdb1f6eca2394df3615ccb132afc5324e6459a1a260c",
+    "packages/ecosystem/src/index.ts": "ea8972723e8689a15ecd3e18d221f47ee9c7a1d37968ce07ce6e03b455b10621",
+    "packages/ecosystem/src/panel-context.ts": "1009cbbb01d9ee811d7bd42703e0b5c4c1b9d6aa2a5051c3c379ccb497fd54d0",
+    "packages/ecosystem/test/panel-context.test.ts": "02a3c9d7fbf95d6b62a1c6927cdc84e682c36e0dd0e3cee79c96830df47c95d2",
     "packages/geometry/src/hit-test.ts": "2da9ca42d97c135f37d599bbaebed8f758343fa4e52fd647c05a4b179340c121",
     "packages/geometry/src/invalidation.ts": "9d42bd81ccfc82cecac5d0a200bd889ae49c164acf5db44eaebdb445acff7906",
     "packages/kernel-optimized/src/indexes.ts": "c6d962626b3c0cac8d7d89f156aed383b1e313a201f7c3ce5f228d97959ac0a8",
@@ -159,10 +165,11 @@
     "packages/react/src/floating-surface.tsx": "a89136a0685a1b87f97a15b324198c498d45cf382843fe34dbbf9a963b98225b",
     "packages/react/src/group-drag.tsx": "bb30a15666da3c6fbcfa53b443b023393ea85bec33ee3da750e9f67384694f26",
     "packages/react/src/group-drop.ts": "85a436f15d973eacf1a7d556b467a75e56ed484fb1add90e95d2b3e1c4c137dd",
-    "packages/react/src/index.ts": "091c9aec1f4bf40b9968e5387462582549bcf033b4983dfb4b5e7230ee47cc00",
+    "packages/react/src/index.ts": "78a20b340453ecf23113ef28509426d4fc093f287bd2ebe55a5cbac3a66ccf6c",
     "packages/react/src/messages.ts": "cd68829f5ead5ffd616dc93b22a57a76117e142395acda4a88c6f560d7751a47",
     "packages/react/src/move-destination-controls.tsx": "c72fd93fc63ecefa7f732dde93291f04f1f3d075b9bee3e0b1b4d52ed18bd19d",
     "packages/react/src/node-motion.ts": "5f7efe09d09573ea1c2baa44744627d34fabe60cc6978f287da83e6b02ed52bb",
+    "packages/react/src/panel-context.ts": "1eff71c604f23b75320210271e895c864cccf617584380e398bf72132eddb2d7",
     "packages/react/src/panel-drag.tsx": "e19befa4995182d66a76570990bcff60e2ab4ba5fb76f0fe8a63e020bca493cc",
     "packages/react/src/styles.css": "5ce0dc5fcdafaa04e9593212eecdcac4012ebde9b56894d4294cbdc6a07ba144",
     "packages/react/src/tab-insertion.ts": "e611ecfe7cb4b0b9fb7e748a747f2584e35dbaa72111a907008f6dc6b11f1670",
@@ -170,11 +177,12 @@
     "packages/react/test/drop-preview.test.ts": "bdc1de685dce3a9bc5c073cf9fb7f2325de07251a8f71d4b318f09990c22211c",
     "packages/react/test/drop-target.test.ts": "2f28dc5a482cb6cc12fdbafb4e29ca3fba2a424dd1a5e9f822e9d95f4e9fc0a6",
     "packages/react/test/floating-input.test.tsx": "0251984dd7a1e52ef0e2560d8a3f36ccfdc394ae5c9b2545f05b7a119a958d3e",
+    "packages/react/test/panel-context.test.tsx": "abf4141ff6dec4ee77e1bf6f3e215b141d4ddfa4d8d4340035be3b7d21ac4a63",
     "packages/react/test/tab-insertion.test.ts": "5c65997257abdca9b2605b13ed733bc9670991b962cd3096674d503f2ed77960",
     "packages/react/test/touch-drop-policy.test.ts": "b58dba1e8cc540085ddde1e90538ccecbaaaef9a1fa519331d71399293d538f5",
     "pnpm-lock.yaml": "e659e90970ee34935228595f2297da307495a7a7b01202ecfa67deaf1ac53209",
     "scripts/performance-smoke.mjs": "fc0d8ce5df966b75312b5d9fae367e07b5ce4f8215afa724d03a7a6cb17fdc95",
-    "scripts/record-preview-evidence.mjs": "9918258288f54dd3d93f8cebb895107dca13e9b7c58130234071c70a47411e2c",
+    "scripts/record-preview-evidence.mjs": "9d5c71eb2a1de595719a19524678a93e51574e09f02ee1b1579f0f95f89da4d1",
     "vitest.config.ts": "6f743b2639e8e091bdc454a4aaa6336a538b889e70af8814ee7d1f27c7a8769e"
   },
   "limitations": [
