@@ -275,9 +275,7 @@ export function createPanelContextHub<Channels extends object>(
       const contexts = Object.assign(emptyMutableContexts<Channels>(), destination.contexts);
       Object.defineProperty(contexts, channel, { value: event, enumerable: true });
       destination.contexts = Object.freeze(contexts);
-      const targets = [...destination.members].filter(
-        (target) => target.snapshot.mode === "follow",
-      );
+      const targets = [...destination.members].filter((target) => target.snapshot.mode === "follow");
       // Install all snapshots before notifying anyone: observers cannot see partial fan-out.
       for (const target of targets) {
         target.snapshot = Object.freeze({ ...target.snapshot, contexts: destination.contexts });
