@@ -103,6 +103,14 @@ const sourceDigests = async (name) => {
     "packages/react/src/drop-target.ts",
     "packages/react/test/drop-preview.test.ts",
     "packages/react/test/drop-target.test.ts",
+    "packages/ecosystem/src/boundary.ts",
+    "packages/ecosystem/src/panel-context.ts",
+    "packages/ecosystem/src/index.ts",
+    "packages/ecosystem/test/panel-context.test.ts",
+    "packages/react/src/panel-context.ts",
+    "packages/react/test/panel-context.test.tsx",
+    "apps/demo/src/linked-panels.tsx",
+    "e2e/linked-panels.spec.ts",
   ]);
   return Object.fromEntries(
     await Promise.all([...paths].sort().map(async (path) => [path, digest(await readFile(path))])),

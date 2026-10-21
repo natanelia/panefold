@@ -27,26 +27,35 @@ jobs:
           node-version: 24
           cache: pnpm
       - run: pnpm install --frozen-lockfile
-      - name: Capture exact source and full-repository formatting
+      - run: mkdir -p artifacts
+      - run: pnpm format:check
+      - run: pnpm build:packages
+      - run: pnpm exec tsc --noEmit -p tsconfig.json
+      - name: Execute full unit suite
+        run: pnpm exec vitest run --reporter=json --outputFile=artifacts/preview-unit.json
+      - name: Execute Node performance measurements
+        run: node scripts/performance-smoke.mjs > artifacts/preview-node-smoke.json
+      - run: pnpm exec playwright install --with-deps chromium
+      - name: Execute full reference browser suite
+        run: pnpm exec playwright test --reporter=json > artifacts/preview-browser.json
+      - name: Record fresh results and verify their source provenance
         run: |
-          mkdir -p artifacts
-          git log -1 --format='%H %P' | tee artifacts/commit.txt
-          cp package.json .oxfmtrc.json artifacts/
-          git hash-object packages/ecosystem/src/panel-context.ts | tee artifacts/before-sha.txt
-          pnpm exec oxfmt --version | tee artifacts/formatter-version.txt
-          formatter_root=$(dirname "$(realpath node_modules/oxfmt)")
-          tar -czhf artifacts/formatter.tar.gz -C "$formatter_root" .
-          pnpm format
-          git hash-object packages/ecosystem/src/panel-context.ts | tee artifacts/after-sha.txt
-          git diff --binary | tee artifacts/format.patch
-          cp packages/ecosystem/src/panel-context.ts artifacts/panel-context.ts
-      - name: Run unchanged repository checks
-        run: pnpm check 2>&1 | tee artifacts/check.log
-      - name: Preserve exact formatter and check evidence
+          node scripts/record-preview-evidence.mjs
+          pnpm exec oxfmt --write docs/CONFORMANCE.md
+          pnpm conformance:data:generate
+          pnpm conformance:check 2>&1 | tee artifacts/conformance-check.log
+          git log -1 --format='%H %P' > artifacts/commit.txt
+          git diff --name-only > artifacts/changed-files.txt
+          git diff -- conformance docs/CONFORMANCE.md > artifacts/evidence.patch
+          tar -czf artifacts/generated-evidence.tar.gz conformance docs/CONFORMANCE.md
+      - run: pnpm build:site
+      - name: Execute site browser suite
+        run: pnpm exec playwright test --config playwright.site.config.ts --reporter=json > artifacts/preview-site-browser.json
+      - name: Preserve fresh execution evidence
         if: always()
         uses: actions/upload-artifact@v7
         with:
-          name: linked-context-final-check
+          name: preview-executed-evidence
           path: artifacts
           if-no-files-found: error
-          retention-days: 7
+          retention-days: 30
