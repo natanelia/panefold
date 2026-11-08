@@ -142,6 +142,13 @@ application can supply `solveLayout`; the projection solver uses the same exact-
 allocator as a constraint-free compatibility fallback. Pointer resize uses a sparse XState actor and
 frame-coalesced preview before one semantic commit.
 
+Splitter and in-page floating gestures capture the relationship between screen coordinates and
+layout pixels at pointer-down. Positive axis-aligned CSS scaling (including different horizontal
+and vertical scales) and CSS zoom therefore keep the dragged boundary under the pointer. The
+transform is assumed to stay fixed during a gesture; pointer frames do not remeasure the DOM.
+Initial workspace measurement uses the unscaled content box, matching later ResizeObserver
+notifications. Keyboard steps remain in layout pixels.
+
 Same-document floating surfaces are projected as a small ordered view containing stable surface and
 root IDs, canonical bounds, and minimized/maximized state. React solves every visible surface root,
 merges those disjoint results into one read-only geometry projection, and renders non-modal frames in

@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "kind": "browser-profile-result",
   "profile": "compact-react-chromium-desktop",
-  "producedAt": "2026-11-08T10:07:00.792Z",
+  "producedAt": "2026-11-08T10:41:24.717Z",
   "status": "passed",
   "runner": "Playwright",
   "command": "pnpm exec playwright test --reporter=json",
@@ -13,11 +13,11 @@
     "browserVersion": "151.0.7922.34"
   },
   "summary": {
-    "tests": 82,
-    "passed": 82,
+    "tests": 103,
+    "passed": 103,
     "skipped": 0,
     "failed": 0,
-    "durationMs": 70664.698
+    "durationMs": 72668.885
   },
   "tests": [
     {
@@ -331,6 +331,106 @@
       "ok": true
     },
     {
+      "file": "scaled-coordinates.spec.ts",
+      "title": "unscaled: splitters follow the pointer on both axes in ltr",
+      "ok": true
+    },
+    {
+      "file": "scaled-coordinates.spec.ts",
+      "title": "unscaled: splitters follow the pointer on both axes in rtl",
+      "ok": true
+    },
+    {
+      "file": "scaled-coordinates.spec.ts",
+      "title": "unscaled: floating movement and corner resize follow the pointer",
+      "ok": true
+    },
+    {
+      "file": "scaled-coordinates.spec.ts",
+      "title": "scale 0.75: splitters follow the pointer on both axes in ltr",
+      "ok": true
+    },
+    {
+      "file": "scaled-coordinates.spec.ts",
+      "title": "scale 0.75: splitters follow the pointer on both axes in rtl",
+      "ok": true
+    },
+    {
+      "file": "scaled-coordinates.spec.ts",
+      "title": "scale 0.75: floating movement and corner resize follow the pointer",
+      "ok": true
+    },
+    {
+      "file": "scaled-coordinates.spec.ts",
+      "title": "scale 1.5: splitters follow the pointer on both axes in ltr",
+      "ok": true
+    },
+    {
+      "file": "scaled-coordinates.spec.ts",
+      "title": "scale 1.5: splitters follow the pointer on both axes in rtl",
+      "ok": true
+    },
+    {
+      "file": "scaled-coordinates.spec.ts",
+      "title": "scale 1.5: floating movement and corner resize follow the pointer",
+      "ok": true
+    },
+    {
+      "file": "scaled-coordinates.spec.ts",
+      "title": "nonuniform scale: splitters follow the pointer on both axes in ltr",
+      "ok": true
+    },
+    {
+      "file": "scaled-coordinates.spec.ts",
+      "title": "nonuniform scale: splitters follow the pointer on both axes in rtl",
+      "ok": true
+    },
+    {
+      "file": "scaled-coordinates.spec.ts",
+      "title": "nonuniform scale: floating movement and corner resize follow the pointer",
+      "ok": true
+    },
+    {
+      "file": "scaled-coordinates.spec.ts",
+      "title": "zoom 0.75: splitters follow the pointer on both axes in ltr",
+      "ok": true
+    },
+    {
+      "file": "scaled-coordinates.spec.ts",
+      "title": "zoom 0.75: splitters follow the pointer on both axes in rtl",
+      "ok": true
+    },
+    {
+      "file": "scaled-coordinates.spec.ts",
+      "title": "zoom 0.75: floating movement and corner resize follow the pointer",
+      "ok": true
+    },
+    {
+      "file": "scaled-coordinates.spec.ts",
+      "title": "zoom 1.5: splitters follow the pointer on both axes in ltr",
+      "ok": true
+    },
+    {
+      "file": "scaled-coordinates.spec.ts",
+      "title": "zoom 1.5: splitters follow the pointer on both axes in rtl",
+      "ok": true
+    },
+    {
+      "file": "scaled-coordinates.spec.ts",
+      "title": "zoom 1.5: floating movement and corner resize follow the pointer",
+      "ok": true
+    },
+    {
+      "file": "scaled-coordinates.spec.ts",
+      "title": "initial layout uses CSS pixels without ResizeObserver (transform: scale(0.75))",
+      "ok": true
+    },
+    {
+      "file": "scaled-coordinates.spec.ts",
+      "title": "initial layout uses CSS pixels without ResizeObserver (zoom: 1.5)",
+      "ok": true
+    },
+    {
       "file": "single-tab-row.spec.ts",
       "title": "hides a docked single-tab row without removing pointer docking",
       "ok": true
@@ -363,6 +463,11 @@
     {
       "file": "touch-layout.spec.ts",
       "title": "native touch reorders tabs in the full landscape layout",
+      "ok": true
+    },
+    {
+      "file": "touch-layout.spec.ts",
+      "title": "successive native touch splits wait for structural motion before capturing geometry",
       "ok": true
     },
     {
@@ -433,8 +538,8 @@
   ],
   "rawReport": {
     "path": "artifacts/preview-browser.json",
-    "sha256": "7ed7d4d96f2ddf22facea9ad75857c8b98d1cece2de40906b060afe54e01bb50",
-    "runUrl": "https://github.com/natanelia/panefold/actions/runs/42469779683",
+    "sha256": "e1015cd09890f6aff0e67b81f285de866f46c223ddefc37dac66b90fff4e05bf",
+    "runUrl": "https://github.com/natanelia/panefold/actions/runs/42472155591",
     "artifact": "preview-executed-evidence"
   },
   "sourceDigests": {
@@ -464,8 +569,8 @@
     "e2e/native-touch-audit.ts": "31e07885233945c7f47f7965a0fa66df5d73973ece27a211cc952e34c76d183b",
     "e2e/performance-baseline.json": "128b4c7dc2c7fc03372224828417f675b279359ebbe9bab7408b172ad76b48a9",
     "e2e/performance.spec.ts": "2bbc7b6cb40fd2ad97ba33824b5b8a0a3cf43a82ce638e432f13d29c8db164f3",
-    "e2e/touch-helpers.ts": "656bb325633317a76e1f0d803bc95a3b22b418142be7daad50c3724fa667c19e",
-    "e2e/touch-layout.spec.ts": "b2b1633c8edb751f7fdf45e1d25072b4e6393146c8ebb9b44d49f772ce443e44",
+    "e2e/touch-helpers.ts": "bf7072e192e7395fb26f23d2f172669a8790063f26c35a8442eb1d2c1d77c511",
+    "e2e/touch-layout.spec.ts": "15a09005c8bcc752b1520d30b619c257912a60fa518066b5392a0c9853dc8eef",
     "e2e/touch-playground-operations.spec.ts": "d594a5a80b176d7be8c721d13546aede0b69e7ce72dea879d59498dc69123d5b",
     "e2e/touch-playground-ux.spec.ts": "17748d80e1de9cb6a5ab9443fd9992635cb82cd2fb77112185e1ad3eb63ce7ac",
     "package.json": "acd970060c8df0d628cada8c1762111b9c3587031dbdc0e5815fb1e6159147ee",
@@ -473,11 +578,11 @@
     "packages/kernel/src/plan-panel-drop.ts": "61725af35d608d44bdbc6ec6a7079e7e41a9d39e7fcaccb3fae1477cca4df93f",
     "packages/motion/src/coordinator.ts": "50eff7dd6a1b8f6433ac3f5bfc5f8d74b99a501e43e712ccb3e1a82520574c6d",
     "packages/motion/src/motion-dom-driver.ts": "57092ac380b7d666ed807c31d2f691fea906d63d9cdff9095f5c2bc32260323b",
-    "packages/react/src/WorkspaceSurface.tsx": "318fd8cde7c010ecd6e89cb9bbb3901d11d1a03fc7d85fe981a357d17a61b78f",
+    "packages/react/src/WorkspaceSurface.tsx": "34ffd4fe1b5518b51367812d925379340fffaa61f6263904125431e70722b72f",
     "packages/react/src/drop-modifiers.ts": "542583898dfa7d121b0d91f51171df8a3db47a8e749422437da903372a60c6ee",
     "packages/react/src/drop-preview.ts": "7c84edb3ba5ee124e207ca6fc5fb3f2a8b8e07178d90f11b96a68504b4402de7",
     "packages/react/src/drop-target.ts": "6626985475da22f7a7938e2c7dd59cd6ce83f07902561a1cf6b77fec3ed361ff",
-    "packages/react/src/floating-surface.tsx": "a89136a0685a1b87f97a15b324198c498d45cf382843fe34dbbf9a963b98225b",
+    "packages/react/src/floating-surface.tsx": "32929421671ddd83c5f7cf784ad4da970195c0bc657db76c2cd1ad776c0ca536",
     "packages/react/src/group-drag.tsx": "bb30a15666da3c6fbcfa53b443b023393ea85bec33ee3da750e9f67384694f26",
     "packages/react/src/group-drop.ts": "85a436f15d973eacf1a7d556b467a75e56ed484fb1add90e95d2b3e1c4c137dd",
     "packages/react/src/index.ts": "091c9aec1f4bf40b9968e5387462582549bcf033b4983dfb4b5e7230ee47cc00",
