@@ -211,11 +211,28 @@ async function prepareConstrainedWorkspace(page: Page, direction: "ltr" | "rtl")
   }, direction);
   await page.goto("/?fixture=code");
   await page.addStyleTag({
-    content: ".pf-workspace { inline-size: 1100px !important; block-size: 640px !important; }",
+    // The demo workspace normally grows to fill its flex-column shell. Fix its
+    // flex sizing as well as its dimensions so the preferred floors do not fit.
+    content: `
+      .pf-workspace {
+        flex: 0 0 auto !important;
+        inline-size: 1100px !important;
+        block-size: 640px !important;
+        min-block-size: 640px !important;
+      }
+    `,
   });
   const workspace = page.getByLabel("Panefold Code workbench", { exact: true });
   await expect(workspace).toHaveAttribute("dir", direction);
   await expect(workspace).toHaveAttribute("data-geometry-mode", "model");
+  await expect
+    .poll(() =>
+      workspace.evaluate((element) => {
+        const { width, height } = element.getBoundingClientRect();
+        return { width, height };
+      }),
+    )
+    .toEqual({ width: 1100, height: 640 });
   const root = workspace.locator('[data-workspace-split="root"]');
   await expect
     .poll(async () => (await childBoxes(root)).reduce((total, box) => total + box.width, 12))
