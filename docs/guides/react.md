@@ -194,6 +194,13 @@ The default `"auto"` mode checks the selected panels in visible groups beneath t
 
 `"throttled"` and `"adaptive"` preferences currently use the same frame-coalesced preview as `"live"`; they do not implement a separate callback rate or automatic cost detection. Divider-only preview uses the same constraint solver and commit path as live resizing. It does not change the model's weight or constraint semantics. In the demo, choose **Workspace appearance → Resize preview → Divider only**.
 
+Active splitter resizes and floating-window moves or resizes also cancel when their owning window
+loses focus, receives `pagehide`, or its document becomes hidden. The renderer restores the committed
+geometry and accessible values, removes any divider preview, and discards queued pointer frames.
+The interruption does not dispatch a layout command or create an undo entry; a later pointer release
+cannot commit the abandoned gesture. Events in a different document and ordinary element focus
+changes do not cancel it. The next pointer gesture starts normally.
+
 ## Resize with the keyboard
 
 Focus a divider with Tab. Arrow keys resize along its axis; Shift increases the step from 2% to 10% of the adjacent pair. Inline arrows follow `direction`, including RTL. With the built-in solvers, Home gives the primary pane its smallest verified size, and End gives it its largest, while keeping the other panes in the split fixed. Alt, Ctrl and Meta combinations remain available to the browser and application.
