@@ -151,7 +151,8 @@ the active allocation and constraints. Adjacent resizing works in visible pixels
 other children, reverses the active grow/shrink factors across the split, and normalizes weights
 with the same pure model helper used by the kernel. The resulting weights are checked through the
 allocator before they are previewed and committed unchanged. Home/End and accessible bounds use
-the attainable range of that same plan. A custom solver can omit the plan and retain the generic
+the verified range of that same plan. The inverse search is bounded independently of viewport size;
+extreme numeric layouts may use a sparse set of verified states. A custom solver can omit the plan and retain the generic
 weight-based pointer and arrow path, with solver-probed Home/End endpoints. Metadata that no longer
 matches the requested child IDs, weights, adjacency or returned pane sizes uses that same fallback.
 

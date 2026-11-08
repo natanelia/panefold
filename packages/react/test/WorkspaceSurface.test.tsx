@@ -834,7 +834,7 @@ describe("WorkspaceSurface", () => {
 
   it("commits semantic splitter steps with keyboard origin and useful scale", async () => {
     const runtime = new FixtureRuntime(initialProjection);
-    renderWorkspace(runtime);
+    const view = renderWorkspace(runtime);
     const splitter = await screen.findByRole("separator", {
       name: /resize adjacent/i,
     });
@@ -845,13 +845,8 @@ describe("WorkspaceSurface", () => {
     await waitFor(() => {
       expect(runtime.getSnapshot().projection.revision).toBe("1");
     });
-    const root = runtime.getSnapshot().projection.nodes.root;
-    expect(root?.kind).toBe("split");
-    if (root?.kind === "split") {
-      const total = root.weights.reduce((sum, weight) => sum + weight, 0);
-      expect((root.weights[0] ?? 0) / total).toBeCloseTo(0.52, 3);
-      expect((root.weights[1] ?? 0) / total).toBeCloseTo(0.48, 3);
-    }
+    // The pair has 994 content pixels: a 2% step moves the divider by 20 pixels.
+    expectResizeCommit(runtime, initialProjection, view.container, [517, 477]);
     expect(runtime.transactions.at(-1)?.origin).toBe("keyboard");
   });
 
@@ -1481,14 +1476,16 @@ describe("WorkspaceSurface", () => {
     expect(firstChild.dataset.inlineSize).toBe("544");
 
     fireEvent.pointerUp(splitter, { pointerId: 8, clientX: 900, clientY: 0 });
-    expect(runtime.lastCommand?.type).toBe("resize");
-    if (runtime.lastCommand?.type === "resize") {
-      const total = runtime.lastCommand.weights.reduce((sum, weight) => sum + weight, 0);
-      expect((runtime.lastCommand.weights[0] ?? 0) / total).toBeCloseTo(544 / 994);
-    }
     await waitFor(() => {
       expect(firstChild.dataset.inlineSize).toBe("544");
     });
+    expectResizeCommit(
+      runtime,
+      initialProjection,
+      view.container,
+      [544, 450],
+      hardMinimumLayoutSolver,
+    );
   });
 
   it("commits the final constrained pointer sample before a coalesced frame runs", async () => {
@@ -1512,14 +1509,16 @@ describe("WorkspaceSurface", () => {
     fireEvent.pointerUp(splitter, { pointerId: 9, clientX: 900, clientY: 0 });
 
     expect(frames.hasPending()).toBe(false);
-    expect(runtime.lastCommand?.type).toBe("resize");
-    if (runtime.lastCommand?.type === "resize") {
-      const total = runtime.lastCommand.weights.reduce((sum, weight) => sum + weight, 0);
-      expect((runtime.lastCommand.weights[0] ?? 0) / total).toBeCloseTo(544 / 994);
-    }
     await waitFor(() => {
       expect(firstChild.dataset.inlineSize).toBe("544");
     });
+    expectResizeCommit(
+      runtime,
+      initialProjection,
+      view.container,
+      [544, 450],
+      hardMinimumLayoutSolver,
+    );
   });
 
   it("commits constrained solved weights after a keyboard step hits a hard minimum", async () => {
@@ -1533,14 +1532,16 @@ describe("WorkspaceSurface", () => {
 
     await userEvent.keyboard("{Shift>}{ArrowRight}{/Shift}");
 
-    expect(runtime.lastCommand?.type).toBe("resize");
-    if (runtime.lastCommand?.type === "resize") {
-      const total = runtime.lastCommand.weights.reduce((sum, weight) => sum + weight, 0);
-      expect((runtime.lastCommand.weights[0] ?? 0) / total).toBeCloseTo(544 / 994);
-    }
     await waitFor(() => {
       expect(firstChild.dataset.inlineSize).toBe("544");
     });
+    expectResizeCommit(
+      runtime,
+      initialProjection,
+      view.container,
+      [544, 450],
+      hardMinimumLayoutSolver,
+    );
   });
 
   it("keeps pointer ownership in the resize actor and restores geometry on cancellation", async () => {
@@ -1645,11 +1646,7 @@ describe("WorkspaceSurface", () => {
     await waitFor(() => {
       expect(inlineRuntime.getSnapshot().projection.revision).toBe("1");
     });
-    const inlineRoot = inlineRuntime.getSnapshot().projection.nodes.root;
-    if (inlineRoot?.kind !== "split") throw new Error("Fixture requires a root split");
-    expect(
-      (inlineRoot.weights[0] ?? 0) / inlineRoot.weights.reduce((sum, weight) => sum + weight, 0),
-    ).toBeCloseTo(0.48, 3);
+    expectResizeCommit(inlineRuntime, initialProjection, inlineView.container, [477, 517]);
     inlineView.unmount();
 
     const root = initialProjection.nodes.root;
@@ -1658,18 +1655,16 @@ describe("WorkspaceSurface", () => {
       ...initialProjection,
       nodes: { ...initialProjection.nodes, root: { ...root, axis: "block" } },
     });
-    renderWorkspace(blockRuntime, { direction: "rtl" });
+    const blockBefore = blockRuntime.getSnapshot().projection;
+    const blockView = renderWorkspace(blockRuntime, { direction: "rtl" });
     const blockSplitter = await screen.findByRole("separator", { name: /resize adjacent/i });
     blockSplitter.focus();
     await userEvent.keyboard("{ArrowDown}");
     await waitFor(() => {
       expect(blockRuntime.getSnapshot().projection.revision).toBe("1");
     });
-    const blockRoot = blockRuntime.getSnapshot().projection.nodes.root;
-    if (blockRoot?.kind !== "split") throw new Error("Fixture requires a root split");
-    expect(
-      (blockRoot.weights[0] ?? 0) / blockRoot.weights.reduce((sum, weight) => sum + weight, 0),
-    ).toBeCloseTo(0.52, 3);
+    // Block sizing follows ArrowDown in either direction: 2% of 694 rounds to 14.
+    expectResizeCommit(blockRuntime, blockBefore, blockView.container, [361, 333]);
   });
 
   it("adapts structural FLIP plans to reduced motion", async () => {
@@ -4400,6 +4395,72 @@ function reduceProjection(
     };
   }
   return projection;
+}
+
+function expectResizeCommit(
+  runtime: FixtureRuntime,
+  before: WorkspaceProjection,
+  container: HTMLElement,
+  expectedSizes: readonly [number, number],
+  layoutSolver?: WorkspaceLayoutSolver<FixtureSnapshot>,
+) {
+  const command = runtime.lastCommand;
+  if (command?.type !== "resize") throw new Error("Expected a resize command");
+  expect(command.splitId).toBe(before.rootNodeId);
+  const committed = runtime.getSnapshot();
+  const split = committed.projection.nodes[command.splitId];
+  if (split?.kind !== "split") throw new Error("Expected the committed split");
+  expect(command.weights).toHaveLength(split.childIds.length);
+  expect(command.weights.every((weight) => Number.isSafeInteger(weight) && weight > 0)).toBe(true);
+  expect(command.weights.reduce((sum, weight) => sum + weight, 0)).toBe(1_000_000);
+  expect(split.weights).toEqual(command.weights);
+
+  const solve: WorkspaceLayoutSolver<FixtureSnapshot> =
+    layoutSolver ??
+    ((_snapshot, request) =>
+      solveWorkspaceProjectionLayout(request.projection, request.bounds, {
+        splitterSize: request.splitterSize,
+        splitOverrides: request.splitOverrides,
+      }));
+  const request = {
+    rootNodeId: before.rootNodeId,
+    bounds: { inlineStart: 0, blockStart: 0, inlineSize: 1000, blockSize: 700 },
+    splitterSize: 6,
+  };
+  const preview = solve(
+    { projection: before },
+    {
+      ...request,
+      projection: before,
+      splitOverrides: { [command.splitId]: { weights: command.weights } },
+    },
+  );
+  const resolved = solve(committed, {
+    ...request,
+    projection: committed.projection,
+    splitOverrides: {},
+  });
+  expect(resolved).toEqual(preview);
+  expect(
+    split.childIds.map((id) =>
+      split.axis === "inline"
+        ? resolved.nodeRects[id]?.inlineSize
+        : resolved.nodeRects[id]?.blockSize,
+    ),
+  ).toEqual(expectedSizes);
+  const children = Array.from(
+    container.querySelectorAll<HTMLElement>(
+      `[data-workspace-split="${command.splitId}"] > [data-workspace-split-child]`,
+    ),
+  );
+  expect(
+    children.map((child) =>
+      Number(split.axis === "inline" ? child.dataset.inlineSize : child.dataset.blockSize),
+    ),
+  ).toEqual(expectedSizes);
+  expect(children.map((child) => child.style.getPropertyValue("--pf-split-size"))).toEqual(
+    expectedSizes.map((size) => `${size}px`),
+  );
 }
 
 function renderWorkspace(

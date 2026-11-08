@@ -132,6 +132,205 @@ describe("constraint-aware axis resizing", () => {
   });
 
   it.each([
+    [1, 1],
+    [1, 7],
+    [1e6, 7],
+  ])("keeps a capped sibling from making grow factors %s/%s snap", (beforeGrow, afterGrow) => {
+    const items = canonicalItems([
+      { key: "capped", constraints: { max: 100, grow: 1e6 } },
+      { key: "before", constraints: { grow: beforeGrow } },
+      { key: "after", constraints: { grow: afterGrow } },
+    ]);
+    const plan = createAxisResizePlan(items, 1000, 6);
+    expect(plan.allocation.sizes[0]).toBe(100);
+    for (const target of [150, 300, 301, 450, 600, 750]) {
+      const weights = resizeAxis(plan, 1, 2, target);
+      expect(normalizeSplitWeights(weights)).toEqual(weights);
+      const actual = allocateAxis(
+        items.map((item, index) => ({ ...item, weight: weights[index] ?? 1 })),
+        1000,
+        6,
+      );
+      expect(actual.sizes).toEqual([100, target, 888 - target]);
+    }
+  });
+
+  it.each([true, false])(
+    "fills canonical bands using lower-bound sibling slack (fast primary: %s)",
+    (fastPrimary) => {
+      const items = canonicalItems(
+        [fastPrimary ? 1e6 : 1, fastPrimary ? 1 : 1e6, 1].map((grow, index) => ({
+          key: String(index),
+          constraints: { min: 100, grow },
+        })),
+      );
+      const plan = createAxisResizePlan(items, 1000);
+      // For fast-pane weights 1,2,3,4 the lower-bound sibling can absorb spare
+      // canonical weight, yielding these exact integer bands. The gaps between
+      // bands are unavoidable; pixels inside them must not be sampled away.
+      const bands = [
+        [450, 500],
+        [600, 667],
+        [675, 800],
+      ] as const;
+      let previousBefore = -Infinity;
+      for (
+        let beforeTarget = fastPrimary ? 450 : 100;
+        beforeTarget <= (fastPrimary ? 800 : 450);
+        beforeTarget += 1
+      ) {
+        const fastTarget = fastPrimary ? beforeTarget : 900 - beforeTarget;
+        let expectedFast = 450;
+        for (const [lower, upper] of bands) {
+          const candidate = Math.min(upper, Math.max(lower, fastTarget));
+          const distance = Math.abs(candidate - fastTarget);
+          const priorDistance = Math.abs(expectedFast - fastTarget);
+          if (
+            distance < priorDistance ||
+            (distance === priorDistance &&
+              (fastPrimary ? candidate < expectedFast : candidate > expectedFast))
+          )
+            expectedFast = candidate;
+        }
+        const weights = resizeAxis(plan, 0, 1, beforeTarget);
+        const result = replay(items, weights, 1000);
+        const expectedBefore = fastPrimary ? expectedFast : 900 - expectedFast;
+        expect(result.sizes).toEqual([expectedBefore, 900 - expectedBefore, 100]);
+        expect(expectedBefore).toBeGreaterThanOrEqual(previousBefore);
+        previousBefore = expectedBefore;
+      }
+      const bounds = getAxisResizeBounds(plan, 0, 1);
+      for (const target of [bounds.minBeforeSize, bounds.maxBeforeSize]) {
+        const weights = resizeAxis(plan, 0, 1, target);
+        const next = createAxisResizePlan(
+          items.map((item, index) => ({ ...item, weight: weights[index] ?? 1 })),
+          1000,
+        );
+        expect(getAxisResizeBounds(next, 0, 1)).toMatchObject({
+          minBeforeSize: bounds.minBeforeSize,
+          maxBeforeSize: bounds.maxBeforeSize,
+        });
+      }
+    },
+  );
+
+  it.each([
+    {
+      available: 46,
+      before: 1,
+      minimum: 17,
+      maximum: 23,
+      interior: 22,
+      items: [
+        {
+          key: "a",
+          weight: 390909,
+          constraints: { min: 1.25, max: 35, preferred: 31.25, grow: 0.01, shrink: 0.01 },
+        },
+        {
+          key: "b",
+          weight: 277273,
+          constraints: { min: 1, max: 23.25, preferred: 13, grow: 10, shrink: 1e-6 },
+        },
+        {
+          key: "c",
+          weight: 331818,
+          constraints: { min: 9.75, max: 30.5, preferred: 21.75, grow: 1e6, shrink: 1 },
+        },
+      ],
+    },
+    {
+      available: 28,
+      before: 0,
+      minimum: 9,
+      maximum: 16,
+      interior: 11,
+      items: [
+        {
+          key: "a",
+          weight: 70064,
+          constraints: { min: 0, max: 16.75, preferred: 0, grow: 1e6, shrink: 1e-6 },
+        },
+        {
+          key: "b",
+          weight: 369427,
+          constraints: { min: 1, max: 34.25, preferred: 29, grow: 1e6, shrink: 1 },
+        },
+        {
+          key: "c",
+          weight: 560509,
+          constraints: { min: 1.75, max: 29, preferred: 16.75, grow: 0.01, shrink: 0.01 },
+        },
+      ],
+    },
+  ])(
+    "finds canonical positions when every destination pane is free ($available px)",
+    ({ items, available, before, minimum, maximum, interior }) => {
+      const after = before + 1;
+      const plan = createAxisResizePlan(items, available, 1);
+      const bounds = getAxisResizeBounds(plan, before, after);
+      expect(bounds).toMatchObject({ minBeforeSize: minimum, maxBeforeSize: maximum });
+      for (const target of [minimum, interior, maximum]) {
+        const weights = resizeAxis(plan, before, after, target);
+        expect(normalizeSplitWeights(weights)).toEqual(weights);
+        const updatedItems = items.map((item, index) => ({ ...item, weight: weights[index] ?? 1 }));
+        const updatedPlan = createAxisResizePlan(updatedItems, available, 1);
+        expect(updatedPlan.allocation.sizes[before]).toBe(target);
+        updatedPlan.allocation.sizes.forEach((size, index) => {
+          if (index !== before && index !== after) expect(size).toBe(plan.allocation.sizes[index]);
+        });
+        expect(getAxisResizeBounds(updatedPlan, before, after)).toMatchObject({
+          minBeforeSize: minimum,
+          maxBeforeSize: maximum,
+        });
+      }
+    },
+  );
+
+  it("keeps both limits after resizing a large axis with precise free-pane ratios", () => {
+    const scale = 1e6;
+    const records = [
+      [115702, 70.1, 438.1, 161.1, 0, 2],
+      [359504, 12.9, 458.9, 189.9, 0.3, 1e6],
+      [355372, 170.1, 406.1, 409.1, 1, 1e6],
+      [136364, 40.7, 290.7, 41.7, 0, 2],
+      [33058, 158.9, 570.9, 317.9, 2, 2],
+    ];
+    const items: AllocationItem[] = records.map((record, index) => {
+      const [weight = 1, min = 0, max = Infinity, preferred = 0, grow = 1, shrink = 1] = record;
+      return {
+        key: String(index),
+        weight,
+        constraints: {
+          min: min * scale,
+          max: max * scale,
+          preferred: preferred * scale,
+          grow,
+          shrink,
+        },
+      };
+    });
+    const plan = createAxisResizePlan(items, 736 * scale, 6 * scale);
+    const originalBefore = plan.allocation.sizes[0] ?? 0;
+    const bounds = getAxisResizeBounds(plan, 0, 1);
+    expect(bounds.maxBeforeSize).toBe(originalBefore);
+    for (const target of [bounds.minBeforeSize, bounds.maxBeforeSize]) {
+      const weights = resizeAxis(plan, 0, 1, target);
+      const nextPlan = createAxisResizePlan(
+        items.map((item, index) => ({ ...item, weight: weights[index] ?? 1 })),
+        736 * scale,
+        6 * scale,
+      );
+      expect(nextPlan.allocation.sizes[0]).toBe(target);
+      expect(nextPlan.allocation.sizes.slice(2)).toEqual(plan.allocation.sizes.slice(2));
+      expect(getAxisResizeBounds(nextPlan, 0, 1)).toMatchObject({
+        minBeforeSize: bounds.minBeforeSize,
+        maxBeforeSize: bounds.maxBeforeSize,
+      });
+    }
+  });
+
+  it.each([
     {
       name: "an inactive shrink floor",
       available: 993,
@@ -234,6 +433,113 @@ describe("constraint-aware axis resizing", () => {
     },
   );
 
+  it.each([
+    {
+      name: "weak minimum-bound children",
+      available: 736,
+      before: 0,
+      after: 1,
+      minimum: 71,
+      records: [
+        [115702, 70.1, 438.1, 161.1, 0, 2],
+        [359504, 12.9, 458.9, 189.9, 0.3, 1e6],
+        [355372, 170.1, 406.1, 409.1, 1, 1e6],
+        [136364, 40.7, 290.7, 41.7, 0, 2],
+        [33058, 158.9, 570.9, 317.9, 2, 2],
+      ],
+    },
+    {
+      name: "capped fast-growing siblings",
+      available: 1559,
+      before: 3,
+      after: 4,
+      minimum: 351,
+      records: [
+        [254692, 173.2, 440.2, 179.2, 1e6, 0],
+        [252011, 67.6, 532.6, 79.6, 0.1, 1],
+        [131367, 81.8, 116.8, 291.8, 1, 1],
+        [225201, 31.4, 472.4, 71.4, 1e6, 1],
+        [136729, 93.8, 548.8, 159.8, 7, 1],
+      ],
+    },
+    {
+      name: "fractional room in saturated panes",
+      available: 850,
+      before: 1,
+      after: 2,
+      minimum: 307,
+      records: [
+        [200514, 95, 561, 176, 13, 1e6],
+        [239075, 94, 391, 94, 7, 1],
+        [205656, 1, 85, 76, 1, 1e6],
+        [182519, 168, 575, 454, 1, 5],
+        [66838, 131, 285, 152, 13, 1e6, 1],
+        [105398, 154, 279, 222, 1, 5],
+      ],
+    },
+  ])(
+    "reaches true bounds and moves monotonically with $name",
+    ({ records, available, before, after, minimum }) => {
+      const items: AllocationItem[] = records.map((record, index) => {
+        const [
+          weight = 1,
+          min = 0,
+          max = Infinity,
+          preferred = 0,
+          grow = 1,
+          shrink = 1,
+          collapsed = 0,
+        ] = record;
+        return {
+          key: String(index),
+          weight,
+          collapsed: collapsed === 1,
+          constraints: { min, max, preferred, grow, shrink },
+        };
+      });
+      const plan = createAxisResizePlan(items, available, 6);
+      const bounds = getAxisResizeBounds(plan, before, after);
+      expect(bounds.minBeforeSize).toBe(minimum);
+      const positions: number[] = [];
+      let previous = minimum;
+      for (let target = bounds.minBeforeSize; target <= bounds.maxBeforeSize; target += 1) {
+        const weights = resizeAxis(plan, before, after, target);
+        const result = allocateAxis(
+          items.map((item, index) => ({ ...item, weight: weights[index] ?? 1 })),
+          available,
+          6,
+        );
+        const position = result.sizes[before] ?? 0;
+        expect(position).toBeGreaterThanOrEqual(previous);
+        expect(position).toBeGreaterThanOrEqual(bounds.minBeforeSize);
+        expect(position).toBeLessThanOrEqual(bounds.maxBeforeSize);
+        result.sizes.forEach((size, index) => {
+          if (index !== before && index !== after) expect(size).toBe(plan.allocation.sizes[index]);
+        });
+        previous = position;
+        positions.push(position);
+      }
+      const reversePlan = createAxisResizePlan(items, available, 6);
+      for (let target = bounds.maxBeforeSize; target >= bounds.minBeforeSize; target -= 1) {
+        const weights = resizeAxis(reversePlan, before, after, target);
+        const result = allocateAxis(
+          items.map((item, index) => ({ ...item, weight: weights[index] ?? 1 })),
+          available,
+          6,
+        );
+        expect(result.sizes[before]).toBe(positions[target - bounds.minBeforeSize]);
+      }
+      for (const target of [bounds.minBeforeSize, bounds.maxBeforeSize]) {
+        const weights = resizeAxis(plan, before, after, target);
+        const nextItems = items.map((item, index) => ({ ...item, weight: weights[index] ?? 1 }));
+        const nextPlan = createAxisResizePlan(nextItems, available, 6);
+        const nextBounds = getAxisResizeBounds(nextPlan, before, after);
+        expect(nextBounds.minBeforeSize).toBe(bounds.minBeforeSize);
+        expect(nextBounds.maxBeforeSize).toBe(bounds.maxBeforeSize);
+      }
+    },
+  );
+
   it("captures caller-owned arrays and constraints before caching a gesture", () => {
     const inputs = [
       { key: "a", weight: 500_000, constraints: { min: 100 } },
@@ -242,8 +548,10 @@ describe("constraint-aware axis resizing", () => {
     const allocation = allocateAxis(inputs, 1000, 6);
     const plan = createAxisResizePlan(inputs, 1000, 6, allocation);
     expect(getAxisResizeBounds(plan, 0, 1).minBeforeSize).toBe(100);
-    inputs[0]!.constraints.min = 450;
-    inputs[0]!.weight = 900_000;
+    const first = inputs[0];
+    if (first === undefined) throw new Error("Expected the first input.");
+    first.constraints.min = 450;
+    first.weight = 900_000;
     (allocation.sizes as number[])[0] = 450;
     const weights = resizeAxis(plan, 0, 1, Number.NEGATIVE_INFINITY);
     const replayed = allocateAxis(
