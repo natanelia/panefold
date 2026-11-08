@@ -21,7 +21,10 @@ Append `?fixture=starter` to that local workbench URL. Or open the [hosted start
 
 The starter contains an editable note, a preview and an inspector. It uses the real runtime and React surface, not a picture of a docking layout. Switch tabs, type a note, drag it to another group, resize the split, and change the tab rail. Undo reverses layout changes, not edits inside the note.
 
-The entry point is [docs-starter.tsx](../../apps/demo/src/docs-starter.tsx). It deliberately reuses `projectWorkspace` and `createDemoCommands` from [workspace-config.ts](../../apps/demo/src/workspace-config.ts). Those are **reference application helpers, not exports from `@panefold/react`**. Copy and adapt that glue when creating a separate application.
+The entry point is [docs-starter.tsx](../../apps/demo/src/docs-starter.tsx). It uses the official
+`createModelWorkspaceSession` and `ModelWorkspaceSurface` exports from `@panefold/react/model`.
+They connect the runtime, model projection, semantic commands and model-aware layout solver.
+The smaller starter does not import or copy the workbench's command glue.
 
 ## 3. Make a visible change
 
@@ -33,7 +36,11 @@ Read [your first panel](panels.md), [tabs](tabs.md), and [themes](styling.md) fo
 
 Stay in the monorepo first. Its `workspace:*` dependencies resolve the unpublished packages and its build order creates the package declarations. For a separate repository, build and vendor the selected packages with all their workspace dependencies; the source tree is not a single-file npm dependency.
 
-Keep these pieces together: a valid initial snapshot, a runtime, a projector, a command adapter, a registry and the renderer stylesheet. The [React guide](react.md) explains each boundary. The starter keeps layout in memory; the full workbench demonstrates durable IndexedDB restoration.
+Start with a valid initial snapshot, your panel registry and the renderer stylesheet. Create one
+model session in an effect and dispose it in that effect's cleanup. `ModelWorkspaceSurface`
+installs the session's provider, commands, projection and constraint-aware solver together.
+The [React guide](react.md) explains customization and the lower-level generic renderer.
+The starter keeps layout in memory; the full workbench demonstrates durable IndexedDB restoration.
 
 ## 5. Check your changes
 

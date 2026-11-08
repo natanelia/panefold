@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "kind": "protocol-motion-result",
   "profile": "compact-react-chromium-desktop",
-  "producedAt": "2026-11-08T10:45:04.565Z",
+  "producedAt": "2026-11-08T10:43:03.989Z",
   "status": "passed",
   "runner": "Vitest",
   "command": "pnpm exec vitest run --reporter=json --outputFile=artifacts/preview-unit.json",
@@ -12,16 +12,16 @@
     "browserVersion": "151.0.7922.34"
   },
   "summary": {
-    "tests": 621,
-    "passed": 621,
+    "tests": 638,
+    "passed": 638,
     "failed": 0,
-    "files": 80,
+    "files": 82,
     "protocolMotionTestFiles": 9,
     "protocolMotionTests": 86,
     "protocolMotionPassed": 86,
-    "reactIntegrationTestFiles": 14,
-    "reactIntegrationTests": 195,
-    "reactIntegrationPassed": 195
+    "reactIntegrationTestFiles": 16,
+    "reactIntegrationTests": 212,
+    "reactIntegrationPassed": 212
   },
   "tests": [
     {
@@ -33,6 +33,11 @@
       "file": "packages/adapter-contract/test/native-adapters.test.ts",
       "status": "passed",
       "passed": 4
+    },
+    {
+      "file": "packages/angular/test/angular.test.ts",
+      "status": "passed",
+      "passed": 1
     },
     {
       "file": "packages/conformance/test/certification.test.ts",
@@ -105,6 +110,41 @@
       "passed": 2
     },
     {
+      "file": "packages/geometry/test/allocate-axis.test.ts",
+      "status": "passed",
+      "passed": 6
+    },
+    {
+      "file": "packages/geometry/test/group-constraints.test.ts",
+      "status": "passed",
+      "passed": 2
+    },
+    {
+      "file": "packages/geometry/test/hit-test.test.ts",
+      "status": "passed",
+      "passed": 4
+    },
+    {
+      "file": "packages/geometry/test/invalidation-differential.test.ts",
+      "status": "passed",
+      "passed": 5
+    },
+    {
+      "file": "packages/geometry/test/invalidation.test.ts",
+      "status": "passed",
+      "passed": 6
+    },
+    {
+      "file": "packages/geometry/test/rounding-compatibility.test.ts",
+      "status": "passed",
+      "passed": 2
+    },
+    {
+      "file": "packages/geometry/test/solve-layout.test.ts",
+      "status": "passed",
+      "passed": 12
+    },
+    {
       "file": "packages/kernel/test/effects.test.ts",
       "status": "passed",
       "passed": 5
@@ -155,41 +195,6 @@
       "passed": 3
     },
     {
-      "file": "packages/geometry/test/allocate-axis.test.ts",
-      "status": "passed",
-      "passed": 6
-    },
-    {
-      "file": "packages/geometry/test/group-constraints.test.ts",
-      "status": "passed",
-      "passed": 2
-    },
-    {
-      "file": "packages/geometry/test/hit-test.test.ts",
-      "status": "passed",
-      "passed": 4
-    },
-    {
-      "file": "packages/geometry/test/invalidation-differential.test.ts",
-      "status": "passed",
-      "passed": 5
-    },
-    {
-      "file": "packages/geometry/test/invalidation.test.ts",
-      "status": "passed",
-      "passed": 6
-    },
-    {
-      "file": "packages/geometry/test/rounding-compatibility.test.ts",
-      "status": "passed",
-      "passed": 2
-    },
-    {
-      "file": "packages/geometry/test/solve-layout.test.ts",
-      "status": "passed",
-      "passed": 12
-    },
-    {
       "file": "packages/kernel-optimized/test/benchmark.test.ts",
       "status": "passed",
       "passed": 1
@@ -213,6 +218,21 @@
       "file": "packages/kernel-optimized/test/projection.test.ts",
       "status": "passed",
       "passed": 5
+    },
+    {
+      "file": "packages/model/test/effects.test.ts",
+      "status": "passed",
+      "passed": 3
+    },
+    {
+      "file": "packages/model/test/model.test.ts",
+      "status": "passed",
+      "passed": 7
+    },
+    {
+      "file": "packages/model/test/panel-registry.test.ts",
+      "status": "passed",
+      "passed": 3
     },
     {
       "file": "packages/motion/test/motion-lifecycle.test.ts",
@@ -260,36 +280,6 @@
       "passed": 22
     },
     {
-      "file": "packages/runtime/test/envelope-serialization.test.ts",
-      "status": "passed",
-      "passed": 5
-    },
-    {
-      "file": "packages/runtime/test/persistence-byte-count.test.ts",
-      "status": "passed",
-      "passed": 5
-    },
-    {
-      "file": "packages/runtime/test/persistence.test.ts",
-      "status": "passed",
-      "passed": 14
-    },
-    {
-      "file": "packages/runtime/test/policy.test.ts",
-      "status": "passed",
-      "passed": 2
-    },
-    {
-      "file": "packages/runtime/test/post-commit-effects.test.ts",
-      "status": "passed",
-      "passed": 14
-    },
-    {
-      "file": "packages/runtime/test/runtime.test.ts",
-      "status": "passed",
-      "passed": 17
-    },
-    {
       "file": "packages/react/test/WorkspaceSurface.test.tsx",
       "status": "passed",
       "passed": 102
@@ -330,6 +320,16 @@
       "passed": 6
     },
     {
+      "file": "packages/react/test/model-adapter.test.ts",
+      "status": "passed",
+      "passed": 14
+    },
+    {
+      "file": "packages/react/test/model-surface.test.tsx",
+      "status": "passed",
+      "passed": 3
+    },
+    {
       "file": "packages/react/test/node-motion.test.ts",
       "status": "passed",
       "passed": 4
@@ -360,9 +360,34 @@
       "passed": 2
     },
     {
-      "file": "packages/runtime-effect/test/persistence.test.ts",
+      "file": "packages/runtime/test/envelope-serialization.test.ts",
       "status": "passed",
       "passed": 5
+    },
+    {
+      "file": "packages/runtime/test/persistence-byte-count.test.ts",
+      "status": "passed",
+      "passed": 5
+    },
+    {
+      "file": "packages/runtime/test/persistence.test.ts",
+      "status": "passed",
+      "passed": 14
+    },
+    {
+      "file": "packages/runtime/test/policy.test.ts",
+      "status": "passed",
+      "passed": 2
+    },
+    {
+      "file": "packages/runtime/test/post-commit-effects.test.ts",
+      "status": "passed",
+      "passed": 14
+    },
+    {
+      "file": "packages/runtime/test/runtime.test.ts",
+      "status": "passed",
+      "passed": 17
     },
     {
       "file": "packages/surfaces/test/browser-adapter.test.ts",
@@ -380,6 +405,11 @@
       "passed": 1
     },
     {
+      "file": "packages/runtime-effect/test/persistence.test.ts",
+      "status": "passed",
+      "passed": 5
+    },
+    {
       "file": "packages/testkit/test/browser-fixtures.test.ts",
       "status": "passed",
       "passed": 3
@@ -395,21 +425,6 @@
       "passed": 1
     },
     {
-      "file": "packages/model/test/effects.test.ts",
-      "status": "passed",
-      "passed": 3
-    },
-    {
-      "file": "packages/model/test/model.test.ts",
-      "status": "passed",
-      "passed": 7
-    },
-    {
-      "file": "packages/model/test/panel-registry.test.ts",
-      "status": "passed",
-      "passed": 3
-    },
-    {
       "file": "packages/web-components/test/ssr-import.test.ts",
       "status": "passed",
       "passed": 1
@@ -418,22 +433,19 @@
       "file": "packages/web-components/test/web-components.test.ts",
       "status": "passed",
       "passed": 2
-    },
-    {
-      "file": "packages/angular/test/angular.test.ts",
-      "status": "passed",
-      "passed": 1
     }
   ],
   "rawReport": {
     "path": "artifacts/preview-unit.json",
-    "sha256": "d41a269a1fae62104197ccff9965d33ebc76ef0ac15b9f3818c12e187d9a4354",
-    "runUrl": "https://github.com/natanelia/panefold/actions/runs/42472168419",
+    "sha256": "bb8c6a913301fc97c8078ef2a586dda2ff251e9a8f96394efea4afcb7599fb6e",
+    "runUrl": "https://github.com/natanelia/panefold/actions/runs/42472202916",
     "artifact": "preview-executed-evidence"
   },
   "sourceDigests": {
     "apps/demo/src/TouchButton.tsx": "13e7301be325cd1f03fb9a47d48e955b3db3a156fec38c70ec2370189d0c109a",
     "apps/demo/src/TouchPlayground.tsx": "2afb246e15de0cb41e7f830ce3d5e044e0fb78aba72c051df87c9c3567a1abca",
+    "apps/demo/src/docs-starter.test.ts": "5d8aca65382da6f0a4d68357e536d689906df8a45f8dc6fc79d4d51f0ad39aca",
+    "apps/demo/src/docs-starter.tsx": "a5584fc283ff790fd45bc3166a7371436943de7cc33cf93735ec2e2850031e45",
     "apps/demo/src/main.tsx": "7b437cb000879d31587a91fa6082861a3f41cb14fc9e7d0084912b4992fdd721",
     "apps/demo/src/mobile.css": "71859290c3377d1a54bd9e5e9e44c17d0aa34bb699e3eff8c766a5287dfa36b8",
     "apps/demo/src/playground-model.test.ts": "54d584cdd971e62348e025b85cc20db34987bb9cd463ffa1348fc43c22d57194",
@@ -515,7 +527,7 @@
     "packages/protocol/src/types.ts": "7b8fbdfa15ba81da62581764bb2f28434d10ecb9beefdc49513d650e1e05eeb0",
     "packages/protocol/test/protocol.test.ts": "dd118363496c22c9df3110c3a3ab05e7b1bee643fe0c613c75503c2f2262fd4f",
     "packages/protocol/tsconfig.json": "3f465de909ed88bb206aa2ee7095c56a63223c3a11efa84ad39e69b1d1abd1a8",
-    "packages/react/package.json": "d1341651ed83068f7688a248a3d721fe66ec4ac7fbe4329245b9b5c2540735fb",
+    "packages/react/package.json": "39bcbf2fc9e64daa7167f035fc67b01a0c725c3e4a77282644df560a6d8a9b72",
     "packages/react/src/WorkspaceSurface.tsx": "a02e722b0be8f9e0145070ff7ca846832d2fabc7d6d675b7d596d641da90a824",
     "packages/react/src/client-coordinates.ts": "f70aaae0922037939b3f21583cfceaf34289d2d811654991da775ac23241411e",
     "packages/react/src/drop-modifiers.ts": "542583898dfa7d121b0d91f51171df8a3db47a8e749422437da903372a60c6ee",
@@ -527,6 +539,8 @@
     "packages/react/src/group-drop.ts": "85a436f15d973eacf1a7d556b467a75e56ed484fb1add90e95d2b3e1c4c137dd",
     "packages/react/src/index.ts": "0f9a8f943ddde1d84b66f1a3e31203189a428023cd6939e56764bcb0c960a490",
     "packages/react/src/messages.ts": "b6ddb245d6f42d3054c50c2eede24814261649ab3464e55131bed934cb09eb30",
+    "packages/react/src/model-adapter.ts": "51730ea5ba984ee33a67bee0f9d715873b11ae166020d9ac22c053e607286259",
+    "packages/react/src/model.tsx": "fa92825ae6342f2ac9525114d771d53d8e4ab7c057fa8c73f4fd9f81c313a9c8",
     "packages/react/src/move-destination-controls.tsx": "c72fd93fc63ecefa7f732dde93291f04f1f3d075b9bee3e0b1b4d52ed18bd19d",
     "packages/react/src/node-motion.ts": "5f7efe09d09573ea1c2baa44744627d34fabe60cc6978f287da83e6b02ed52bb",
     "packages/react/src/panel-drag.tsx": "e19befa4995182d66a76570990bcff60e2ab4ba5fb76f0fe8a63e020bca493cc",
@@ -545,16 +559,19 @@
     "packages/react/test/drop-target.test.ts": "2f28dc5a482cb6cc12fdbafb4e29ca3fba2a424dd1a5e9f822e9d95f4e9fc0a6",
     "packages/react/test/floating-input.test.tsx": "0251984dd7a1e52ef0e2560d8a3f36ccfdc394ae5c9b2545f05b7a119a958d3e",
     "packages/react/test/group-drop.test.ts": "c99eadd199fe4c10f3b572d03018f2d36f363c110c33199b2785ee80fa5c4b31",
+    "packages/react/test/model-adapter.test.ts": "acd32cb92b421b5a2a32b8a4e96593e0c184f2a5dc7ee9be0264075afd4721a3",
+    "packages/react/test/model-fixture.ts": "9fd3c285f89007849386489fd52353a50bceb310125c17d65fc6e32dcae70a58",
+    "packages/react/test/model-surface.test.tsx": "70b3e839ae10561d1c346d7e6e7037e90bf428a49e239e9f71d4afcb3ae7ba95",
     "packages/react/test/node-motion.test.ts": "7c826c0b7f309830af7fd78b0db89cae76c7d06ebeb95e18b1e0bebbd4f3e42d",
     "packages/react/test/panel-drop.test.ts": "33b5839fb82ad5ab3e79c61badaec03589b8024377e85e549e4af80797a4024c",
     "packages/react/test/tab-insertion.test.ts": "5c65997257abdca9b2605b13ed733bc9670991b962cd3096674d503f2ed77960",
     "packages/react/test/tab-reorder.test.ts": "da6e97901c25a0e5b32480ffd0450e058bb1f6070eef5df5d3e062067282dae2",
     "packages/react/test/touch-drop-policy.test.ts": "b58dba1e8cc540085ddde1e90538ccecbaaaef9a1fa519331d71399293d538f5",
-    "pnpm-lock.yaml": "be4cd87737d70f25c878659c3d485f829712789fd70504d542cc4cb27797eb6d",
+    "pnpm-lock.yaml": "6f188132c287b0b7a559b11ac5d247f28252d473cee2a6abd3468d64f92959ba",
     "pnpm-workspace.yaml": "d51950e32647c121ad667b578a448b703ea5f74637fd91524b7012dd53167169",
     "scripts/protocol-coverage-lib.d.mts": "ad9778fdda16883ddc6d8c8f366e119453673c61db21abc5a058e648f39e33ca",
     "scripts/protocol-coverage-lib.mjs": "a6172fbdc67ad48298c7866f47ff25895d255dcbb47976f65e7098825a758f8e",
-    "scripts/record-preview-evidence.mjs": "9df57c81a48c8b6ef83a7938a1a6593e2c5602ea8a4a326669c4305ffb3a9126",
+    "scripts/record-preview-evidence.mjs": "5ce30b1bf5074d7ad81a327a866b20af46d2b937c0b68d86a98e63e6fdd66186",
     "scripts/run-protocol-coverage.mjs": "51345937f17b41822986377ed74a6b6f52a88dcc1ac1482fc1580af9a8a0eb9a",
     "scripts/verify-protocol-coverage.d.mts": "353a5ec6ec45b69ccdac52b7f1d4cc5d308e9360fa7627241c178b52684643cf",
     "scripts/verify-protocol-coverage.mjs": "e6659c6d19bb29abd6ba2b9942639a9b9b3e83a2535ccf80e2d7a296b6805fc9",

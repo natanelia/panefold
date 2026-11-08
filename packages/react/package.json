@@ -17,6 +17,10 @@
       "types": "./dist/index.d.ts",
       "import": "./dist/index.js"
     },
+    "./model": {
+      "types": "./dist/model.d.ts",
+      "import": "./dist/model.js"
+    },
     "./styles.css": "./src/styles.css",
     "./hide-single-tab-row.css": "./src/hide-single-tab-row.css"
   },
@@ -26,9 +30,11 @@
   },
   "dependencies": {
     "@panefold/geometry": "workspace:*",
+    "@panefold/kernel": "workspace:*",
     "@panefold/model": "workspace:*",
     "@panefold/motion": "workspace:*",
     "@panefold/protocol-xstate": "workspace:*",
+    "@panefold/runtime": "workspace:*",
     "use-sync-external-store": "1.6.0"
   },
   "devDependencies": {
@@ -37,6 +43,6 @@
     "react-dom": "catalog:"
   },
   "scripts": {
-    "build": "tsup src/index.ts --format esm --dts --clean --external react --external react-dom"
+    "build": "tsup src/index.ts src/model.tsx --format esm --dts --splitting --clean --external react --external react-dom"
   }
 }

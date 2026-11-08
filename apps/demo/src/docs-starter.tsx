@@ -1,5 +1,4 @@
-import { useEffect, useMemo, useState, useSyncExternalStore } from "react";
-import { solveLayout } from "@panefold/geometry";
+import { useEffect, useState, useSyncExternalStore } from "react";
 import {
   MAIN_SURFACE_CAPABILITIES,
   createWorkspaceSnapshot,
@@ -8,23 +7,18 @@ import {
   panelId,
   surfaceId,
   type PanelRecord,
-  type WorkspaceSnapshot,
 } from "@panefold/model";
 import {
-  WorkspaceRuntimeProvider,
-  WorkspaceSurface,
-  type WorkspaceLayoutSolver,
   type WorkspacePanelRegistry,
   type WorkspacePanelRenderProps,
   type WorkspaceTabPlacement,
 } from "@panefold/react";
 import {
-  createWorkspaceRuntime,
-  type RuntimeDispatchReceipt,
-  type WorkspaceRuntime,
-} from "@panefold/runtime";
-// These are application-owned reference adapters, not library exports.
-import { createDemoCommands, projectWorkspace } from "./workspace-config";
+  createModelWorkspaceSession,
+  ModelWorkspaceSurface,
+  type ModelWorkspaceSession,
+} from "@panefold/react/model";
+import type { RuntimeDispatchReceipt } from "@panefold/runtime";
 import "./docs-starter.css";
 
 function panel(id: string, type: string, title: string): PanelRecord {
@@ -131,8 +125,8 @@ function InspectorPanel() {
         Drop Notes in the center of this group to dock it here. Drop at an edge to create a split.
       </p>
       <p>
-        The reference command adapter connects those gestures to the semantic kernel. The layout is
-        in memory only.
+        The model integration connects those gestures to the semantic kernel. The layout is in
+        memory only.
       </p>
     </div>
   );
@@ -142,18 +136,12 @@ export const starterPanels: WorkspacePanelRegistry = {
   "starter.preview": { render: PreviewPanel, icon: <span aria-hidden="true">◫</span> },
   "starter.inspector": { render: InspectorPanel, icon: <span aria-hidden="true">☷</span> },
 };
-export const layoutSolver: WorkspaceLayoutSolver<WorkspaceSnapshot> = (snapshot, request) =>
-  solveLayout(snapshot, nodeId(request.rootNodeId), request.bounds, {
-    splitterSize: request.splitterSize,
-    splitOverrides: request.splitOverrides,
-  });
-
 export default function StarterWorkspace() {
-  const [runtime, setRuntime] = useState<WorkspaceRuntime>();
+  const [session, setSession] = useState<ModelWorkspaceSession>();
   useEffect(() => {
-    const session = createWorkspaceRuntime({ initialSnapshot, historyLimit: 50 });
-    setRuntime(session);
-    return () => session.dispose();
+    const nextSession = createModelWorkspaceSession({ initialSnapshot, historyLimit: 50 });
+    setSession(nextSession);
+    return () => nextSession.dispose();
   }, []);
   return (
     <main className="starter-app">
@@ -165,28 +153,22 @@ export default function StarterWorkspace() {
           Three components. Two groups. One place to start. This smaller fixture does not use
           IndexedDB or open browser windows.
         </p>
-        {runtime ? (
-          <WorkspaceRuntimeProvider runtime={runtime}>
-            <StarterSurface runtime={runtime} />
-          </WorkspaceRuntimeProvider>
-        ) : (
-          <p role="status">Starting workspace…</p>
-        )}
+        {session ? <StarterSurface session={session} /> : <p role="status">Starting workspace…</p>}
         <p className="starter-footnote">
-          Source: apps/demo/src/docs-starter.tsx. Projection and commands reuse the reference
-          application's workspace-config.ts helpers.
+          Source: apps/demo/src/docs-starter.tsx. The @panefold/react/model entry point supplies the
+          runtime wiring, commands and constraint-aware layout.
         </p>
       </div>
     </main>
   );
 }
-function StarterSurface({ runtime }: { readonly runtime: WorkspaceRuntime }) {
+function StarterSurface({ session }: { readonly session: ModelWorkspaceSession }) {
+  const { runtime } = session;
   const snapshot = useSyncExternalStore(
     runtime.subscribe,
     runtime.getSnapshot,
     runtime.getSnapshot,
   );
-  const commands = useMemo(() => createDemoCommands(runtime.getSnapshot), [runtime]);
   const [placement, setPlacement] = useState<WorkspaceTabPlacement>("block-start");
   const [iconsOnly, setIconsOnly] = useState(false);
   const [status, setStatus] = useState(
@@ -230,11 +212,9 @@ function StarterSurface({ runtime }: { readonly runtime: WorkspaceRuntime }) {
         </button>
         <span>Revision {snapshot.revision.toString()}</span>
       </div>
-      <WorkspaceSurface
-        projector={projectWorkspace}
-        commands={commands}
+      <ModelWorkspaceSurface
+        bindings={session}
         panels={starterPanels}
-        layoutSolver={layoutSolver}
         tabPresentation={{ placement, content: iconsOnly ? "icon-only" : "icon-and-label" }}
         motion="off"
         workspaceLabel="Starter workspace"

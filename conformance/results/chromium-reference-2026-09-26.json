@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "kind": "browser-profile-result",
   "profile": "compact-react-chromium-desktop",
-  "producedAt": "2026-11-08T10:45:04.565Z",
+  "producedAt": "2026-11-08T10:43:03.989Z",
   "status": "passed",
   "runner": "Playwright",
   "command": "pnpm exec playwright test --reporter=json",
@@ -17,7 +17,7 @@
     "passed": 110,
     "skipped": 0,
     "failed": 0,
-    "durationMs": 86886.508
+    "durationMs": 104028.403
   },
   "tests": [
     {
@@ -573,8 +573,8 @@
   ],
   "rawReport": {
     "path": "artifacts/preview-browser.json",
-    "sha256": "10be03ccea2cfd31f48ba428682ce5ae32728fe45fbbce0e093c0e85a2f0e697",
-    "runUrl": "https://github.com/natanelia/panefold/actions/runs/42472168419",
+    "sha256": "578fd7b844cc60a5ad2b15a972543f1b592769d930834fbf2336fd5b2969c460",
+    "runUrl": "https://github.com/natanelia/panefold/actions/runs/42472202916",
     "artifact": "preview-executed-evidence"
   },
   "sourceDigests": {
@@ -583,6 +583,8 @@
     "apps/demo/src/TouchButton.tsx": "13e7301be325cd1f03fb9a47d48e955b3db3a156fec38c70ec2370189d0c109a",
     "apps/demo/src/TouchPlayground.tsx": "2afb246e15de0cb41e7f830ce3d5e044e0fb78aba72c051df87c9c3567a1abca",
     "apps/demo/src/demo-panels.tsx": "e0896a5cc259c6ea29db9e63bb6e181de1a2d08569fbd4b17c092c74b7a0ae7a",
+    "apps/demo/src/docs-starter.test.ts": "5d8aca65382da6f0a4d68357e536d689906df8a45f8dc6fc79d4d51f0ad39aca",
+    "apps/demo/src/docs-starter.tsx": "a5584fc283ff790fd45bc3166a7371436943de7cc33cf93735ec2e2850031e45",
     "apps/demo/src/external-panels.ts": "2836bab76f011fd9baa4db41be9d164cf450ee00b55933d21fce9c0744fd3b3e",
     "apps/demo/src/main.tsx": "7b437cb000879d31587a91fa6082861a3f41cb14fc9e7d0084912b4992fdd721",
     "apps/demo/src/mobile.css": "71859290c3377d1a54bd9e5e9e44c17d0aa34bb699e3eff8c766a5287dfa36b8",
@@ -595,7 +597,7 @@
     "apps/demo/src/touch-floating.css": "3a7e05c611f84b8e9552d9d177a685d3756d1ec34942541ed25b64c20d2394cb",
     "apps/demo/src/touch-playground.css": "f85cd5505e93e38f3301c5d419a6790e16edde937c0eea2c061213a8fc182d6c",
     "apps/demo/src/use-touch-workbench.ts": "c913911471945a857994e2078eb36420b14cdcb8cd3d7437b5d562c32a02f04c",
-    "apps/demo/src/workspace-config.ts": "4951f57efcd9f822e4f192200be5b096768428ef7094612a0f6a767422a52434",
+    "apps/demo/src/workspace-config.ts": "96d52c3e7452fdb4fe8f0926fb406c26572e89c80c931d063107f618851415b0",
     "apps/demo/vite.config.ts": "70dd28bb53e3ea556d4c750aee26762312fa7884b2052c9c0cb073a1584cc663",
     "e2e/code-workbench-cases.ts": "e83979a7be6e659fa238414e65f7f28ec74828274567e8f181ea002ed3212d39",
     "e2e/deferred-resize.spec.ts": "87cee00ab3529a9fe7f4c82addd017c951b2cc10a7ebc264ee3b4b8e680899b7",
@@ -626,6 +628,8 @@
     "packages/react/src/group-drop.ts": "85a436f15d973eacf1a7d556b467a75e56ed484fb1add90e95d2b3e1c4c137dd",
     "packages/react/src/index.ts": "0f9a8f943ddde1d84b66f1a3e31203189a428023cd6939e56764bcb0c960a490",
     "packages/react/src/messages.ts": "b6ddb245d6f42d3054c50c2eede24814261649ab3464e55131bed934cb09eb30",
+    "packages/react/src/model-adapter.ts": "51730ea5ba984ee33a67bee0f9d715873b11ae166020d9ac22c053e607286259",
+    "packages/react/src/model.tsx": "fa92825ae6342f2ac9525114d771d53d8e4ab7c057fa8c73f4fd9f81c313a9c8",
     "packages/react/src/move-destination-controls.tsx": "c72fd93fc63ecefa7f732dde93291f04f1f3d075b9bee3e0b1b4d52ed18bd19d",
     "packages/react/src/node-motion.ts": "5f7efe09d09573ea1c2baa44744627d34fabe60cc6978f287da83e6b02ed52bb",
     "packages/react/src/panel-drag.tsx": "e19befa4995182d66a76570990bcff60e2ab4ba5fb76f0fe8a63e020bca493cc",
@@ -640,6 +644,9 @@
     "packages/react/test/drop-preview.test.ts": "bdc1de685dce3a9bc5c073cf9fb7f2325de07251a8f71d4b318f09990c22211c",
     "packages/react/test/drop-target.test.ts": "2f28dc5a482cb6cc12fdbafb4e29ca3fba2a424dd1a5e9f822e9d95f4e9fc0a6",
     "packages/react/test/floating-input.test.tsx": "0251984dd7a1e52ef0e2560d8a3f36ccfdc394ae5c9b2545f05b7a119a958d3e",
+    "packages/react/test/model-adapter.test.ts": "acd32cb92b421b5a2a32b8a4e96593e0c184f2a5dc7ee9be0264075afd4721a3",
+    "packages/react/test/model-fixture.ts": "9fd3c285f89007849386489fd52353a50bceb310125c17d65fc6e32dcae70a58",
+    "packages/react/test/model-surface.test.tsx": "70b3e839ae10561d1c346d7e6e7037e90bf428a49e239e9f71d4afcb3ae7ba95",
     "packages/react/test/tab-insertion.test.ts": "5c65997257abdca9b2605b13ed733bc9670991b962cd3096674d503f2ed77960",
     "packages/react/test/touch-drop-policy.test.ts": "b58dba1e8cc540085ddde1e90538ccecbaaaef9a1fa519331d71399293d538f5",
     "packages/runtime/src/durable-runtime.ts": "e89cd98a92aa51de7c9eae88aa6eced0f48fb8e3ff3a739526a447786b527595",
@@ -647,8 +654,8 @@
     "packages/surfaces/src/transfer.ts": "2ae27ae6d5f76269d2e49f9649f5e2cf51792441460b13fceee9c7bfabe4318f",
     "packages/surfaces/src/types.ts": "119ae61f47124f0d7bb4c9f2b74afd3fa5510f27cb3e928fe328590488b029e6",
     "playwright.config.ts": "1488b4ef7257ef5a6dc5505148550cbb6ed89e9488b2c9e39e874f15469cc245",
-    "pnpm-lock.yaml": "be4cd87737d70f25c878659c3d485f829712789fd70504d542cc4cb27797eb6d",
-    "scripts/record-preview-evidence.mjs": "9df57c81a48c8b6ef83a7938a1a6593e2c5602ea8a4a326669c4305ffb3a9126",
+    "pnpm-lock.yaml": "6f188132c287b0b7a559b11ac5d247f28252d473cee2a6abd3468d64f92959ba",
+    "scripts/record-preview-evidence.mjs": "5ce30b1bf5074d7ad81a327a866b20af46d2b937c0b68d86a98e63e6fdd66186",
     "vitest.config.ts": "6f743b2639e8e091bdc454a4aaa6336a538b889e70af8814ee7d1f27c7a8769e"
   },
   "limitations": [

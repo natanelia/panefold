@@ -47,6 +47,10 @@ operational/driver packages and do not appear in serialized state.
   progressive View Transition fallback, load-adaptive degradation, and the optional DOM driver.
 - `@panefold/adapter-contract` is the common immutable framework boundary. React, Vue, Svelte,
   Angular, and Web Components packages depend on it or implement the same projection contract.
+- `@panefold/react/model` is an opt-in entry point within the existing React package. It binds
+  canonical snapshots to the generic renderer through existing kernel planners and model geometry.
+  It adds no semantic authority or package; applications retain policy and runtime ownership. See
+  [ADR-0016](adr/0016-model-backed-react-integration.md).
 - `@panefold/ecosystem` contains trusted and isolated plugin hosts, bounded devtools and
   reproductions, authenticated single-writer coordination, and mobile data projection.
 - `@panefold/testkit` publishes workload, panel, lifecycle, action-parity, ownership-model, and
@@ -141,6 +145,11 @@ The React renderer consumes resolved geometry rather than relying on CSS weights
 application can supply `solveLayout`; the projection solver uses the same exact-conservation
 allocator as a constraint-free compatibility fallback. Pointer resize uses a sparse XState actor and
 frame-coalesced preview before one semantic commit.
+
+For canonical model applications, `ModelWorkspaceSurface` installs the model-aware bridge together
+with the projector and command adapter, so the ordinary setup does not silently omit constraints.
+Its preview and committed layout use the same solver. The generic renderer remains available for
+other snapshot models and explicit integration choices.
 
 Splitter and in-page floating gestures capture the relationship between screen coordinates and
 layout pixels at pointer-down. Positive axis-aligned CSS scaling (including different horizontal

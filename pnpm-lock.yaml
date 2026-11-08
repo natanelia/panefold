@@ -228,6 +228,9 @@ importers:
       '@panefold/geometry':
         specifier: workspace:*
         version: link:../geometry
+      '@panefold/kernel':
+        specifier: workspace:*
+        version: link:../kernel
       '@panefold/model':
         specifier: workspace:*
         version: link:../model
@@ -237,6 +240,9 @@ importers:
       '@panefold/protocol-xstate':
         specifier: workspace:*
         version: link:../protocol-xstate
+      '@panefold/runtime':
+        specifier: workspace:*
+        version: link:../runtime
       use-sync-external-store:
         specifier: 1.6.0
         version: 1.6.0(react@19.2.8)
