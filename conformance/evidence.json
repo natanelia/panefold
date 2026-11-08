@@ -576,7 +576,7 @@
       "verificationClass": "code-verifiable",
       "artifactRole": "source",
       "uri": "repo://pnpm-lock.yaml",
-      "sha256": "e659e90970ee34935228595f2297da307495a7a7b01202ecfa67deaf1ac53209",
+      "sha256": "be4cd87737d70f25c878659c3d485f829712789fd70504d542cc4cb27797eb6d",
       "producedAt": "2026-08-14T07:19:51.074Z",
       "requirementIds": [
         "ARC-005",
