@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "kind": "browser-profile-result",
   "profile": "compact-react-chromium-desktop",
-  "producedAt": "2026-11-08T10:46:37.454Z",
+  "producedAt": "2026-11-08T13:05:31.853Z",
   "status": "passed",
   "runner": "Playwright",
   "command": "pnpm exec playwright test --reporter=json",
@@ -17,7 +17,7 @@
     "passed": 112,
     "skipped": 0,
     "failed": 0,
-    "durationMs": 94140.214
+    "durationMs": 80811.811
   },
   "tests": [
     {
@@ -583,8 +583,8 @@
   ],
   "rawReport": {
     "path": "artifacts/preview-browser.json",
-    "sha256": "fca41ba2aea7f392d20f3862bcb5689fe49ae5ac6b328bbc71c579b3fcb4525a",
-    "runUrl": "https://github.com/natanelia/panefold/actions/runs/42472409418",
+    "sha256": "1bb6f8b8f3ca6c3139c14fc9f57ae2ba096a828707193769ece1b87ae2e62984",
+    "runUrl": "https://github.com/natanelia/panefold/actions/runs/42483022797",
     "artifact": "preview-executed-evidence"
   },
   "sourceDigests": {
@@ -634,7 +634,7 @@
     "packages/kernel/src/plan-panel-drop.ts": "61725af35d608d44bdbc6ec6a7079e7e41a9d39e7fcaccb3fae1477cca4df93f",
     "packages/motion/src/coordinator.ts": "50eff7dd6a1b8f6433ac3f5bfc5f8d74b99a501e43e712ccb3e1a82520574c6d",
     "packages/motion/src/motion-dom-driver.ts": "57092ac380b7d666ed807c31d2f691fea906d63d9cdff9095f5c2bc32260323b",
-    "packages/react/src/WorkspaceSurface.tsx": "a02e722b0be8f9e0145070ff7ca846832d2fabc7d6d675b7d596d641da90a824",
+    "packages/react/src/WorkspaceSurface.tsx": "f0d86236c2c926ea5c8536761def8c86235a3c7f8db9a23d2afa7aa8e958592a",
     "packages/react/src/client-coordinates.ts": "f70aaae0922037939b3f21583cfceaf34289d2d811654991da775ac23241411e",
     "packages/react/src/drop-modifiers.ts": "542583898dfa7d121b0d91f51171df8a3db47a8e749422437da903372a60c6ee",
     "packages/react/src/drop-preview.ts": "7c84edb3ba5ee124e207ca6fc5fb3f2a8b8e07178d90f11b96a68504b4402de7",
