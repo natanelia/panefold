@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "kind": "protocol-motion-result",
   "profile": "compact-react-chromium-desktop",
-  "producedAt": "2026-11-08T14:30:33.570Z",
+  "producedAt": "2026-11-08T14:43:13.214Z",
   "status": "passed",
   "runner": "Vitest",
   "command": "pnpm exec vitest run --reporter=json --outputFile=artifacts/preview-unit.json",
@@ -100,6 +100,21 @@
       "passed": 5
     },
     {
+      "file": "packages/ecosystem/test/ecosystem.test.ts",
+      "status": "passed",
+      "passed": 19
+    },
+    {
+      "file": "packages/ecosystem/test/isolated-frame.test.ts",
+      "status": "passed",
+      "passed": 2
+    },
+    {
+      "file": "packages/ecosystem/test/panel-context.test.ts",
+      "status": "passed",
+      "passed": 35
+    },
+    {
       "file": "packages/geometry/test/allocate-axis.test.ts",
       "status": "passed",
       "passed": 6
@@ -150,54 +165,29 @@
       "passed": 14
     },
     {
-      "file": "packages/kernel/test/effects.test.ts",
-      "status": "passed",
-      "passed": 5
-    },
-    {
-      "file": "packages/kernel/test/exploration.test.ts",
+      "file": "packages/kernel-optimized/test/benchmark.test.ts",
       "status": "passed",
       "passed": 1
     },
     {
-      "file": "packages/kernel/test/extended-commands.test.ts",
-      "status": "passed",
-      "passed": 10
-    },
-    {
-      "file": "packages/kernel/test/hash.test.ts",
-      "status": "passed",
-      "passed": 4
-    },
-    {
-      "file": "packages/kernel/test/invariants.test.ts",
-      "status": "passed",
-      "passed": 9
-    },
-    {
-      "file": "packages/kernel/test/kernel.test.ts",
-      "status": "passed",
-      "passed": 12
-    },
-    {
-      "file": "packages/kernel/test/patches.test.ts",
-      "status": "passed",
-      "passed": 4
-    },
-    {
-      "file": "packages/kernel/test/plan-group-drop.test.ts",
-      "status": "passed",
-      "passed": 4
-    },
-    {
-      "file": "packages/kernel/test/plan-panel-drop.test.ts",
+      "file": "packages/kernel-optimized/test/differential.test.ts",
       "status": "passed",
       "passed": 7
     },
     {
-      "file": "packages/kernel/test/properties.test.ts",
+      "file": "packages/kernel-optimized/test/independent-reducer.test.ts",
       "status": "passed",
-      "passed": 3
+      "passed": 8
+    },
+    {
+      "file": "packages/kernel-optimized/test/persistent-bucket-map.test.ts",
+      "status": "passed",
+      "passed": 4
+    },
+    {
+      "file": "packages/kernel-optimized/test/projection.test.ts",
+      "status": "passed",
+      "passed": 5
     },
     {
       "file": "packages/model/test/effects.test.ts",
@@ -213,16 +203,6 @@
       "file": "packages/model/test/panel-registry.test.ts",
       "status": "passed",
       "passed": 3
-    },
-    {
-      "file": "packages/motion/test/motion-lifecycle.test.ts",
-      "status": "passed",
-      "passed": 13
-    },
-    {
-      "file": "packages/motion/test/motion.test.ts",
-      "status": "passed",
-      "passed": 7
     },
     {
       "file": "packages/protocol/test/protocol.test.ts",
@@ -258,6 +238,16 @@
       "file": "packages/protocol-xstate/test/scoped-actor-deadline.test.ts",
       "status": "passed",
       "passed": 22
+    },
+    {
+      "file": "packages/motion/test/motion-lifecycle.test.ts",
+      "status": "passed",
+      "passed": 13
+    },
+    {
+      "file": "packages/motion/test/motion.test.ts",
+      "status": "passed",
+      "passed": 7
     },
     {
       "file": "packages/react/test/WorkspaceSurface.test.tsx",
@@ -355,21 +345,6 @@
       "passed": 2
     },
     {
-      "file": "packages/ecosystem/test/ecosystem.test.ts",
-      "status": "passed",
-      "passed": 19
-    },
-    {
-      "file": "packages/ecosystem/test/isolated-frame.test.ts",
-      "status": "passed",
-      "passed": 2
-    },
-    {
-      "file": "packages/ecosystem/test/panel-context.test.ts",
-      "status": "passed",
-      "passed": 35
-    },
-    {
       "file": "packages/runtime/test/envelope-serialization.test.ts",
       "status": "passed",
       "passed": 5
@@ -445,35 +420,60 @@
       "passed": 2
     },
     {
-      "file": "packages/kernel-optimized/test/benchmark.test.ts",
+      "file": "packages/kernel/test/effects.test.ts",
+      "status": "passed",
+      "passed": 5
+    },
+    {
+      "file": "packages/kernel/test/exploration.test.ts",
       "status": "passed",
       "passed": 1
     },
     {
-      "file": "packages/kernel-optimized/test/differential.test.ts",
+      "file": "packages/kernel/test/extended-commands.test.ts",
       "status": "passed",
-      "passed": 7
+      "passed": 10
     },
     {
-      "file": "packages/kernel-optimized/test/independent-reducer.test.ts",
-      "status": "passed",
-      "passed": 8
-    },
-    {
-      "file": "packages/kernel-optimized/test/persistent-bucket-map.test.ts",
+      "file": "packages/kernel/test/hash.test.ts",
       "status": "passed",
       "passed": 4
     },
     {
-      "file": "packages/kernel-optimized/test/projection.test.ts",
+      "file": "packages/kernel/test/invariants.test.ts",
       "status": "passed",
-      "passed": 5
+      "passed": 9
+    },
+    {
+      "file": "packages/kernel/test/kernel.test.ts",
+      "status": "passed",
+      "passed": 12
+    },
+    {
+      "file": "packages/kernel/test/patches.test.ts",
+      "status": "passed",
+      "passed": 4
+    },
+    {
+      "file": "packages/kernel/test/plan-group-drop.test.ts",
+      "status": "passed",
+      "passed": 4
+    },
+    {
+      "file": "packages/kernel/test/plan-panel-drop.test.ts",
+      "status": "passed",
+      "passed": 7
+    },
+    {
+      "file": "packages/kernel/test/properties.test.ts",
+      "status": "passed",
+      "passed": 3
     }
   ],
   "rawReport": {
     "path": "artifacts/preview-unit.json",
-    "sha256": "802738c2c00abe9944220d6df9b24a6e326029a6834d03e646aeae5ba35217e1",
-    "runUrl": "https://github.com/natanelia/panefold/actions/runs/42489878122",
+    "sha256": "8cd5ef329f49367d402d1e88d4024d6d4baf661531f6e6e082c0e490a4516369",
+    "runUrl": "https://github.com/natanelia/panefold/actions/runs/42490890707",
     "artifact": "preview-executed-evidence"
   },
   "sourceDigests": {
@@ -626,7 +626,7 @@
     "scripts/record-preview-evidence.mjs": "2c64a646d148759762d07257f79dbeb39b7d584d980191931db68d63e3e3538e",
     "scripts/run-protocol-coverage.mjs": "51345937f17b41822986377ed74a6b6f52a88dcc1ac1482fc1580af9a8a0eb9a",
     "scripts/verify-protocol-coverage.d.mts": "353a5ec6ec45b69ccdac52b7f1d4cc5d308e9360fa7627241c178b52684643cf",
-    "scripts/verify-protocol-coverage.mjs": "e6659c6d19bb29abd6ba2b9942639a9b9b3e83a2535ccf80e2d7a296b6805fc9",
+    "scripts/verify-protocol-coverage.mjs": "4dfe1a18a090b39a352190eff73b8c12949c0853cce3a6f2ef7f1c374a82d1ef",
     "tsconfig.base.json": "6a5180d481cd767365ec8da2257e5573e498c5802ce56bda99e0ac218baca818",
     "tsconfig.json": "ba7a45d0184771111310a1c6503d1ab957ee05c7ad538f3ade8070acefdd9a8f",
     "vitest.config.ts": "6f743b2639e8e091bdc454a4aaa6336a538b889e70af8814ee7d1f27c7a8769e"
