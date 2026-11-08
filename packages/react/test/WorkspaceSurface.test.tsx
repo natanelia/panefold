@@ -34,6 +34,7 @@ import {
   type WorkspaceExternalPanelOutcome,
   type WorkspacePanelRenderProps,
   type WorkspaceProjection,
+  type WorkspaceResizePreviewMode,
   type WorkspaceResultInterpreter,
   type WorkspaceRuntimeLike,
   type WorkspaceTabPresentationResolver,
@@ -852,6 +853,119 @@ describe("WorkspaceSurface", () => {
     expect(runtime.transactions.at(-1)?.origin).toBe("keyboard");
   });
 
+  it("cycles visible enabled splitters with F6 within the owning workspace", async () => {
+    const root = initialProjection.nodes.root;
+    if (root?.kind !== "split") throw new Error("Expected the fixture root split");
+    const runtime = new FixtureRuntime({
+      ...initialProjection,
+      nodes: {
+        ...initialProjection.nodes,
+        root: {
+          ...root,
+          childIds: ["left-node", "middle-node", "extra-node", "right-node"],
+          weights: [1, 1, 1, 1],
+        },
+        "middle-node": { kind: "group", id: "middle-node", groupId: "middle" },
+        "extra-node": { kind: "group", id: "extra-node", groupId: "extra" },
+      },
+      groups: {
+        ...initialProjection.groups,
+        middle: { id: "middle", panelIds: [], selectedPanelId: "", label: "Middle" },
+        extra: { id: "extra", panelIds: [], selectedPanelId: "", label: "Extra" },
+      },
+    });
+    const view = renderWorkspace(runtime);
+    const otherView = renderWorkspace(new FixtureRuntime(initialProjection));
+    const splitters = Array.from(
+      view.container.querySelectorAll<HTMLElement>("[data-workspace-splitter]"),
+    );
+    const first = requiredElement(splitters[0] ?? null);
+    const middle = requiredElement(splitters[1] ?? null);
+    const last = requiredElement(splitters[2] ?? null);
+    const other = requiredElement(otherView.container.querySelector("[data-workspace-splitter]"));
+    expect(first.getAttribute("aria-controls")).not.toBe(other.getAttribute("aria-controls"));
+    const nestedWorkspace = document.createElement("div");
+    nestedWorkspace.className = "pf-workspace";
+    const nestedSplitter = document.createElement("div");
+    nestedSplitter.setAttribute("data-workspace-splitter", "nested");
+    nestedSplitter.tabIndex = 0;
+    nestedWorkspace.append(nestedSplitter);
+    first.closest(".pf-workspace")?.append(nestedWorkspace);
+    first.focus();
+
+    await userEvent.keyboard("{F6}");
+    expect(document.activeElement).toBe(middle);
+    await userEvent.keyboard("{Shift>}{F6}{/Shift}");
+    expect(document.activeElement).toBe(first);
+    await userEvent.keyboard("{Shift>}{F6}{/Shift}");
+    expect(document.activeElement).toBe(last);
+    await userEvent.keyboard("{F6}");
+    expect(document.activeElement).toBe(first);
+
+    middle.style.display = "none";
+    await userEvent.keyboard("{F6}");
+    expect(document.activeElement).toBe(last);
+    last.setAttribute("aria-disabled", "true");
+    first.focus();
+    await userEvent.keyboard("{F6}");
+    expect(document.activeElement).toBe(first);
+    middle.style.display = "";
+    middle.inert = true;
+    await userEvent.keyboard("{F6}");
+    expect(document.activeElement).toBe(first);
+    expect(runtime.transactions).toHaveLength(0);
+    expect(fireEvent.keyDown(first, { key: "F6", ctrlKey: true })).toBe(true);
+    expect(fireEvent.keyDown(first, { key: "F6", altKey: true })).toBe(true);
+    expect(fireEvent.keyDown(first, { key: "F6", metaKey: true })).toBe(true);
+    expect(document.activeElement).toBe(first);
+  });
+
+  it("identifies the controlled pane and reports its resolved percentage precisely", async () => {
+    const root = initialProjection.nodes.root;
+    if (root?.kind !== "split") throw new Error("Expected the fixture root split");
+    const runtime = new FixtureRuntime({
+      ...initialProjection,
+      nodes: { ...initialProjection.nodes, root: { ...root, weights: [1, 2] } },
+    });
+    const view = renderWorkspace(runtime);
+    const splitter = await screen.findByRole("separator", { name: /resize adjacent/i });
+    const primary = requiredElement(
+      view.container.querySelector('[data-workspace-split-child="left-node"]'),
+    );
+    expect(splitter.getAttribute("aria-controls")).toBe(primary.id);
+    expect(document.getElementById(primary.id)).toBe(primary);
+    expect(primary.dataset.inlineSize).toBe("331");
+    expect(splitter.getAttribute("aria-valuenow")).toBe("33.3");
+    expect(splitter.getAttribute("aria-valuetext")).toBe("Primary pane 33.3 percent");
+  });
+
+  it("focuses a pointer-owned divider so Escape restores geometry and releases capture", async () => {
+    const runtime = new FixtureRuntime(initialProjection);
+    const frames = createManualFrameScheduler();
+    const view = renderWorkspace(runtime, { frameScheduler: frames.scheduler });
+    const splitter = await screen.findByRole("separator", { name: /resize adjacent/i });
+    const primary = requiredElement(
+      view.container.querySelector('[data-workspace-split-child="left-node"]'),
+    );
+    installPointerCapture(splitter);
+    screen.getByRole("tab", { name: "Alpha" }).focus();
+    fireEvent.pointerDown(splitter, { button: 0, pointerId: 18, clientX: 497, clientY: 0 });
+    expect(document.activeElement).toBe(splitter);
+    fireEvent.pointerMove(splitter, { pointerId: 18, clientX: 567, clientY: 0 });
+    act(() => frames.flush());
+    expect(primary.dataset.inlineSize).toBe("567");
+
+    await userEvent.keyboard("{Escape}");
+    expect(primary.dataset.inlineSize).toBe("497");
+    expect(splitter.hasPointerCapture(18)).toBe(false);
+    expect(splitter.dataset.resizeState).toBe("idle");
+    expect(protocolActorInventory.resize.active).toBe(0);
+    expect(frames.hasPending()).toBe(false);
+    fireEvent.pointerUp(splitter, { pointerId: 18, clientX: 567, clientY: 0 });
+    expect(runtime.transactions).toHaveLength(0);
+    expect(document.activeElement).toBe(splitter);
+  });
+
   it("uses one geometry projection for pointer preview and commit", async () => {
     const runtime = new FixtureRuntime(initialProjection);
     const frames = createManualFrameScheduler();
@@ -895,6 +1009,245 @@ describe("WorkspaceSurface", () => {
     expect(protocolActorInventory.resize.pointerMoves).toBe(2);
     expect(protocolActorInventory.resize.active).toBe(0);
     expect(runtime.transactions.at(-1)?.origin).toBe("pointer");
+  });
+
+  it("previews only the divider and commits the final release sample without pointer renders", async () => {
+    const runtime = new FixtureRuntime(initialProjection);
+    const frames = createManualFrameScheduler();
+    let renders = 0;
+    const view = renderWorkspace(runtime, {
+      resizePreviewMode: "separator",
+      frameScheduler: frames.scheduler,
+      tabPresentation: () => {
+        renders += 1;
+        return { placement: "block-start", content: "icon-and-label" };
+      },
+    });
+    const splitter = await screen.findByRole("separator", { name: /resize adjacent/i });
+    installPointerCapture(splitter);
+    const child = requiredElement(
+      view.container.querySelector('[data-workspace-split-child="left-node"]'),
+    );
+    const marker = requiredElement(view.container.querySelector("[data-workspace-resize-preview]"));
+    const initialRenders = renders;
+    expect(marker.hidden).toBe(true);
+
+    fireEvent.pointerDown(splitter, { button: 0, pointerId: 61, clientX: 497 });
+    fireEvent.pointerMove(splitter, { pointerId: 61, clientX: 597 });
+    act(() => frames.flush());
+    expect(child.dataset.inlineSize).toBe("497");
+    expect(splitter.dataset.inlineStart).toBe("497");
+    expect(marker.hidden).toBe(false);
+    expect(marker.style.insetInlineStart).toBe("597px");
+    expect(marker.getAttribute("aria-hidden")).toBe("true");
+    expect(renders).toBe(initialRenders);
+    expect(runtime.transactions).toHaveLength(0);
+
+    fireEvent.pointerMove(splitter, { pointerId: 61, clientX: 620 });
+    fireEvent.pointerUp(splitter, { pointerId: 61, clientX: 647 });
+    await waitFor(() => expect(child.dataset.inlineSize).toBe("647"));
+    expect(marker.hidden).toBe(true);
+    expect(frames.hasPending()).toBe(false);
+    expect(runtime.transactions).toHaveLength(1);
+    expect(runtime.transactions[0]?.origin).toBe("pointer");
+    expect(protocolActorInventory.resize.active).toBe(0);
+  });
+
+  it.each(["escape", "pointercancel", "lostpointercapture", "revision", "removed"] as const)(
+    "discards a divider-only preview on %s",
+    async (cancel) => {
+      const runtime = new FixtureRuntime(initialProjection);
+      const frames = createManualFrameScheduler();
+      const view = renderWorkspace(runtime, {
+        resizePreviewMode: "separator",
+        frameScheduler: frames.scheduler,
+      });
+      const splitter = await screen.findByRole("separator", { name: /resize adjacent/i });
+      installPointerCapture(splitter);
+      const child = requiredElement(
+        view.container.querySelector('[data-workspace-split-child="left-node"]'),
+      );
+      const marker = requiredElement(
+        view.container.querySelector("[data-workspace-resize-preview]"),
+      );
+      fireEvent.pointerDown(splitter, { button: 0, pointerId: 62, clientX: 497 });
+      fireEvent.pointerMove(splitter, { pointerId: 62, clientX: 597 });
+      act(() => frames.flush());
+      expect(marker.hidden).toBe(false);
+      if (cancel === "escape") fireEvent.keyDown(splitter, { key: "Escape" });
+      else if (cancel === "pointercancel") fireEvent.pointerCancel(splitter, { pointerId: 62 });
+      else if (cancel === "lostpointercapture")
+        fireEvent.lostPointerCapture(splitter, { pointerId: 62 });
+      else if (cancel === "removed") {
+        act(() => runtime.publishProjection({ ...initialProjection, rootNodeId: "left-node" }));
+        expect(screen.queryByRole("separator")).toBeNull();
+      } else act(() => runtime.publishProjection({ ...initialProjection, revision: "1" }));
+      expect(marker.hidden).toBe(true);
+      expect(child.dataset.inlineSize).toBe("497");
+      expect(runtime.transactions).toHaveLength(0);
+      expect(protocolActorInventory.resize.active).toBe(0);
+      expect(frames.hasPending()).toBe(false);
+      fireEvent.pointerUp(splitter, { pointerId: 62, clientX: 647 });
+      expect(runtime.transactions).toHaveLength(0);
+    },
+  );
+
+  it("keeps a resize through equal-valued parent renders and cancels when bounds change", async () => {
+    const runtime = new FixtureRuntime(initialProjection);
+    const frames = createManualFrameScheduler();
+    function Parent() {
+      const [width, setWidth] = useState(1000);
+      const [, update] = useState(0);
+      return (
+        <WorkspaceRuntimeProvider runtime={runtime}>
+          <button onClick={() => update((value) => value + 1)}>Rerender equal bounds</button>
+          <button onClick={() => setWidth(1100)}>Grow bounds</button>
+          <WorkspaceSurface
+            projector={(snapshot: FixtureSnapshot) => snapshot.projection}
+            commands={commands}
+            panels={panels}
+            resizePreviewMode="separator"
+            frameScheduler={frames.scheduler}
+            layoutBounds={{ inlineStart: 0, blockStart: 0, inlineSize: width, blockSize: 700 }}
+          />
+        </WorkspaceRuntimeProvider>
+      );
+    }
+    const view = render(<Parent />);
+    const splitter = await screen.findByRole("separator", { name: /resize adjacent/i });
+    installPointerCapture(splitter);
+    const marker = requiredElement(view.container.querySelector("[data-workspace-resize-preview]"));
+    fireEvent.pointerDown(splitter, { button: 0, pointerId: 67, clientX: 497 });
+    fireEvent.pointerMove(splitter, { pointerId: 67, clientX: 597 });
+    act(() => frames.flush());
+    expect(marker.hidden).toBe(false);
+    fireEvent.click(screen.getByRole("button", { name: "Rerender equal bounds" }));
+    expect(marker.hidden).toBe(false);
+    expect(splitter.dataset.resizeState).toBe("resizing");
+    expect(splitter.hasPointerCapture(67)).toBe(true);
+    expect(protocolActorInventory.resize.active).toBe(1);
+    fireEvent.pointerMove(splitter, { pointerId: 67, clientX: 617 });
+    act(() => frames.flush());
+    expect(marker.style.insetInlineStart).toBe("617px");
+
+    fireEvent.click(screen.getByRole("button", { name: "Grow bounds" }));
+    expect(marker.hidden).toBe(true);
+    expect(splitter.dataset.resizeState).toBe("idle");
+    expect(splitter.hasPointerCapture(67)).toBe(false);
+    expect(protocolActorInventory.resize.active).toBe(0);
+    expect(frames.hasPending()).toBe(false);
+    expect(runtime.transactions).toHaveLength(0);
+  });
+
+  it("restores a live preview when an unrelated revision keeps declared geometry unchanged", async () => {
+    const runtime = new FixtureRuntime(initialProjection);
+    const frames = createManualFrameScheduler();
+    const view = renderWorkspace(runtime, { frameScheduler: frames.scheduler });
+    const splitter = await screen.findByRole("separator", { name: /resize adjacent/i });
+    installPointerCapture(splitter);
+    const child = requiredElement(
+      view.container.querySelector('[data-workspace-split-child="left-node"]'),
+    );
+    fireEvent.pointerDown(splitter, { button: 0, pointerId: 66, clientX: 497 });
+    fireEvent.pointerMove(splitter, { pointerId: 66, clientX: 597 });
+    act(() => frames.flush());
+    expect(child.dataset.inlineSize).toBe("597");
+    act(() => runtime.publishProjection({ ...initialProjection, revision: "1" }));
+    expect(child.dataset.inlineSize).toBe("497");
+    expect(child.style.getPropertyValue("--pf-split-size")).toBe("497px");
+    expect(runtime.transactions).toHaveLength(0);
+    expect(protocolActorInventory.resize.active).toBe(0);
+  });
+
+  it("clears a rejected divider-only resize without moving panel contents", async () => {
+    const runtime = new FixtureRuntime(initialProjection, "resize");
+    const frames = createManualFrameScheduler();
+    const view = renderWorkspace(runtime, {
+      resizePreviewMode: "separator",
+      frameScheduler: frames.scheduler,
+    });
+    const splitter = await screen.findByRole("separator", { name: /resize adjacent/i });
+    installPointerCapture(splitter);
+    const child = requiredElement(
+      view.container.querySelector('[data-workspace-split-child="left-node"]'),
+    );
+    const marker = requiredElement(view.container.querySelector("[data-workspace-resize-preview]"));
+    fireEvent.pointerDown(splitter, { button: 0, pointerId: 63, clientX: 497 });
+    fireEvent.pointerMove(splitter, { pointerId: 63, clientX: 597 });
+    act(() => frames.flush());
+    fireEvent.pointerUp(splitter, { pointerId: 63, clientX: 597 });
+    expect(marker.hidden).toBe(true);
+    expect(child.dataset.inlineSize).toBe("497");
+    expect(runtime.getSnapshot().projection.revision).toBe("0");
+    expect(protocolActorInventory.resize.active).toBe(0);
+  });
+
+  it.each([
+    { selected: "deferred", hidden: "live", mode: "auto", deferred: true },
+    { selected: "live", hidden: "deferred", mode: "auto", deferred: false },
+    { selected: "deferred", hidden: "live", mode: "live", deferred: false },
+    { selected: "live", hidden: "live", mode: "separator", deferred: true },
+    { selected: "throttled", hidden: "deferred", mode: "auto", deferred: false },
+    { selected: "adaptive", hidden: "deferred", mode: "auto", deferred: false },
+  ] as const)(
+    "resolves $mode preview for selected $selected content (deferred=$deferred)",
+    async ({ selected, hidden, mode, deferred }) => {
+      const runtime = new FixtureRuntime({
+        ...initialProjection,
+        panels: {
+          ...initialProjection.panels,
+          alpha: { ...panel("alpha", "Alpha"), resizeDelivery: selected },
+          beta: { ...panel("beta", "Beta"), resizeDelivery: hidden },
+        },
+      });
+      const frames = createManualFrameScheduler();
+      const view = renderWorkspace(runtime, {
+        resizePreviewMode: mode,
+        frameScheduler: frames.scheduler,
+      });
+      const splitter = await screen.findByRole("separator", { name: /resize adjacent/i });
+      installPointerCapture(splitter);
+      const child = requiredElement(
+        view.container.querySelector('[data-workspace-split-child="left-node"]'),
+      );
+      const marker = requiredElement(
+        view.container.querySelector("[data-workspace-resize-preview]"),
+      );
+      fireEvent.pointerDown(splitter, { button: 0, pointerId: 64, clientX: 497 });
+      fireEvent.pointerMove(splitter, { pointerId: 64, clientX: 597 });
+      act(() => frames.flush());
+      expect(child.dataset.inlineSize).toBe(deferred ? "497" : "597");
+      expect(marker.hidden).toBe(!deferred);
+      fireEvent.pointerCancel(splitter, { pointerId: 64 });
+    },
+  );
+
+  it("applies constraints to a divider-only preview and keeps keyboard resizing immediate", async () => {
+    const runtime = new FixtureRuntime(initialProjection);
+    const frames = createManualFrameScheduler();
+    const view = renderWorkspace(runtime, {
+      resizePreviewMode: "separator",
+      frameScheduler: frames.scheduler,
+      layoutSolver: hardMinimumLayoutSolver,
+    });
+    const splitter = await screen.findByRole("separator", { name: /resize adjacent/i });
+    installPointerCapture(splitter);
+    const child = requiredElement(
+      view.container.querySelector('[data-workspace-split-child="left-node"]'),
+    );
+    const marker = requiredElement(view.container.querySelector("[data-workspace-resize-preview]"));
+    fireEvent.pointerDown(splitter, { button: 0, pointerId: 65, clientX: 497 });
+    fireEvent.pointerMove(splitter, { pointerId: 65, clientX: 900 });
+    act(() => frames.flush());
+    expect(marker.style.insetInlineStart).toBe("544px");
+    expect(child.dataset.inlineSize).toBe("497");
+    fireEvent.pointerCancel(splitter, { pointerId: 65 });
+    splitter.focus();
+    await userEvent.keyboard("{Shift>}{ArrowRight}{/Shift}");
+    await waitFor(() => expect(child.dataset.inlineSize).toBe("544"));
+    expect(marker.hidden).toBe(true);
+    expect(runtime.transactions).toHaveLength(1);
+    expect(runtime.transactions[0]?.origin).toBe("keyboard");
   });
 
   it("refreshes cached preview targets when a same-axis split gains a child", async () => {
@@ -3938,6 +4291,7 @@ function renderWorkspace(
   runtime: FixtureRuntime,
   options: {
     readonly motion?: "off" | "reduced" | "productive";
+    readonly resizePreviewMode?: WorkspaceResizePreviewMode;
     readonly dropBehavior?: WorkspaceDropBehavior;
     readonly registry?: WorkspacePanelRegistry;
     readonly direction?: "ltr" | "rtl";
@@ -3993,6 +4347,9 @@ function renderWorkspace(
           {...(options.layoutSolver === undefined ? {} : { layoutSolver: options.layoutSolver })}
           {...(options.motionDriver === undefined ? {} : { motionDriver: options.motionDriver })}
           {...(options.motion === undefined ? {} : { motion: options.motion })}
+          {...(options.resizePreviewMode === undefined
+            ? {}
+            : { resizePreviewMode: options.resizePreviewMode })}
         />
       </div>
     </WorkspaceRuntimeProvider>,

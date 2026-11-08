@@ -21,6 +21,7 @@ import {
   type FloatingManipulationEvent,
 } from "@panefold/protocol-xstate";
 
+import { measureClientScale, type ClientScale } from "./client-coordinates";
 import type { ResolvedWorkspaceInteractionMessages, WorkspaceFloatingResizeEdge } from "./messages";
 import type {
   WorkspaceCommandOrigin,
@@ -50,6 +51,7 @@ interface FloatingPointerSession {
   readonly pointerId: number;
   readonly startClientX: number;
   readonly startClientY: number;
+  readonly clientScale: ClientScale;
   readonly startBounds: WorkspaceFloatingBounds;
   readonly baseRevision: string;
   readonly viewportKey: string;
@@ -259,8 +261,8 @@ export function FloatingSurfaceFrame({
       const sample = session.pending;
       if (sample === undefined || sessionRef.current !== session) return;
       session.pending = undefined;
-      const deltaX = sample.clientX - session.startClientX;
-      const deltaY = sample.clientY - session.startClientY;
+      const deltaX = (sample.clientX - session.startClientX) / session.clientScale.x;
+      const deltaY = (sample.clientY - session.startClientY) / session.clientScale.y;
       const next =
         session.mode === "move"
           ? moveBounds(session.startBounds, deltaX, deltaY, viewportWidth, viewportHeight)
@@ -304,6 +306,7 @@ export function FloatingSurfaceFrame({
       pointerId: event.pointerId,
       startClientX: event.clientX,
       startClientY: event.clientY,
+      clientScale: measureClientScale(frameRef.current),
       startBounds: bounds,
       baseRevision: projectionRevision,
       viewportKey,

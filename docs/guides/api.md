@@ -30,6 +30,7 @@ All packages are currently unpublished workspace packages. For the complete pack
 | `tabPresentation`                 | Static or per-group placement/content policy           |
 | `direction`, `messageCatalog`     | Logical direction and interaction messages             |
 | `motion`                          | `off`, `reduced` or `productive`                       |
+| `resizePreviewMode`               | `auto`, `live` or a divider-only `separator` preview   |
 | `dropBehavior`                    | Edge splitting and center-group swap/merge preferences |
 | `responsive`, `compactBreakpoint` | Reversible single-region projection policy             |
 | `onCommandResult`                 | Observe dispatch outcomes                              |
@@ -47,7 +48,24 @@ trigger a render from the subscription. Use `useWorkspaceSnapshot()` when a comp
 whole snapshot. See [React integration](react.md#subscribe-to-the-values-a-component-needs) for an
 object-selection example and the requirements for selectors, equality checks and server rendering.
 
-`projectWorkspace`, `createDemoCommands`, `openDemoWorkspaceSession` and `DemoExternalPanelController` live in `apps/demo/src`. They demonstrate application-owned policy and glue. They are **not** imports from a published Panefold package. Start with them to understand the wiring; rename and adapt them as your application takes ownership.
+The opt-in `@panefold/react/model` entry point adds:
+
+| Export                                                  | Responsibility                                                                    |
+| ------------------------------------------------------- | --------------------------------------------------------------------------------- |
+| `createModelWorkspaceSession(runtimeOptions, options?)` | Own an in-memory runtime and complete model bindings; expose explicit `dispose()` |
+| `createModelWorkspaceBindings(runtime, options?)`       | Bind an existing runtime while leaving its lifetime with the caller               |
+| `ModelWorkspaceSurface`                                 | Install the bindings' provider, projector, commands and model solver together     |
+| `projectModelWorkspace(snapshot, options?)`             | Project the main surface and same-document floating surfaces                      |
+| `createModelWorkspaceCommands(getSnapshot, options?)`   | Create semantic commands and kernel-based drop plans for a captured revision      |
+
+`ModelWorkspaceOptions` exposes application labels, floating bounds, redock targets, shared model
+geometry and individual command overrides. See [React integration](react.md) for lifecycle and
+constraint details.
+
+`projectWorkspace`, `createDemoCommands`, `openDemoWorkspaceSession` and `DemoExternalPanelController`
+still live in `apps/demo/src`. The first two are thin application-policy wrappers around the official
+model bridge. Durable opening and browser-window controllers remain application-owned examples.
+Every package and subpath is still workspace-local, experimental and unpublished.
 
 ## Go deeper only when you need to
 

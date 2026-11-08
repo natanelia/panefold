@@ -167,6 +167,43 @@ test("native touch reorders tabs in the full landscape layout", async ({ page })
   expect(await revision(page)).toBe(before + 1);
 });
 
+test("successive native touch splits wait for structural motion before capturing geometry", async ({
+  page,
+}) => {
+  await page.addInitScript(() => {
+    const animate = Element.prototype.animate;
+    Element.prototype.animate = function (keyframes, options) {
+      // Make the existing timing race deterministic without changing the drag
+      // protocol or replacing browser input with synthetic DOM events.
+      const timing =
+        this.hasAttribute("data-workspace-node") && typeof options === "object"
+          ? { ...options, duration: 1_000 }
+          : options;
+      return animate.call(this, keyframes, timing);
+    };
+  });
+  await open(page);
+  const before = await revision(page);
+  await touchPanelDrop(
+    page,
+    tab(page, "notes"),
+    group(page, "primary"),
+    overlay(page),
+    "block-end",
+  );
+  const child = await owner(page, "notes");
+  const second = await touchPanelDrop(
+    page,
+    tab(page, "layers"),
+    group(page, child),
+    overlay(page),
+    "inline-end",
+  );
+  await expect(page.locator(".pf-group")).toHaveCount(6);
+  await samePreview(page, "layers", second);
+  expect(await revision(page)).toBe(before + 2);
+});
+
 test("native touch moves a whole container into another container", async ({ page }) => {
   await open(page);
   const before = await revision(page);

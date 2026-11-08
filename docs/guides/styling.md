@@ -50,6 +50,17 @@ The starter provides a small [application stylesheet](../../apps/demo/src/docs-s
 
 Use the `splitterSize` prop when changing solver geometry; changing only a CSS variable can make visual chrome disagree with hit testing. Use the logical tab-presentation prop rather than rotating a horizontal strip with CSS.
 
+The divider's grab area is configured separately from its visible gutter. These public CSS variables set the total target size across the resize axis:
+
+```css
+.starter-surface {
+  --pf-splitter-hit-target-fine: 24px;
+  --pf-splitter-hit-target-coarse: 44px;
+}
+```
+
+Those are the defaults. The coarse value is used when any available pointer is coarse, including devices with both a mouse and touch input. The target is centered on the divider, can extend over adjacent pane edges, and never becomes smaller than the visible gutter. Changing these variables leaves solver geometry and saved layout unchanged.
+
 `motion` accepts `"off"`, `"reduced"` and `"productive"`. Begin with motion off when integrating heavy content; add transitions only after measuring the actual workload. Keep reduced-motion behavior and visible focus indicators intact.
 
 `direction="rtl"` sets the workspace's logical direction. Test it with real labels and content, including floating controls and vertical rails.
