@@ -2,14 +2,14 @@
   "schemaVersion": 1,
   "kind": "browser-profile-result",
   "profile": "compact-react-chromium-desktop",
-  "producedAt": "2026-09-30T11:55:54.787Z",
+  "producedAt": "2026-11-08T10:07:00.792Z",
   "status": "passed",
   "runner": "Playwright",
   "command": "pnpm exec playwright test --reporter=json",
   "project": "chromium",
   "environment": {
-    "operatingSystem": "Linux 6.17.0-1022-azure x64",
-    "node": "v24.21.0",
+    "operatingSystem": "Linux 7.0.0-1017-azure x64",
+    "node": "v24.22.2",
     "browserVersion": "151.0.7922.34"
   },
   "summary": {
@@ -17,7 +17,7 @@
     "passed": 82,
     "skipped": 0,
     "failed": 0,
-    "durationMs": 90772.999
+    "durationMs": 70664.698
   },
   "tests": [
     {
@@ -433,8 +433,8 @@
   ],
   "rawReport": {
     "path": "artifacts/preview-browser.json",
-    "sha256": "bf923cd482c1deb03e1ec6920cf8118298e3738709eb2c3b9d0303966d81382c",
-    "runUrl": "https://github.com/natanelia/panefold/actions/runs/36711088102",
+    "sha256": "7ed7d4d96f2ddf22facea9ad75857c8b98d1cece2de40906b060afe54e01bb50",
+    "runUrl": "https://github.com/natanelia/panefold/actions/runs/42469779683",
     "artifact": "preview-executed-evidence"
   },
   "sourceDigests": {
@@ -501,7 +501,7 @@
     "packages/surfaces/src/transfer.ts": "2ae27ae6d5f76269d2e49f9649f5e2cf51792441460b13fceee9c7bfabe4318f",
     "packages/surfaces/src/types.ts": "119ae61f47124f0d7bb4c9f2b74afd3fa5510f27cb3e928fe328590488b029e6",
     "playwright.config.ts": "1488b4ef7257ef5a6dc5505148550cbb6ed89e9488b2c9e39e874f15469cc245",
-    "pnpm-lock.yaml": "e659e90970ee34935228595f2297da307495a7a7b01202ecfa67deaf1ac53209",
+    "pnpm-lock.yaml": "be4cd87737d70f25c878659c3d485f829712789fd70504d542cc4cb27797eb6d",
     "scripts/record-preview-evidence.mjs": "9918258288f54dd3d93f8cebb895107dca13e9b7c58130234071c70a47411e2c",
     "vitest.config.ts": "6f743b2639e8e091bdc454a4aaa6336a538b889e70af8814ee7d1f27c7a8769e"
   },

@@ -28,9 +28,11 @@
     "@panefold/geometry": "workspace:*",
     "@panefold/model": "workspace:*",
     "@panefold/motion": "workspace:*",
-    "@panefold/protocol-xstate": "workspace:*"
+    "@panefold/protocol-xstate": "workspace:*",
+    "use-sync-external-store": "1.6.0"
   },
   "devDependencies": {
+    "@types/use-sync-external-store": "1.7.0",
     "react": "catalog:",
     "react-dom": "catalog:"
   },
