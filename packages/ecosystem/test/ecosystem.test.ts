@@ -215,6 +215,44 @@ describe("authenticated bounded boundaries", () => {
     expect(validateBoundaryValue([1, 2], { maxArrayLength: 1 }).ok).toBe(false);
   });
 
+  it.each(["extra", "01", "-1", "1.0", "4294967295", "__proto__"])(
+    "rejects non-index array property %s before accepting a JSON payload",
+    (key) => {
+      const values = [1];
+      Object.defineProperty(values, key, {
+        value: "x".repeat(100),
+        enumerable: true,
+      });
+      expect(validateBoundaryValue({ values }, { maxStringLength: 10 }).ok).toBe(false);
+    },
+  );
+
+  it("rejects sparse arrays even when their prototype provides a missing value", () => {
+    const sparse = [1, 2, 3];
+    Reflect.deleteProperty(sparse, "1");
+    expect(validateBoundaryValue(sparse).ok).toBe(false);
+    Object.setPrototypeOf(sparse, { 1: 2 });
+    expect(validateBoundaryValue(sparse).ok).toBe(false);
+    expect(validateBoundaryValue([1, null, 3]).ok).toBe(true);
+  });
+
+  it("rejects symbol keys on JSON objects and arrays", () => {
+    const metadata = Symbol("metadata");
+    const object = { value: 1, [metadata]: "hidden from JSON" };
+    const array = Object.assign([1], { [metadata]: "hidden from JSON" });
+    expect(validateBoundaryValue(object).ok).toBe(false);
+    expect(validateBoundaryValue(array).ok).toBe(false);
+  });
+
+  it("continues to bound dense nested arrays and reject array cycles", () => {
+    const cyclic: unknown[] = [];
+    cyclic.push(cyclic);
+    expect(validateBoundaryValue(cyclic).ok).toBe(false);
+    expect(validateBoundaryValue([[1]], { maxDepth: 2 }).ok).toBe(true);
+    expect(validateBoundaryValue([[[1]]], { maxDepth: 2 }).ok).toBe(false);
+    expect(validateBoundaryValue([[1, 2]], { maxNodes: 3 }).ok).toBe(false);
+  });
+
   it("exports deterministic bounded reproductions with safe defaults", () => {
     const input = {
       engineVersion: "0.1.0",

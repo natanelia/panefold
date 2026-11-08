@@ -69,7 +69,25 @@ export function validateBoundaryValue(
       if (object.length > resolved.maxArrayLength) {
         return invalid(current.path, "array length limit exceeded");
       }
+      // Structured cloning retains extra array properties while JSON encoding
+      // ignores them. Reject that extra state before it can bypass this walk's
+      // payload limits or disagree with a canonical JSON fingerprint.
+      for (const key of Reflect.ownKeys(object)) {
+        if (key === "length") continue;
+        const index = typeof key === "string" ? Number(key) : Number.NaN;
+        if (
+          !Number.isInteger(index) ||
+          index < 0 ||
+          index >= object.length ||
+          String(index) !== key
+        ) {
+          return invalid(current.path, "array properties must be numeric indices");
+        }
+      }
       for (let index = object.length - 1; index >= 0; index -= 1) {
+        if (!Object.hasOwn(object, index)) {
+          return invalid(`${current.path}[${String(index)}]`, "sparse arrays are not allowed");
+        }
         stack.push({
           value: object[index],
           path: `${current.path}[${String(index)}]`,
@@ -82,6 +100,9 @@ export function validateBoundaryValue(
     const prototype = Object.getPrototypeOf(object);
     if (prototype !== Object.prototype && prototype !== null) {
       return invalid(current.path, "object prototype is not JSON-safe");
+    }
+    if (Object.getOwnPropertySymbols(object).length > 0) {
+      return invalid(current.path, "symbol keys are not JSON-safe");
     }
     const keys = Object.keys(object);
     if (keys.length > resolved.maxObjectKeys)

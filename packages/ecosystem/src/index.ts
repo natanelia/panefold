@@ -83,3 +83,16 @@ export {
   type MobileWorkspaceProjection,
   type MobileWorkspaceProfile,
 } from "./mobile";
+export {
+  createPanelContextHub,
+  type PanelContextConnection,
+  type PanelContextEvent,
+  type PanelContextHub,
+  type PanelContextHubOptions,
+  type PanelContextKey,
+  type PanelContextMode,
+  type PanelContextPublishOptions,
+  type PanelContextPublishResult,
+  type PanelContextSnapshot,
+  type PanelContextValues,
+} from "./panel-context";

@@ -68,3 +68,4 @@ export type {
 } from "./types";
 
 export { resolveFloatingSurfaceBounds, floatingSurfaceContentBounds } from "./floating-surface";
+export { usePanelContext, type PanelContextSource } from "./panel-context";

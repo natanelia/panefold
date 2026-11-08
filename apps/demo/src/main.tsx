@@ -15,9 +15,15 @@ const isTouch =
 const TouchPlayground = lazy(() => import("./TouchPlayground"));
 const isStarter = new URL(location.href).searchParams.get("fixture") === "starter";
 const StarterWorkspace = lazy(() => import("./docs-starter"));
-if (isStarter || isTouch) document.body.classList.remove("pf-hide-single-tab-row");
+const isLinked = fixture === "linked";
+const LinkedPanelsWorkspace = lazy(() => import("./linked-panels"));
+if (isStarter || isTouch || isLinked) document.body.classList.remove("pf-hide-single-tab-row");
 createRoot(root).render(
-  isTouch ? (
+  isLinked ? (
+    <Suspense fallback={<p>Loading linked panels…</p>}>
+      <LinkedPanelsWorkspace />
+    </Suspense>
+  ) : isTouch ? (
     <Suspense fallback={<p>Opening playground…</p>}>
       <TouchPlayground />
     </Suspense>
