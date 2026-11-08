@@ -1435,7 +1435,7 @@ function SurfaceRenderer<TSnapshot, TCommand, TResult>({
                     scheduler={scheduler}
                     scheduleKey={`${surfaceScheduleKey}:${surface.id}`}
                     previewSplit={previewSplit}
-            solveSplitCandidate={solveSplitCandidate}
+                    solveSplitCandidate={solveSplitCandidate}
                     getResizePreviewMode={getResizePreviewMode}
                     commitSplit={commitSplit}
                     clearSplitPreview={clearSplitPreview}
@@ -2178,8 +2178,7 @@ function Splitter({
       if (focusNextSplitter(event.currentTarget, event.shiftKey ? -1 : 1)) event.preventDefault();
       return;
     }
-    const boundary =
-      event.key === "Home" ? "min" : event.key === "End" ? "max" : undefined;
+    const boundary = event.key === "Home" ? "min" : event.key === "End" ? "max" : undefined;
     if (boundary !== undefined && (event.altKey || event.ctrlKey || event.metaKey)) return;
     const negativeKeys = split.axis === "inline" ? ["ArrowLeft"] : ["ArrowUp"];
     const positiveKeys = split.axis === "inline" ? ["ArrowRight"] : ["ArrowDown"];

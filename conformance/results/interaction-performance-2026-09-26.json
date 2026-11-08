@@ -18,32 +18,27 @@
   "sampleCount": 179,
   "summary": {
     "minimum": 16.5,
-    "maximum": 33.2,
-    "mean": 16.759,
+    "maximum": 16.8,
+    "mean": 16.666,
     "median": 16.7,
-    "p95": 16.7,
+    "p95": 16.8,
     "p99": 16.8
   },
   "rawFrameDeltasMs": [
-    16.6, 16.7, 16.6, 16.7, 16.7, 16.7, 16.6, 16.7, 16.6, 16.7, 16.6, 16.8, 16.6, 16.7, 16.7, 16.6,
-    16.7, 16.6, 16.7, 16.6, 16.7, 16.7, 16.7, 16.6, 16.7, 16.7, 16.6, 16.7, 16.6, 16.7, 16.7, 16.6,
-    16.8, 16.6, 16.7, 16.6, 16.7, 16.6, 16.7, 16.7, 16.6, 16.8, 16.6, 16.6, 16.7, 16.6, 16.7, 16.7,
-    16.7, 16.6, 16.7, 16.7, 16.6, 16.7, 16.7, 16.6, 16.7, 16.6, 16.8, 16.6, 16.7, 16.6, 16.7, 16.7,
-    16.6, 16.7, 16.7, 16.6, 16.7, 16.6, 16.7, 16.7, 16.7, 16.6, 16.7, 16.6, 16.7, 16.7, 16.6, 16.7,
-    16.7, 16.7, 16.6, 16.7, 16.7, 16.6, 16.6, 16.8, 16.6, 16.7, 16.7, 16.6, 16.7, 16.6, 16.7, 16.6,
-    16.7, 16.7, 16.7, 16.6, 16.7, 16.7, 16.6, 16.7, 16.7, 16.6, 16.7, 16.7, 16.6, 16.7, 16.7, 16.7,
-    16.6, 16.6, 16.7, 16.7, 16.6, 16.7, 16.7, 16.7, 16.6, 16.7, 16.7, 16.6, 16.6, 16.7, 16.7, 16.7,
-    16.7, 16.6, 16.7, 16.7, 16.6, 16.6, 16.7, 16.7, 16.7, 16.6, 16.7, 16.7, 16.6, 16.7, 16.7, 16.7,
-    33.2, 16.7, 16.7, 16.7, 16.7, 16.6, 16.7, 16.6, 16.7, 16.7, 16.6, 16.7, 16.7, 16.6, 16.7, 16.6,
-    16.7, 16.7, 16.7, 16.6, 16.7, 16.7, 16.7, 16.5, 16.8, 16.6, 16.7, 16.6, 16.7, 16.7, 16.6, 16.7,
-    16.7, 16.6, 16.7
+    16.7, 16.7, 16.6, 16.7, 16.7, 16.7, 16.6, 16.6, 16.7, 16.7, 16.7, 16.7, 16.6, 16.6, 16.7, 16.7,
+    16.7, 16.6, 16.7, 16.7, 16.6, 16.7, 16.6, 16.8, 16.6, 16.7, 16.6, 16.7, 16.7, 16.7, 16.6, 16.7,
+    16.6, 16.7, 16.6, 16.7, 16.7, 16.7, 16.6, 16.7, 16.7, 16.6, 16.7, 16.7, 16.6, 16.7, 16.7, 16.6,
+    16.7, 16.6, 16.7, 16.7, 16.7, 16.6, 16.6, 16.7, 16.7, 16.7, 16.6, 16.8, 16.6, 16.7, 16.6, 16.7,
+    16.6, 16.7, 16.7, 16.6, 16.7, 16.6, 16.7, 16.7, 16.7, 16.6, 16.7, 16.6, 16.7, 16.7, 16.6, 16.8,
+    16.6, 16.7, 16.6, 16.7, 16.7, 16.6, 16.7, 16.7, 16.6, 16.7, 16.6, 16.8, 16.6, 16.6, 16.7, 16.7,
+    16.6, 16.8, 16.6, 16.7, 16.6, 16.6, 16.7, 16.7, 16.7, 16.6, 16.7, 16.7, 16.6, 16.7, 16.7, 16.7,
+    16.6, 16.7, 16.7, 16.6, 16.6, 16.8, 16.6, 16.6, 16.7, 16.7, 16.6, 16.8, 16.6, 16.7, 16.6, 16.7,
+    16.7, 16.6, 16.7, 16.7, 16.6, 16.7, 16.7, 16.6, 16.7, 16.6, 16.7, 16.6, 16.8, 16.7, 16.6, 16.6,
+    16.8, 16.6, 16.7, 16.7, 16.6, 16.6, 16.7, 16.7, 16.6, 16.7, 16.6, 16.8, 16.7, 16.5, 16.7, 16.8,
+    16.6, 16.6, 16.7, 16.6, 16.8, 16.6, 16.7, 16.7, 16.6, 16.7, 16.6, 16.7, 16.7, 16.6, 16.7, 16.6,
+    16.7, 16.7, 16.6
   ],
-  "longTasks": [
-    {
-      "startTime": 152.29999999998836,
-      "duration": 53
-    }
-  ],
+  "longTasks": [],
   "baseline": {
     "schemaVersion": 1,
     "profile": "compact-react-chromium-desktop",
@@ -53,7 +48,7 @@
     "longTaskMaximumCount": 12,
     "minimumSamples": 120
   },
-  "producedAt": "2026-11-08T10:46:37.454Z",
+  "producedAt": "2026-11-08T13:05:31.853Z",
   "nodeSmoke": {
     "schemaVersion": 1,
     "environment": {
@@ -61,24 +56,24 @@
       "v8": "13.6.233.17-node.63",
       "platform": "linux",
       "architecture": "x64",
-      "cpu": "AMD EPYC 9V74 80-Core Processor"
+      "cpu": "AMD EPYC 9V45 96-Core Processor"
     },
     "kernel": {
       "iterations": 10000,
-      "elapsedMs": 1702.27
+      "elapsedMs": 1177.19
     },
     "geometry": {
       "iterations": 100000,
-      "elapsedMs": 260.31
+      "elapsedMs": 187.76
     },
     "reorderProfiles": [
       {
         "panelCount": 50,
         "warmupCount": 250,
         "sampleCount": 2000,
-        "medianMs": 0.2687,
-        "p95Ms": 0.4093,
-        "p99Ms": 0.4927,
+        "medianMs": 0.1767,
+        "p95Ms": 0.2671,
+        "p99Ms": 0.3235,
         "designTargetMs": 1,
         "withinDesignTargetOnThisMachine": true,
         "invariantViolations": 0
@@ -87,9 +82,9 @@
         "panelCount": 500,
         "warmupCount": 100,
         "sampleCount": 1000,
-        "medianMs": 2.4781,
-        "p95Ms": 2.7448,
-        "p99Ms": 3.2395,
+        "medianMs": 1.7288,
+        "p95Ms": 1.8737,
+        "p99Ms": 2.375,
         "designTargetMs": 5,
         "withinDesignTargetOnThisMachine": true,
         "invariantViolations": 0
@@ -99,30 +94,30 @@
       {
         "nodeCount": 100,
         "sampleCount": 10000,
-        "elapsedMs": 40.76,
-        "meanMicroseconds": 4.076
+        "elapsedMs": 29.64,
+        "meanMicroseconds": 2.964
       },
       {
         "nodeCount": 500,
         "sampleCount": 10000,
-        "elapsedMs": 205.71,
-        "meanMicroseconds": 20.571
+        "elapsedMs": 151.48,
+        "meanMicroseconds": 15.148
       },
       {
         "nodeCount": 1000,
         "sampleCount": 10000,
-        "elapsedMs": 433.87,
-        "meanMicroseconds": 43.387
+        "elapsedMs": 315.08,
+        "meanMicroseconds": 31.508
       }
     ],
-    "totalElapsedMs": 6117.69,
+    "totalElapsedMs": 4252.02,
     "finalRevision": "10000",
     "invariantViolations": 0
   },
   "rawReport": {
     "path": "artifacts/preview-browser.json",
-    "sha256": "fca41ba2aea7f392d20f3862bcb5689fe49ae5ac6b328bbc71c579b3fcb4525a",
-    "runUrl": "https://github.com/natanelia/panefold/actions/runs/42472409418",
+    "sha256": "1bb6f8b8f3ca6c3139c14fc9f57ae2ba096a828707193769ece1b87ae2e62984",
+    "runUrl": "https://github.com/natanelia/panefold/actions/runs/42483022797",
     "artifact": "preview-executed-evidence"
   },
   "sourceDigests": {
@@ -163,7 +158,7 @@
     "packages/geometry/src/invalidation.ts": "9d42bd81ccfc82cecac5d0a200bd889ae49c164acf5db44eaebdb445acff7906",
     "packages/kernel-optimized/src/indexes.ts": "c6d962626b3c0cac8d7d89f156aed383b1e313a201f7c3ce5f228d97959ac0a8",
     "packages/motion/src/coordinator.ts": "50eff7dd6a1b8f6433ac3f5bfc5f8d74b99a501e43e712ccb3e1a82520574c6d",
-    "packages/react/src/WorkspaceSurface.tsx": "a02e722b0be8f9e0145070ff7ca846832d2fabc7d6d675b7d596d641da90a824",
+    "packages/react/src/WorkspaceSurface.tsx": "f0d86236c2c926ea5c8536761def8c86235a3c7f8db9a23d2afa7aa8e958592a",
     "packages/react/src/client-coordinates.ts": "f70aaae0922037939b3f21583cfceaf34289d2d811654991da775ac23241411e",
     "packages/react/src/drop-modifiers.ts": "542583898dfa7d121b0d91f51171df8a3db47a8e749422437da903372a60c6ee",
     "packages/react/src/drop-preview.ts": "7c84edb3ba5ee124e207ca6fc5fb3f2a8b8e07178d90f11b96a68504b4402de7",

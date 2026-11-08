@@ -919,9 +919,7 @@ describe("WorkspaceSurface", () => {
       view.container.querySelector<HTMLElement>("[data-workspace-splitter]"),
     );
     const child = requiredElement(
-      view.container.querySelector<HTMLElement>(
-        '[data-workspace-split-child="left-node"]',
-      ),
+      view.container.querySelector<HTMLElement>('[data-workspace-split-child="left-node"]'),
     );
     splitter.focus();
     const user = userEvent.setup();
