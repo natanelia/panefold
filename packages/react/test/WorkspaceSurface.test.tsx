@@ -853,6 +853,115 @@ describe("WorkspaceSurface", () => {
     expect(runtime.transactions.at(-1)?.origin).toBe("keyboard");
   });
 
+  it("Home and End reach the solver's hard limits and skip already-attained endpoints", async () => {
+    const runtime = new FixtureRuntime(initialProjection);
+    const view = renderWorkspace(runtime, { layoutSolver: hardMinimumLayoutSolver });
+    const user = userEvent.setup();
+    const splitter = await screen.findByRole("separator", { name: /resize adjacent/i });
+    const firstChild = requiredElement(
+      view.container.querySelector('[data-workspace-split="root"] > .pf-split-child'),
+    );
+    splitter.focus();
+
+    await waitFor(() => {
+      expect(splitter.getAttribute("aria-valuemin")).toBe("0.1");
+      expect(splitter.getAttribute("aria-valuemax")).toBe("54.73");
+    });
+    await user.keyboard("{End}");
+    await waitFor(() => expect(firstChild.dataset.inlineSize).toBe("544"));
+    expect(runtime.lastCommand?.type).toBe("resize");
+    expect(runtime.transactions.at(-1)?.origin).toBe("keyboard");
+
+    const committed = runtime.transactions.length;
+    await user.keyboard("{End}");
+    expect(runtime.transactions).toHaveLength(committed);
+
+    await user.keyboard("{Home}");
+    await waitFor(() => expect(firstChild.dataset.inlineSize).toBe("1"));
+    expect(runtime.transactions).toHaveLength(committed + 1);
+    expect(splitter.getAttribute("aria-valuemin")).toBe("0.1");
+    expect(splitter.getAttribute("aria-valuemax")).toBe("54.73");
+  });
+
+  it("keeps Home/End commits equal to their previews in a weighted three-pane layout", async () => {
+    const root = initialProjection.nodes.root;
+    if (root?.kind !== "split") throw new Error("Expected a split root");
+    const projection: WorkspaceProjection = {
+      ...initialProjection,
+      nodes: {
+        ...initialProjection.nodes,
+        root: { ...root, childIds: ["left-node", "middle-node", "right-node"], weights: [1, 1, 1] },
+        "middle-node": { kind: "group", id: "middle-node", groupId: "middle" },
+      },
+      groups: {
+        ...initialProjection.groups,
+        middle: { id: "middle", panelIds: [], selectedPanelId: "", label: "Middle" },
+      },
+    };
+    // Equivalent to nonuniform grow/shrink factors in the weighted allocator.
+    const weightedSolver: WorkspaceLayoutSolver<FixtureSnapshot> = (snapshot, request) => {
+      const split = snapshot.projection.nodes.root;
+      if (split?.kind !== "split") throw new Error("Expected a split root");
+      const weights = request.splitOverrides.root?.weights ?? split.weights;
+      const adjusted = weights.map((weight, index) => weight * ([1, 4, 0.2][index] ?? 1));
+      return solveWorkspaceProjectionLayout(
+        {
+          ...snapshot.projection,
+          nodes: { ...snapshot.projection.nodes, root: { ...split, weights: adjusted } },
+        },
+        request.bounds,
+        { splitterSize: request.splitterSize },
+      );
+    };
+    const runtime = new FixtureRuntime(projection);
+    const view = renderWorkspace(runtime, { layoutSolver: weightedSolver });
+    const splitter = requiredElement(
+      view.container.querySelector<HTMLElement>("[data-workspace-splitter]"),
+    );
+    const child = requiredElement(
+      view.container.querySelector<HTMLElement>(
+        '[data-workspace-split-child="left-node"]',
+      ),
+    );
+    splitter.focus();
+    const user = userEvent.setup();
+    await user.keyboard("{End}");
+    await waitFor(() => expect(Number(child.dataset.inlineSize)).toBeGreaterThan(890));
+    const afterEnd = Number(child.dataset.inlineSize);
+    const endWeights =
+      runtime.lastCommand?.type === "resize" ? runtime.lastCommand.weights : undefined;
+    expect(endWeights?.[0]).toBeGreaterThan(1.9);
+    await user.keyboard("{Home}");
+    await waitFor(() => expect(Number(child.dataset.inlineSize)).toBeLessThan(2));
+    expect(Number(child.dataset.inlineSize)).toBeLessThan(afterEnd);
+    const homeWeights =
+      runtime.lastCommand?.type === "resize" ? runtime.lastCommand.weights : undefined;
+    expect(homeWeights?.[0]).toBeLessThan(0.001);
+    expect(homeWeights?.[2]).toBe(1);
+  });
+
+  it("supports logical Home/End on block splitters in RTL", async () => {
+    const root = initialProjection.nodes.root;
+    if (root?.kind !== "split") throw new Error("Expected a split root");
+    const runtime = new FixtureRuntime({
+      ...initialProjection,
+      nodes: { ...initialProjection.nodes, root: { ...root, axis: "block" } },
+    });
+    const view = renderWorkspace(runtime, { direction: "rtl" });
+    const user = userEvent.setup();
+    const splitter = requiredElement(
+      view.container.querySelector<HTMLElement>("[data-workspace-splitter]"),
+    );
+    const first = requiredElement(
+      view.container.querySelector<HTMLElement>('[data-workspace-split-child="left-node"]'),
+    );
+    splitter.focus();
+    await user.keyboard("{Home}");
+    await waitFor(() => expect(Number(first.dataset.blockSize)).toBeLessThan(2));
+    await user.keyboard("{End}");
+    await waitFor(() => expect(Number(first.dataset.blockSize)).toBeGreaterThan(690));
+  });
+
   it("cycles visible enabled splitters with F6 within the owning workspace", async () => {
     const root = initialProjection.nodes.root;
     if (root?.kind !== "split") throw new Error("Expected the fixture root split");
