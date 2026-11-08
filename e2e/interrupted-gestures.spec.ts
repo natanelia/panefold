@@ -245,6 +245,8 @@ for (const mode of ["move", "resize"] as const) {
     const handle = frame.locator(
       mode === "move" ? ".pf-floating-header-drag-region" : '[data-resize-edge="bottom-right"]',
     );
+    // The drag region starts movement through its titlebar's pointer handler.
+    const captureOwner = mode === "move" ? frame.locator(".pf-floating-titlebar") : handle;
     const before = await boxOf(frame);
     const revision = await revisionOf(page);
     const changedAxis = mode === "move" ? "x" : "width";
@@ -252,18 +254,18 @@ for (const mode of ["move", "resize"] as const) {
     for (const reason of interruptions) {
       const pointerId = await startDrag(page, handle, 24, 16);
       await expect(frame).toHaveAttribute("data-floating-manipulation", "manipulating");
-      expect(await handle.evaluate((element, id) => element.hasPointerCapture(id), pointerId)).toBe(
-        true,
-      );
+      expect(
+        await captureOwner.evaluate((element, id) => element.hasPointerCapture(id), pointerId),
+      ).toBe(true);
       await expect
         .poll(async () => (await boxOf(frame))[changedAxis])
         .toBe(before[changedAxis] + 24);
       expect(await revisionOf(page)).toBe(revision);
       await interrupt(page, reason);
       await expect(frame).toHaveAttribute("data-floating-manipulation", "idle");
-      expect(await handle.evaluate((element, id) => element.hasPointerCapture(id), pointerId)).toBe(
-        false,
-      );
+      expect(
+        await captureOwner.evaluate((element, id) => element.hasPointerCapture(id), pointerId),
+      ).toBe(false);
       expect(await boxOf(frame)).toEqual(before);
       await page.mouse.up();
       expect(await revisionOf(page)).toBe(revision);
