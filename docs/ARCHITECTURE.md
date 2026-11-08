@@ -152,7 +152,8 @@ other children, reverses the active grow/shrink factors across the split, and no
 with the same pure model helper used by the kernel. The resulting weights are checked through the
 allocator before they are previewed and committed unchanged. Home/End and accessible bounds use
 the attainable range of that same plan. A custom solver can omit the plan and retain the generic
-weight-based pointer and arrow path.
+weight-based pointer and arrow path, with solver-probed Home/End endpoints. Metadata that no longer
+matches the requested child IDs, weights, adjacency or returned pane sizes uses that same fallback.
 
 For canonical model applications, `ModelWorkspaceSurface` installs the model-aware bridge together
 with the projector and command adapter, so the ordinary setup does not silently omit constraints.

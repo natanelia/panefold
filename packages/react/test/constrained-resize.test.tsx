@@ -134,7 +134,7 @@ describe("model-backed constrained splitter resizing", () => {
     },
   );
 
-  it("keeps a legacy solver's preview intact without inventing keyboard limits", () => {
+  it("keeps legacy solver previews and solver-probed Home/End limits", () => {
     const session = createModelWorkspaceSession(
       { initialSnapshot: fixture([{ grow: 2 }, {}, {}]) },
       {
@@ -169,10 +169,6 @@ describe("model-backed constrained splitter resizing", () => {
           view.container.querySelectorAll<HTMLElement>("[data-workspace-split-child]"),
         ).map((child) => Number(child.dataset.inlineSize));
       const start = Number(splitter.dataset.inlineStart);
-      const revision = session.runtime.getSnapshot().revision;
-      expect(fireEvent.keyDown(splitter, { key: "Home" })).toBe(true);
-      expect(fireEvent.keyDown(splitter, { key: "End" })).toBe(true);
-      expect(session.runtime.getSnapshot().revision).toBe(revision);
       expect(splitter.getAttribute("aria-valuemin")).toBe("0");
       expect(splitter.getAttribute("aria-valuemax")).toBe("100");
       fireEvent.pointerDown(splitter, { button: 0, pointerId: 21, clientX: start });
@@ -181,6 +177,20 @@ describe("model-backed constrained splitter resizing", () => {
       const preview = sizes();
       fireEvent.pointerUp(splitter, { pointerId: 21, clientX: start + 30 });
       expect(sizes()).toEqual(preview);
+      const revision = session.runtime.getSnapshot().revision;
+      expect(fireEvent.keyDown(splitter, { key: "Home" })).toBe(false);
+      expect(sizes()[0]).toBe(100);
+      expect(session.runtime.getSnapshot().revision).toBeGreaterThan(revision);
+      expect(splitter.getAttribute("aria-valuenow")).toBe(splitter.getAttribute("aria-valuemin"));
+      const homeRevision = session.runtime.getSnapshot().revision;
+      fireEvent.keyDown(splitter, { key: "Home" });
+      expect(session.runtime.getSnapshot().revision).toBe(homeRevision);
+      expect(fireEvent.keyDown(splitter, { key: "End" })).toBe(false);
+      expect(sizes()[0]).toBeGreaterThan(100);
+      expect(splitter.getAttribute("aria-valuenow")).toBe(splitter.getAttribute("aria-valuemax"));
+      const endRevision = session.runtime.getSnapshot().revision;
+      fireEvent.keyDown(splitter, { key: "End" });
+      expect(session.runtime.getSnapshot().revision).toBe(endRevision);
       view.unmount();
     } finally {
       session.dispose();

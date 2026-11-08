@@ -82,6 +82,8 @@ const sourceDigests = async (name) => {
     "packages/geometry/src/index.ts",
     "packages/geometry/test/bounded-waterfill.test.ts",
     "packages/geometry/test/bounded-rounding.test.ts",
+    "packages/geometry/test/rounding-compatibility.test.ts",
+    "packages/geometry/test/reference/allocate-axis.ts",
     "packages/geometry/test/resize-axis.test.ts",
     "packages/model/src/split-weights.ts",
     "packages/react/test/constrained-resize.test.tsx",

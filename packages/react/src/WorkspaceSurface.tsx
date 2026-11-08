@@ -384,7 +384,13 @@ function SurfaceRenderer<TSnapshot, TCommand, TResult>({
           splitterSize,
           splitOverrides: overrides,
         };
-        if (layoutSolver !== undefined) return layoutSolver(snapshot, request);
+        if (layoutSolver !== undefined) {
+          return validateResolvedResizePlans(
+            layoutSolver(snapshot, request),
+            renderedProjection,
+            overrides,
+          );
+        }
         const rootProjection =
           rootNodeId === renderedProjection.rootNodeId
             ? renderedProjection
@@ -443,6 +449,16 @@ function SurfaceRenderer<TSnapshot, TCommand, TResult>({
         visibleGroupIds,
       ),
     [renderedProjection, resizePreviewMode, visibleGroupIds],
+  );
+
+  // Probe limits without touching the DOM or installing speculative resize state.
+  const solveSplitCandidate = useCallback(
+    (splitId: string, weights: readonly number[]) =>
+      solveResolvedLayout({
+        ...splitOverridesRef.current,
+        [splitId]: { weights },
+      }),
+    [solveResolvedLayout],
   );
 
   const previewSplit = useCallback(
@@ -1252,6 +1268,7 @@ function SurfaceRenderer<TSnapshot, TCommand, TResult>({
             scheduler={scheduler}
             scheduleKey={surfaceScheduleKey}
             previewSplit={previewSplit}
+            solveSplitCandidate={solveSplitCandidate}
             getResizePreviewMode={getResizePreviewMode}
             commitSplit={commitSplit}
             clearSplitPreview={clearSplitPreview}
@@ -1425,6 +1442,7 @@ function SurfaceRenderer<TSnapshot, TCommand, TResult>({
                     scheduler={scheduler}
                     scheduleKey={`${surfaceScheduleKey}:${surface.id}`}
                     previewSplit={previewSplit}
+                    solveSplitCandidate={solveSplitCandidate}
                     getResizePreviewMode={getResizePreviewMode}
                     commitSplit={commitSplit}
                     clearSplitPreview={clearSplitPreview}
@@ -1700,6 +1718,7 @@ interface LayoutNodeProps<TCommand, TResult> {
     preview: Omit<SplitResizePreview, "splitId">,
   ) => ResolvedLayout;
   readonly getResizePreviewMode: (splitId: string) => ResolvedResizePreviewMode;
+  readonly solveSplitCandidate: (splitId: string, weights: readonly number[]) => ResolvedLayout;
   readonly commitSplit: (
     splitId: string,
     weights: readonly number[],
@@ -1799,6 +1818,7 @@ function SplitNode<TCommand, TResult>({
                   })
                 }
                 getPreviewMode={() => props.getResizePreviewMode(split.id)}
+                onSolve={(nextWeights) => props.solveSplitCandidate(split.id, nextWeights)}
                 onCommit={(nextWeights, origin) => props.commitSplit(split.id, nextWeights, origin)}
                 onCancel={() => props.clearSplitPreview(split.id)}
                 messages={props.messages}
@@ -1845,6 +1865,7 @@ interface SplitterProps {
     mode?: ResolvedResizePreviewMode,
   ) => ResolvedLayout;
   readonly getPreviewMode: () => ResolvedResizePreviewMode;
+  readonly onSolve: (weights: readonly number[]) => ResolvedLayout;
   readonly onCommit: (
     weights: readonly number[],
     origin: "keyboard" | "pointer",
@@ -1867,6 +1888,7 @@ function Splitter({
   scheduleKey,
   onPreview,
   getPreviewMode,
+  onSolve,
   onCommit,
   onCancel,
   messages,
@@ -1911,15 +1933,35 @@ function Splitter({
   const handledGeometryRef = useRef(geometryKey);
   const pairSize = beforeSize + afterSize;
   const value = pairSize === 0 ? 50 : (beforeSize / pairSize) * 100;
+  const [focused, setFocused] = useState(false);
+  // Custom solvers without compatible resize metadata retain solver-probed limits.
+  // Full layout solves are only done for a focused divider, never on pointer frames.
+  const attainableRange = useMemo(() => {
+    if (!focused || resizeBounds !== undefined) return undefined;
+    const low = splitPairPercent(
+      split,
+      splitter,
+      onSolve(pairBoundaryWeights(weights, beforeIndex, afterIndex, "min")),
+    );
+    const high = splitPairPercent(
+      split,
+      splitter,
+      onSolve(pairBoundaryWeights(weights, beforeIndex, afterIndex, "max")),
+    );
+    return {
+      min: roundPercent(Math.min(value, low, high)),
+      max: roundPercent(Math.max(value, low, high)),
+    };
+  }, [focused, resizeBounds, onSolve, weights, beforeIndex, afterIndex, split, splitter, value]);
   const minimumValue =
     resizeBounds === undefined
-      ? 0
+      ? (attainableRange?.min ?? 0)
       : pairSize === 0
         ? value
         : (resizeBounds.minBeforeSize / pairSize) * 100;
   const maximumValue =
     resizeBounds === undefined
-      ? 100
+      ? (attainableRange?.max ?? 100)
       : pairSize === 0
         ? value
         : (resizeBounds.maxBeforeSize / pairSize) * 100;
@@ -2191,41 +2233,56 @@ function Splitter({
       return;
     }
     if (event.altKey || event.ctrlKey || event.metaKey) return;
+    const boundary = event.key === "Home" ? "min" : event.key === "End" ? "max" : undefined;
     const extreme =
-      resizeBounds === undefined
+      resizeBounds === undefined || boundary === undefined
         ? undefined
-        : event.key === "Home"
+        : boundary === "min"
           ? resizeBounds.minBeforeSize
-          : event.key === "End"
-            ? resizeBounds.maxBeforeSize
-            : undefined;
+          : resizeBounds.maxBeforeSize;
     const negativeKeys = split.axis === "inline" ? ["ArrowLeft"] : ["ArrowUp"];
     const positiveKeys = split.axis === "inline" ? ["ArrowRight"] : ["ArrowDown"];
     let delta = 0;
     if (negativeKeys.includes(event.key)) delta = -1;
     if (positiveKeys.includes(event.key)) delta = 1;
-    if (delta === 0 && extreme === undefined) return;
+    if (delta === 0 && boundary === undefined) return;
     if (split.axis === "inline" && direction === "rtl") delta *= -1;
     event.preventDefault();
     const step =
       extreme === undefined
         ? Math.max(1, pairSize) * (event.shiftKey ? 0.1 : 0.02) * delta
         : extreme - beforeSize;
-    if (step === 0) return;
+    if (step === 0 && (extreme !== undefined || boundary === undefined)) return;
     const next =
-      splitter.resize === undefined
-        ? updatePair(step, weights, beforeSize, afterSize)
-        : resizeAxis(
+      splitter.resize !== undefined
+        ? resizeAxis(
             splitter.resize.plan,
             splitter.resize.beforeIndex,
             splitter.resize.afterIndex,
             beforeSize + step,
-          );
+          )
+        : boundary !== undefined
+          ? pairBoundaryWeights(weights, beforeIndex, afterIndex, boundary)
+          : updatePair(step, weights, beforeSize, afterSize);
     if (next.every((weight, index) => weight === weights[index])) return;
     const currentPosition = splitterPosition(resolvedLayout, splitter.id) ?? {
       inline: splitter.rect.inlineStart,
       block: splitter.rect.blockStart,
     };
+    const boundaryPosition =
+      boundary === undefined || splitter.resize !== undefined
+        ? undefined
+        : splitterPosition(onSolve(next), splitter.id);
+    // A custom solver's endpoint can already be reached. Avoid an empty undo step.
+    if (
+      boundary !== undefined &&
+      splitter.resize === undefined &&
+      (boundaryPosition === undefined ||
+        (boundaryPosition.inline === currentPosition.inline &&
+          boundaryPosition.block === currentPosition.block))
+    ) {
+      return;
+    }
     const actor = createResizeActor();
     actor.start();
     actorRef.current = actor;
@@ -2236,14 +2293,16 @@ function Splitter({
         baseRevision: safeRevision(projectionRevision),
       });
       const nextPosition =
-        split.axis === "inline"
+        boundaryPosition ??
+        (split.axis === "inline"
           ? { ...currentPosition, inline: currentPosition.inline + step }
-          : { ...currentPosition, block: currentPosition.block + step };
+          : { ...currentPosition, block: currentPosition.block + step });
       send(actor, { type: "KEYBOARD_STEP", position: nextPosition });
       const preview = onPreview(next);
       const constrained = splitterPosition(preview, splitter.id);
       if (constrained !== undefined)
         send(actor, { type: "CONSTRAINT_RESULT", position: constrained });
+
       send(actor, { type: "COMMIT" });
       settleCommit(onCommit(next, "keyboard").outcome, (event) => send(actor, event), messages);
     } finally {
@@ -2273,6 +2332,8 @@ function Splitter({
           "--pf-splitter-size": `${axisSize(splitter.rect, split.axis)}px`,
         } as CSSProperties
       }
+      onFocus={() => setFocused(true)}
+      onBlur={() => setFocused(false)}
       onPointerDown={onPointerDown}
       onPointerMove={onPointerMove}
       onPointerUp={finishPointer}
@@ -3765,6 +3826,43 @@ function roundPercent(value: number): number {
   return Math.round(value * 100) / 100;
 }
 
+/** Ignore metadata left in a custom solver's transformed weight or geometry space. */
+function validateResolvedResizePlans(
+  layout: ResolvedLayout,
+  projection: WorkspaceProjection,
+  overrides: Readonly<Record<string, SplitLayoutOverride>>,
+): ResolvedLayout {
+  let changed = false;
+  const splitters = layout.splitters.map((splitter) => {
+    const { resize } = splitter;
+    if (resize === undefined) return splitter;
+    const split = projection.nodes[splitter.splitNodeId];
+    const weights =
+      overrides[splitter.splitNodeId]?.weights ??
+      (split?.kind === "split" ? split.weights : undefined);
+    if (
+      split?.kind === "split" &&
+      splitter.axis === split.axis &&
+      split.childIds[resize.beforeIndex] === splitter.beforeNodeId &&
+      split.childIds[resize.afterIndex] === splitter.afterNodeId &&
+      resize.plan.items.length === split.childIds.length &&
+      resize.plan.items.every(
+        (item, index) =>
+          item.key === split.childIds[index] &&
+          item.weight === weights?.[index] &&
+          resize.plan.allocation.sizes[index] === axisSize(layout.nodeRects[item.key], split.axis),
+      )
+    ) {
+      return splitter;
+    }
+    changed = true;
+    const { resize: discarded, ...legacySplitter } = splitter;
+    void discarded;
+    return legacySplitter;
+  });
+  return changed ? { ...layout, splitters } : layout;
+}
+
 function splitterResizeKey(resize: ResolvedSplitter["resize"]): string {
   if (resize === undefined) return "";
   const { plan } = resize;
@@ -3963,8 +4061,12 @@ function applyResolvedLayoutPreview(
     const attributes = {
       "aria-valuenow": String(percent(before)),
       "aria-valuetext": messages.primaryPanePercent({ percent: percent(before) }),
-      "aria-valuemin": String(bounds === undefined ? 0 : percent(bounds.minBeforeSize)),
-      "aria-valuemax": String(bounds === undefined ? 100 : percent(bounds.maxBeforeSize)),
+      ...(bounds === undefined
+        ? {}
+        : {
+            "aria-valuemin": String(percent(bounds.minBeforeSize)),
+            "aria-valuemax": String(percent(bounds.maxBeforeSize)),
+          }),
     };
     for (const [name, value] of Object.entries(attributes)) {
       if (element.getAttribute(name) !== value) element.setAttribute(name, value);
@@ -4062,6 +4164,38 @@ function axisSize(rect: LogicalRect | undefined, axis: WorkspaceSplitView["axis"
 
 function positiveNumber(value: number | undefined): number {
   return value !== undefined && Number.isFinite(value) && value > 0 ? value : 1;
+}
+
+/**
+ * Extremes must remain strictly positive because the semantic model rejects
+ * zero weights. With integer pixel allocation this epsilon still reaches the
+ * visual endpoint, or the solver's actual constraint-limited endpoint.
+ */
+function pairBoundaryWeights(
+  weights: readonly number[],
+  beforeIndex: number,
+  afterIndex: number,
+  boundary: "min" | "max",
+): readonly number[] {
+  const before = positiveNumber(weights[beforeIndex]);
+  const after = positiveNumber(weights[afterIndex]);
+  const total = before + after;
+  const epsilon = Math.min(total / 2, Math.max(total * 0.000001, 0.000001));
+  const nextBefore = boundary === "min" ? epsilon : total - epsilon;
+  const result = [...weights];
+  result[beforeIndex] = nextBefore;
+  result[afterIndex] = total - nextBefore;
+  return result;
+}
+
+function splitPairPercent(
+  split: WorkspaceSplitView,
+  splitter: ResolvedSplitter,
+  layout: ResolvedLayout,
+): number {
+  const before = axisSize(layout.nodeRects[splitter.beforeNodeId], split.axis);
+  const after = axisSize(layout.nodeRects[splitter.afterNodeId], split.axis);
+  return before + after === 0 ? 50 : (before / (before + after)) * 100;
 }
 
 function settleCommit(

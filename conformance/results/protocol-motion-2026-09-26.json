@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "kind": "protocol-motion-result",
   "profile": "compact-react-chromium-desktop",
-  "producedAt": "2026-11-08T10:46:37.454Z",
+  "producedAt": "2026-11-08T13:05:31.853Z",
   "status": "passed",
   "runner": "Vitest",
   "command": "pnpm exec vitest run --reporter=json --outputFile=artifacts/preview-unit.json",
@@ -12,16 +12,16 @@
     "browserVersion": "151.0.7922.34"
   },
   "summary": {
-    "tests": 686,
-    "passed": 686,
+    "tests": 689,
+    "passed": 689,
     "failed": 0,
     "files": 84,
     "protocolMotionTestFiles": 9,
     "protocolMotionTests": 86,
     "protocolMotionPassed": 86,
     "reactIntegrationTestFiles": 17,
-    "reactIntegrationTests": 216,
-    "reactIntegrationPassed": 216
+    "reactIntegrationTests": 219,
+    "reactIntegrationPassed": 219
   },
   "tests": [
     {
@@ -115,6 +115,41 @@
       "passed": 35
     },
     {
+      "file": "packages/geometry/test/allocate-axis.test.ts",
+      "status": "passed",
+      "passed": 6
+    },
+    {
+      "file": "packages/geometry/test/group-constraints.test.ts",
+      "status": "passed",
+      "passed": 2
+    },
+    {
+      "file": "packages/geometry/test/hit-test.test.ts",
+      "status": "passed",
+      "passed": 4
+    },
+    {
+      "file": "packages/geometry/test/invalidation-differential.test.ts",
+      "status": "passed",
+      "passed": 5
+    },
+    {
+      "file": "packages/geometry/test/invalidation.test.ts",
+      "status": "passed",
+      "passed": 6
+    },
+    {
+      "file": "packages/geometry/test/rounding-compatibility.test.ts",
+      "status": "passed",
+      "passed": 2
+    },
+    {
+      "file": "packages/geometry/test/solve-layout.test.ts",
+      "status": "passed",
+      "passed": 12
+    },
+    {
       "file": "packages/kernel/test/effects.test.ts",
       "status": "passed",
       "passed": 5
@@ -190,41 +225,6 @@
       "passed": 5
     },
     {
-      "file": "packages/geometry/test/allocate-axis.test.ts",
-      "status": "passed",
-      "passed": 6
-    },
-    {
-      "file": "packages/geometry/test/group-constraints.test.ts",
-      "status": "passed",
-      "passed": 2
-    },
-    {
-      "file": "packages/geometry/test/hit-test.test.ts",
-      "status": "passed",
-      "passed": 4
-    },
-    {
-      "file": "packages/geometry/test/invalidation-differential.test.ts",
-      "status": "passed",
-      "passed": 5
-    },
-    {
-      "file": "packages/geometry/test/invalidation.test.ts",
-      "status": "passed",
-      "passed": 6
-    },
-    {
-      "file": "packages/geometry/test/rounding-compatibility.test.ts",
-      "status": "passed",
-      "passed": 2
-    },
-    {
-      "file": "packages/geometry/test/solve-layout.test.ts",
-      "status": "passed",
-      "passed": 12
-    },
-    {
       "file": "packages/model/test/effects.test.ts",
       "status": "passed",
       "passed": 3
@@ -287,7 +287,7 @@
     {
       "file": "packages/react/test/WorkspaceSurface.test.tsx",
       "status": "passed",
-      "passed": 102
+      "passed": 105
     },
     {
       "file": "packages/react/test/client-coordinates.test.ts",
@@ -400,6 +400,11 @@
       "passed": 17
     },
     {
+      "file": "packages/runtime-effect/test/persistence.test.ts",
+      "status": "passed",
+      "passed": 5
+    },
+    {
       "file": "packages/surfaces/test/browser-adapter.test.ts",
       "status": "passed",
       "passed": 14
@@ -408,11 +413,6 @@
       "file": "packages/surfaces/test/surfaces.test.ts",
       "status": "passed",
       "passed": 40
-    },
-    {
-      "file": "packages/runtime-effect/test/persistence.test.ts",
-      "status": "passed",
-      "passed": 5
     },
     {
       "file": "packages/svelte/test/svelte.test.ts",
@@ -447,8 +447,8 @@
   ],
   "rawReport": {
     "path": "artifacts/preview-unit.json",
-    "sha256": "da2869492883a706307b2e20de29a67870344e10a9044524870cc2e9f6358d7f",
-    "runUrl": "https://github.com/natanelia/panefold/actions/runs/42472409418",
+    "sha256": "70aea6d01c290d5f43703dc306778dba24ecc9a8a2f1db01ab27cf339d7766fa",
+    "runUrl": "https://github.com/natanelia/panefold/actions/runs/42483022797",
     "artifact": "preview-executed-evidence"
   },
   "sourceDigests": {
@@ -544,7 +544,7 @@
     "packages/protocol/test/protocol.test.ts": "dd118363496c22c9df3110c3a3ab05e7b1bee643fe0c613c75503c2f2262fd4f",
     "packages/protocol/tsconfig.json": "3f465de909ed88bb206aa2ee7095c56a63223c3a11efa84ad39e69b1d1abd1a8",
     "packages/react/package.json": "39bcbf2fc9e64daa7167f035fc67b01a0c725c3e4a77282644df560a6d8a9b72",
-    "packages/react/src/WorkspaceSurface.tsx": "a02e722b0be8f9e0145070ff7ca846832d2fabc7d6d675b7d596d641da90a824",
+    "packages/react/src/WorkspaceSurface.tsx": "f0d86236c2c926ea5c8536761def8c86235a3c7f8db9a23d2afa7aa8e958592a",
     "packages/react/src/client-coordinates.ts": "f70aaae0922037939b3f21583cfceaf34289d2d811654991da775ac23241411e",
     "packages/react/src/drop-modifiers.ts": "542583898dfa7d121b0d91f51171df8a3db47a8e749422437da903372a60c6ee",
     "packages/react/src/drop-preview.ts": "7c84edb3ba5ee124e207ca6fc5fb3f2a8b8e07178d90f11b96a68504b4402de7",
@@ -569,7 +569,7 @@
     "packages/react/src/tab-presentation.ts": "eeeac41f560e89ed8db685a0df1d6190703ed306507e2cc3cff81f5f4e460143",
     "packages/react/src/tab-reorder.ts": "c139803bc37c5f2c6fc6a17eb836784ff8d203b7bae8acebedcbf290cdabc599",
     "packages/react/src/types.ts": "75f063061f6af77986f752c7c4fa5512ca4e403301e7377e67a2622596e48bad",
-    "packages/react/test/WorkspaceSurface.test.tsx": "64aa6c97dd4f7538dde56f5f020e891c19bb20df74bf08378a0ed9975612d8b4",
+    "packages/react/test/WorkspaceSurface.test.tsx": "ca562cc27866047b34efefc9a99ec4ab4eed35e97b0a06cdced0033681c42f37",
     "packages/react/test/client-coordinates.test.ts": "11492358f3ecc0ad0b0530abc11e6237e20fb60ce7132d7bead8625467a45389",
     "packages/react/test/drag-parity.test.ts": "1f0bca650b8647cf7473639a0afa59839bdd60327892e428f30a98642cd67443",
     "packages/react/test/drop-preview.test.ts": "bdc1de685dce3a9bc5c073cf9fb7f2325de07251a8f71d4b318f09990c22211c",
