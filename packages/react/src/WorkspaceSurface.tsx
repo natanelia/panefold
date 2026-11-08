@@ -34,6 +34,7 @@ import {
 } from "@panefold/motion";
 import { createResizeActor, type ResizeEvent } from "@panefold/protocol-xstate";
 
+import { measureClientScale, measureContentBox } from "./client-coordinates";
 import {
   FloatingSurfaceFrame,
   floatingSurfaceContentBounds,
@@ -555,7 +556,7 @@ function SurfaceRenderer<TSnapshot, TCommand, TResult>({
       };
       setMeasuredBounds((current) => (sameLogicalRect(current, next) ? current : next));
     };
-    const measured = element.getBoundingClientRect();
+    const measured = measureContentBox(element);
     updateBounds(measured.width, measured.height);
 
     const Observer = ownerWindow.ResizeObserver;
@@ -1894,6 +1895,9 @@ function Splitter({
       actor,
       pointerId: event.pointerId,
       startCoordinate: coordinate,
+      clientScale: measureClientScale(event.currentTarget.parentElement)[
+        split.axis === "inline" ? "x" : "y"
+      ],
       beforeSize,
       afterSize,
       weights: [...weights],
@@ -1913,7 +1917,7 @@ function Splitter({
   };
 
   const requestedPointerWeights = (session: PointerResizeSession, coordinate: number) => {
-    const physicalDelta = coordinate - session.startCoordinate;
+    const physicalDelta = (coordinate - session.startCoordinate) / session.clientScale;
     const logicalDelta =
       split.axis === "inline" && direction === "rtl" ? -physicalDelta : physicalDelta;
     return updatePair(logicalDelta, session.weights, session.beforeSize, session.afterSize);
@@ -3571,6 +3575,7 @@ interface PointerResizeSession {
   readonly actor: ResizeActor;
   readonly pointerId: number;
   readonly startCoordinate: number;
+  readonly clientScale: number;
   readonly beforeSize: number;
   readonly afterSize: number;
   readonly weights: readonly number[];
