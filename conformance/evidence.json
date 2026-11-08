@@ -107,7 +107,7 @@
       "verificationClass": "code-verifiable",
       "artifactRole": "source",
       "uri": "repo://packages/geometry/test/solve-layout.test.ts",
-      "sha256": "f9eeb6af1c0ca92f7ec7446de66cd165730a91151ead5262b0fa0241b06cb6c2",
+      "sha256": "1d717e6523b3a592d259f1b626335623a57830269e8afe259a25fae4fb42b8b9",
       "producedAt": "2026-08-14T07:19:51.074Z",
       "requirementIds": [
         "LAY-002",
@@ -383,7 +383,7 @@
       "verificationClass": "code-verifiable",
       "artifactRole": "source",
       "uri": "repo://packages/react/test/WorkspaceSurface.test.tsx",
-      "sha256": "ca562cc27866047b34efefc9a99ec4ab4eed35e97b0a06cdced0033681c42f37",
+      "sha256": "63ff3e887f0d0d0fec33c94d399dfa7136925077f34e3a60eae2c858388b78ac",
       "producedAt": "2026-08-14T07:19:51.074Z",
       "requirementIds": [
         "A11Y-003",
@@ -760,7 +760,7 @@
       "verificationClass": "code-verifiable",
       "artifactRole": "source",
       "uri": "repo://packages/react/test/WorkspaceSurface.test.tsx",
-      "sha256": "ca562cc27866047b34efefc9a99ec4ab4eed35e97b0a06cdced0033681c42f37",
+      "sha256": "63ff3e887f0d0d0fec33c94d399dfa7136925077f34e3a60eae2c858388b78ac",
       "producedAt": "2026-08-14T07:19:51.074Z",
       "requirementIds": [
         "I18N-001",
@@ -856,7 +856,7 @@
       "verificationClass": "code-verifiable",
       "artifactRole": "source",
       "uri": "repo://docs/ARCHITECTURE.md",
-      "sha256": "cd0e447036f1f26aec407b9ec09d856f0f8660a7c67dd07b60909207ee880364",
+      "sha256": "0fb67caa397f367b94b4fe6b27edc45452b8fcce0753b999ae03fc680419bd4a",
       "producedAt": "2026-08-14T07:19:51.074Z",
       "requirementIds": [
         "API-002",
@@ -1000,8 +1000,8 @@
       "verificationClass": "environment-verifiable",
       "artifactRole": "result",
       "uri": "repo://conformance/results/chromium-reference-2026-09-26.json",
-      "sha256": "01e1143acab45bae0a938a5a33e56e3769fcd930a91dcba3061b5a6cd81fb8b1",
-      "producedAt": "2026-11-08T13:05:31.853Z",
+      "sha256": "dc1330e2603dd2564ad88546dd1e70e00a58853e521ebbb4555a2a70dda7494a",
+      "producedAt": "2026-11-08T14:43:13.214Z",
       "requirementIds": [
         "A11Y-002",
         "A11Y-003",
@@ -1037,8 +1037,8 @@
       "verificationClass": "environment-verifiable",
       "artifactRole": "result",
       "uri": "repo://conformance/results/interaction-performance-2026-09-26.json",
-      "sha256": "0d30a9a09038ab5d8c7c3ae898d42f083fde7ae3d4c5a3b8c8cbdc6505682d54",
-      "producedAt": "2026-11-08T13:05:31.853Z",
+      "sha256": "4e47f2ee2b61ff973686f3e81cd6fef5d237cc1fb681c8652a70f65a891d2326",
+      "producedAt": "2026-11-08T14:43:13.214Z",
       "requirementIds": [
         "PRF-001",
         "PRF-006",
@@ -1075,8 +1075,8 @@
       "verificationClass": "environment-verifiable",
       "artifactRole": "result",
       "uri": "repo://conformance/results/protocol-motion-2026-09-26.json",
-      "sha256": "023ecc6cbe91ffb106e6adfe53f1159c169626371dd74b4d6504a5e38952f473",
-      "producedAt": "2026-11-08T13:05:31.853Z",
+      "sha256": "372a2ec2f326a950dff2428bff355cd355721b07cc4ee3166e61846e18f3fe9a",
+      "producedAt": "2026-11-08T14:43:13.214Z",
       "requirementIds": [
         "A11Y-002",
         "ARC-002",
@@ -1109,7 +1109,7 @@
       "verificationClass": "code-verifiable",
       "artifactRole": "result",
       "uri": "repo://conformance/results/protocol-state-machine-coverage-2026-08-14.json",
-      "sha256": "3798027c9629179700edd00646574e03d67318bb80ae661d33ca7328673d8a0a",
+      "sha256": "071489b3d7772ab47ce079dadba9691ac8d14131f0ec8b52956ddff0eabedfbd",
       "producedAt": "2026-08-14T01:12:00Z",
       "requirementIds": [
         "TST-003"
@@ -1126,8 +1126,8 @@
       "verificationClass": "code-verifiable",
       "artifactRole": "result",
       "uri": "repo://conformance/results/independent-semantic-oracle-2026-09-27.json",
-      "sha256": "c84015a57f7793adf543c1c7477e29473a9fa7611b251f4b345707af9b8fc158",
-      "producedAt": "2026-11-08T10:31:55.424672+00:00",
+      "sha256": "55d1c6979f5a2ab30da0878318060cf9e1d3eecd789d3e685d8d9ffcb6b9db96",
+      "producedAt": "2026-11-08T13:02:50.554567+00:00",
       "requirementIds": [
         "MOD-004",
         "PRF-003",

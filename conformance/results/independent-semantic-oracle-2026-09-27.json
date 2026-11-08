@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "kind": "differential-model-result",
   "profile": "compact-react-chromium-desktop",
-  "producedAt": "2026-11-08T10:31:55.424672+00:00",
+  "producedAt": "2026-11-08T13:02:50.554567+00:00",
   "status": "passed-with-thresholds-unmet",
   "runner": "panefold-differential-campaign",
   "commands": {
@@ -31,14 +31,14 @@
     "divergenceCount": 0,
     "finalHash": "fnv1a64-v1:a1f58a1b0c635ad1",
     "generatedCommandTypeCount": 36,
-    "elapsedMs": 28526
+    "elapsedMs": 27349
   },
   "suite": {
     "testFiles": 5,
     "tests": 25,
     "passed": 25,
     "failed": 0,
-    "durationMs": 9264.671875
+    "durationMs": 9255.566650390625
   },
   "checks": {
     "curatedCommandDiscriminants": 36,
@@ -84,11 +84,11 @@
     "packages/kernel-optimized/test/fixtures.ts": "06c2c1ee18b7ced4e29900e5fbb96b32ceaf8654cb5e55a1d97233a9eccf5681",
     "packages/kernel/package.json": "51bd5a9f2c98be841a47718dd738930b0f21391722b1690dc55c2d427f4a00ed",
     "packages/kernel/tsconfig.json": "49477f7be8bc9f2976c250a0297c34809aed00c7d9e57115eaa4ad1722897e9c",
-    "packages/kernel/src/canonicalize.ts": "e4d8106960ef12ee90df80fe5af5541ba266d7966eb71c37402b8a86306d8101",
+    "packages/kernel/src/canonicalize.ts": "6d68636bcea9e99bbe9c240e952f951be92620d2355998ca09a5eab34674f30e",
     "packages/kernel/src/execute.ts": "65f7b3b487c522fdec4055d4118640f304dd040f47d636f57b23fc66a1a6f66f",
     "packages/kernel/src/diff.ts": "1d7f028876fbac357f38be47ef53486c27d1b49d115c8d2b5cd30c69537a3004",
     "packages/kernel/src/index.ts": "b748533828f258065aab94562da4003885a3b3ae47a567358910c37c63bb1e6f",
-    "packages/kernel/src/internal.ts": "2572cf6a794c4d80f28255ce287037e8838187f8798caf5c6c8c09720fc8e98d",
+    "packages/kernel/src/internal.ts": "f4d6e997f102e0bf5e43b85221eff686383559df64a3c9045dff7a6fedc40efc",
     "packages/kernel/src/invariants.ts": "90f29c105afa762de85d1583eb22daebdcb4d66f22f626a1cceb81ddd88f396a",
     "packages/kernel/src/plan-panel-drop.ts": "61725af35d608d44bdbc6ec6a7079e7e41a9d39e7fcaccb3fae1477cca4df93f",
     "packages/kernel/src/reducer.ts": "210dc3c2521c50b877b401402cd09470e9659bab430e5ff49fb5088a7388a19f",
@@ -101,7 +101,7 @@
     "packages/model/src/effects.ts": "1bed7b3eab6289f407357379f2bfa0cc1611dd3f2ef4aec1eb5835bdf811ff8c",
     "packages/model/src/factories.ts": "efb2d00d14f7f93fc249daae477a22e1b3dea8541d9cffc1cb2e1e04651c6b98",
     "packages/model/src/ids.ts": "cbf1947c1c8ed51447a6e3b5d77b04734e0b6b59e588099f442b99c3bde953c1",
-    "packages/model/src/index.ts": "894f6d22e3e7612e4ae3ce186e244452247d6111196270901edfbd3544684f0a",
+    "packages/model/src/index.ts": "be7cef88f8bf665374cfdca6a72b146f20d6861da1649a41f535df5c424861b7",
     "packages/model/src/json.ts": "71b1008440a2511a701e7ff4484e0373fd0f0dfac78a39eb099da31f0ee389f5",
     "packages/model/src/panel-registry.ts": "0a84a2ea260b55bf2c8efaa8462aae4e698045865f533d6e937a93ab8af9af5c",
     "packages/model/src/results.ts": "f66a7e790365153a33f72df22e7961890d74f0e1723cf9ed2f13fcdd58c50fec",
@@ -109,7 +109,8 @@
     "packages/kernel-optimized/test/differential.test.ts": "5df1ac571356551d240449e5892c56c98574c7ca3d6e4c001bbd927963137d96",
     "packages/kernel-optimized/test/independent-reducer.test.ts": "62e4b41b5dc18457bbb6272f1a3f5ae0837824adc2763de858c840fab2eff768",
     "packages/kernel-optimized/test/persistent-bucket-map.test.ts": "6424a661d75a0edb6b000b6664b0a7ce1b6d60e7173291ddfa4883f7f52df3bf",
-    "packages/kernel-optimized/test/projection.test.ts": "2799540bb4f1e0dd92dfba6c7b52c74517fe9f335fa4315e637066bfd23ecc96"
+    "packages/kernel-optimized/test/projection.test.ts": "2799540bb4f1e0dd92dfba6c7b52c74517fe9f335fa4315e637066bfd23ecc96",
+    "packages/model/src/split-weights.ts": "05695900c92d98b016c21adae3e17ca20ee97134f10e1b6a3d91c0a35cf19ea6"
   },
   "limitations": [
     "The correctness-first candidate rebuilds Map and entity-table state for each command; it is an independent semantic oracle, not a retained performance-optimized production kernel.",
@@ -120,12 +121,12 @@
   "rawReports": [
     {
       "path": "artifacts/independent-campaign.json",
-      "sha256": "d7c7c9e1f4edf6bf543f48e127e2071e9fd9a22d181cd67d9e52ad1964ce489a",
+      "sha256": "38a9adf55870fc52e8b1b22fc5e9891510bd8eddb49b4df04893c6a646643de6",
       "execution": "Local isolated worktree; freshly executed reports retained with this review."
     },
     {
       "path": "artifacts/independent-suite.json",
-      "sha256": "2450be8a0eee73d87e5b852ff24a2aea7399c780f135031579277bb1775e312e",
+      "sha256": "945ff2405fba87803c4be38d1b4d9c29982f7a87dcc46670d12693b454ffe234",
       "execution": "Local isolated worktree; freshly executed reports retained with this review."
     }
   ]

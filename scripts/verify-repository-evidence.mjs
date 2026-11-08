@@ -56,6 +56,7 @@ const REQUIRED_RESULT_SOURCE_PATHS = Object.freeze({
     "packages/model/src/json.ts",
     "packages/model/src/panel-registry.ts",
     "packages/model/src/results.ts",
+    "packages/model/src/split-weights.ts",
   ]),
 });
 

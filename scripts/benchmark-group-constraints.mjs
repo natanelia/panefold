@@ -8,7 +8,11 @@ import {
   nodeId,
   panelId,
 } from "../packages/model/dist/index.js";
-import { baselineRef, loadBaselineGeometry } from "./benchmarks/baseline-geometry.mjs";
+import {
+  assertLayoutGeometry,
+  baselineRef,
+  loadBaselineGeometry,
+} from "./benchmarks/baseline-geometry.mjs";
 import { pairedBenchmark, reportBenchmarks } from "./benchmarks/paired.mjs";
 const original = await loadBaselineGeometry("solve-layout");
 
@@ -79,7 +83,10 @@ for (const [groupCount, tabs] of [
   [16, 50],
 ]) {
   const { snapshot, root } = fixture(groupCount, tabs);
-  assert.deepEqual(solveLayout(snapshot, root, rect), original.solveLayout(snapshot, root, rect));
+  assertLayoutGeometry(
+    solveLayout(snapshot, root, rect),
+    original.solveLayout(snapshot, root, rect),
+  );
   results.push(
     pairedBenchmark(
       `solve/${groupCount}-groups/${tabs}-tabs`,
@@ -90,5 +97,6 @@ for (const [groupCount, tabs] of [
 }
 reportBenchmarks(results, {
   baseline: baselineRef,
-  comparison: "Actual original geometry sources versus built candidate",
+  comparison:
+    "Actual original geometry sources versus built candidate. Candidate full solves additionally capture resize plans; all shared geometry is checked.",
 });

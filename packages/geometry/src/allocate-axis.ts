@@ -7,7 +7,7 @@ import type {
 
 const EPSILON = 1e-9;
 
-interface NormalizedItem {
+export interface NormalizedItem {
   readonly key: string;
   readonly index: number;
   readonly min: number;
@@ -25,7 +25,7 @@ function finiteNonNegative(value: number | undefined, fallback: number): number 
   return value === undefined || !Number.isFinite(value) || value < 0 ? fallback : value;
 }
 
-function normalizeItem(
+export function normalizeItem(
   item: AllocationItem,
   index: number,
   diagnostics: GeometryDiagnostic[],
@@ -94,7 +94,7 @@ function boundedFactor(value: number): number {
  * Finds the proportional allocation whose factor-scaled sizes fit the supplied
  * bounds. Items that hit a bound are frozen and the remainder is solved again.
  */
-function allocateProportionally(
+export function allocateProportionally(
   items: readonly NormalizedItem[],
   target: number,
   lowerFor: (item: NormalizedItem) => number,
@@ -109,41 +109,57 @@ function allocateProportionally(
     const candidates = [...pending].map((index) => {
       const item = items[index];
       if (item === undefined) throw new RangeError("Missing proportional allocation item.");
-      return { item, index, factor: boundedFactor(factorFor(item)) };
+      return {
+        index,
+        factor: boundedFactor(factorFor(item)),
+        lower: lowerFor(item),
+        upper: upperFor(item),
+        proposed: 0,
+        clamped: 0,
+      };
     });
     const largestFactor = candidates.reduce(
       (largest, candidate) => Math.max(largest, candidate.factor),
       0,
     );
-    const factors = candidates.map((candidate) =>
-      largestFactor > EPSILON ? candidate.factor / largestFactor : 1,
-    );
-    const factorTotal = factors.reduce((total, factor) => total + factor, 0);
+    let factorTotal = 0;
+    for (const candidate of candidates) {
+      candidate.factor = largestFactor > EPSILON ? candidate.factor / largestFactor : 1;
+      factorTotal += candidate.factor;
+    }
+    let clampedTotal = 0;
+    for (const candidate of candidates) {
+      candidate.proposed = remaining * (candidate.factor / factorTotal);
+      candidate.clamped = Math.min(candidate.upper, Math.max(candidate.lower, candidate.proposed));
+      clampedTotal += candidate.clamped;
+    }
+    const correction = remaining - clampedTotal;
     let frozeItem = false;
 
-    candidates.forEach(({ item, index }, candidateIndex) => {
-      const factor = factors[candidateIndex] ?? 0;
-      const proposed = remaining * (factor / factorTotal);
-      const lower = lowerFor(item);
-      const upper = upperFor(item);
-      if (proposed < lower - EPSILON) {
+    // Every proposal uses the same remaining budget. Freeze only the bounds
+    // that stay binding when the proportional scale moves toward the target:
+    // lower bounds when the clamped total is too large, upper bounds when it
+    // is too small. Freezing both directions can lock an item at a bound that
+    // should be released after the other bound changes the remaining budget.
+    for (const proposal of candidates) {
+      const { index } = proposal;
+      if (correction < -EPSILON && proposal.proposed < proposal.lower - EPSILON) {
+        const { lower } = proposal;
         values[index] = lower;
         remaining -= lower;
         pending.delete(index);
         frozeItem = true;
-      } else if (proposed > upper + EPSILON) {
+      } else if (correction > EPSILON && proposal.proposed > proposal.upper + EPSILON) {
+        const { upper } = proposal;
         values[index] = upper;
         remaining -= upper;
         pending.delete(index);
         frozeItem = true;
       }
-    });
+    }
 
     if (!frozeItem) {
-      candidates.forEach(({ index }, candidateIndex) => {
-        const factor = factors[candidateIndex] ?? 0;
-        values[index] = remaining * (factor / factorTotal);
-      });
+      for (const candidate of candidates) values[candidate.index] = candidate.clamped;
       remaining = 0;
       pending.clear();
     }
@@ -163,7 +179,7 @@ function largestRemainderEqual(total: number, count: number): number[] {
   return Array.from({ length: count }, (_, index) => base + (index < remainder ? 1 : 0));
 }
 
-function roundConserving(
+export function roundConserving(
   values: readonly number[],
   items: readonly NormalizedItem[],
   target: number,
@@ -188,7 +204,10 @@ function roundConserving(
   const order = items
     .map((item, index) => {
       const value = values[index] ?? 0;
-      return { item, index, fraction: value - Math.floor(value) };
+      // A fractional hard minimum may have rounded this item up already.
+      // Rank the residual against that actual base so it does not receive a
+      // second pixel ahead of an item that is still rounded down.
+      return { item, index, fraction: value - (rounded[index] ?? 0) };
     })
     .sort(
       delta > 0

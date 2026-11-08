@@ -169,6 +169,7 @@ function roundConserving(
   target: number,
   minMayBeViolated: boolean,
   maxMayBeViolated: boolean,
+  residualFor?: (value: number, roundedBase: number) => number,
 ): number[] {
   const fractions = values.map((value) => value - Math.floor(value));
   const rounded = values.map((value, index) => {
@@ -180,6 +181,14 @@ function roundConserving(
     const upper = maxMayBeViolated ? Number.POSITIVE_INFINITY : Math.floor(item.max + EPSILON);
     return Math.min(upper, Math.max(lower, Math.floor(value + EPSILON)));
   });
+  // The default keeps the archived priority rule exactly. A supplied policy
+  // lets tests isolate the eager vs lazy ordering mechanics independently of
+  // the fractional-bound correction, whose mathematics has its own oracle.
+  if (residualFor !== undefined) {
+    values.forEach((value, index) => {
+      fractions[index] = residualFor(value, rounded[index] ?? 0);
+    });
+  }
 
   let delta = target - rounded.reduce((total, value) => total + value, 0);
   const growOrder = items
@@ -245,6 +254,11 @@ export function allocateAxis(
   inputItems: readonly AllocationItem[],
   availableSize: number,
   requestedSplitterSize = 0,
+  // Default preserves the archived allocator. Rounding-only comparisons inject
+  // the current proportional step so allocator bug fixes do not disguise a
+  // regression in the independent, pre-optimization rounding implementation.
+  proportionalAllocator = allocateProportionally,
+  residualFor?: (value: number, roundedBase: number) => number,
 ): AxisAllocation {
   const diagnostics: GeometryDiagnostic[] = [];
   const safeAvailable =
@@ -362,7 +376,7 @@ export function allocateAxis(
     // sizes are soft floors when they jointly fit. Bounded proportional
     // water-filling makes pointer resize direct: a 60/40 request resolves to
     // 60/40 unless a declared constraint actually prevents it.
-    values = allocateProportionally(
+    values = proportionalAllocator(
       active,
       contentSize,
       lowerFor,
@@ -378,7 +392,14 @@ export function allocateAxis(
     values[lastIndex] = (values[lastIndex] ?? 0) + floatingDelta;
   }
 
-  const activeSizes = roundConserving(values, active, contentSize, minViolated, maxViolated);
+  const activeSizes = roundConserving(
+    values,
+    active,
+    contentSize,
+    minViolated,
+    maxViolated,
+    residualFor,
+  );
   const sizes = Array.from({ length: items.length }, () => 0);
   active.forEach((item, index) => {
     sizes[item.index] = activeSizes[index] ?? 0;

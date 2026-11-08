@@ -14,7 +14,7 @@ import {
   type WorkspaceSnapshot,
 } from "@panefold/model";
 
-export const NORMALIZED_WEIGHT_TOTAL = 1_000_000;
+export { NORMALIZED_SPLIT_WEIGHT_TOTAL as NORMALIZED_WEIGHT_TOTAL } from "@panefold/model";
 
 /** Stable UTF-16 code-unit ordering; independent of host locale and ICU data. */
 export function compareCanonicalStrings(left: string, right: string): number {

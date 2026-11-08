@@ -42,6 +42,16 @@ Read the exact [WorkspaceSurfaceProps](../../packages/react/src/WorkspaceSurface
 
 `createWorkspaceRuntime`, `WorkspaceRuntimeProvider`, `WorkspaceSurface`, `useWorkspaceSnapshot`, `useWorkspaceProjection` and `solveLayout` are package exports.
 
+For custom layout solvers, `@panefold/geometry` exports `createAxisResizePlan`,
+`getAxisResizeBounds` and `resizeAxis`. Attach a plan to `ResolvedSplitter.resize` to give the React
+renderer pixel-based adjacent resizing and verified keyboard limits. Changed layouts from
+`resizeAxis` use positive canonical weights; unchanged requests preserve the existing weights.
+Preview and commit those same weights. Integer pixels and finite canonical weight precision can
+leave gaps between attainable sizes. Extreme numeric layouts use a bounded search for the closest
+verified state; it does not exhaustively enumerate every representable allocation. The shared
+`normalizeSplitWeights` helper lives in `@panefold/model`; the kernel's existing `normalizeWeights`
+export remains available.
+
 `useWorkspaceProjection(selector, isEqual?)` subscribes to a selected snapshot value. The optional
 equality check defaults to `Object.is`; equal selections keep their previous identity and do not
 trigger a render from the subscription. Use `useWorkspaceSnapshot()` when a component needs the

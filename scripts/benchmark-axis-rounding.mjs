@@ -5,7 +5,11 @@ import {
   solveLayout,
 } from "../packages/geometry/dist/index.js";
 import { createWorkspaceSnapshot, groupId, nodeId } from "../packages/model/dist/index.js";
-import { baselineRef, loadBaselineGeometry } from "./benchmarks/baseline-geometry.mjs";
+import {
+  assertLayoutGeometry,
+  baselineRef,
+  loadBaselineGeometry,
+} from "./benchmarks/baseline-geometry.mjs";
 import { pairedBenchmark, reportBenchmarks } from "./benchmarks/paired.mjs";
 
 const original = await loadBaselineGeometry("allocate-axis");
@@ -65,8 +69,8 @@ measure(
   [100, 201, 303, 801],
   4,
 );
-// Both solvers use the same current group constraint callback, isolating the
-// allocator change from the independently benchmarked group-scan improvement.
+// Both solvers use the same current group constraint callback. Candidate full
+// solves also capture resize plans, whose overhead is included in the timings.
 for (const count of [2, 8, 32]) {
   const groups = Array.from({ length: count }, (_, index) => ({
     id: groupId(`g:${index}`),
@@ -95,7 +99,7 @@ for (const count of [2, 8, 32]) {
   }));
   const options = { resolveGroupConstraints: defaultGroupConstraints };
   for (const rect of rects)
-    assert.deepEqual(
+    assertLayoutGeometry(
       solveLayout(snapshot, nodeId("root"), rect, options),
       originalLayout.solveLayout(snapshot, nodeId("root"), rect, options),
     );
@@ -110,5 +114,6 @@ for (const count of [2, 8, 32]) {
 }
 reportBenchmarks(results, {
   baseline: baselineRef,
-  comparison: "Pinned baseline allocation, identical group constraint callback in both full solves",
+  comparison:
+    "Pinned baseline allocation; identical group constraint callback in both full solves. Candidate full solves additionally capture resize plans; all shared geometry is checked.",
 });

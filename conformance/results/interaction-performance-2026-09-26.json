@@ -21,24 +21,29 @@
     "maximum": 16.8,
     "mean": 16.666,
     "median": 16.7,
-    "p95": 16.8,
+    "p95": 16.7,
     "p99": 16.8
   },
   "rawFrameDeltasMs": [
-    16.7, 16.7, 16.6, 16.7, 16.7, 16.7, 16.6, 16.6, 16.7, 16.7, 16.7, 16.7, 16.6, 16.6, 16.7, 16.7,
-    16.7, 16.6, 16.7, 16.7, 16.6, 16.7, 16.6, 16.8, 16.6, 16.7, 16.6, 16.7, 16.7, 16.7, 16.6, 16.7,
-    16.6, 16.7, 16.6, 16.7, 16.7, 16.7, 16.6, 16.7, 16.7, 16.6, 16.7, 16.7, 16.6, 16.7, 16.7, 16.6,
-    16.7, 16.6, 16.7, 16.7, 16.7, 16.6, 16.6, 16.7, 16.7, 16.7, 16.6, 16.8, 16.6, 16.7, 16.6, 16.7,
-    16.6, 16.7, 16.7, 16.6, 16.7, 16.6, 16.7, 16.7, 16.7, 16.6, 16.7, 16.6, 16.7, 16.7, 16.6, 16.8,
-    16.6, 16.7, 16.6, 16.7, 16.7, 16.6, 16.7, 16.7, 16.6, 16.7, 16.6, 16.8, 16.6, 16.6, 16.7, 16.7,
-    16.6, 16.8, 16.6, 16.7, 16.6, 16.6, 16.7, 16.7, 16.7, 16.6, 16.7, 16.7, 16.6, 16.7, 16.7, 16.7,
-    16.6, 16.7, 16.7, 16.6, 16.6, 16.8, 16.6, 16.6, 16.7, 16.7, 16.6, 16.8, 16.6, 16.7, 16.6, 16.7,
-    16.7, 16.6, 16.7, 16.7, 16.6, 16.7, 16.7, 16.6, 16.7, 16.6, 16.7, 16.6, 16.8, 16.7, 16.6, 16.6,
-    16.8, 16.6, 16.7, 16.7, 16.6, 16.6, 16.7, 16.7, 16.6, 16.7, 16.6, 16.8, 16.7, 16.5, 16.7, 16.8,
-    16.6, 16.6, 16.7, 16.6, 16.8, 16.6, 16.7, 16.7, 16.6, 16.7, 16.6, 16.7, 16.7, 16.6, 16.7, 16.6,
-    16.7, 16.7, 16.6
+    16.7, 16.6, 16.7, 16.6, 16.7, 16.7, 16.7, 16.6, 16.7, 16.7, 16.6, 16.7, 16.6, 16.8, 16.6, 16.6,
+    16.7, 16.7, 16.6, 16.7, 16.7, 16.7, 16.6, 16.7, 16.6, 16.7, 16.6, 16.8, 16.6, 16.6, 16.8, 16.6,
+    16.7, 16.6, 16.7, 16.7, 16.7, 16.6, 16.7, 16.6, 16.7, 16.7, 16.6, 16.7, 16.6, 16.7, 16.7, 16.7,
+    16.7, 16.6, 16.6, 16.7, 16.7, 16.7, 16.6, 16.7, 16.7, 16.6, 16.7, 16.6, 16.7, 16.7, 16.6, 16.7,
+    16.7, 16.7, 16.6, 16.7, 16.6, 16.7, 16.6, 16.7, 16.7, 16.7, 16.6, 16.7, 16.7, 16.7, 16.6, 16.7,
+    16.7, 16.6, 16.7, 16.6, 16.7, 16.6, 16.7, 16.7, 16.7, 16.6, 16.7, 16.7, 16.6, 16.7, 16.7, 16.7,
+    16.6, 16.7, 16.6, 16.7, 16.6, 16.8, 16.6, 16.7, 16.6, 16.7, 16.6, 16.8, 16.6, 16.7, 16.6, 16.6,
+    16.7, 16.7, 16.7, 16.6, 16.7, 16.7, 16.6, 16.7, 16.7, 16.6, 16.7, 16.6, 16.7, 16.7, 16.7, 16.6,
+    16.7, 16.6, 16.8, 16.6, 16.6, 16.7, 16.7, 16.7, 16.6, 16.7, 16.6, 16.8, 16.6, 16.6, 16.7, 16.7,
+    16.7, 16.6, 16.7, 16.6, 16.7, 16.7, 16.7, 16.6, 16.7, 16.7, 16.7, 16.5, 16.7, 16.7, 16.7, 16.6,
+    16.7, 16.7, 16.6, 16.7, 16.7, 16.6, 16.7, 16.7, 16.6, 16.7, 16.7, 16.7, 16.6, 16.7, 16.7, 16.6,
+    16.6, 16.7, 16.7
   ],
-  "longTasks": [],
+  "longTasks": [
+    {
+      "startTime": 162.60000000000582,
+      "duration": 61
+    }
+  ],
   "baseline": {
     "schemaVersion": 1,
     "profile": "compact-react-chromium-desktop",
@@ -48,7 +53,7 @@
     "longTaskMaximumCount": 12,
     "minimumSamples": 120
   },
-  "producedAt": "2026-11-08T13:05:31.853Z",
+  "producedAt": "2026-11-08T14:43:13.214Z",
   "nodeSmoke": {
     "schemaVersion": 1,
     "environment": {
@@ -60,20 +65,20 @@
     },
     "kernel": {
       "iterations": 10000,
-      "elapsedMs": 1177.19
+      "elapsedMs": 1195.28
     },
     "geometry": {
       "iterations": 100000,
-      "elapsedMs": 187.76
+      "elapsedMs": 209.15
     },
     "reorderProfiles": [
       {
         "panelCount": 50,
         "warmupCount": 250,
         "sampleCount": 2000,
-        "medianMs": 0.1767,
-        "p95Ms": 0.2671,
-        "p99Ms": 0.3235,
+        "medianMs": 0.186,
+        "p95Ms": 0.2842,
+        "p99Ms": 0.3591,
         "designTargetMs": 1,
         "withinDesignTargetOnThisMachine": true,
         "invariantViolations": 0
@@ -82,9 +87,9 @@
         "panelCount": 500,
         "warmupCount": 100,
         "sampleCount": 1000,
-        "medianMs": 1.7288,
-        "p95Ms": 1.8737,
-        "p99Ms": 2.375,
+        "medianMs": 1.7691,
+        "p95Ms": 2.0061,
+        "p99Ms": 4.1442,
         "designTargetMs": 5,
         "withinDesignTargetOnThisMachine": true,
         "invariantViolations": 0
@@ -94,30 +99,30 @@
       {
         "nodeCount": 100,
         "sampleCount": 10000,
-        "elapsedMs": 29.64,
-        "meanMicroseconds": 2.964
+        "elapsedMs": 29.22,
+        "meanMicroseconds": 2.922
       },
       {
         "nodeCount": 500,
         "sampleCount": 10000,
-        "elapsedMs": 151.48,
-        "meanMicroseconds": 15.148
+        "elapsedMs": 154.95,
+        "meanMicroseconds": 15.495
       },
       {
         "nodeCount": 1000,
         "sampleCount": 10000,
-        "elapsedMs": 315.08,
-        "meanMicroseconds": 31.508
+        "elapsedMs": 323.93,
+        "meanMicroseconds": 32.393
       }
     ],
-    "totalElapsedMs": 4252.02,
+    "totalElapsedMs": 4430.14,
     "finalRevision": "10000",
     "invariantViolations": 0
   },
   "rawReport": {
     "path": "artifacts/preview-browser.json",
-    "sha256": "1bb6f8b8f3ca6c3139c14fc9f57ae2ba096a828707193769ece1b87ae2e62984",
-    "runUrl": "https://github.com/natanelia/panefold/actions/runs/42483022797",
+    "sha256": "7b37d4bc90f8f3b235c3a6fb04a4788a3e2988a81420f9694876cd1c6d8c7985",
+    "runUrl": "https://github.com/natanelia/panefold/actions/runs/42490890707",
     "artifact": "preview-executed-evidence"
   },
   "sourceDigests": {
@@ -144,7 +149,7 @@
     "e2e/performance-baseline.json": "128b4c7dc2c7fc03372224828417f675b279359ebbe9bab7408b172ad76b48a9",
     "e2e/performance.spec.ts": "2bbc7b6cb40fd2ad97ba33824b5b8a0a3cf43a82ce638e432f13d29c8db164f3",
     "e2e/scaled-coordinates.spec.ts": "5a086a41e1494cca8ca29f6d3d2acdc9dae5df138e07ee16f492bc37136d0630",
-    "e2e/splitter-accessibility.spec.ts": "e2ff2c3b967888397f230620d362001f4d6f5a25b637c3481b6db0b036dc4c74",
+    "e2e/splitter-accessibility.spec.ts": "a444a95b1ce7f3345f476d888a86a0d6b5310f8d47bd43990d89c1ea91536ea3",
     "e2e/touch-helpers.ts": "bf7072e192e7395fb26f23d2f172669a8790063f26c35a8442eb1d2c1d77c511",
     "e2e/touch-layout.spec.ts": "15a09005c8bcc752b1520d30b619c257912a60fa518066b5392a0c9853dc8eef",
     "e2e/touch-playground-operations.spec.ts": "d594a5a80b176d7be8c721d13546aede0b69e7ce72dea879d59498dc69123d5b",
@@ -154,11 +159,22 @@
     "packages/ecosystem/src/index.ts": "ea8972723e8689a15ecd3e18d221f47ee9c7a1d37968ce07ce6e03b455b10621",
     "packages/ecosystem/src/panel-context.ts": "1009cbbb01d9ee811d7bd42703e0b5c4c1b9d6aa2a5051c3c379ccb497fd54d0",
     "packages/ecosystem/test/panel-context.test.ts": "7ca939dfeb54736705ada46eb62f56b62031a4d7d803725d47a3242410653196",
+    "packages/geometry/src/allocate-axis.ts": "0b7a6f7e021ad9d739aee403bb4c9b6aefea842606b4cf16054a031da1e83ed2",
     "packages/geometry/src/hit-test.ts": "2da9ca42d97c135f37d599bbaebed8f758343fa4e52fd647c05a4b179340c121",
+    "packages/geometry/src/index.ts": "6d365e111dc67dd1f2beae95d27985cf4c2aa43dc0023d2bef8a198747ecc87f",
     "packages/geometry/src/invalidation.ts": "9d42bd81ccfc82cecac5d0a200bd889ae49c164acf5db44eaebdb445acff7906",
+    "packages/geometry/src/resize-axis.ts": "7a1b1281eea8d5ce61fd77169614589775e914860a57031f05864bb0d0ad2feb",
+    "packages/geometry/src/solve-layout.ts": "0114df31e8d6059e9a06bf6a7d212c64731d4f8b314f3fa308154a90941bb7e6",
+    "packages/geometry/src/types.ts": "b4e8f5116d33cd7875a7605bb5c38150f1f7d594fa212ff5eb335a502567f74a",
+    "packages/geometry/test/bounded-rounding.test.ts": "9a259f2fd6f3b5671c2d62a70c752422712a86cada16f0137aa3636ea5bc62a0",
+    "packages/geometry/test/bounded-waterfill.test.ts": "59daf31fccd47add659db0d962d3789b2bafb9ed5d79c0c645bf81e66ec88cfd",
+    "packages/geometry/test/reference/allocate-axis.ts": "93e01f42b3982ea54785fcab6636777b8e6e4d9b7feb89545ff1199e402f1b76",
+    "packages/geometry/test/resize-axis.test.ts": "534d8af5424480a13f83b1899ad57b2823d059a9b056e58857bba092d946cd02",
+    "packages/geometry/test/rounding-compatibility.test.ts": "cd320f634822fefe70ab3d4933c321cb9bb8e793c36b8efed5014f5428588489",
     "packages/kernel-optimized/src/indexes.ts": "c6d962626b3c0cac8d7d89f156aed383b1e313a201f7c3ce5f228d97959ac0a8",
+    "packages/model/src/split-weights.ts": "05695900c92d98b016c21adae3e17ca20ee97134f10e1b6a3d91c0a35cf19ea6",
     "packages/motion/src/coordinator.ts": "50eff7dd6a1b8f6433ac3f5bfc5f8d74b99a501e43e712ccb3e1a82520574c6d",
-    "packages/react/src/WorkspaceSurface.tsx": "f0d86236c2c926ea5c8536761def8c86235a3c7f8db9a23d2afa7aa8e958592a",
+    "packages/react/src/WorkspaceSurface.tsx": "9e7139cb97d9333de4bb44d87f0562a72b399404452abf051969abbaea367d9c",
     "packages/react/src/client-coordinates.ts": "f70aaae0922037939b3f21583cfceaf34289d2d811654991da775ac23241411e",
     "packages/react/src/drop-modifiers.ts": "542583898dfa7d121b0d91f51171df8a3db47a8e749422437da903372a60c6ee",
     "packages/react/src/drop-preview.ts": "7c84edb3ba5ee124e207ca6fc5fb3f2a8b8e07178d90f11b96a68504b4402de7",
@@ -178,6 +194,7 @@
     "packages/react/src/styles.css": "9e471d644146b497b56569a9351d63f5a028beb566255472c169301a2cc5146d",
     "packages/react/src/tab-insertion.ts": "e611ecfe7cb4b0b9fb7e748a747f2584e35dbaa72111a907008f6dc6b11f1670",
     "packages/react/test/client-coordinates.test.ts": "11492358f3ecc0ad0b0530abc11e6237e20fb60ce7132d7bead8625467a45389",
+    "packages/react/test/constrained-resize.test.tsx": "9a261e6135f34510627296e9545ae3bbecab5e7c8ca4805d1b6dec0b426df446",
     "packages/react/test/drag-parity.test.ts": "1f0bca650b8647cf7473639a0afa59839bdd60327892e428f30a98642cd67443",
     "packages/react/test/drop-preview.test.ts": "bdc1de685dce3a9bc5c073cf9fb7f2325de07251a8f71d4b318f09990c22211c",
     "packages/react/test/drop-target.test.ts": "2f28dc5a482cb6cc12fdbafb4e29ca3fba2a424dd1a5e9f822e9d95f4e9fc0a6",
@@ -186,11 +203,12 @@
     "packages/react/test/model-fixture.ts": "9fd3c285f89007849386489fd52353a50bceb310125c17d65fc6e32dcae70a58",
     "packages/react/test/model-surface.test.tsx": "70b3e839ae10561d1c346d7e6e7037e90bf428a49e239e9f71d4afcb3ae7ba95",
     "packages/react/test/panel-context.test.tsx": "abf4141ff6dec4ee77e1bf6f3e215b141d4ddfa4d8d4340035be3b7d21ac4a63",
+    "packages/react/test/resize-policy.test.tsx": "f5a57b9914dc6e2b74fcb75bdbf83c4ea4dd71394b4b115c1ef6f850b7c42701",
     "packages/react/test/tab-insertion.test.ts": "5c65997257abdca9b2605b13ed733bc9670991b962cd3096674d503f2ed77960",
     "packages/react/test/touch-drop-policy.test.ts": "b58dba1e8cc540085ddde1e90538ccecbaaaef9a1fa519331d71399293d538f5",
     "pnpm-lock.yaml": "6f188132c287b0b7a559b11ac5d247f28252d473cee2a6abd3468d64f92959ba",
     "scripts/performance-smoke.mjs": "fc0d8ce5df966b75312b5d9fae367e07b5ce4f8215afa724d03a7a6cb17fdc95",
-    "scripts/record-preview-evidence.mjs": "a5871ec4a3ed2399c9415bdcc5ce074a19989a16a7ea4e74696b33bbd1e0cea2",
+    "scripts/record-preview-evidence.mjs": "2c64a646d148759762d07257f79dbeb39b7d584d980191931db68d63e3e3538e",
     "vitest.config.ts": "6f743b2639e8e091bdc454a4aaa6336a538b889e70af8814ee7d1f27c7a8769e"
   },
   "limitations": [

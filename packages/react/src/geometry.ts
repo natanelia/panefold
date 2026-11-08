@@ -1,4 +1,4 @@
-import { allocateAxis } from "@panefold/geometry";
+import { allocateAxis, createAxisResizePlan } from "@panefold/geometry";
 import type {
   GeometryDiagnostic,
   LogicalAxis,
@@ -86,15 +86,14 @@ export function solveWorkspaceProjectionLayout(
       });
     }
     const collapsed = new Set(override?.collapsedChildIds ?? []);
-    const allocation = allocateAxis(
-      node.childIds.map((childId, index) => ({
-        key: childId,
-        weight: positiveWeight(weights[index]),
-        collapsed: collapsed.has(childId),
-      })),
-      node.axis === "inline" ? rect.inlineSize : rect.blockSize,
-      splitterSize,
-    );
+    const items = node.childIds.map((childId, index) => ({
+      key: childId,
+      weight: positiveWeight(weights[index]),
+      collapsed: collapsed.has(childId),
+    }));
+    const availableSize = node.axis === "inline" ? rect.inlineSize : rect.blockSize;
+    const allocation = allocateAxis(items, availableSize, splitterSize);
+    const resizePlan = createAxisResizePlan(items, availableSize, splitterSize, allocation);
     diagnostics.push(...allocation.diagnostics.map((item) => ({ ...item, nodeId: node.id })));
 
     const activePositionByIndex = new Map(
@@ -117,7 +116,8 @@ export function solveWorkspaceProjectionLayout(
 
       if (activePosition < allocation.activeIndices.length - 1) {
         const afterIndex = allocation.activeIndices[activePosition + 1];
-        const afterNodeId = afterIndex === undefined ? undefined : node.childIds[afterIndex];
+        if (afterIndex === undefined) return;
+        const afterNodeId = node.childIds[afterIndex];
         if (afterNodeId === undefined) return;
         const size = allocation.splitterSizes[activePosition] ?? 0;
         splitters.push({
@@ -127,6 +127,7 @@ export function solveWorkspaceProjectionLayout(
           beforeNodeId: childId,
           afterNodeId,
           rect: rectAlongAxis(rect, node.axis, cursor, size),
+          resize: { plan: resizePlan, beforeIndex: childIndex, afterIndex },
         });
         cursor += size;
       }
