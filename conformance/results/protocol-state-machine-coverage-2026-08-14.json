@@ -1009,10 +1009,11 @@
     "packages/model/src/entities.ts": "2f8461c6ced824a4d99258dfc3f35e983161cef641779b0d4bcaa72e04d0fd2b",
     "packages/model/src/factories.ts": "efb2d00d14f7f93fc249daae477a22e1b3dea8541d9cffc1cb2e1e04651c6b98",
     "packages/model/src/ids.ts": "cbf1947c1c8ed51447a6e3b5d77b04734e0b6b59e588099f442b99c3bde953c1",
-    "packages/model/src/index.ts": "894f6d22e3e7612e4ae3ce186e244452247d6111196270901edfbd3544684f0a",
+    "packages/model/src/index.ts": "be7cef88f8bf665374cfdca6a72b146f20d6861da1649a41f535df5c424861b7",
     "packages/model/src/json.ts": "71b1008440a2511a701e7ff4484e0373fd0f0dfac78a39eb099da31f0ee389f5",
     "packages/model/src/panel-registry.ts": "0a84a2ea260b55bf2c8efaa8462aae4e698045865f533d6e937a93ab8af9af5c",
     "packages/model/src/results.ts": "f66a7e790365153a33f72df22e7961890d74f0e1723cf9ed2f13fcdd58c50fec",
+    "packages/model/src/split-weights.ts": "05695900c92d98b016c21adae3e17ca20ee97134f10e1b6a3d91c0a35cf19ea6",
     "packages/protocol/src/catalog.ts": "8f9a79fa206045cf16903e6727892517796a16dee4e13998dd828c1d36b1121a",
     "packages/protocol/src/coverage-contract.ts": "539dc24685d0eea7df47be5e6cfd9333b1a1fe4dfb73153d5ee53e4846fc7f61",
     "packages/protocol/src/index.ts": "8181f9009c395ff6c9f0f3fde9f34577558e8978f66c08e384174247d8a3ffab",
@@ -1042,7 +1043,7 @@
     "scripts/protocol-coverage-lib.mjs": "a6172fbdc67ad48298c7866f47ff25895d255dcbb47976f65e7098825a758f8e",
     "scripts/run-protocol-coverage.mjs": "51345937f17b41822986377ed74a6b6f52a88dcc1ac1482fc1580af9a8a0eb9a",
     "scripts/verify-protocol-coverage.d.mts": "353a5ec6ec45b69ccdac52b7f1d4cc5d308e9360fa7627241c178b52684643cf",
-    "scripts/verify-protocol-coverage.mjs": "e6659c6d19bb29abd6ba2b9942639a9b9b3e83a2535ccf80e2d7a296b6805fc9",
+    "scripts/verify-protocol-coverage.mjs": "4dfe1a18a090b39a352190eff73b8c12949c0853cce3a6f2ef7f1c374a82d1ef",
     "pnpm-lock.yaml": "6f188132c287b0b7a559b11ac5d247f28252d473cee2a6abd3468d64f92959ba"
   },
   "limitations": [

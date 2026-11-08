@@ -147,6 +147,7 @@ export const PROTOCOL_COVERAGE_SOURCE_DIGEST_PATHS = Object.freeze([
   "packages/model/src/json.ts",
   "packages/model/src/panel-registry.ts",
   "packages/model/src/results.ts",
+  "packages/model/src/split-weights.ts",
   "packages/protocol/src/catalog.ts",
   "packages/protocol/src/coverage-contract.ts",
   "packages/protocol/src/index.ts",

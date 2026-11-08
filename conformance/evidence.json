@@ -1109,7 +1109,7 @@
       "verificationClass": "code-verifiable",
       "artifactRole": "result",
       "uri": "repo://conformance/results/protocol-state-machine-coverage-2026-08-14.json",
-      "sha256": "3798027c9629179700edd00646574e03d67318bb80ae661d33ca7328673d8a0a",
+      "sha256": "071489b3d7772ab47ce079dadba9691ac8d14131f0ec8b52956ddff0eabedfbd",
       "producedAt": "2026-08-14T01:12:00Z",
       "requirementIds": [
         "TST-003"
