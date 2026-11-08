@@ -39,7 +39,13 @@ Read the exact [WorkspaceSurfaceProps](../../packages/react/src/WorkspaceSurface
 
 ## Public APIs versus reference helpers
 
-`createWorkspaceRuntime`, `WorkspaceRuntimeProvider`, `WorkspaceSurface`, `useWorkspaceSnapshot` and `solveLayout` are package exports.
+`createWorkspaceRuntime`, `WorkspaceRuntimeProvider`, `WorkspaceSurface`, `useWorkspaceSnapshot`, `useWorkspaceProjection` and `solveLayout` are package exports.
+
+`useWorkspaceProjection(selector, isEqual?)` subscribes to a selected snapshot value. The optional
+equality check defaults to `Object.is`; equal selections keep their previous identity and do not
+trigger a render from the subscription. Use `useWorkspaceSnapshot()` when a component needs the
+whole snapshot. See [React integration](react.md#subscribe-to-the-values-a-component-needs) for an
+object-selection example and the requirements for selectors, equality checks and server rendering.
 
 `projectWorkspace`, `createDemoCommands`, `openDemoWorkspaceSession` and `DemoExternalPanelController` live in `apps/demo/src`. They demonstrate application-owned policy and glue. They are **not** imports from a published Panefold package. Start with them to understand the wiring; rename and adapt them as your application takes ownership.
 

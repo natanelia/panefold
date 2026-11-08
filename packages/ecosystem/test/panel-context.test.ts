@@ -164,6 +164,26 @@ test("owns and deeply freezes payloads without freezing caller data", () => {
   assert.ok(!Object.isFrozen(value));
 });
 
+test("rejects array metadata that would bypass payload limits without changing context", () => {
+  const a = hub().connect({ panelId: "a", groupId: "A" });
+  const before = a.getSnapshot();
+  const tags = Object.assign(["safe"], { extra: "x".repeat(4_097) });
+  assert.deepEqual(a.publish("selection", { entityId: "road-1", tags }), {
+    status: "rejected",
+    reason: "invalid-value",
+  });
+  assert.equal(a.getSnapshot(), before);
+
+  const cleanTags = ["safe"];
+  const result = a.publish("selection", { entityId: "road-1", tags: cleanTags });
+  assert.equal(result.status, "published");
+  const event = a.getSnapshot().contexts.selection;
+  assert.equal(event?.sequence, 1);
+  cleanTags.push("caller change");
+  assert.deepEqual(event?.value?.tags, ["safe"]);
+  assert.ok(Object.isFrozen(event?.value?.tags));
+});
+
 test("suppresses async echoes, including events older than the current selection", async () => {
   const source = hub();
   const a = source.connect({ panelId: "a", groupId: "A" });

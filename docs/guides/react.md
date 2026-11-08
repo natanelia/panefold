@@ -49,6 +49,50 @@ Create one runtime per workspace session, not one per render. Keep the panel reg
 
 A registry entry is `{ render: Component, icon?: ReactNode }`, keyed by a panel's **type**, not its ID. The renderer passes `panel`, `selected`, `active`, `lifecycle` and lifecycle cancellation information to the component.
 
+## Subscribe to the values a component needs
+
+`useWorkspaceSnapshot()` updates a component whenever the runtime publishes a new snapshot.
+For a component that only needs part of that snapshot, use
+`useWorkspaceProjection(selector, isEqual?)`. It compares the selected value with `Object.is` by
+default, so an unrelated workspace change does not trigger that subscription's component render.
+Parent renders and the component's own state can still cause it to render.
+
+```tsx
+import { useWorkspaceProjection } from "@panefold/react";
+
+type AppSnapshot = {
+  readonly revision: number;
+  readonly status: { readonly pending: number; readonly failed: number };
+};
+
+function SaveStatus() {
+  const status = useWorkspaceProjection(
+    (snapshot: AppSnapshot) => ({
+      pending: snapshot.status.pending,
+      failed: snapshot.status.failed,
+    }),
+    (previous, next) => previous.pending === next.pending && previous.failed === next.failed,
+  );
+  return <output>{`${status.pending} pending, ${status.failed} failed`}</output>;
+}
+```
+
+This example uses an application-defined snapshot; select the fields your runtime actually exposes.
+Selectors and equality checks must be pure. If a selector creates a new object or array, provide an
+equality check that compares all values the component uses, or return an existing immutable value.
+When two selections compare equal, the hook keeps the previous selected value. Inline selectors
+can capture current props, and changing a selector or runtime takes effect immediately.
+
+The hook uses React's `use-sync-external-store/with-selector` implementation so selection caching
+also works with interrupted rendering. Server rendering reads the provided runtime's snapshot
+without subscribing; initialize that runtime from the same snapshot when hydrating it.
+This changes React subscriptions only: workspace commands, history, persistence and temporary
+pointer previews keep their existing behavior.
+
+The [hook regression tests](../../packages/react/test/runtime-context.test.tsx) exercise 100 separate
+unrelated snapshot commits. A selected-value consumer does not rerender; a full-snapshot consumer
+receives all 100 updates. This is a render-count check, not an application frame-rate benchmark.
+
 ## Make geometry model-aware
 
 The optional `layoutSolver` bridge lets the renderer use constraints from the canonical model. The reference bridge calls `solveLayout(snapshot, nodeId(request.rootNodeId), request.bounds, options)`, forwarding splitter size and temporary split overrides. Omitting the model-aware bridge is not equivalent to enforcing all model constraints.

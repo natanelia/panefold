@@ -56,7 +56,7 @@ A useful acceptance test is to type an unsaved note, move it, float it, switch t
 
 Use `createPanelContextHub` from `@panefold/ecosystem` to share small, typed context values. A map, table and inspector can follow the same entity ID. The application still owns the entities and their data.
 
-Create a hub during session setup, not during React render. Each channel needs a pure runtime type guard. The hub validates bounded JSON data, copies it, and freezes it before delivery.
+Create a hub during session setup, not during React render. Each channel needs a pure runtime type guard. The hub validates bounded JSON data, copies it, and freezes it before delivery. Payloads use plain objects and dense arrays; extra array properties and symbol keys are rejected.
 
 ```ts
 import { createPanelContextHub } from "@panefold/ecosystem";
