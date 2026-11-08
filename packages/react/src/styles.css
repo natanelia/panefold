@@ -18,6 +18,8 @@
     --pf-tab-size: 34px;
     --pf-tab-inline-size: 148px;
     --pf-splitter-size: 6px;
+    --pf-splitter-hit-target-fine: 24px;
+    --pf-splitter-hit-target-coarse: 44px;
     --pf-motion-micro: 90ms;
     --pf-motion-structural: 200ms;
     color: var(--pf-text);
@@ -356,6 +358,7 @@
   }
 
   .pf-splitter {
+    --pf-splitter-hit-target: var(--pf-splitter-hit-target-fine);
     position: relative;
     z-index: 4;
     flex: 0 0 var(--pf-splitter-size);
@@ -375,7 +378,15 @@
   .pf-splitter::before {
     content: "";
     position: absolute;
-    inset: -6px;
+    inset: 0;
+  }
+
+  .pf-split[data-axis="inline"] > .pf-splitter::before {
+    inset-inline: min(0px, calc((var(--pf-splitter-size) - var(--pf-splitter-hit-target)) / 2));
+  }
+
+  .pf-split[data-axis="block"] > .pf-splitter::before {
+    inset-block: min(0px, calc((var(--pf-splitter-size) - var(--pf-splitter-hit-target)) / 2));
   }
 
   .pf-splitter-line {
@@ -383,6 +394,13 @@
     inset: 0;
     background: var(--pf-border);
     transition: background-color var(--pf-motion-micro);
+  }
+
+  .pf-resize-preview {
+    position: absolute;
+    pointer-events: none;
+    background: var(--pf-accent);
+    box-shadow: 0 0 0 1px color-mix(in srgb, var(--pf-accent) 45%, transparent);
   }
 
   .pf-splitter:is(:hover, :focus-visible) .pf-splitter-line {
@@ -1036,6 +1054,10 @@
   }
 
   @media (any-pointer: coarse) {
+    .pf-splitter {
+      --pf-splitter-hit-target: var(--pf-splitter-hit-target-coarse);
+    }
+
     .pf-workspace[data-panel-drop-enabled="true"] .pf-tab-drag-handle {
       display: inline-flex;
       flex: 0 0 44px;
@@ -1065,7 +1087,6 @@
     :where(.pf-workspace) {
       --pf-target-size: 44px;
       --pf-tab-size: 46px;
-      --pf-splitter-size: 10px;
     }
 
     .pf-tab-close,

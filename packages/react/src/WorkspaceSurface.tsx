@@ -78,6 +78,12 @@ import {
   surfaceLayoutBoundsForNode,
 } from "./panel-drop";
 import { useWorkspaceRuntime, useWorkspaceSnapshot } from "./runtime-context";
+import {
+  resolveSplitResizePreviewMode,
+  showSplitResizePreview,
+  type ResolvedResizePreviewMode,
+  type SplitResizePreview,
+} from "./resize-preview";
 import { resolveTabPresentation, tabOrientation } from "./tab-presentation";
 import type {
   WorkspaceCommandAdapter,
@@ -103,6 +109,7 @@ import type {
   WorkspaceProjection,
   WorkspaceProjector,
   WorkspaceRuntimeLike,
+  WorkspaceResizePreviewMode,
   WorkspaceResultInterpreter,
   WorkspaceSplitView,
   WorkspaceTabPresentation,
@@ -126,6 +133,12 @@ export interface WorkspaceSurfaceProps<TSnapshot, TCommand, TResult> {
   /** Deterministic logical bounds, primarily for embedded and test surfaces. */
   readonly layoutBounds?: LogicalRect;
   readonly splitterSize?: number;
+  /**
+   * Pointer resize presentation. Auto defers a split when its visible content
+   * requests deferred delivery; separator keeps content sizes fixed until release.
+   * Keyboard resizing always applies immediately.
+   */
+  readonly resizePreviewMode?: WorkspaceResizePreviewMode;
   /** Floating titlebar height in CSS pixels; shared by chrome and docking geometry. */
   readonly floatingTitlebarSize?: number;
   /**
@@ -249,6 +262,7 @@ function SurfaceRenderer<TSnapshot, TCommand, TResult>({
   layoutSolver,
   layoutBounds,
   splitterSize = 6,
+  resizePreviewMode = "auto",
   floatingTitlebarSize = 34,
   responsive = false,
   compactBreakpoint = 720,
@@ -300,6 +314,8 @@ function SurfaceRenderer<TSnapshot, TCommand, TResult>({
   const [internalCompactGroupId, setInternalCompactGroupId] = useState<string>();
   const [measuredBounds, setMeasuredBounds] = useState<LogicalRect>(ZERO_LOGICAL_RECT);
   const splitOverridesRef = useRef<Readonly<Record<string, SplitLayoutOverride>>>({});
+  const resizePreviewRef = useRef<HTMLDivElement>(null);
+  const activeResizePreviewRef = useRef<SplitResizePreview | undefined>(undefined);
   const splitPreviewRevisionRef = useRef(projection.revision);
   const effectiveMotion = motion === "productive" && systemReducedMotion ? "reduced" : motion;
   const logicalBounds = layoutBounds ?? measuredBounds;
@@ -417,19 +433,37 @@ function SurfaceRenderer<TSnapshot, TCommand, TResult>({
     [resolvedLayout.groupRects],
   );
 
+  const getResizePreviewMode = useCallback(
+    (splitId: string) =>
+      resolveSplitResizePreviewMode(
+        resizePreviewMode,
+        renderedProjection,
+        splitId,
+        visibleGroupIds,
+      ),
+    [renderedProjection, resizePreviewMode, visibleGroupIds],
+  );
+
   const previewSplit = useCallback(
-    (splitId: string, weights: readonly number[]) => {
+    (splitId: string, weights: readonly number[], preview: Omit<SplitResizePreview, "splitId">) => {
       const nextOverrides = {
         ...splitOverridesRef.current,
         [splitId]: { weights },
       };
       splitOverridesRef.current = nextOverrides;
       splitPreviewRevisionRef.current = projectionRef.current.revision;
-      const preview = solveResolvedLayout(nextOverrides);
-      applyResolvedLayoutPreview(rootRef.current, preview);
-      return preview;
+      const layout = solveResolvedLayout(nextOverrides);
+      const activePreview = { ...preview, splitId };
+      activeResizePreviewRef.current = activePreview;
+      if (preview.mode === "separator") {
+        showSplitResizePreview(resizePreviewRef.current, layout, activePreview, logicalBounds);
+      } else {
+        if (resizePreviewRef.current !== null) resizePreviewRef.current.hidden = true;
+        applyResolvedLayoutPreview(rootRef.current, layout);
+      }
+      return layout;
     },
-    [solveResolvedLayout],
+    [logicalBounds, solveResolvedLayout],
   );
 
   const clearSplitPreview = useCallback(
@@ -438,6 +472,10 @@ function SurfaceRenderer<TSnapshot, TCommand, TResult>({
       const nextOverrides = { ...splitOverridesRef.current };
       delete nextOverrides[splitId];
       splitOverridesRef.current = nextOverrides;
+      if (activeResizePreviewRef.current?.splitId === splitId) {
+        activeResizePreviewRef.current = undefined;
+        if (resizePreviewRef.current !== null) resizePreviewRef.current.hidden = true;
+      }
       if (restore) {
         applyResolvedLayoutPreview(rootRef.current, solveResolvedLayout(nextOverrides));
       }
@@ -446,13 +484,26 @@ function SurfaceRenderer<TSnapshot, TCommand, TResult>({
   );
 
   useLayoutEffect(() => {
+    if (Object.keys(splitOverridesRef.current).length === 0) return;
+    const activePreview = activeResizePreviewRef.current;
     if (
       splitPreviewRevisionRef.current !== projection.revision ||
-      Object.keys(splitOverridesRef.current).length === 0
+      (activePreview !== undefined &&
+        !resolvedLayout.splitters.some((item) => item.id === activePreview.splitterId))
     ) {
+      splitOverridesRef.current = EMPTY_SPLIT_OVERRIDES;
+      activeResizePreviewRef.current = undefined;
+      if (resizePreviewRef.current !== null) resizePreviewRef.current.hidden = true;
+      applyResolvedLayoutPreview(rootRef.current, resolvedLayout);
       return;
     }
-    applyResolvedLayoutPreview(rootRef.current, solveResolvedLayout(splitOverridesRef.current));
+    const layout = solveResolvedLayout(splitOverridesRef.current);
+    const preview = activeResizePreviewRef.current;
+    if (preview?.mode === "separator") {
+      showSplitResizePreview(resizePreviewRef.current, layout, preview, logicalBounds);
+    } else {
+      applyResolvedLayoutPreview(rootRef.current, layout);
+    }
   });
 
   const publishAnnouncement = useCallback(
@@ -758,16 +809,21 @@ function SurfaceRenderer<TSnapshot, TCommand, TResult>({
 
   const commitSplit = useCallback(
     (splitId: string, weights: readonly number[], origin: "keyboard" | "pointer") => {
-      const execution = dispatch(
-        commands.resizeSplit(splitId, weights),
-        messages.resizedWorkspacePanes(),
-        origin,
-      );
-      clearSplitPreview(
-        splitId,
-        execution.outcome.status !== "committed" && execution.outcome.status !== "queued",
-      );
-      return execution;
+      try {
+        const execution = dispatch(
+          commands.resizeSplit(splitId, weights),
+          messages.resizedWorkspacePanes(),
+          origin,
+        );
+        clearSplitPreview(
+          splitId,
+          execution.outcome.status !== "committed" && execution.outcome.status !== "queued",
+        );
+        return execution;
+      } catch (error) {
+        clearSplitPreview(splitId);
+        throw error;
+      }
     },
     [clearSplitPreview, commands, dispatch, messages],
   );
@@ -1195,6 +1251,7 @@ function SurfaceRenderer<TSnapshot, TCommand, TResult>({
             scheduler={scheduler}
             scheduleKey={surfaceScheduleKey}
             previewSplit={previewSplit}
+            getResizePreviewMode={getResizePreviewMode}
             commitSplit={commitSplit}
             clearSplitPreview={clearSplitPreview}
             dispatch={dispatch}
@@ -1367,6 +1424,7 @@ function SurfaceRenderer<TSnapshot, TCommand, TResult>({
                     scheduler={scheduler}
                     scheduleKey={`${surfaceScheduleKey}:${surface.id}`}
                     previewSplit={previewSplit}
+                    getResizePreviewMode={getResizePreviewMode}
                     commitSplit={commitSplit}
                     clearSplitPreview={clearSplitPreview}
                     dispatch={dispatch}
@@ -1403,6 +1461,13 @@ function SurfaceRenderer<TSnapshot, TCommand, TResult>({
       />
 
       <div className="pf-overlay-layer" data-workspace-layer="overlay">
+        <div
+          ref={resizePreviewRef}
+          className="pf-resize-preview"
+          data-workspace-resize-preview="true"
+          hidden
+          aria-hidden="true"
+        />
         <PanelDragOverlay overlayRef={panelDrag.overlayRef} />
         <GroupDragOverlay overlayRef={groupDrag.overlayRef} />
         {movePanelId !== undefined ? (
@@ -1628,7 +1693,12 @@ interface LayoutNodeProps<TCommand, TResult> {
   readonly projectionRevision: string;
   readonly scheduler: SurfaceFrameScheduler;
   readonly scheduleKey: string;
-  readonly previewSplit: (splitId: string, weights: readonly number[]) => ResolvedLayout;
+  readonly previewSplit: (
+    splitId: string,
+    weights: readonly number[],
+    preview: Omit<SplitResizePreview, "splitId">,
+  ) => ResolvedLayout;
+  readonly getResizePreviewMode: (splitId: string) => ResolvedResizePreviewMode;
   readonly commitSplit: (
     splitId: string,
     weights: readonly number[],
@@ -1717,16 +1787,24 @@ function SplitNode<TCommand, TResult>({
                 weights={weights}
                 direction={props.direction}
                 resolvedLayout={props.resolvedLayout}
+                primaryPaneId={splitChildId(props.domIdPrefix, precedingSplitter.beforeNodeId)}
                 projectionRevision={props.projectionRevision}
                 scheduler={props.scheduler}
                 scheduleKey={props.scheduleKey}
-                onPreview={(nextWeights) => props.previewSplit(split.id, nextWeights)}
+                onPreview={(nextWeights, mode = "live") =>
+                  props.previewSplit(split.id, nextWeights, {
+                    mode,
+                    splitterId: precedingSplitter.id,
+                  })
+                }
+                getPreviewMode={() => props.getResizePreviewMode(split.id)}
                 onCommit={(nextWeights, origin) => props.commitSplit(split.id, nextWeights, origin)}
                 onCancel={() => props.clearSplitPreview(split.id)}
                 messages={props.messages}
               />
             ) : null}
             <div
+              id={splitChildId(props.domIdPrefix, childId)}
               className="pf-split-child"
               data-workspace-split-child={childId}
               data-empty-group-descendant={String(subtreeHasEmptyGroup(props.projection, child.id))}
@@ -1750,6 +1828,7 @@ function SplitNode<TCommand, TResult>({
 }
 
 interface SplitterProps {
+  readonly primaryPaneId: string;
   readonly split: WorkspaceSplitView;
   readonly splitter: ResolvedSplitter;
   readonly beforeIndex: number;
@@ -1760,7 +1839,11 @@ interface SplitterProps {
   readonly projectionRevision: string;
   readonly scheduler: SurfaceFrameScheduler;
   readonly scheduleKey: string;
-  readonly onPreview: (weights: readonly number[]) => ResolvedLayout;
+  readonly onPreview: (
+    weights: readonly number[],
+    mode?: ResolvedResizePreviewMode,
+  ) => ResolvedLayout;
+  readonly getPreviewMode: () => ResolvedResizePreviewMode;
   readonly onCommit: (
     weights: readonly number[],
     origin: "keyboard" | "pointer",
@@ -1770,6 +1853,7 @@ interface SplitterProps {
 }
 
 function Splitter({
+  primaryPaneId,
   split,
   splitter,
   beforeIndex,
@@ -1781,6 +1865,7 @@ function Splitter({
   scheduler,
   scheduleKey,
   onPreview,
+  getPreviewMode,
   onCommit,
   onCancel,
   messages,
@@ -1790,6 +1875,7 @@ function Splitter({
   const actorRef = useRef<ResizeActor | null>(null);
   const sessionRef = useRef<PointerResizeSession | null>(null);
   const handledRevisionRef = useRef(projectionRevision);
+  const handledLayoutRef = useRef(resolvedLayout);
   const beforeSize = axisSize(resolvedLayout.nodeRects[splitter.beforeNodeId], split.axis);
   const afterSize = axisSize(resolvedLayout.nodeRects[splitter.afterNodeId], split.axis);
   const pairSize = beforeSize + afterSize;
@@ -1843,8 +1929,13 @@ function Splitter({
   );
 
   useEffect(() => {
-    if (handledRevisionRef.current === projectionRevision) return;
+    if (
+      handledRevisionRef.current === projectionRevision &&
+      handledLayoutRef.current === resolvedLayout
+    )
+      return;
     handledRevisionRef.current = projectionRevision;
+    handledLayoutRef.current = resolvedLayout;
     const actor = actorRef.current;
     if (actor === null) return;
     scheduler.cancel(scheduleKey);
@@ -1858,7 +1949,7 @@ function Splitter({
     }
     if (state === "cancelling") send(actor, { type: "RETURNED" });
     disposeActor(actor);
-  }, [disposeActor, onCancel, projectionRevision, scheduleKey, scheduler, send]);
+  }, [disposeActor, onCancel, projectionRevision, resolvedLayout, scheduleKey, scheduler, send]);
 
   const updatePair = useCallback(
     (
@@ -1902,6 +1993,7 @@ function Splitter({
       afterSize,
       weights: [...weights],
       latest: [...weights],
+      previewMode: getPreviewMode(),
       pending: undefined,
       captureElement: event.currentTarget,
     };
@@ -1912,6 +2004,7 @@ function Splitter({
       position: pointerSample(event),
       baseRevision: safeRevision(projectionRevision),
     });
+    event.currentTarget.focus({ preventScroll: true });
     event.currentTarget.setPointerCapture?.(event.pointerId);
     event.preventDefault();
   };
@@ -1927,7 +2020,7 @@ function Splitter({
     session: PointerResizeSession,
     requestedWeights: readonly number[],
   ) => {
-    const preview = onPreview(requestedWeights);
+    const preview = onPreview(requestedWeights, session.previewMode);
     const position = splitterPosition(preview, splitter.id);
     if (position !== undefined && String(session.actor.getSnapshot().value) === "resizing") {
       session.latest = solvedPairWeights(split, requestedWeights, preview, beforeIndex, afterIndex);
@@ -2031,6 +2124,10 @@ function Splitter({
       return;
     }
     if (actorRef.current !== null) return;
+    if (event.key === "F6" && !event.altKey && !event.ctrlKey && !event.metaKey) {
+      if (focusNextSplitter(event.currentTarget, event.shiftKey ? -1 : 1)) event.preventDefault();
+      return;
+    }
     const negativeKeys = split.axis === "inline" ? ["ArrowLeft"] : ["ArrowUp"];
     const positiveKeys = split.axis === "inline" ? ["ArrowRight"] : ["ArrowDown"];
     let delta = 0;
@@ -2082,11 +2179,12 @@ function Splitter({
       role="separator"
       tabIndex={0}
       aria-label={messages.resizeAdjacentPanes()}
+      aria-controls={primaryPaneId}
       aria-orientation={split.axis === "inline" ? "vertical" : "horizontal"}
       aria-valuemin={0}
       aria-valuemax={100}
-      aria-valuenow={Math.round(value)}
-      aria-valuetext={messages.primaryPanePercent({ percent: Math.round(value) })}
+      aria-valuenow={roundPercent(value)}
+      aria-valuetext={messages.primaryPanePercent({ percent: roundPercent(value) })}
       data-resize-state="idle"
       data-workspace-splitter={splitter.id}
       data-inline-start={splitter.rect.inlineStart}
@@ -3482,6 +3580,7 @@ function samePanelView(previous: WorkspacePanelView, next: WorkspacePanelView): 
       previous.title === next.title &&
       previous.closable === next.closable &&
       previous.floatable === next.floatable &&
+      previous.resizeDelivery === next.resizeDelivery &&
       Object.is(previous.parameters, next.parameters) &&
       sameOptionalPanelLifecyclePolicy(previous.lifecyclePolicy, next.lifecyclePolicy))
   );
@@ -3535,6 +3634,58 @@ function panelTabId(prefix: string, panelId: string) {
   return `${prefix}-tab-${encodeDomId(panelId)}`;
 }
 
+function splitChildId(prefix: string, nodeId: string) {
+  return `${prefix}-split-child-${encodeDomId(nodeId)}`;
+}
+
+function focusNextSplitter(current: HTMLElement, delta: -1 | 1): boolean {
+  const workspace = current.closest<HTMLElement>(".pf-workspace");
+  if (workspace === null) return false;
+  const splitters = Array.from(
+    workspace.querySelectorAll<HTMLElement>("[data-workspace-splitter]"),
+  ).filter((element) => {
+    if (
+      element.closest(".pf-workspace") !== workspace ||
+      element.getAttribute("aria-disabled") === "true"
+    ) {
+      return false;
+    }
+    for (
+      let ancestor: HTMLElement | null = element;
+      ancestor !== null;
+      ancestor = ancestor.parentElement
+    ) {
+      const style = ancestor.ownerDocument.defaultView?.getComputedStyle(ancestor);
+      if (
+        ancestor.hidden ||
+        ancestor.inert ||
+        ancestor.getAttribute("aria-hidden") === "true" ||
+        style?.display === "none" ||
+        style?.visibility === "hidden" ||
+        style?.visibility === "collapse"
+      ) {
+        return false;
+      }
+      if (ancestor === workspace) break;
+    }
+    return true;
+  });
+  if (splitters.length === 0) return false;
+  const index = splitters.indexOf(current);
+  const nextIndex =
+    index === -1
+      ? delta === 1
+        ? 0
+        : splitters.length - 1
+      : (index + delta + splitters.length) % splitters.length;
+  splitters[nextIndex]?.focus({ preventScroll: true });
+  return true;
+}
+
+function roundPercent(value: number): number {
+  return Math.round(value * 100) / 100;
+}
+
 function panelContentId(prefix: string, panelId: string) {
   return `${prefix}-panel-${encodeDomId(panelId)}`;
 }
@@ -3579,6 +3730,7 @@ interface PointerResizeSession {
   readonly beforeSize: number;
   readonly afterSize: number;
   readonly weights: readonly number[];
+  readonly previewMode: ResolvedResizePreviewMode;
   readonly captureElement: HTMLDivElement;
   latest: readonly number[];
   pending: PointerResizeSample | undefined;

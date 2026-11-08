@@ -3,6 +3,8 @@ import type { LogicalRect } from "@panefold/geometry";
 
 export type WorkspaceDirection = "ltr" | "rtl";
 export type WorkspaceAxis = "inline" | "block";
+export type WorkspaceResizeDelivery = "live" | "throttled" | "deferred" | "adaptive";
+export type WorkspaceResizePreviewMode = "auto" | "live" | "separator";
 export type WorkspaceLogicalEdge = "inline-start" | "inline-end" | "block-start" | "block-end";
 export type WorkspaceCommandOrigin =
   | "pointer"
@@ -23,6 +25,8 @@ export interface WorkspacePanelView {
   readonly floatable?: boolean;
   readonly parameters?: unknown;
   readonly lifecyclePolicy?: WorkspacePanelLifecyclePolicy;
+  /** Project the model's resizeDelivery preference for visible split content. */
+  readonly resizeDelivery?: WorkspaceResizeDelivery;
 }
 
 export interface WorkspacePanelLifecyclePolicy {

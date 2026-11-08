@@ -25,6 +25,7 @@ import {
   type WorkspaceDirection,
   type WorkspaceLayoutSolver,
   type WorkspaceProjection,
+  type WorkspaceResizePreviewMode,
   type WorkspaceTabContent,
   type WorkspaceTabPlacement,
 } from "@panefold/react";
@@ -158,6 +159,7 @@ function CodeWorkspaceApp({ session }: { readonly session: DemoWorkspaceSession 
   const [paletteOpen, setPaletteOpen] = useState(false);
   const [compactGroupId, setCompactGroupId] = useState("primary");
   const [focusMode, setFocusMode] = useState(false);
+  const [resizePreviewMode, setResizePreviewMode] = useState<WorkspaceResizePreviewMode>("auto");
   const touchWorkbench = useTouchWorkbench();
   // The compact view must follow activation from menus, history and panel moves.
   // Changing the region selector itself stays a view-only operation.
@@ -385,6 +387,8 @@ function CodeWorkspaceApp({ session }: { readonly session: DemoWorkspaceSession 
           motion={motion}
           tabPlacement={tabPlacement}
           tabContent={tabContent}
+          resizePreviewMode={resizePreviewMode}
+          onResizePreviewMode={setResizePreviewMode}
           onTheme={(value) => {
             updatePreferences({ theme: value });
           }}
@@ -487,6 +491,7 @@ function CodeWorkspaceApp({ session }: { readonly session: DemoWorkspaceSession 
             layoutSolver={layoutSolver}
             direction={direction}
             motion={motion}
+            resizePreviewMode={resizePreviewMode}
             workspaceLabel="Panefold Code workbench"
             className="demo-workspace"
             responsive={focusMode ? "auto" : false}
@@ -861,11 +866,13 @@ function SettingsMenu({
   motion,
   tabPlacement,
   tabContent,
+  resizePreviewMode,
   onTheme,
   onDirection,
   onMotion,
   onTabPlacement,
   onTabContent,
+  onResizePreviewMode,
   onResetLayout,
 }: {
   readonly theme: DemoTheme;
@@ -873,11 +880,13 @@ function SettingsMenu({
   readonly motion: DemoMotionProfile;
   readonly tabPlacement: WorkspaceTabPlacement;
   readonly tabContent: WorkspaceTabContent;
+  readonly resizePreviewMode: WorkspaceResizePreviewMode;
   readonly onTheme: (value: DemoTheme) => void;
   readonly onDirection: (value: WorkspaceDirection) => void;
   readonly onMotion: (value: DemoMotionProfile) => void;
   readonly onTabPlacement: (value: WorkspaceTabPlacement) => void;
   readonly onTabContent: (value: WorkspaceTabContent) => void;
+  readonly onResizePreviewMode: (value: WorkspaceResizePreviewMode) => void;
   readonly onResetLayout: () => void;
 }) {
   const [open, setOpen] = useState(false);
@@ -996,6 +1005,19 @@ function SettingsMenu({
               </label>
             ))}
           </fieldset>
+          <label>
+            Resize preview
+            <select
+              value={resizePreviewMode}
+              onChange={(event) => {
+                onResizePreviewMode(event.target.value as WorkspaceResizePreviewMode);
+              }}
+            >
+              <option value="auto">Follow panel preferences</option>
+              <option value="live">Live panels</option>
+              <option value="separator">Divider only</option>
+            </select>
+          </label>
           <button className="demo-settings-reset" type="button" onClick={onResetLayout}>
             Reset saved layout
           </button>

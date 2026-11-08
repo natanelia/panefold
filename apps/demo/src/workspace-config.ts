@@ -291,6 +291,9 @@ export function projectWorkspace(snapshot: WorkspaceSnapshot): WorkspaceProjecti
       floatable: item.capabilities.floatable,
       parameters: item.parameters,
       lifecyclePolicy: item.lifecycle,
+      ...(item.constraints.resizeDelivery === undefined
+        ? {}
+        : { resizeDelivery: item.constraints.resizeDelivery }),
     };
   }
 

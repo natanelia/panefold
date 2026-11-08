@@ -57,6 +57,8 @@ export type {
   WorkspaceProjection,
   WorkspaceProjector,
   WorkspaceRuntimeLike,
+  WorkspaceResizeDelivery,
+  WorkspaceResizePreviewMode,
   WorkspaceTabContent,
   WorkspaceTabPlacement,
   WorkspaceTabPresentation,
