@@ -22,6 +22,7 @@ import {
 } from "@panefold/protocol-xstate";
 
 import { measureClientScale, type ClientScale } from "./client-coordinates";
+import { usePointerInterruption } from "./pointer-interruption";
 import type { ResolvedWorkspaceInteractionMessages, WorkspaceFloatingResizeEdge } from "./messages";
 import type {
   WorkspaceCommandOrigin,
@@ -195,10 +196,20 @@ export function FloatingSurfaceFrame({
     [publishState],
   );
 
+  const { start: observeInterruption, stop: stopInterruption } = usePointerInterruption(() => {
+    const session = sessionRef.current;
+    if (session === undefined) return;
+    send(session.actor, { type: "CANCEL" });
+    send(session.actor, { type: "RECOVERED" });
+    disposeSession(session, true);
+  });
+
   const disposeSession = useCallback(
     (session: FloatingPointerSession, restore: boolean) => {
       if (sessionRef.current === session) sessionRef.current = undefined;
+      stopInterruption();
       scheduler.cancel(scheduleKey);
+      session.pending = undefined;
       if (session.captureElement.hasPointerCapture?.(session.pointerId)) {
         session.captureElement.releasePointerCapture?.(session.pointerId);
       }
@@ -206,7 +217,7 @@ export function FloatingSurfaceFrame({
       publishState("idle");
       if (restore) applyPreview(bounds);
     },
-    [applyPreview, bounds, publishState, scheduleKey, scheduler],
+    [applyPreview, bounds, publishState, scheduleKey, scheduler, stopInterruption],
   );
 
   useLayoutEffect(() => {
@@ -222,6 +233,7 @@ export function FloatingSurfaceFrame({
 
   useEffect(
     () => () => {
+      stopInterruption();
       const session = sessionRef.current;
       sessionRef.current = undefined;
       scheduler.cancel(scheduleKey);
@@ -231,7 +243,7 @@ export function FloatingSurfaceFrame({
       session?.actor.stop();
       publishState("idle");
     },
-    [publishState, scheduleKey, scheduler],
+    [publishState, scheduleKey, scheduler, stopInterruption],
   );
 
   useEffect(() => {
@@ -323,6 +335,7 @@ export function FloatingSurfaceFrame({
       baseRevision: safeRevision(projectionRevision),
     });
     event.currentTarget.setPointerCapture?.(event.pointerId);
+    observeInterruption(event.currentTarget);
     event.stopPropagation();
     event.preventDefault();
   };
@@ -339,6 +352,7 @@ export function FloatingSurfaceFrame({
   const finish = (event: ReactPointerEvent<HTMLElement>) => {
     const session = sessionRef.current;
     if (session === undefined || session.pointerId !== event.pointerId) return;
+    stopInterruption();
     scheduler.cancel(scheduleKey);
     if (currentRevisionRef.current !== session.baseRevision) {
       send(session.actor, { type: "POINTER_END", pointerId: event.pointerId });

@@ -79,6 +79,7 @@ import {
   surfaceLayoutBoundsForNode,
 } from "./panel-drop";
 import { useWorkspaceRuntime, useWorkspaceSnapshot } from "./runtime-context";
+import { usePointerInterruption } from "./pointer-interruption";
 import {
   resolveSplitResizePreviewMode,
   showSplitResizePreview,
@@ -1988,18 +1989,38 @@ function Splitter({
     [publishResizeState],
   );
 
+  const { start: observeInterruption, stop: stopInterruption } = usePointerInterruption(() => {
+    const session = sessionRef.current;
+    if (session === null) return;
+    scheduler.cancel(scheduleKey);
+    session.pending = undefined;
+    sessionRef.current = null;
+    const state = send(session.actor, { type: "CANCEL" });
+    try {
+      onCancel();
+    } finally {
+      if (session.captureElement.hasPointerCapture?.(session.pointerId)) {
+        session.captureElement.releasePointerCapture?.(session.pointerId);
+      }
+      if (state === "cancelling") send(session.actor, { type: "RETURNED" });
+      disposeActor(session.actor);
+    }
+  });
+
   const disposeActor = useCallback(
     (actor: ResizeActor) => {
       if (actorRef.current !== actor) return;
+      stopInterruption();
       actorRef.current = null;
       actor.stop();
       publishResizeState("idle");
     },
-    [publishResizeState],
+    [publishResizeState, stopInterruption],
   );
 
   useEffect(
     () => () => {
+      stopInterruption();
       scheduler.cancel(scheduleKey);
       const session = sessionRef.current;
       if (session?.captureElement.hasPointerCapture?.(session.pointerId)) {
@@ -2010,7 +2031,7 @@ function Splitter({
       actorRef.current = null;
       actor?.stop();
     },
-    [scheduleKey, scheduler],
+    [scheduleKey, scheduler, stopInterruption],
   );
 
   useLayoutEffect(() => {
@@ -2093,6 +2114,7 @@ function Splitter({
     });
     event.currentTarget.focus({ preventScroll: true });
     event.currentTarget.setPointerCapture?.(event.pointerId);
+    observeInterruption(event.currentTarget);
     event.preventDefault();
   };
 
@@ -2165,6 +2187,7 @@ function Splitter({
   const finishPointer = (event: ReactPointerEvent<HTMLDivElement>) => {
     const session = sessionRef.current;
     if (session === null || session.pointerId !== event.pointerId) return;
+    stopInterruption();
     scheduler.cancel(scheduleKey);
     // A coalesced move may still be waiting for its frame when pointerup
     // arrives. Resolve the release sample synchronously through the same
