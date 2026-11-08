@@ -2,11 +2,11 @@ import {
   createContext,
   useContext,
   useEffect,
-  useMemo,
   useState,
   useSyncExternalStore,
   type PropsWithChildren,
 } from "react";
+import { useSyncExternalStoreWithSelector } from "use-sync-external-store/with-selector";
 
 import type { WorkspaceRuntimeLike } from "./types";
 
@@ -45,11 +45,23 @@ export function useWorkspaceSnapshot<TSnapshot, TCommand, TResult>() {
   return useSyncExternalStore(runtime.subscribe, runtime.getSnapshot, runtime.getSnapshot);
 }
 
+/**
+ * Read a selection without rerendering for unrelated workspace changes.
+ * Selectors and equality checks must be pure. Object selections can supply an
+ * equality check to retain their previous value when its contents are unchanged.
+ */
 export function useWorkspaceProjection<TSnapshot, TCommand, TResult, TSelection>(
   selector: (snapshot: TSnapshot) => TSelection,
+  isEqual: (previous: TSelection, next: TSelection) => boolean = Object.is,
 ): TSelection {
-  const snapshot = useWorkspaceSnapshot<TSnapshot, TCommand, TResult>();
-  return useMemo(() => selector(snapshot), [selector, snapshot]);
+  const runtime = useWorkspaceRuntime<TSnapshot, TCommand, TResult>();
+  return useSyncExternalStoreWithSelector(
+    runtime.subscribe,
+    runtime.getSnapshot,
+    runtime.getSnapshot,
+    selector,
+    isEqual,
+  );
 }
 
 export function useWorkspaceTransactions<TSnapshot, TCommand, TResult>() {

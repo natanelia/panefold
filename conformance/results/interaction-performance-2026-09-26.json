@@ -11,39 +11,34 @@
       "width": 1280,
       "height": 720
     },
-    "operatingSystem": "Linux 6.17.0-1022-azure x64",
-    "node": "v24.21.0",
+    "operatingSystem": "Linux 7.0.0-1017-azure x64",
+    "node": "v24.22.2",
     "browserVersion": "151.0.7922.34"
   },
   "sampleCount": 179,
   "summary": {
-    "minimum": 16.5,
-    "maximum": 33.3,
-    "mean": 16.759,
+    "minimum": 16.6,
+    "maximum": 16.8,
+    "mean": 16.666,
     "median": 16.7,
     "p95": 16.7,
-    "p99": 16.8
+    "p99": 16.722
   },
   "rawFrameDeltasMs": [
-    16.6, 16.6, 16.7, 16.6, 16.7, 16.7, 16.7, 16.7, 16.7, 16.5, 16.8, 16.7, 16.6, 16.7, 16.6, 16.6,
-    16.7, 16.7, 16.7, 16.6, 16.7, 16.7, 16.7, 16.6, 16.6, 16.7, 16.7, 16.6, 16.7, 16.7, 16.7, 16.7,
-    16.6, 16.7, 16.6, 16.7, 16.6, 16.7, 16.7, 16.6, 16.7, 16.7, 16.6, 16.7, 16.7, 16.7, 16.6, 16.7,
-    16.6, 16.7, 16.7, 16.7, 16.6, 16.7, 16.7, 16.6, 16.7, 16.7, 16.7, 16.6, 16.6, 16.7, 16.7, 16.7,
-    16.6, 16.7, 16.7, 16.6, 16.7, 16.6, 16.7, 16.7, 16.6, 16.8, 16.6, 16.6, 16.7, 16.7, 16.7, 16.6,
-    16.7, 16.6, 16.7, 16.7, 16.6, 16.7, 16.6, 16.7, 16.7, 16.7, 16.7, 16.6, 16.7, 16.7, 16.6, 16.6,
-    16.7, 16.7, 16.6, 16.8, 16.6, 16.7, 16.6, 16.7, 16.7, 16.6, 16.7, 16.6, 16.7, 16.7, 16.6, 16.8,
-    16.5, 16.7, 16.7, 16.7, 16.6, 16.7, 16.6, 16.8, 16.6, 16.7, 16.7, 16.6, 16.7, 16.6, 16.7, 16.7,
-    16.6, 16.7, 16.7, 16.7, 16.6, 16.6, 16.7, 16.7, 16.6, 16.7, 16.7, 16.6, 16.7, 16.7, 16.7, 16.6,
-    16.7, 16.7, 16.7, 16.6, 16.6, 16.7, 16.7, 16.6, 16.7, 33.3, 16.7, 16.7, 16.7, 16.6, 16.7, 16.7,
-    16.6, 16.7, 16.6, 16.7, 16.7, 16.6, 16.7, 16.7, 16.6, 16.7, 16.7, 16.7, 16.6, 16.7, 16.7, 16.6,
+    16.6, 16.7, 16.7, 16.6, 16.7, 16.6, 16.7, 16.7, 16.7, 16.7, 16.6, 16.7, 16.6, 16.7, 16.6, 16.7,
+    16.6, 16.7, 16.7, 16.7, 16.7, 16.6, 16.7, 16.7, 16.6, 16.7, 16.7, 16.6, 16.7, 16.6, 16.7, 16.7,
+    16.7, 16.6, 16.7, 16.7, 16.6, 16.7, 16.7, 16.6, 16.7, 16.6, 16.7, 16.6, 16.8, 16.7, 16.6, 16.6,
+    16.7, 16.6, 16.7, 16.7, 16.7, 16.7, 16.6, 16.7, 16.6, 16.7, 16.6, 16.7, 16.7, 16.7, 16.7, 16.6,
+    16.7, 16.6, 16.7, 16.7, 16.6, 16.7, 16.7, 16.6, 16.7, 16.6, 16.7, 16.7, 16.7, 16.6, 16.7, 16.7,
+    16.6, 16.7, 16.7, 16.6, 16.6, 16.7, 16.7, 16.6, 16.7, 16.7, 16.7, 16.7, 16.6, 16.7, 16.6, 16.7,
+    16.7, 16.7, 16.6, 16.7, 16.6, 16.7, 16.7, 16.6, 16.7, 16.7, 16.7, 16.6, 16.6, 16.7, 16.7, 16.7,
+    16.6, 16.7, 16.7, 16.6, 16.7, 16.7, 16.6, 16.7, 16.7, 16.6, 16.7, 16.7, 16.6, 16.7, 16.6, 16.7,
+    16.7, 16.6, 16.7, 16.7, 16.6, 16.7, 16.7, 16.7, 16.6, 16.6, 16.8, 16.6, 16.7, 16.7, 16.6, 16.7,
+    16.7, 16.6, 16.6, 16.7, 16.7, 16.7, 16.6, 16.7, 16.7, 16.6, 16.7, 16.7, 16.6, 16.7, 16.7, 16.7,
+    16.6, 16.7, 16.6, 16.7, 16.7, 16.7, 16.6, 16.6, 16.7, 16.7, 16.7, 16.6, 16.7, 16.6, 16.7, 16.7,
     16.6, 16.7, 16.7
   ],
-  "longTasks": [
-    {
-      "startTime": 172.09999999997672,
-      "duration": 66
-    }
-  ],
+  "longTasks": [],
   "baseline": {
     "schemaVersion": 1,
     "profile": "compact-react-chromium-desktop",
@@ -53,32 +48,32 @@
     "longTaskMaximumCount": 12,
     "minimumSamples": 120
   },
-  "producedAt": "2026-09-30T11:55:54.787Z",
+  "producedAt": "2026-11-08T10:07:00.792Z",
   "nodeSmoke": {
     "schemaVersion": 1,
     "environment": {
-      "node": "v24.21.0",
-      "v8": "13.6.233.17-node.53",
+      "node": "v24.22.2",
+      "v8": "13.6.233.17-node.63",
       "platform": "linux",
       "architecture": "x64",
-      "cpu": "AMD EPYC 7763 64-Core Processor"
+      "cpu": "AMD EPYC 9V74 80-Core Processor"
     },
     "kernel": {
       "iterations": 10000,
-      "elapsedMs": 2431.32
+      "elapsedMs": 1652.42
     },
     "geometry": {
       "iterations": 100000,
-      "elapsedMs": 329.81
+      "elapsedMs": 255.56
     },
     "reorderProfiles": [
       {
         "panelCount": 50,
         "warmupCount": 250,
         "sampleCount": 2000,
-        "medianMs": 0.3541,
-        "p95Ms": 0.5855,
-        "p99Ms": 0.7013,
+        "medianMs": 0.2473,
+        "p95Ms": 0.3717,
+        "p99Ms": 0.4537,
         "designTargetMs": 1,
         "withinDesignTargetOnThisMachine": true,
         "invariantViolations": 0
@@ -87,9 +82,9 @@
         "panelCount": 500,
         "warmupCount": 100,
         "sampleCount": 1000,
-        "medianMs": 3.1384,
-        "p95Ms": 3.4876,
-        "p99Ms": 4.0558,
+        "medianMs": 2.3312,
+        "p95Ms": 2.5421,
+        "p99Ms": 3.0736,
         "designTargetMs": 5,
         "withinDesignTargetOnThisMachine": true,
         "invariantViolations": 0
@@ -99,30 +94,30 @@
       {
         "nodeCount": 100,
         "sampleCount": 10000,
-        "elapsedMs": 49,
-        "meanMicroseconds": 4.9
+        "elapsedMs": 39.25,
+        "meanMicroseconds": 3.925
       },
       {
         "nodeCount": 500,
         "sampleCount": 10000,
-        "elapsedMs": 256.61,
-        "meanMicroseconds": 25.661
+        "elapsedMs": 201.89,
+        "meanMicroseconds": 20.189
       },
       {
         "nodeCount": 1000,
         "sampleCount": 10000,
-        "elapsedMs": 547.07,
-        "meanMicroseconds": 54.707
+        "elapsedMs": 414.35,
+        "meanMicroseconds": 41.435
       }
     ],
-    "totalElapsedMs": 8066.09,
+    "totalElapsedMs": 5821.13,
     "finalRevision": "10000",
     "invariantViolations": 0
   },
   "rawReport": {
     "path": "artifacts/preview-browser.json",
-    "sha256": "bf923cd482c1deb03e1ec6920cf8118298e3738709eb2c3b9d0303966d81382c",
-    "runUrl": "https://github.com/natanelia/panefold/actions/runs/36711088102",
+    "sha256": "7ed7d4d96f2ddf22facea9ad75857c8b98d1cece2de40906b060afe54e01bb50",
+    "runUrl": "https://github.com/natanelia/panefold/actions/runs/42469779683",
     "artifact": "preview-executed-evidence"
   },
   "sourceDigests": {
@@ -172,7 +167,7 @@
     "packages/react/test/floating-input.test.tsx": "0251984dd7a1e52ef0e2560d8a3f36ccfdc394ae5c9b2545f05b7a119a958d3e",
     "packages/react/test/tab-insertion.test.ts": "5c65997257abdca9b2605b13ed733bc9670991b962cd3096674d503f2ed77960",
     "packages/react/test/touch-drop-policy.test.ts": "b58dba1e8cc540085ddde1e90538ccecbaaaef9a1fa519331d71399293d538f5",
-    "pnpm-lock.yaml": "e659e90970ee34935228595f2297da307495a7a7b01202ecfa67deaf1ac53209",
+    "pnpm-lock.yaml": "be4cd87737d70f25c878659c3d485f829712789fd70504d542cc4cb27797eb6d",
     "scripts/performance-smoke.mjs": "fc0d8ce5df966b75312b5d9fae367e07b5ce4f8215afa724d03a7a6cb17fdc95",
     "scripts/record-preview-evidence.mjs": "9918258288f54dd3d93f8cebb895107dca13e9b7c58130234071c70a47411e2c",
     "vitest.config.ts": "6f743b2639e8e091bdc454a4aaa6336a538b889e70af8814ee7d1f27c7a8769e"
