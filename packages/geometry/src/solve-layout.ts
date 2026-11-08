@@ -8,6 +8,7 @@ import type {
 } from "@panefold/model";
 
 import { allocateAxis } from "./allocate-axis.js";
+import { createAxisResizePlan } from "./resize-axis.js";
 import type {
   AxisConstraints,
   BoxConstraints,
@@ -389,36 +390,34 @@ export function solveLayout(
     const available = node.axis === "inline" ? rect.inlineSize : rect.blockSize;
     const splitState = resolveSplitState(node, constraintContext);
     const persistedCollapsed = new Set(splitState.collapsedChildIds.map(String));
-    const allocation = allocateAxis(
-      node.children.map((childId, index) => {
-        const weight = safeDimension(splitState.weights[index], 1) || 1;
-        const childBox = deriveConstraints(childId, constraintContext);
-        const constraints = constraintsForAxis(childBox, node.axis);
-        const aspectPreferred =
-          childBox.preferredAspectRatio === undefined
-            ? undefined
-            : node.axis === "inline"
-              ? rect.blockSize * childBox.preferredAspectRatio
-              : rect.inlineSize / childBox.preferredAspectRatio;
-        return {
-          key: String(childId),
-          weight,
-          collapsed: persistedCollapsed.has(String(childId)),
-          constraints: {
-            ...constraints,
-            ...(aspectPreferred === undefined
-              ? {}
-              : {
-                  preferred: Math.min(constraints.max, Math.max(constraints.min, aspectPreferred)),
-                }),
-            grow: constraints.grow,
-            shrink: constraints.shrink,
-          },
-        };
-      }),
-      available,
-      splitterSize,
-    );
+    const items = node.children.map((childId, index) => {
+      const weight = safeDimension(splitState.weights[index], 1) || 1;
+      const childBox = deriveConstraints(childId, constraintContext);
+      const constraints = constraintsForAxis(childBox, node.axis);
+      const aspectPreferred =
+        childBox.preferredAspectRatio === undefined
+          ? undefined
+          : node.axis === "inline"
+            ? rect.blockSize * childBox.preferredAspectRatio
+            : rect.inlineSize / childBox.preferredAspectRatio;
+      return {
+        key: String(childId),
+        weight,
+        collapsed: persistedCollapsed.has(String(childId)),
+        constraints: {
+          ...constraints,
+          ...(aspectPreferred === undefined
+            ? {}
+            : {
+                preferred: Math.min(constraints.max, Math.max(constraints.min, aspectPreferred)),
+              }),
+          grow: constraints.grow,
+          shrink: constraints.shrink,
+        },
+      };
+    });
+    const allocation = allocateAxis(items, available, splitterSize);
+    const resizePlan = createAxisResizePlan(items, available, splitterSize, allocation);
     diagnostics.push(
       ...allocation.diagnostics.map((diagnostic) => ({ ...diagnostic, nodeId: key })),
     );
@@ -444,7 +443,7 @@ export function solveLayout(
       if (activePosition < allocation.activeIndices.length - 1) {
         const nextIndex = allocation.activeIndices[activePosition + 1];
         const afterNodeId = nextIndex === undefined ? undefined : node.children[nextIndex];
-        if (afterNodeId === undefined) {
+        if (nextIndex === undefined || afterNodeId === undefined) {
           throw new RangeError("Axis allocation referenced a child outside the split node.");
         }
         const size = allocation.splitterSizes[activePosition] ?? 0;
@@ -456,6 +455,7 @@ export function solveLayout(
           beforeNodeId: String(childId),
           afterNodeId: String(afterNodeId),
           rect: splitterRect,
+          resize: { plan: resizePlan, beforeIndex: childIndex, afterIndex: nextIndex },
         });
         cursor += size;
       }

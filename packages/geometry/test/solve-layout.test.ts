@@ -2,15 +2,19 @@ import fc from "fast-check";
 import {
   DEFAULT_PANEL_CAPABILITIES,
   DEFAULT_PANEL_LIFECYCLE,
+  MAIN_SURFACE_CAPABILITIES,
+  commandId,
   createWorkspaceSnapshot,
   groupId,
   nodeId,
   panelId,
+  surfaceId,
 } from "@panefold/model";
 import type { GroupRecord, LayoutNode, PanelConstraints, PanelRecord } from "@panefold/model";
 import { describe, expect, it } from "vitest";
 
-import { solveLayout } from "../src/index.js";
+import { executeCommand } from "../../kernel/src/execute.js";
+import { resizeAxis, solveLayout } from "../src/index.js";
 
 function panel(name: string, constraints: PanelConstraints = {}): PanelRecord {
   return {
@@ -93,6 +97,78 @@ describe("solveLayout", () => {
     ]);
     expect(result.diagnostics).toEqual([]);
   });
+
+  it.each(["inline", "block"] as const)(
+    "replays a %s model resize with the exact preview geometry after canonicalization",
+    (axis) => {
+      const constraints: PanelConstraints[] = [
+        { hardMinInline: 100, hardMinBlock: 100, grow: 2 },
+        { hardMinInline: 100, hardMinBlock: 100, grow: 1 },
+        { hardMinInline: 100, hardMinBlock: 100, grow: 1 },
+      ];
+      const nodes: LayoutNode[] = [
+        groupNode("n0", "g0"),
+        groupNode("n1", "g1"),
+        groupNode("n2", "g2"),
+        {
+          kind: "split",
+          id: nodeId("root"),
+          axis,
+          children: [nodeId("n0"), nodeId("n1"), nodeId("n2")],
+          weights: [333_334, 333_333, 333_333],
+          collapsedChildIds: [],
+        },
+      ];
+      const snapshot = createWorkspaceSnapshot({
+        panels: constraints.map((item, index) => panel(`p${index}`, item)),
+        groups: constraints.map((_, index) => group(`g${index}`, [`p${index}`])),
+        nodes,
+        surfaces: [
+          {
+            id: surfaceId("main"),
+            kind: "main",
+            rootNodeId: nodeId("root"),
+            capabilities: MAIN_SURFACE_CAPABILITIES,
+            maximized: false,
+          },
+        ],
+        activation: { activePanelId: panelId("p0"), activeSurfaceId: surfaceId("main") },
+      });
+      const bounds = {
+        inlineStart: 0,
+        blockStart: 0,
+        inlineSize: axis === "inline" ? 1000 : 200,
+        blockSize: axis === "block" ? 1000 : 200,
+      };
+      const original = solveLayout(snapshot, nodeId("root"), bounds);
+      const descriptor = original.splitters[0]?.resize;
+      if (descriptor === undefined) throw new Error("Expected model resize constraints.");
+      const sizeKey = axis === "inline" ? "inlineSize" : "blockSize";
+      const beforeSize = original.nodeRects.n0?.[sizeKey] ?? 0;
+      const weights = resizeAxis(
+        descriptor.plan,
+        descriptor.beforeIndex,
+        descriptor.afterIndex,
+        beforeSize + 100,
+      );
+      const preview = solveLayout(snapshot, nodeId("root"), bounds, {
+        splitOverrides: { root: { weights } },
+      });
+      const result = executeCommand(snapshot, {
+        id: commandId(`resize:${axis}`),
+        label: "Resize constrained pair",
+        origin: "keyboard",
+        baseRevision: snapshot.revision,
+        command: { type: "resize-split", splitNodeId: nodeId("root"), weights },
+      });
+      if (!result.ok) throw new Error(result.error.message);
+      const committed = solveLayout(result.next, nodeId("root"), bounds);
+      expect(committed.nodeRects).toEqual(preview.nodeRects);
+      expect(committed.nodeRects.n0?.[sizeKey]).toBe(beforeSize + 100);
+      expect(committed.nodeRects.n2).toEqual(original.nodeRects.n2);
+      expect(result.next.nodes.byId.root).toMatchObject({ weights });
+    },
+  );
 
   it("derives group hard minima from every panel and preference/max from the selection", () => {
     const panels = [

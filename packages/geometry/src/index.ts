@@ -1,4 +1,5 @@
 export { allocateAxis } from "./allocate-axis.js";
+export { createAxisResizePlan, getAxisResizeBounds, resizeAxis } from "./resize-axis.js";
 export { containsPoint, createDropTargets, hitTestNodes } from "./hit-test.js";
 export { planLayoutInvalidation } from "./invalidation.js";
 export { defaultGroupConstraints, solveLayout } from "./solve-layout.js";
@@ -8,6 +9,8 @@ export type {
   AllocationItem,
   AxisAllocation,
   AxisConstraints,
+  AxisResizeBounds,
+  AxisResizePlan,
   BoxConstraints,
   DropTarget,
   GeometryDiagnostic,

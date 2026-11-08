@@ -196,9 +196,11 @@ The default `"auto"` mode checks the selected panels in visible groups beneath t
 
 ## Resize with the keyboard
 
-Focus a divider with Tab. Arrow keys resize along its axis; Shift increases the step from 2% to 10% of the adjacent pair. Inline arrows follow `direction`, including RTL.
+Focus a divider with Tab. Arrow keys resize along its axis; Shift increases the step from 2% to 10% of the adjacent pair. Inline arrows follow `direction`, including RTL. Home gives the primary pane its smallest attainable size, and End gives it its largest, while keeping the other panes in the split fixed. Alt, Ctrl and Meta combinations remain available to the browser and application.
 
-The separator's `aria-controls` identifies the primary pane: the pane immediately before the divider in logical layout order. Its current value reports that pane's percentage of the adjacent pair, rounded to two decimal places. The 0–100 scale describes that percentage; it does not claim that every percentage is attainable under the active constraints.
+The separator's `aria-controls` identifies the primary pane: the pane immediately before the divider in logical layout order. Its current value reports that pane's percentage of the adjacent pair, rounded to two decimal places. `aria-valuemin` and `aria-valuemax` report the attainable bounds under the current constraints, including preferred floors when those fit. Home and End use those same bounds. These shortcuts resize panes; they do not change semantic collapse state.
+
+Both built-in solvers provide the resize metadata needed for these bounds. A custom `layoutSolver` can return `ResolvedSplitter.resize` using `createAxisResizePlan` from `@panefold/geometry` with the exact allocation inputs it used. If it transforms geometry or constraints, it must also update that metadata. A custom solver without metadata retains arrow and pointer resizing with the existing 0–100 percentage scale; Home and End are unavailable because the renderer cannot infer its limits. Pointer release commits the exact weights used for the preview.
 
 F6 moves focus to the next visible, enabled divider in the same workspace; Shift+F6 moves backward. Both wrap at the ends. Starting a pointer resize focuses its divider, so Escape cancels the active resize and restores its previous geometry. Keyboard sizing uses the same semantic resize command and result handling as pointer resizing.
 

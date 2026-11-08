@@ -79,6 +79,22 @@ export interface AxisAllocation {
   readonly diagnostics: readonly GeometryDiagnostic[];
 }
 
+/** Immutable allocation inputs captured once for a split-resize gesture. */
+export interface AxisResizePlan {
+  readonly items: readonly AllocationItem[];
+  readonly availableSize: number;
+  readonly splitterSize: number;
+  readonly allocation: AxisAllocation;
+}
+
+/** Reachable primary-pane limits while the other split children keep their sizes. */
+export interface AxisResizeBounds {
+  readonly beforeSize: number;
+  readonly afterSize: number;
+  readonly minBeforeSize: number;
+  readonly maxBeforeSize: number;
+}
+
 export interface ResolvedSplitter {
   readonly id: string;
   readonly splitNodeId: string;
@@ -86,6 +102,12 @@ export interface ResolvedSplitter {
   readonly beforeNodeId: string;
   readonly afterNodeId: string;
   readonly rect: LogicalRect;
+  /** Optional for custom solvers; the default solvers publish constraint-aware resize data. */
+  readonly resize?: {
+    readonly plan: AxisResizePlan;
+    readonly beforeIndex: number;
+    readonly afterIndex: number;
+  };
 }
 
 export interface ResolvedLayout {

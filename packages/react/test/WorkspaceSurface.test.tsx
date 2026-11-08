@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { act, cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
+import { allocateAxis, createAxisResizePlan } from "@panefold/geometry";
 import type {
   createDragActor as CreateDragActor,
   createResizeActor as CreateResizeActor,
@@ -847,8 +848,9 @@ describe("WorkspaceSurface", () => {
     const root = runtime.getSnapshot().projection.nodes.root;
     expect(root?.kind).toBe("split");
     if (root?.kind === "split") {
-      expect(root.weights[0]).toBeCloseTo(1.04);
-      expect(root.weights[1]).toBeCloseTo(0.96);
+      const total = root.weights.reduce((sum, weight) => sum + weight, 0);
+      expect((root.weights[0] ?? 0) / total).toBeCloseTo(0.52, 3);
+      expect((root.weights[1] ?? 0) / total).toBeCloseTo(0.48, 3);
     }
     expect(runtime.transactions.at(-1)?.origin).toBe("keyboard");
   });
@@ -1537,7 +1539,10 @@ describe("WorkspaceSurface", () => {
       expect(inlineRuntime.getSnapshot().projection.revision).toBe("1");
     });
     const inlineRoot = inlineRuntime.getSnapshot().projection.nodes.root;
-    expect(inlineRoot?.kind === "split" ? inlineRoot.weights[0] : undefined).toBeCloseTo(0.96);
+    if (inlineRoot?.kind !== "split") throw new Error("Fixture requires a root split");
+    expect(
+      (inlineRoot.weights[0] ?? 0) / inlineRoot.weights.reduce((sum, weight) => sum + weight, 0),
+    ).toBeCloseTo(0.48, 3);
     inlineView.unmount();
 
     const root = initialProjection.nodes.root;
@@ -1554,7 +1559,10 @@ describe("WorkspaceSurface", () => {
       expect(blockRuntime.getSnapshot().projection.revision).toBe("1");
     });
     const blockRoot = blockRuntime.getSnapshot().projection.nodes.root;
-    expect(blockRoot?.kind === "split" ? blockRoot.weights[0] : undefined).toBeCloseTo(1.04);
+    if (blockRoot?.kind !== "split") throw new Error("Fixture requires a root split");
+    expect(
+      (blockRoot.weights[0] ?? 0) / blockRoot.weights.reduce((sum, weight) => sum + weight, 0),
+    ).toBeCloseTo(0.52, 3);
   });
 
   it("adapts structural FLIP plans to reduced motion", async () => {
@@ -4525,11 +4533,21 @@ const hardMinimumLayoutSolver: WorkspaceLayoutSolver<FixtureSnapshot> = (snapsho
   const requested = request.splitOverrides.root?.weights ?? root.weights;
   const before = requested[0] ?? 1;
   const after = requested[1] ?? 1;
+  const items = [
+    { key: "left-node", weight: before, constraints: { min: 1 } },
+    { key: "right-node", weight: after, constraints: { min: 450 } },
+  ];
+  const allocation = allocateAxis(items, request.bounds.inlineSize, request.splitterSize);
+  const plan = createAxisResizePlan(
+    items,
+    request.bounds.inlineSize,
+    request.splitterSize,
+    allocation,
+  );
   const contentSize = Math.max(0, request.bounds.inlineSize - request.splitterSize);
-  const requestedBefore = Math.round(contentSize * (before / (before + after)));
-  const constrainedBefore = Math.min(contentSize - 450, Math.max(1, requestedBefore));
+  const constrainedBefore = allocation.sizes[0] ?? 0;
 
-  return solveWorkspaceProjectionLayout(snapshot.projection, request.bounds, {
+  const layout = solveWorkspaceProjectionLayout(snapshot.projection, request.bounds, {
     splitterSize: request.splitterSize,
     splitOverrides: {
       ...request.splitOverrides,
@@ -4539,6 +4557,13 @@ const hardMinimumLayoutSolver: WorkspaceLayoutSolver<FixtureSnapshot> = (snapsho
       },
     },
   });
+  return {
+    ...layout,
+    splitters: layout.splitters.map((splitter) => ({
+      ...splitter,
+      resize: { plan, beforeIndex: 0, afterIndex: 1 },
+    })),
+  };
 };
 
 function installPointerCapture(element: HTMLElement) {

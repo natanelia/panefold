@@ -107,7 +107,7 @@
       "verificationClass": "code-verifiable",
       "artifactRole": "source",
       "uri": "repo://packages/geometry/test/solve-layout.test.ts",
-      "sha256": "f9eeb6af1c0ca92f7ec7446de66cd165730a91151ead5262b0fa0241b06cb6c2",
+      "sha256": "1d717e6523b3a592d259f1b626335623a57830269e8afe259a25fae4fb42b8b9",
       "producedAt": "2026-08-14T07:19:51.074Z",
       "requirementIds": [
         "LAY-002",
@@ -383,7 +383,7 @@
       "verificationClass": "code-verifiable",
       "artifactRole": "source",
       "uri": "repo://packages/react/test/WorkspaceSurface.test.tsx",
-      "sha256": "64aa6c97dd4f7538dde56f5f020e891c19bb20df74bf08378a0ed9975612d8b4",
+      "sha256": "b1bfe2145942fba7fb21f257d9f34b24137b39d628ca40ecc764f88da123eb2f",
       "producedAt": "2026-08-14T07:19:51.074Z",
       "requirementIds": [
         "A11Y-003",
@@ -760,7 +760,7 @@
       "verificationClass": "code-verifiable",
       "artifactRole": "source",
       "uri": "repo://packages/react/test/WorkspaceSurface.test.tsx",
-      "sha256": "64aa6c97dd4f7538dde56f5f020e891c19bb20df74bf08378a0ed9975612d8b4",
+      "sha256": "b1bfe2145942fba7fb21f257d9f34b24137b39d628ca40ecc764f88da123eb2f",
       "producedAt": "2026-08-14T07:19:51.074Z",
       "requirementIds": [
         "I18N-001",
@@ -856,7 +856,7 @@
       "verificationClass": "code-verifiable",
       "artifactRole": "source",
       "uri": "repo://docs/ARCHITECTURE.md",
-      "sha256": "cd0e447036f1f26aec407b9ec09d856f0f8660a7c67dd07b60909207ee880364",
+      "sha256": "41594f0b0e64e5b0fe463ca4e21b74ad4aa6cee4263e98da4e2d11f189280e1b",
       "producedAt": "2026-08-14T07:19:51.074Z",
       "requirementIds": [
         "API-002",
@@ -1126,8 +1126,8 @@
       "verificationClass": "code-verifiable",
       "artifactRole": "result",
       "uri": "repo://conformance/results/independent-semantic-oracle-2026-09-27.json",
-      "sha256": "c84015a57f7793adf543c1c7477e29473a9fa7611b251f4b345707af9b8fc158",
-      "producedAt": "2026-11-08T10:31:55.424672+00:00",
+      "sha256": "55d1c6979f5a2ab30da0878318060cf9e1d3eecd789d3e685d8d9ffcb6b9db96",
+      "producedAt": "2026-11-08T13:02:50.554567+00:00",
       "requirementIds": [
         "MOD-004",
         "PRF-003",
