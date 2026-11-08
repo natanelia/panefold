@@ -10,6 +10,7 @@ export async function visibleBox(locator: Locator) {
  * capture, native scrolling, browser cancellation and touch-generated clicks. */
 export async function beginTouch(page: Page, handle: Locator) {
   await handle.scrollIntoViewIfNeeded();
+  await settleWorkspaceMotion(handle);
   const rect = await visibleBox(handle);
   const from = { x: rect.x + rect.width / 2, y: rect.y + rect.height / 2 };
   const cdp = await page.context().newCDPSession(page);
@@ -59,6 +60,7 @@ export async function touchPanelDrop(
   // Scrolling the source into view can move a nested target inside the workspace canvas.
   // Do it before measuring the destination so touch coordinates stay current.
   await source.locator(".pf-tab-drag-handle").scrollIntoViewIfNeeded();
+  await settleWorkspaceMotion(source);
   const slot = target.locator(".pf-panel-slot");
   const rect = await visibleBox(slot);
   const rtl = await target.evaluate((element) => getComputedStyle(element).direction === "rtl");
@@ -92,4 +94,18 @@ export async function touchPanelDrop(
   } finally {
     await cdp.detach();
   }
+}
+
+async function settleWorkspaceMotion(locator: Locator) {
+  await locator.evaluate(async (element) => {
+    const workspace = element.closest(".pf-workspace");
+    if (workspace === null) return;
+    // A previous semantic drop can still be animating other panes even when
+    // this handle is stable. The drag caches all pane geometry at pointer-down.
+    const animations = workspace.getAnimations({ subtree: true }).filter((animation) => {
+      const target = (animation.effect as KeyframeEffect | null)?.target;
+      return target?.hasAttribute("data-workspace-node");
+    });
+    await Promise.all(animations.map((animation) => animation.finished.catch(() => undefined)));
+  });
 }
