@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "kind": "differential-model-result",
   "profile": "compact-react-chromium-desktop",
-  "producedAt": "2026-09-30T12:56:00.489976+00:00",
+  "producedAt": "2026-11-08T10:11:42.656584+00:00",
   "status": "passed-with-thresholds-unmet",
   "runner": "panefold-differential-campaign",
   "commands": {
@@ -12,10 +12,10 @@
     "suite": "pnpm exec vitest run packages/kernel-optimized/test/benchmark.test.ts packages/kernel-optimized/test/differential.test.ts packages/kernel-optimized/test/independent-reducer.test.ts packages/kernel-optimized/test/persistent-bucket-map.test.ts packages/kernel-optimized/test/projection.test.ts --reporter=json --outputFile=artifacts/independent-suite.json"
   },
   "environment": {
-    "operatingSystem": "Linux-6.17.0-1022-azure-x86_64-with-glibc2.39",
-    "node": "v24.21.0",
+    "operatingSystem": "Linux-6.18.57-x86_64-with-glibc2.41",
+    "node": "v24.22.1",
     "pnpm": "11.16.0",
-    "dependencies": "Installed with pnpm install --frozen-lockfile in this workflow.",
+    "dependencies": "Installed with pnpm install --frozen-lockfile for this isolated worktree.",
     "vitestMaxWorkers": 1
   },
   "campaign": {
@@ -27,24 +27,24 @@
     "completedSteps": 10000,
     "accepted": 7973,
     "rejected": 2027,
-    "generatedCommandTypeCount": 36,
     "missingCommandTypes": [],
     "divergenceCount": 0,
     "finalHash": "fnv1a64-v1:a1f58a1b0c635ad1",
-    "elapsedMs": 29179
+    "generatedCommandTypeCount": 36,
+    "elapsedMs": 25447
   },
   "suite": {
     "testFiles": 5,
     "tests": 25,
     "passed": 25,
     "failed": 0,
-    "durationMs": 10526.96923828125
+    "durationMs": 10563.583740234375
   },
   "checks": {
     "curatedCommandDiscriminants": 36,
     "candidateComparison": "complete accepted and rejected result contract after every generated attempt",
     "candidateComparisons": 10000,
-    "invariantValidation": "every attempt",
+    "invariantValidation": "every-attempt",
     "committedPatchReplay": 7973,
     "inversePatchReplay": 7973,
     "optimizedProjectionReplay": 7973
@@ -62,7 +62,7 @@
   },
   "sourceDigests": {
     "package.json": "acd970060c8df0d628cada8c1762111b9c3587031dbdc0e5815fb1e6159147ee",
-    "pnpm-lock.yaml": "e659e90970ee34935228595f2297da307495a7a7b01202ecfa67deaf1ac53209",
+    "pnpm-lock.yaml": "be4cd87737d70f25c878659c3d485f829712789fd70504d542cc4cb27797eb6d",
     "pnpm-workspace.yaml": "d51950e32647c121ad667b578a448b703ea5f74637fd91524b7012dd53167169",
     "tsconfig.json": "ba7a45d0184771111310a1c6503d1ab957ee05c7ad538f3ade8070acefdd9a8f",
     "tsconfig.base.json": "6a5180d481cd767365ec8da2257e5573e498c5802ce56bda99e0ac218baca818",
@@ -120,15 +120,13 @@
   "rawReports": [
     {
       "path": "artifacts/independent-campaign.json",
-      "sha256": "a9ebcee862ec9b9e68194171488a024435058a23292631c0fcf1537146217337",
-      "runUrl": "https://github.com/natanelia/panefold/actions/runs/36717852627",
-      "artifact": "playground-evidence-finalized"
+      "sha256": "c3e7a5e21ebdb4aa44a1ff542b62ef85e231590a23d2e11f35087dde61c3e0dc",
+      "execution": "Local isolated worktree; freshly executed reports retained with this review."
     },
     {
       "path": "artifacts/independent-suite.json",
-      "sha256": "022affd5379dbf0bc3a9e47932f9ea8457aadad66f319e2e76ff2356c547dda1",
-      "runUrl": "https://github.com/natanelia/panefold/actions/runs/36717852627",
-      "artifact": "playground-evidence-finalized"
+      "sha256": "4635a62d2c757ae8641272d67ab04f94c684a8e3020254b1ad1c949ea9450fc4",
+      "execution": "Local isolated worktree; freshly executed reports retained with this review."
     }
   ]
 }
