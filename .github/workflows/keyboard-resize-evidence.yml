@@ -60,12 +60,12 @@ jobs:
           node scripts/record-preview-evidence.mjs
           pnpm exec oxfmt --write conformance/results docs/CONFORMANCE.md
           pnpm conformance:data:generate
-          pnpm check
-      - name: Commit verified results back to the feature branch
-        if: steps.guard.outputs.skip != 'true'
-        run: |
+          # The conformance check requires recorded evidence to be committed.
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add packages/react/src/WorkspaceSurface.tsx packages/react/test/WorkspaceSurface.test.tsx conformance/results conformance/evidence.json docs/CONFORMANCE.md
           git commit -m "test: record verified keyboard resize evidence"
-          git push origin HEAD:refs/heads/fix/solver-bounded-keyboard-resize
+          pnpm check
+      - name: Publish verified results back to the feature branch
+        if: steps.guard.outputs.skip != 'true'
+        run: git push origin HEAD:refs/heads/fix/solver-bounded-keyboard-resize
