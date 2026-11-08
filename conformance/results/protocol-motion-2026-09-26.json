@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "kind": "protocol-motion-result",
   "profile": "compact-react-chromium-desktop",
-  "producedAt": "2026-11-08T13:05:31.853Z",
+  "producedAt": "2026-11-08T14:30:33.570Z",
   "status": "passed",
   "runner": "Vitest",
   "command": "pnpm exec vitest run --reporter=json --outputFile=artifacts/preview-unit.json",
@@ -12,16 +12,16 @@
     "browserVersion": "151.0.7922.34"
   },
   "summary": {
-    "tests": 689,
-    "passed": 689,
+    "tests": 729,
+    "passed": 729,
     "failed": 0,
-    "files": 84,
+    "files": 89,
     "protocolMotionTestFiles": 9,
     "protocolMotionTests": 86,
     "protocolMotionPassed": 86,
-    "reactIntegrationTestFiles": 17,
-    "reactIntegrationTests": 219,
-    "reactIntegrationPassed": 219
+    "reactIntegrationTestFiles": 19,
+    "reactIntegrationTests": 227,
+    "reactIntegrationPassed": 227
   },
   "tests": [
     {
@@ -100,24 +100,19 @@
       "passed": 5
     },
     {
-      "file": "packages/ecosystem/test/ecosystem.test.ts",
-      "status": "passed",
-      "passed": 19
-    },
-    {
-      "file": "packages/ecosystem/test/isolated-frame.test.ts",
-      "status": "passed",
-      "passed": 2
-    },
-    {
-      "file": "packages/ecosystem/test/panel-context.test.ts",
-      "status": "passed",
-      "passed": 35
-    },
-    {
       "file": "packages/geometry/test/allocate-axis.test.ts",
       "status": "passed",
       "passed": 6
+    },
+    {
+      "file": "packages/geometry/test/bounded-rounding.test.ts",
+      "status": "passed",
+      "passed": 3
+    },
+    {
+      "file": "packages/geometry/test/bounded-waterfill.test.ts",
+      "status": "passed",
+      "passed": 5
     },
     {
       "file": "packages/geometry/test/group-constraints.test.ts",
@@ -140,6 +135,11 @@
       "passed": 6
     },
     {
+      "file": "packages/geometry/test/resize-axis.test.ts",
+      "status": "passed",
+      "passed": 22
+    },
+    {
       "file": "packages/geometry/test/rounding-compatibility.test.ts",
       "status": "passed",
       "passed": 2
@@ -147,7 +147,7 @@
     {
       "file": "packages/geometry/test/solve-layout.test.ts",
       "status": "passed",
-      "passed": 12
+      "passed": 14
     },
     {
       "file": "packages/kernel/test/effects.test.ts",
@@ -198,31 +198,6 @@
       "file": "packages/kernel/test/properties.test.ts",
       "status": "passed",
       "passed": 3
-    },
-    {
-      "file": "packages/kernel-optimized/test/benchmark.test.ts",
-      "status": "passed",
-      "passed": 1
-    },
-    {
-      "file": "packages/kernel-optimized/test/differential.test.ts",
-      "status": "passed",
-      "passed": 7
-    },
-    {
-      "file": "packages/kernel-optimized/test/independent-reducer.test.ts",
-      "status": "passed",
-      "passed": 8
-    },
-    {
-      "file": "packages/kernel-optimized/test/persistent-bucket-map.test.ts",
-      "status": "passed",
-      "passed": 4
-    },
-    {
-      "file": "packages/kernel-optimized/test/projection.test.ts",
-      "status": "passed",
-      "passed": 5
     },
     {
       "file": "packages/model/test/effects.test.ts",
@@ -295,6 +270,11 @@
       "passed": 12
     },
     {
+      "file": "packages/react/test/constrained-resize.test.tsx",
+      "status": "passed",
+      "passed": 7
+    },
+    {
       "file": "packages/react/test/drag-parity.test.ts",
       "status": "passed",
       "passed": 5
@@ -350,6 +330,11 @@
       "passed": 10
     },
     {
+      "file": "packages/react/test/resize-policy.test.tsx",
+      "status": "passed",
+      "passed": 1
+    },
+    {
       "file": "packages/react/test/runtime-context.test.tsx",
       "status": "passed",
       "passed": 6
@@ -368,6 +353,21 @@
       "file": "packages/react/test/touch-drop-policy.test.ts",
       "status": "passed",
       "passed": 2
+    },
+    {
+      "file": "packages/ecosystem/test/ecosystem.test.ts",
+      "status": "passed",
+      "passed": 19
+    },
+    {
+      "file": "packages/ecosystem/test/isolated-frame.test.ts",
+      "status": "passed",
+      "passed": 2
+    },
+    {
+      "file": "packages/ecosystem/test/panel-context.test.ts",
+      "status": "passed",
+      "passed": 35
     },
     {
       "file": "packages/runtime/test/envelope-serialization.test.ts",
@@ -443,12 +443,37 @@
       "file": "packages/web-components/test/web-components.test.ts",
       "status": "passed",
       "passed": 2
+    },
+    {
+      "file": "packages/kernel-optimized/test/benchmark.test.ts",
+      "status": "passed",
+      "passed": 1
+    },
+    {
+      "file": "packages/kernel-optimized/test/differential.test.ts",
+      "status": "passed",
+      "passed": 7
+    },
+    {
+      "file": "packages/kernel-optimized/test/independent-reducer.test.ts",
+      "status": "passed",
+      "passed": 8
+    },
+    {
+      "file": "packages/kernel-optimized/test/persistent-bucket-map.test.ts",
+      "status": "passed",
+      "passed": 4
+    },
+    {
+      "file": "packages/kernel-optimized/test/projection.test.ts",
+      "status": "passed",
+      "passed": 5
     }
   ],
   "rawReport": {
     "path": "artifacts/preview-unit.json",
-    "sha256": "70aea6d01c290d5f43703dc306778dba24ecc9a8a2f1db01ab27cf339d7766fa",
-    "runUrl": "https://github.com/natanelia/panefold/actions/runs/42483022797",
+    "sha256": "802738c2c00abe9944220d6df9b24a6e326029a6834d03e646aeae5ba35217e1",
+    "runUrl": "https://github.com/natanelia/panefold/actions/runs/42489878122",
     "artifact": "preview-executed-evidence"
   },
   "sourceDigests": {
@@ -473,7 +498,7 @@
     "e2e/mobile-playground.spec.ts": "fd45fe0690c8edbb380193d2525ed07a565ce2b1acb186207bc9d88e96d1d25c",
     "e2e/native-touch-audit.ts": "31e07885233945c7f47f7965a0fa66df5d73973ece27a211cc952e34c76d183b",
     "e2e/scaled-coordinates.spec.ts": "5a086a41e1494cca8ca29f6d3d2acdc9dae5df138e07ee16f492bc37136d0630",
-    "e2e/splitter-accessibility.spec.ts": "e2ff2c3b967888397f230620d362001f4d6f5a25b637c3481b6db0b036dc4c74",
+    "e2e/splitter-accessibility.spec.ts": "a444a95b1ce7f3345f476d888a86a0d6b5310f8d47bd43990d89c1ea91536ea3",
     "e2e/touch-helpers.ts": "bf7072e192e7395fb26f23d2f172669a8790063f26c35a8442eb1d2c1d77c511",
     "e2e/touch-layout.spec.ts": "15a09005c8bcc752b1520d30b619c257912a60fa518066b5392a0c9853dc8eef",
     "e2e/touch-playground-operations.spec.ts": "d594a5a80b176d7be8c721d13546aede0b69e7ce72dea879d59498dc69123d5b",
@@ -484,12 +509,18 @@
     "packages/ecosystem/src/panel-context.ts": "1009cbbb01d9ee811d7bd42703e0b5c4c1b9d6aa2a5051c3c379ccb497fd54d0",
     "packages/ecosystem/test/panel-context.test.ts": "7ca939dfeb54736705ada46eb62f56b62031a4d7d803725d47a3242410653196",
     "packages/geometry/package.json": "c3455159603a71c37cb4a70e89083be28c1c8144cca8939bea4f544bd886ab38",
-    "packages/geometry/src/allocate-axis.ts": "a4317dea79bbb8986fc37ba48c1cec8f7089e6542d8955497d2d050c76d540cf",
+    "packages/geometry/src/allocate-axis.ts": "0b7a6f7e021ad9d739aee403bb4c9b6aefea842606b4cf16054a031da1e83ed2",
     "packages/geometry/src/hit-test.ts": "2da9ca42d97c135f37d599bbaebed8f758343fa4e52fd647c05a4b179340c121",
-    "packages/geometry/src/index.ts": "d033849f77196b6f518b4deadee9062b72a72e3362732e11fc512e7a78958d13",
+    "packages/geometry/src/index.ts": "6d365e111dc67dd1f2beae95d27985cf4c2aa43dc0023d2bef8a198747ecc87f",
     "packages/geometry/src/invalidation.ts": "9d42bd81ccfc82cecac5d0a200bd889ae49c164acf5db44eaebdb445acff7906",
-    "packages/geometry/src/solve-layout.ts": "0686fcb7b43b713abe13f81c93c84652fa9f78d192dd80211e56d10ca0c9c8ff",
-    "packages/geometry/src/types.ts": "f8d663491053871b919c0b1782604fa74a740822e11eb2fba4470d505b6345fc",
+    "packages/geometry/src/resize-axis.ts": "7a1b1281eea8d5ce61fd77169614589775e914860a57031f05864bb0d0ad2feb",
+    "packages/geometry/src/solve-layout.ts": "0114df31e8d6059e9a06bf6a7d212c64731d4f8b314f3fa308154a90941bb7e6",
+    "packages/geometry/src/types.ts": "b4e8f5116d33cd7875a7605bb5c38150f1f7d594fa212ff5eb335a502567f74a",
+    "packages/geometry/test/bounded-rounding.test.ts": "9a259f2fd6f3b5671c2d62a70c752422712a86cada16f0137aa3636ea5bc62a0",
+    "packages/geometry/test/bounded-waterfill.test.ts": "59daf31fccd47add659db0d962d3789b2bafb9ed5d79c0c645bf81e66ec88cfd",
+    "packages/geometry/test/reference/allocate-axis.ts": "93e01f42b3982ea54785fcab6636777b8e6e4d9b7feb89545ff1199e402f1b76",
+    "packages/geometry/test/resize-axis.test.ts": "534d8af5424480a13f83b1899ad57b2823d059a9b056e58857bba092d946cd02",
+    "packages/geometry/test/rounding-compatibility.test.ts": "cd320f634822fefe70ab3d4933c321cb9bb8e793c36b8efed5014f5428588489",
     "packages/geometry/tsconfig.json": "49477f7be8bc9f2976c250a0297c34809aed00c7d9e57115eaa4ad1722897e9c",
     "packages/model/package.json": "15e5054eb50fc8a0c54fcd593a9dfb71a4c10c2091e0af0477598a2b98f88f90",
     "packages/model/src/commands.ts": "e4d1dd8edd3fde607ae8f5640a2e9c9b7a4d571724b4847ab945d599d3fa32b7",
@@ -497,10 +528,11 @@
     "packages/model/src/entities.ts": "2f8461c6ced824a4d99258dfc3f35e983161cef641779b0d4bcaa72e04d0fd2b",
     "packages/model/src/factories.ts": "efb2d00d14f7f93fc249daae477a22e1b3dea8541d9cffc1cb2e1e04651c6b98",
     "packages/model/src/ids.ts": "cbf1947c1c8ed51447a6e3b5d77b04734e0b6b59e588099f442b99c3bde953c1",
-    "packages/model/src/index.ts": "894f6d22e3e7612e4ae3ce186e244452247d6111196270901edfbd3544684f0a",
+    "packages/model/src/index.ts": "be7cef88f8bf665374cfdca6a72b146f20d6861da1649a41f535df5c424861b7",
     "packages/model/src/json.ts": "71b1008440a2511a701e7ff4484e0373fd0f0dfac78a39eb099da31f0ee389f5",
     "packages/model/src/panel-registry.ts": "0a84a2ea260b55bf2c8efaa8462aae4e698045865f533d6e937a93ab8af9af5c",
     "packages/model/src/results.ts": "f66a7e790365153a33f72df22e7961890d74f0e1723cf9ed2f13fcdd58c50fec",
+    "packages/model/src/split-weights.ts": "05695900c92d98b016c21adae3e17ca20ee97134f10e1b6a3d91c0a35cf19ea6",
     "packages/model/tsconfig.json": "49477f7be8bc9f2976c250a0297c34809aed00c7d9e57115eaa4ad1722897e9c",
     "packages/motion/package.json": "39e7fa3a01054566b9eba9eebfc304aca294f877c9f39fe396d2fc4bfd321caf",
     "packages/motion/src/coordinator.ts": "50eff7dd6a1b8f6433ac3f5bfc5f8d74b99a501e43e712ccb3e1a82520574c6d",
@@ -544,13 +576,13 @@
     "packages/protocol/test/protocol.test.ts": "dd118363496c22c9df3110c3a3ab05e7b1bee643fe0c613c75503c2f2262fd4f",
     "packages/protocol/tsconfig.json": "3f465de909ed88bb206aa2ee7095c56a63223c3a11efa84ad39e69b1d1abd1a8",
     "packages/react/package.json": "39bcbf2fc9e64daa7167f035fc67b01a0c725c3e4a77282644df560a6d8a9b72",
-    "packages/react/src/WorkspaceSurface.tsx": "f0d86236c2c926ea5c8536761def8c86235a3c7f8db9a23d2afa7aa8e958592a",
+    "packages/react/src/WorkspaceSurface.tsx": "9e7139cb97d9333de4bb44d87f0562a72b399404452abf051969abbaea367d9c",
     "packages/react/src/client-coordinates.ts": "f70aaae0922037939b3f21583cfceaf34289d2d811654991da775ac23241411e",
     "packages/react/src/drop-modifiers.ts": "542583898dfa7d121b0d91f51171df8a3db47a8e749422437da903372a60c6ee",
     "packages/react/src/drop-preview.ts": "7c84edb3ba5ee124e207ca6fc5fb3f2a8b8e07178d90f11b96a68504b4402de7",
     "packages/react/src/drop-target.ts": "6626985475da22f7a7938e2c7dd59cd6ce83f07902561a1cf6b77fec3ed361ff",
     "packages/react/src/floating-surface.tsx": "32929421671ddd83c5f7cf784ad4da970195c0bc657db76c2cd1ad776c0ca536",
-    "packages/react/src/geometry.ts": "2b43bf5f4968b75708abcaf539b18e130a36852fca0fbe84b2d42f8837b25f57",
+    "packages/react/src/geometry.ts": "99bc2ec29880a81797d542279be25d92028d7bb445b0fce162e4edd5c911dbb7",
     "packages/react/src/group-drag.tsx": "bb30a15666da3c6fbcfa53b443b023393ea85bec33ee3da750e9f67384694f26",
     "packages/react/src/group-drop.ts": "85a436f15d973eacf1a7d556b467a75e56ed484fb1add90e95d2b3e1c4c137dd",
     "packages/react/src/index.ts": "06ac67797c26fc7981ed3d770465eb97bb45edfe5d28a4d787322e75e84a1143",
@@ -569,8 +601,9 @@
     "packages/react/src/tab-presentation.ts": "eeeac41f560e89ed8db685a0df1d6190703ed306507e2cc3cff81f5f4e460143",
     "packages/react/src/tab-reorder.ts": "c139803bc37c5f2c6fc6a17eb836784ff8d203b7bae8acebedcbf290cdabc599",
     "packages/react/src/types.ts": "75f063061f6af77986f752c7c4fa5512ca4e403301e7377e67a2622596e48bad",
-    "packages/react/test/WorkspaceSurface.test.tsx": "ca562cc27866047b34efefc9a99ec4ab4eed35e97b0a06cdced0033681c42f37",
+    "packages/react/test/WorkspaceSurface.test.tsx": "63ff3e887f0d0d0fec33c94d399dfa7136925077f34e3a60eae2c858388b78ac",
     "packages/react/test/client-coordinates.test.ts": "11492358f3ecc0ad0b0530abc11e6237e20fb60ce7132d7bead8625467a45389",
+    "packages/react/test/constrained-resize.test.tsx": "9a261e6135f34510627296e9545ae3bbecab5e7c8ca4805d1b6dec0b426df446",
     "packages/react/test/drag-parity.test.ts": "1f0bca650b8647cf7473639a0afa59839bdd60327892e428f30a98642cd67443",
     "packages/react/test/drop-preview.test.ts": "bdc1de685dce3a9bc5c073cf9fb7f2325de07251a8f71d4b318f09990c22211c",
     "packages/react/test/drop-target.test.ts": "2f28dc5a482cb6cc12fdbafb4e29ca3fba2a424dd1a5e9f822e9d95f4e9fc0a6",
@@ -582,6 +615,7 @@
     "packages/react/test/node-motion.test.ts": "7c826c0b7f309830af7fd78b0db89cae76c7d06ebeb95e18b1e0bebbd4f3e42d",
     "packages/react/test/panel-context.test.tsx": "abf4141ff6dec4ee77e1bf6f3e215b141d4ddfa4d8d4340035be3b7d21ac4a63",
     "packages/react/test/panel-drop.test.ts": "33b5839fb82ad5ab3e79c61badaec03589b8024377e85e549e4af80797a4024c",
+    "packages/react/test/resize-policy.test.tsx": "f5a57b9914dc6e2b74fcb75bdbf83c4ea4dd71394b4b115c1ef6f850b7c42701",
     "packages/react/test/tab-insertion.test.ts": "5c65997257abdca9b2605b13ed733bc9670991b962cd3096674d503f2ed77960",
     "packages/react/test/tab-reorder.test.ts": "da6e97901c25a0e5b32480ffd0450e058bb1f6070eef5df5d3e062067282dae2",
     "packages/react/test/touch-drop-policy.test.ts": "b58dba1e8cc540085ddde1e90538ccecbaaaef9a1fa519331d71399293d538f5",
@@ -589,7 +623,7 @@
     "pnpm-workspace.yaml": "d51950e32647c121ad667b578a448b703ea5f74637fd91524b7012dd53167169",
     "scripts/protocol-coverage-lib.d.mts": "ad9778fdda16883ddc6d8c8f366e119453673c61db21abc5a058e648f39e33ca",
     "scripts/protocol-coverage-lib.mjs": "a6172fbdc67ad48298c7866f47ff25895d255dcbb47976f65e7098825a758f8e",
-    "scripts/record-preview-evidence.mjs": "a5871ec4a3ed2399c9415bdcc5ce074a19989a16a7ea4e74696b33bbd1e0cea2",
+    "scripts/record-preview-evidence.mjs": "2c64a646d148759762d07257f79dbeb39b7d584d980191931db68d63e3e3538e",
     "scripts/run-protocol-coverage.mjs": "51345937f17b41822986377ed74a6b6f52a88dcc1ac1482fc1580af9a8a0eb9a",
     "scripts/verify-protocol-coverage.d.mts": "353a5ec6ec45b69ccdac52b7f1d4cc5d308e9360fa7627241c178b52684643cf",
     "scripts/verify-protocol-coverage.mjs": "e6659c6d19bb29abd6ba2b9942639a9b9b3e83a2535ccf80e2d7a296b6805fc9",
