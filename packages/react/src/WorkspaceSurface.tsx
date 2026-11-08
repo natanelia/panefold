@@ -1875,9 +1875,24 @@ function Splitter({
   const actorRef = useRef<ResizeActor | null>(null);
   const sessionRef = useRef<PointerResizeSession | null>(null);
   const handledRevisionRef = useRef(projectionRevision);
-  const handledLayoutRef = useRef(resolvedLayout);
   const beforeSize = axisSize(resolvedLayout.nodeRects[splitter.beforeNodeId], split.axis);
   const afterSize = axisSize(resolvedLayout.nodeRects[splitter.afterNodeId], split.axis);
+  const splitRect = resolvedLayout.nodeRects[split.id];
+  const geometryKey = [
+    direction,
+    split.axis,
+    splitRect?.inlineStart,
+    splitRect?.blockStart,
+    splitRect?.inlineSize,
+    splitRect?.blockSize,
+    splitter.rect.inlineStart,
+    splitter.rect.blockStart,
+    splitter.rect.inlineSize,
+    splitter.rect.blockSize,
+    beforeSize,
+    afterSize,
+  ].join(":");
+  const handledGeometryRef = useRef(geometryKey);
   const pairSize = beforeSize + afterSize;
   const value = pairSize === 0 ? 50 : (beforeSize / pairSize) * 100;
 
@@ -1931,11 +1946,11 @@ function Splitter({
   useEffect(() => {
     if (
       handledRevisionRef.current === projectionRevision &&
-      handledLayoutRef.current === resolvedLayout
+      handledGeometryRef.current === geometryKey
     )
       return;
     handledRevisionRef.current = projectionRevision;
-    handledLayoutRef.current = resolvedLayout;
+    handledGeometryRef.current = geometryKey;
     const actor = actorRef.current;
     if (actor === null) return;
     scheduler.cancel(scheduleKey);
@@ -1949,7 +1964,7 @@ function Splitter({
     }
     if (state === "cancelling") send(actor, { type: "RETURNED" });
     disposeActor(actor);
-  }, [disposeActor, onCancel, projectionRevision, resolvedLayout, scheduleKey, scheduler, send]);
+  }, [disposeActor, geometryKey, onCancel, projectionRevision, scheduleKey, scheduler, send]);
 
   const updatePair = useCallback(
     (

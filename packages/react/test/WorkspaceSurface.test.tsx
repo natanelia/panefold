@@ -1092,6 +1092,53 @@ describe("WorkspaceSurface", () => {
     },
   );
 
+  it("keeps a resize through equal-valued parent renders and cancels when bounds change", async () => {
+    const runtime = new FixtureRuntime(initialProjection);
+    const frames = createManualFrameScheduler();
+    function Parent() {
+      const [width, setWidth] = useState(1000);
+      const [, update] = useState(0);
+      return (
+        <WorkspaceRuntimeProvider runtime={runtime}>
+          <button onClick={() => update((value) => value + 1)}>Rerender equal bounds</button>
+          <button onClick={() => setWidth(1100)}>Grow bounds</button>
+          <WorkspaceSurface
+            projector={(snapshot: FixtureSnapshot) => snapshot.projection}
+            commands={commands}
+            panels={panels}
+            resizePreviewMode="separator"
+            frameScheduler={frames.scheduler}
+            layoutBounds={{ inlineStart: 0, blockStart: 0, inlineSize: width, blockSize: 700 }}
+          />
+        </WorkspaceRuntimeProvider>
+      );
+    }
+    const view = render(<Parent />);
+    const splitter = await screen.findByRole("separator", { name: /resize adjacent/i });
+    installPointerCapture(splitter);
+    const marker = requiredElement(view.container.querySelector("[data-workspace-resize-preview]"));
+    fireEvent.pointerDown(splitter, { button: 0, pointerId: 67, clientX: 497 });
+    fireEvent.pointerMove(splitter, { pointerId: 67, clientX: 597 });
+    act(() => frames.flush());
+    expect(marker.hidden).toBe(false);
+    fireEvent.click(screen.getByRole("button", { name: "Rerender equal bounds" }));
+    expect(marker.hidden).toBe(false);
+    expect(splitter.dataset.resizeState).toBe("resizing");
+    expect(splitter.hasPointerCapture(67)).toBe(true);
+    expect(protocolActorInventory.resize.active).toBe(1);
+    fireEvent.pointerMove(splitter, { pointerId: 67, clientX: 617 });
+    act(() => frames.flush());
+    expect(marker.style.insetInlineStart).toBe("617px");
+
+    fireEvent.click(screen.getByRole("button", { name: "Grow bounds" }));
+    expect(marker.hidden).toBe(true);
+    expect(splitter.dataset.resizeState).toBe("idle");
+    expect(splitter.hasPointerCapture(67)).toBe(false);
+    expect(protocolActorInventory.resize.active).toBe(0);
+    expect(frames.hasPending()).toBe(false);
+    expect(runtime.transactions).toHaveLength(0);
+  });
+
   it("restores a live preview when an unrelated revision keeps declared geometry unchanged", async () => {
     const runtime = new FixtureRuntime(initialProjection);
     const frames = createManualFrameScheduler();
