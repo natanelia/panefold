@@ -97,6 +97,22 @@ receives all 100 updates. This is a render-count check, not an application frame
 
 The optional `layoutSolver` bridge lets the renderer use constraints from the canonical model. The reference bridge calls `solveLayout(snapshot, nodeId(request.rootNodeId), request.bounds, options)`, forwarding splitter size and temporary split overrides. Omitting the model-aware bridge is not equivalent to enforcing all model constraints.
 
+## Resize expensive content on release
+
+`WorkspaceSurface` accepts `resizePreviewMode="separator"` to move a divider marker while panel contents keep their committed dimensions. Pointer release dispatches one resize command. Escape, lost capture, cancellation, a changed layout, or a rejected command removes the preview. Keyboard resizing still applies each step immediately.
+
+The default `"auto"` mode checks the selected panels in visible groups beneath the resized split. Project `panel.constraints.resizeDelivery` into `WorkspacePanelView.resizeDelivery`; a visible `"deferred"` panel selects the divider-only preview. Hidden tabs and unrelated groups do not defer a gesture. `"live"` forces the existing frame-coalesced content preview, and `"separator"` forces the marker regardless of panel preferences. The mode is captured at pointer-down.
+
+`"throttled"` and `"adaptive"` preferences currently use the same frame-coalesced preview as `"live"`; they do not implement a separate callback rate or automatic cost detection. Divider-only preview uses the same constraint solver and commit path as live resizing. It does not change the model's weight or constraint semantics. In the demo, choose **Workspace appearance → Resize preview → Divider only**.
+
+## Resize with the keyboard
+
+Focus a divider with Tab. Arrow keys resize along its axis; Shift increases the step from 2% to 10% of the adjacent pair. Inline arrows follow `direction`, including RTL.
+
+The separator's `aria-controls` identifies the primary pane: the pane immediately before the divider in logical layout order. Its current value reports that pane's percentage of the adjacent pair, rounded to two decimal places. The 0–100 scale describes that percentage; it does not claim that every percentage is attainable under the active constraints.
+
+F6 moves focus to the next visible, enabled divider in the same workspace; Shift+F6 moves backward. Both wrap at the ends. Starting a pointer resize focuses its divider, so Escape cancels the active resize and restores its previous geometry. Keyboard sizing uses the same semantic resize command and result handling as pointer resizing.
+
 ## Handle results and cleanup
 
 Use `onCommandResult` to present rejected operations without treating them as successful UI changes. Dispatch receipts can be `committed`, `rejected` or `queued`; a queued receipt is not proof of a completed commit.

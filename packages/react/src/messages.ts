@@ -131,7 +131,7 @@ export const ENGLISH_WORKSPACE_MESSAGES = Object.freeze({
   regionOption: ({ label, panelCount }) => `${label} · ${String(panelCount)}`,
   resizeAdjacentPanes: () => "Resize adjacent workspace panes",
   primaryPanePercent: ({ percent }) =>
-    `Primary pane ${new Intl.NumberFormat("en", { maximumFractionDigits: 0 }).format(percent)} percent`,
+    `Primary pane ${new Intl.NumberFormat("en", { maximumFractionDigits: 2 }).format(percent)} percent`,
   closePanel: ({ title }) => `Close ${title}`,
   actionsForPanel: ({ title }) => `Actions for ${title}`,
   panelActions: ({ title }) => `${title} actions`,

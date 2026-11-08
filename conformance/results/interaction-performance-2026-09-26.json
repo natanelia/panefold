@@ -25,20 +25,25 @@
     "p99": 16.8
   },
   "rawFrameDeltasMs": [
-    16.6, 16.7, 16.6, 16.7, 16.7, 16.7, 16.6, 16.7, 16.7, 16.7, 16.6, 16.6, 16.8, 16.7, 16.5, 16.8,
-    16.6, 16.7, 16.7, 16.6, 16.6, 16.8, 16.7, 16.5, 16.7, 16.7, 16.7, 16.6, 16.7, 16.7, 16.6, 16.7,
-    16.6, 16.8, 16.5, 16.8, 16.6, 16.7, 16.7, 16.6, 16.7, 16.7, 16.6, 16.6, 16.7, 16.7, 16.7, 16.6,
-    16.7, 16.7, 16.7, 16.6, 16.7, 16.7, 16.7, 16.6, 16.6, 16.7, 16.7, 16.6, 16.8, 16.5, 16.7, 16.7,
-    16.7, 16.6, 16.7, 16.6, 16.8, 16.6, 16.6, 16.7, 16.7, 16.7, 16.6, 16.7, 16.6, 16.7, 16.7, 16.7,
-    16.7, 16.6, 16.7, 16.6, 16.7, 16.6, 16.7, 16.7, 16.7, 16.6, 16.7, 16.6, 16.7, 16.7, 16.7, 16.6,
-    16.6, 16.8, 16.6, 16.7, 16.7, 16.6, 16.7, 16.7, 16.6, 16.7, 16.6, 16.7, 16.7, 16.6, 16.7, 16.7,
-    16.7, 16.6, 16.7, 16.6, 16.7, 16.7, 16.6, 16.7, 16.7, 16.6, 16.7, 16.6, 16.8, 16.6, 16.6, 16.7,
-    16.7, 16.6, 16.8, 16.6, 16.6, 16.7, 16.7, 16.7, 16.7, 16.6, 16.6, 16.8, 16.6, 16.6, 16.8, 16.6,
-    16.7, 16.6, 16.7, 16.6, 16.8, 16.6, 16.7, 16.6, 16.7, 16.6, 16.7, 16.7, 16.6, 16.7, 16.7, 16.6,
-    16.7, 16.7, 16.6, 16.7, 16.6, 16.8, 16.6, 16.7, 16.6, 16.7, 16.6, 16.8, 16.6, 16.7, 16.6, 16.7,
-    16.7, 16.6, 16.7
+    16.8, 16.6, 16.7, 16.6, 16.8, 16.6, 16.7, 16.6, 16.6, 16.8, 16.6, 16.6, 16.7, 16.8, 16.6, 16.7,
+    16.6, 16.6, 16.8, 16.6, 16.7, 16.7, 16.6, 16.7, 16.6, 16.7, 16.6, 16.7, 16.7, 16.7, 16.7, 16.6,
+    16.6, 16.7, 16.7, 16.7, 16.6, 16.7, 16.6, 16.7, 16.7, 16.6, 16.7, 16.7, 16.6, 16.7, 16.7, 16.6,
+    16.7, 16.7, 16.7, 16.6, 16.7, 16.6, 16.7, 16.6, 16.8, 16.6, 16.7, 16.6, 16.8, 16.6, 16.7, 16.6,
+    16.7, 16.6, 16.8, 16.5, 16.7, 16.8, 16.5, 16.7, 16.7, 16.6, 16.7, 16.7, 16.7, 16.7, 16.6, 16.7,
+    16.7, 16.6, 16.7, 16.6, 16.7, 16.7, 16.7, 16.6, 16.7, 16.7, 16.6, 16.6, 16.8, 16.6, 16.6, 16.7,
+    16.7, 16.6, 16.7, 16.7, 16.6, 16.7, 16.7, 16.7, 16.6, 16.7, 16.7, 16.6, 16.7, 16.6, 16.7, 16.6,
+    16.8, 16.6, 16.7, 16.7, 16.6, 16.7, 16.7, 16.6, 16.7, 16.6, 16.7, 16.7, 16.7, 16.6, 16.7, 16.7,
+    16.6, 16.6, 16.8, 16.6, 16.6, 16.7, 16.7, 16.7, 16.7, 16.6, 16.6, 16.7, 16.7, 16.6, 16.8, 16.6,
+    16.7, 16.6, 16.7, 16.6, 16.8, 16.6, 16.6, 16.7, 16.7, 16.7, 16.6, 16.7, 16.7, 16.6, 16.7, 16.7,
+    16.6, 16.7, 16.6, 16.7, 16.7, 16.7, 16.6, 16.7, 16.6, 16.7, 16.6, 16.8, 16.6, 16.7, 16.6, 16.8,
+    16.5, 16.7, 16.7
   ],
-  "longTasks": [],
+  "longTasks": [
+    {
+      "startTime": 130.89999999996508,
+      "duration": 53
+    }
+  ],
   "baseline": {
     "schemaVersion": 1,
     "profile": "compact-react-chromium-desktop",
@@ -48,7 +53,7 @@
     "longTaskMaximumCount": 12,
     "minimumSamples": 120
   },
-  "producedAt": "2026-11-08T10:41:24.717Z",
+  "producedAt": "2026-11-08T10:45:04.565Z",
   "nodeSmoke": {
     "schemaVersion": 1,
     "environment": {
@@ -56,24 +61,24 @@
       "v8": "13.6.233.17-node.63",
       "platform": "linux",
       "architecture": "x64",
-      "cpu": "AMD EPYC 9V45 96-Core Processor"
+      "cpu": "INTEL(R) XEON(R) PLATINUM 8573C"
     },
     "kernel": {
       "iterations": 10000,
-      "elapsedMs": 1103.32
+      "elapsedMs": 1712.76
     },
     "geometry": {
       "iterations": 100000,
-      "elapsedMs": 184.87
+      "elapsedMs": 252.36
     },
     "reorderProfiles": [
       {
         "panelCount": 50,
         "warmupCount": 250,
         "sampleCount": 2000,
-        "medianMs": 0.1664,
-        "p95Ms": 0.2615,
-        "p99Ms": 0.3056,
+        "medianMs": 0.2514,
+        "p95Ms": 0.4119,
+        "p99Ms": 0.5249,
         "designTargetMs": 1,
         "withinDesignTargetOnThisMachine": true,
         "invariantViolations": 0
@@ -82,9 +87,9 @@
         "panelCount": 500,
         "warmupCount": 100,
         "sampleCount": 1000,
-        "medianMs": 1.6066,
-        "p95Ms": 1.7613,
-        "p99Ms": 2.8788,
+        "medianMs": 2.3501,
+        "p95Ms": 2.6563,
+        "p99Ms": 3.2676,
         "designTargetMs": 5,
         "withinDesignTargetOnThisMachine": true,
         "invariantViolations": 0
@@ -94,30 +99,30 @@
       {
         "nodeCount": 100,
         "sampleCount": 10000,
-        "elapsedMs": 28.8,
-        "meanMicroseconds": 2.88
+        "elapsedMs": 41.89,
+        "meanMicroseconds": 4.189
       },
       {
         "nodeCount": 500,
         "sampleCount": 10000,
-        "elapsedMs": 144.46,
-        "meanMicroseconds": 14.446
+        "elapsedMs": 213.19,
+        "meanMicroseconds": 21.319
       },
       {
         "nodeCount": 1000,
         "sampleCount": 10000,
-        "elapsedMs": 301.28,
-        "meanMicroseconds": 30.128
+        "elapsedMs": 456.81,
+        "meanMicroseconds": 45.681
       }
     ],
-    "totalElapsedMs": 4025.52,
+    "totalElapsedMs": 5967.38,
     "finalRevision": "10000",
     "invariantViolations": 0
   },
   "rawReport": {
     "path": "artifacts/preview-browser.json",
-    "sha256": "e1015cd09890f6aff0e67b81f285de866f46c223ddefc37dac66b90fff4e05bf",
-    "runUrl": "https://github.com/natanelia/panefold/actions/runs/42472155591",
+    "sha256": "10be03ccea2cfd31f48ba428682ce5ae32728fe45fbbce0e093c0e85a2f0e697",
+    "runUrl": "https://github.com/natanelia/panefold/actions/runs/42472168419",
     "artifact": "preview-executed-evidence"
   },
   "sourceDigests": {
@@ -133,11 +138,14 @@
     "apps/demo/src/touch-playground.css": "f85cd5505e93e38f3301c5d419a6790e16edde937c0eea2c061213a8fc182d6c",
     "apps/demo/src/use-touch-workbench.ts": "c913911471945a857994e2078eb36420b14cdcb8cd3d7437b5d562c32a02f04c",
     "e2e/code-workbench-cases.ts": "e83979a7be6e659fa238414e65f7f28ec74828274567e8f181ea002ed3212d39",
+    "e2e/deferred-resize.spec.ts": "87cee00ab3529a9fe7f4c82addd017c951b2cc10a7ebc264ee3b4b8e680899b7",
     "e2e/drag-parity.spec.ts": "a7c7da7513e3b56de9b832cce5fa2fc6236f55d74ba9ea3aa9be1600f6620bce",
     "e2e/mobile-playground.spec.ts": "fd45fe0690c8edbb380193d2525ed07a565ce2b1acb186207bc9d88e96d1d25c",
     "e2e/native-touch-audit.ts": "31e07885233945c7f47f7965a0fa66df5d73973ece27a211cc952e34c76d183b",
     "e2e/performance-baseline.json": "128b4c7dc2c7fc03372224828417f675b279359ebbe9bab7408b172ad76b48a9",
     "e2e/performance.spec.ts": "2bbc7b6cb40fd2ad97ba33824b5b8a0a3cf43a82ce638e432f13d29c8db164f3",
+    "e2e/scaled-coordinates.spec.ts": "5a086a41e1494cca8ca29f6d3d2acdc9dae5df138e07ee16f492bc37136d0630",
+    "e2e/splitter-accessibility.spec.ts": "e2ff2c3b967888397f230620d362001f4d6f5a25b637c3481b6db0b036dc4c74",
     "e2e/touch-helpers.ts": "bf7072e192e7395fb26f23d2f172669a8790063f26c35a8442eb1d2c1d77c511",
     "e2e/touch-layout.spec.ts": "15a09005c8bcc752b1520d30b619c257912a60fa518066b5392a0c9853dc8eef",
     "e2e/touch-playground-operations.spec.ts": "d594a5a80b176d7be8c721d13546aede0b69e7ce72dea879d59498dc69123d5b",
@@ -147,20 +155,23 @@
     "packages/geometry/src/invalidation.ts": "9d42bd81ccfc82cecac5d0a200bd889ae49c164acf5db44eaebdb445acff7906",
     "packages/kernel-optimized/src/indexes.ts": "c6d962626b3c0cac8d7d89f156aed383b1e313a201f7c3ce5f228d97959ac0a8",
     "packages/motion/src/coordinator.ts": "50eff7dd6a1b8f6433ac3f5bfc5f8d74b99a501e43e712ccb3e1a82520574c6d",
-    "packages/react/src/WorkspaceSurface.tsx": "34ffd4fe1b5518b51367812d925379340fffaa61f6263904125431e70722b72f",
+    "packages/react/src/WorkspaceSurface.tsx": "a02e722b0be8f9e0145070ff7ca846832d2fabc7d6d675b7d596d641da90a824",
+    "packages/react/src/client-coordinates.ts": "f70aaae0922037939b3f21583cfceaf34289d2d811654991da775ac23241411e",
     "packages/react/src/drop-modifiers.ts": "542583898dfa7d121b0d91f51171df8a3db47a8e749422437da903372a60c6ee",
     "packages/react/src/drop-preview.ts": "7c84edb3ba5ee124e207ca6fc5fb3f2a8b8e07178d90f11b96a68504b4402de7",
     "packages/react/src/drop-target.ts": "6626985475da22f7a7938e2c7dd59cd6ce83f07902561a1cf6b77fec3ed361ff",
     "packages/react/src/floating-surface.tsx": "32929421671ddd83c5f7cf784ad4da970195c0bc657db76c2cd1ad776c0ca536",
     "packages/react/src/group-drag.tsx": "bb30a15666da3c6fbcfa53b443b023393ea85bec33ee3da750e9f67384694f26",
     "packages/react/src/group-drop.ts": "85a436f15d973eacf1a7d556b467a75e56ed484fb1add90e95d2b3e1c4c137dd",
-    "packages/react/src/index.ts": "091c9aec1f4bf40b9968e5387462582549bcf033b4983dfb4b5e7230ee47cc00",
-    "packages/react/src/messages.ts": "cd68829f5ead5ffd616dc93b22a57a76117e142395acda4a88c6f560d7751a47",
+    "packages/react/src/index.ts": "0f9a8f943ddde1d84b66f1a3e31203189a428023cd6939e56764bcb0c960a490",
+    "packages/react/src/messages.ts": "b6ddb245d6f42d3054c50c2eede24814261649ab3464e55131bed934cb09eb30",
     "packages/react/src/move-destination-controls.tsx": "c72fd93fc63ecefa7f732dde93291f04f1f3d075b9bee3e0b1b4d52ed18bd19d",
     "packages/react/src/node-motion.ts": "5f7efe09d09573ea1c2baa44744627d34fabe60cc6978f287da83e6b02ed52bb",
     "packages/react/src/panel-drag.tsx": "e19befa4995182d66a76570990bcff60e2ab4ba5fb76f0fe8a63e020bca493cc",
-    "packages/react/src/styles.css": "5ce0dc5fcdafaa04e9593212eecdcac4012ebde9b56894d4294cbdc6a07ba144",
+    "packages/react/src/resize-preview.ts": "ec6d7eac3d639828b2630592fe5090d9da59f842dae6a88596aad9b8c91d1938",
+    "packages/react/src/styles.css": "9e471d644146b497b56569a9351d63f5a028beb566255472c169301a2cc5146d",
     "packages/react/src/tab-insertion.ts": "e611ecfe7cb4b0b9fb7e748a747f2584e35dbaa72111a907008f6dc6b11f1670",
+    "packages/react/test/client-coordinates.test.ts": "11492358f3ecc0ad0b0530abc11e6237e20fb60ce7132d7bead8625467a45389",
     "packages/react/test/drag-parity.test.ts": "1f0bca650b8647cf7473639a0afa59839bdd60327892e428f30a98642cd67443",
     "packages/react/test/drop-preview.test.ts": "bdc1de685dce3a9bc5c073cf9fb7f2325de07251a8f71d4b318f09990c22211c",
     "packages/react/test/drop-target.test.ts": "2f28dc5a482cb6cc12fdbafb4e29ca3fba2a424dd1a5e9f822e9d95f4e9fc0a6",
@@ -169,7 +180,7 @@
     "packages/react/test/touch-drop-policy.test.ts": "b58dba1e8cc540085ddde1e90538ccecbaaaef9a1fa519331d71399293d538f5",
     "pnpm-lock.yaml": "be4cd87737d70f25c878659c3d485f829712789fd70504d542cc4cb27797eb6d",
     "scripts/performance-smoke.mjs": "fc0d8ce5df966b75312b5d9fae367e07b5ce4f8215afa724d03a7a6cb17fdc95",
-    "scripts/record-preview-evidence.mjs": "9918258288f54dd3d93f8cebb895107dca13e9b7c58130234071c70a47411e2c",
+    "scripts/record-preview-evidence.mjs": "9df57c81a48c8b6ef83a7938a1a6593e2c5602ea8a4a326669c4305ffb3a9126",
     "vitest.config.ts": "6f743b2639e8e091bdc454a4aaa6336a538b889e70af8814ee7d1f27c7a8769e"
   },
   "limitations": [

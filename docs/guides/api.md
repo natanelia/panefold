@@ -30,6 +30,7 @@ All packages are currently unpublished workspace packages. For the complete pack
 | `tabPresentation`                 | Static or per-group placement/content policy           |
 | `direction`, `messageCatalog`     | Logical direction and interaction messages             |
 | `motion`                          | `off`, `reduced` or `productive`                       |
+| `resizePreviewMode`               | `auto`, `live` or a divider-only `separator` preview   |
 | `dropBehavior`                    | Edge splitting and center-group swap/merge preferences |
 | `responsive`, `compactBreakpoint` | Reversible single-region projection policy             |
 | `onCommandResult`                 | Observe dispatch outcomes                              |
