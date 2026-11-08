@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "kind": "differential-model-result",
   "profile": "compact-react-chromium-desktop",
-  "producedAt": "2026-11-08T10:11:42.656584+00:00",
+  "producedAt": "2026-11-08T10:31:55.424672+00:00",
   "status": "passed-with-thresholds-unmet",
   "runner": "panefold-differential-campaign",
   "commands": {
@@ -31,14 +31,14 @@
     "divergenceCount": 0,
     "finalHash": "fnv1a64-v1:a1f58a1b0c635ad1",
     "generatedCommandTypeCount": 36,
-    "elapsedMs": 25447
+    "elapsedMs": 28526
   },
   "suite": {
     "testFiles": 5,
     "tests": 25,
     "passed": 25,
     "failed": 0,
-    "durationMs": 10563.583740234375
+    "durationMs": 9264.671875
   },
   "checks": {
     "curatedCommandDiscriminants": 36,
@@ -62,7 +62,7 @@
   },
   "sourceDigests": {
     "package.json": "acd970060c8df0d628cada8c1762111b9c3587031dbdc0e5815fb1e6159147ee",
-    "pnpm-lock.yaml": "be4cd87737d70f25c878659c3d485f829712789fd70504d542cc4cb27797eb6d",
+    "pnpm-lock.yaml": "6f188132c287b0b7a559b11ac5d247f28252d473cee2a6abd3468d64f92959ba",
     "pnpm-workspace.yaml": "d51950e32647c121ad667b578a448b703ea5f74637fd91524b7012dd53167169",
     "tsconfig.json": "ba7a45d0184771111310a1c6503d1ab957ee05c7ad538f3ade8070acefdd9a8f",
     "tsconfig.base.json": "6a5180d481cd767365ec8da2257e5573e498c5802ce56bda99e0ac218baca818",
@@ -120,12 +120,12 @@
   "rawReports": [
     {
       "path": "artifacts/independent-campaign.json",
-      "sha256": "c3e7a5e21ebdb4aa44a1ff542b62ef85e231590a23d2e11f35087dde61c3e0dc",
+      "sha256": "d7c7c9e1f4edf6bf543f48e127e2071e9fd9a22d181cd67d9e52ad1964ce489a",
       "execution": "Local isolated worktree; freshly executed reports retained with this review."
     },
     {
       "path": "artifacts/independent-suite.json",
-      "sha256": "4635a62d2c757ae8641272d67ab04f94c684a8e3020254b1ad1c949ea9450fc4",
+      "sha256": "2450be8a0eee73d87e5b852ff24a2aea7399c780f135031579277bb1775e312e",
       "execution": "Local isolated worktree; freshly executed reports retained with this review."
     }
   ]

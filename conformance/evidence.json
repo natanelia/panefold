@@ -383,7 +383,7 @@
       "verificationClass": "code-verifiable",
       "artifactRole": "source",
       "uri": "repo://packages/react/test/WorkspaceSurface.test.tsx",
-      "sha256": "7db275aba0d8ec6b23570eda14c3ca3717cd394467b7f860db522950c941bc10",
+      "sha256": "64aa6c97dd4f7538dde56f5f020e891c19bb20df74bf08378a0ed9975612d8b4",
       "producedAt": "2026-08-14T07:19:51.074Z",
       "requirementIds": [
         "A11Y-003",
@@ -576,7 +576,7 @@
       "verificationClass": "code-verifiable",
       "artifactRole": "source",
       "uri": "repo://pnpm-lock.yaml",
-      "sha256": "be4cd87737d70f25c878659c3d485f829712789fd70504d542cc4cb27797eb6d",
+      "sha256": "6f188132c287b0b7a559b11ac5d247f28252d473cee2a6abd3468d64f92959ba",
       "producedAt": "2026-08-14T07:19:51.074Z",
       "requirementIds": [
         "ARC-005",
@@ -760,7 +760,7 @@
       "verificationClass": "code-verifiable",
       "artifactRole": "source",
       "uri": "repo://packages/react/test/WorkspaceSurface.test.tsx",
-      "sha256": "7db275aba0d8ec6b23570eda14c3ca3717cd394467b7f860db522950c941bc10",
+      "sha256": "64aa6c97dd4f7538dde56f5f020e891c19bb20df74bf08378a0ed9975612d8b4",
       "producedAt": "2026-08-14T07:19:51.074Z",
       "requirementIds": [
         "I18N-001",
@@ -856,7 +856,7 @@
       "verificationClass": "code-verifiable",
       "artifactRole": "source",
       "uri": "repo://docs/ARCHITECTURE.md",
-      "sha256": "b5239fe43df593f4c8f274731a8d90fa3c23d5684a661d51719f9dd3ea914a29",
+      "sha256": "cd0e447036f1f26aec407b9ec09d856f0f8660a7c67dd07b60909207ee880364",
       "producedAt": "2026-08-14T07:19:51.074Z",
       "requirementIds": [
         "API-002",
@@ -1109,7 +1109,7 @@
       "verificationClass": "code-verifiable",
       "artifactRole": "result",
       "uri": "repo://conformance/results/protocol-state-machine-coverage-2026-08-14.json",
-      "sha256": "fe19f62c6eb7bba980b1b09446f4cedbfac533c7e0bad955d0396f0b5e7688f2",
+      "sha256": "3798027c9629179700edd00646574e03d67318bb80ae661d33ca7328673d8a0a",
       "producedAt": "2026-08-14T01:12:00Z",
       "requirementIds": [
         "TST-003"
@@ -1126,8 +1126,8 @@
       "verificationClass": "code-verifiable",
       "artifactRole": "result",
       "uri": "repo://conformance/results/independent-semantic-oracle-2026-09-27.json",
-      "sha256": "1e472daa4ff596a813396376786556a3ec803a7f490a35ec3a26419b9563e979",
-      "producedAt": "2026-11-08T10:11:42.656584+00:00",
+      "sha256": "c84015a57f7793adf543c1c7477e29473a9fa7611b251f4b345707af9b8fc158",
+      "producedAt": "2026-11-08T10:31:55.424672+00:00",
       "requirementIds": [
         "MOD-004",
         "PRF-003",
