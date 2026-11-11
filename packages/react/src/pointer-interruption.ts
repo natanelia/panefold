@@ -18,7 +18,7 @@ export function usePointerInterruption(onInterrupt: () => void) {
   useLayoutEffect(() => stop, [stop]);
 
   const start = useCallback(
-    (element: HTMLElement) => {
+    (element: HTMLElement, options?: { readonly cancelOnEscape?: boolean }) => {
       stop();
       const ownerDocument = element.ownerDocument;
       const ownerWindow = ownerDocument.defaultView;
@@ -38,13 +38,32 @@ export function usePointerInterruption(onInterrupt: () => void) {
         if (event.target === ownerDocument && ownerDocument.visibilityState === "hidden")
           interrupt();
       };
+      const onKeyDown = (event: KeyboardEvent) => {
+        if (
+          event.key !== "Escape" ||
+          event.defaultPrevented ||
+          event.isComposing ||
+          event.altKey ||
+          event.ctrlKey ||
+          event.metaKey
+        ) {
+          return;
+        }
+        event.preventDefault();
+        event.stopPropagation();
+        interrupt();
+      };
       ownerWindow?.addEventListener("blur", onWindowBlur);
       ownerWindow?.addEventListener("pagehide", onPageHide);
       ownerDocument.addEventListener("visibilitychange", onVisibilityChange);
+      // Pointer capture does not move keyboard focus. Bubble so an editor can
+      // claim Escape before it cancels the gesture, even with focus elsewhere.
+      if (options?.cancelOnEscape) ownerDocument.addEventListener("keydown", onKeyDown);
       disposeRef.current = () => {
         ownerWindow?.removeEventListener("blur", onWindowBlur);
         ownerWindow?.removeEventListener("pagehide", onPageHide);
         ownerDocument.removeEventListener("visibilitychange", onVisibilityChange);
+        if (options?.cancelOnEscape) ownerDocument.removeEventListener("keydown", onKeyDown);
       };
     },
     [stop],

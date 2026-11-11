@@ -335,7 +335,7 @@ export function FloatingSurfaceFrame({
       baseRevision: safeRevision(projectionRevision),
     });
     event.currentTarget.setPointerCapture?.(event.pointerId);
-    observeInterruption(event.currentTarget);
+    observeInterruption(event.currentTarget, { cancelOnEscape: true });
     event.stopPropagation();
     event.preventDefault();
   };
@@ -422,8 +422,17 @@ export function FloatingSurfaceFrame({
     event.stopPropagation();
   };
 
+  const canHandleKeyboardEvent = (event: KeyboardEvent<HTMLElement>) =>
+    event.target === event.currentTarget &&
+    !event.defaultPrevented &&
+    !event.nativeEvent.isComposing &&
+    !event.altKey &&
+    !event.ctrlKey &&
+    !event.metaKey &&
+    sessionRef.current === undefined;
+
   const moveByKeyboard = (event: KeyboardEvent<HTMLElement>) => {
-    if (event.target !== event.currentTarget || event.defaultPrevented || !canMove) return;
+    if (!canHandleKeyboardEvent(event) || !canMove) return;
     if (
       (event.key === "Enter" || event.key === " ") &&
       (!frontmost || !active) &&
@@ -443,7 +452,7 @@ export function FloatingSurfaceFrame({
   };
 
   const resizeByKeyboard = (edge: FloatingResizeEdge, event: KeyboardEvent<HTMLElement>) => {
-    if (!canResize || onResize === undefined) return;
+    if (!canHandleKeyboardEvent(event) || !canResize || onResize === undefined) return;
     const step = event.shiftKey ? 32 : 8;
     const delta = keyboardDelta(event.key, step);
     if (delta === undefined || !edgeAcceptsDelta(edge, delta)) return;

@@ -51,6 +51,13 @@ jobs:
 
   browser:
     runs-on: ubuntu-latest
+    container:
+      # Keep this image aligned with @playwright/test in package.json.
+      image: mcr.microsoft.com/playwright:v1.62.1-noble@sha256:dcc5531e97840b9b5e794f2814476b21571c5124a3fca2267d73041f56e7580e
+      options: --init --ipc=host --user 1001
+    defaults:
+      run:
+        shell: bash
     timeout-minutes: 20
     steps:
       - uses: actions/checkout@v7
@@ -62,7 +69,6 @@ jobs:
           node-version: 24
           cache: pnpm
       - run: pnpm install --frozen-lockfile
-      - run: pnpm exec playwright install --with-deps chromium
       - run: pnpm test:e2e
       - run: pnpm test:site:e2e
       - name: Upload browser evidence and retained traces

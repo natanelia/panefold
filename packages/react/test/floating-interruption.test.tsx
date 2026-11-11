@@ -62,16 +62,18 @@ afterEach(() => {
 });
 
 type Mode = "move" | "resize";
-type Interruption = "blur" | "pagehide" | "hidden";
+type Interruption = "blur" | "pagehide" | "hidden" | "escape";
 const originalBounds = { x: 100, y: 80, width: 320, height: 240 };
 
 describe("interrupted floating pointer gestures", () => {
   for (const mode of ["move", "resize"] as const) {
-    for (const interruption of ["blur", "pagehide", "hidden"] as const) {
+    for (const interruption of ["blur", "pagehide", "hidden", "escape"] as const) {
       it.each(["queued", "painted"] as const)(
         `cancels a %s ${mode} on owner ${interruption} without committing`,
         (phase) => {
           const fixture = setup(mode);
+          const input = required(fixture.container.querySelector("input"));
+          act(() => input.focus());
           expect(fixture.listeners.count()).toBe(0);
           begin(fixture, 31);
           move(fixture, 31, 60, 40);
@@ -87,6 +89,7 @@ describe("interrupted floating pointer gestures", () => {
 
           interrupt(fixture.document, interruption);
 
+          expect(fixture.document.activeElement).toBe(input);
           expect(fixture.frame.dataset.floatingManipulation).toBe("idle");
           expect(readBounds(fixture.frame)).toEqual(originalBounds);
           expect(fixture.frames.hasPending()).toBe(false);
@@ -156,25 +159,28 @@ describe("interrupted floating pointer gestures", () => {
       expect(fixture.listeners.count()).toBe(0);
     });
 
-    it(`keeps the final ${mode} preview when its release callback changes window focus`, () => {
-      const fixture = setup(mode);
-      const command = mode === "move" ? fixture.onMove : fixture.onResize;
-      command.mockImplementationOnce(() => {
-        interrupt(fixture.document, "blur");
-        return { status: "committed" };
-      });
-      begin(fixture, 45);
-      move(fixture, 45, 60, 40);
-      act(() => fixture.frames.flush());
+    it.each(["blur", "escape"] as const)(
+      `keeps the final ${mode} preview when its release callback sends %s`,
+      (interruption) => {
+        const fixture = setup(mode);
+        const command = mode === "move" ? fixture.onMove : fixture.onResize;
+        command.mockImplementationOnce(() => {
+          interrupt(fixture.document, interruption);
+          return { status: "committed" };
+        });
+        begin(fixture, 45);
+        move(fixture, 45, 60, 40);
+        act(() => fixture.frames.flush());
 
-      finish(fixture, 45, 60, 40);
+        finish(fixture, 45, 60, 40);
 
-      expect(command).toHaveBeenCalledExactlyOnceWith(movedBounds(mode, 60, 40), "pointer");
-      expect(readBounds(fixture.frame)).toEqual(movedBounds(mode, 60, 40));
-      expect(fixture.frame.dataset.floatingManipulation).toBe("idle");
-      expect(fixture.listeners.count()).toBe(0);
-      expect(actors.active).toBe(0);
-    });
+        expect(command).toHaveBeenCalledExactlyOnceWith(movedBounds(mode, 60, 40), "pointer");
+        expect(readBounds(fixture.frame)).toEqual(movedBounds(mode, 60, 40));
+        expect(fixture.frame.dataset.floatingManipulation).toBe("idle");
+        expect(fixture.listeners.count()).toBe(0);
+        expect(actors.active).toBe(0);
+      },
+    );
 
     it(`only interrupts a ${mode} for the document that owns its frame`, () => {
       const iframe = document.createElement("iframe");
@@ -185,7 +191,7 @@ describe("interrupted floating pointer gestures", () => {
         begin(fixture, 51);
         move(fixture, 51, 60, 40);
         act(() => fixture.frames.flush());
-        for (const interruption of ["blur", "pagehide", "hidden"] as const) {
+        for (const interruption of ["blur", "pagehide", "hidden", "escape"] as const) {
           interrupt(document, interruption);
         }
         expect(fixture.frame.dataset.floatingManipulation).toBe("manipulating");
@@ -193,7 +199,7 @@ describe("interrupted floating pointer gestures", () => {
         expect(fixture.handle.hasPointerCapture(51)).toBe(true);
         expect(actors.active).toBe(1);
 
-        interrupt(ownerDocument, "blur");
+        interrupt(ownerDocument, "escape");
 
         expect(fixture.frame.dataset.floatingManipulation).toBe("idle");
         expect(readBounds(fixture.frame)).toEqual(originalBounds);
@@ -207,6 +213,79 @@ describe("interrupted floating pointer gestures", () => {
         fixture.unmount();
         iframe.remove();
       }
+    });
+
+    it(`leaves claimed, composing, and modified Escape keys alone during a ${mode}`, () => {
+      const fixture = setup(mode);
+      const input = required(fixture.container.querySelector("input"));
+      act(() => input.focus());
+      const escapedAtWindow = vi.fn();
+      const ownerWindow = required(fixture.document.defaultView);
+      ownerWindow.addEventListener("keydown", escapedAtWindow);
+      try {
+        expect(fireEvent.keyDown(input, { key: "Escape" })).toBe(true);
+        expect(escapedAtWindow).toHaveBeenCalledTimes(1);
+        begin(fixture, 55);
+        move(fixture, 55, 60, 40);
+        act(() => fixture.frames.flush());
+        input.addEventListener("keydown", (event) => event.stopPropagation(), { once: true });
+        expect(fireEvent.keyDown(input, { key: "Escape" })).toBe(true);
+        expect(escapedAtWindow).toHaveBeenCalledTimes(1);
+        const claim = (event: Event) => event.preventDefault();
+        input.addEventListener("keydown", claim, { once: true });
+        expect(fireEvent.keyDown(input, { key: "Escape" })).toBe(false);
+        for (const options of [
+          { isComposing: true },
+          { altKey: true },
+          { ctrlKey: true },
+          { metaKey: true },
+        ]) {
+          expect(fireEvent.keyDown(input, { key: "Escape", ...options })).toBe(true);
+        }
+        expect(fixture.frame.dataset.floatingManipulation).toBe("manipulating");
+        expect(readBounds(fixture.frame)).toEqual(movedBounds(mode, 60, 40));
+        expect(fixture.handle.hasPointerCapture(55)).toBe(true);
+        expect(escapedAtWindow).toHaveBeenCalledTimes(6);
+
+        expect(fireEvent.keyDown(input, { key: "Escape", shiftKey: true })).toBe(false);
+
+        expect(fixture.frame.dataset.floatingManipulation).toBe("idle");
+        expect(readBounds(fixture.frame)).toEqual(originalBounds);
+        expect(fixture.document.activeElement).toBe(input);
+        expect(fixture.handle.hasPointerCapture(55)).toBe(false);
+        expect(fixture.listeners.count()).toBe(0);
+        expect(actors.active).toBe(0);
+        expect(escapedAtWindow).toHaveBeenCalledTimes(6);
+        expect(fixture.onMove).not.toHaveBeenCalled();
+        expect(fixture.onResize).not.toHaveBeenCalled();
+        expect(fireEvent.keyDown(input, { key: "Escape" })).toBe(true);
+        expect(escapedAtWindow).toHaveBeenCalledTimes(7);
+      } finally {
+        ownerWindow.removeEventListener("keydown", escapedAtWindow);
+      }
+    });
+
+    it(`does not mix keyboard commands into an active ${mode}`, () => {
+      const fixture = setup(mode);
+      begin(fixture, 57);
+      move(fixture, 57, 60, 40);
+      act(() => fixture.frames.flush());
+      for (const target of [
+        required(fixture.container.querySelector(".pf-floating-titlebar")),
+        required(fixture.container.querySelector('[data-resize-edge="right"]')),
+      ]) {
+        expect(fireEvent.keyDown(target, { key: "ArrowRight" })).toBe(true);
+        expect(fireEvent.keyDown(target, { key: "ArrowDown", shiftKey: true })).toBe(true);
+      }
+      expect(readBounds(fixture.frame)).toEqual(movedBounds(mode, 60, 40));
+      expect(fixture.onMove).not.toHaveBeenCalled();
+      expect(fixture.onResize).not.toHaveBeenCalled();
+      finish(fixture, 57, 60, 40);
+      expect(mode === "move" ? fixture.onMove : fixture.onResize).toHaveBeenCalledExactlyOnceWith(
+        movedBounds(mode, 60, 40),
+        "pointer",
+      );
+      expect(fixture.listeners.count()).toBe(0);
     });
 
     it.each([
@@ -253,6 +332,7 @@ describe("interrupted floating pointer gestures", () => {
       }
       const calls = fixture.onMove.mock.calls.length + fixture.onResize.mock.calls.length;
       interrupt(fixture.document, "pagehide");
+      expect(fireEvent.keyDown(fixture.document.body, { key: "Escape" })).toBe(true);
       act(() => fixture.frames.flush());
       finish(fixture, 61, 90, 50);
       expect(fixture.onMove.mock.calls.length + fixture.onResize.mock.calls.length).toBe(calls);
@@ -352,7 +432,9 @@ function readBounds(frame: HTMLElement) {
 }
 
 function interrupt(ownerDocument: Document, kind: Interruption) {
-  if (kind === "hidden") {
+  if (kind === "escape") {
+    fireEvent.keyDown(ownerDocument.activeElement ?? ownerDocument.body, { key: "Escape" });
+  } else if (kind === "hidden") {
     setVisibility(ownerDocument, "hidden");
     fireEvent(ownerDocument, new Event("visibilitychange"));
   } else {
@@ -388,7 +470,7 @@ function watchInterruptionListeners(ownerDocument: Document) {
     vi.spyOn(target, "addEventListener").mockImplementation((type, listener, options) => {
       const tracked =
         target === ownerDocument
-          ? type === "visibilitychange"
+          ? type === "visibilitychange" || type === "keydown"
           : type === "blur" || type === "pagehide";
       const signal = typeof options === "object" ? options?.signal : undefined;
       const capture = typeof options === "boolean" ? options : options?.capture === true;
