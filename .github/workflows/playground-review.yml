@@ -17,6 +17,13 @@ permissions:
 jobs:
   review:
     runs-on: ubuntu-latest
+    container:
+      # Keep this image aligned with @playwright/test in package.json.
+      image: mcr.microsoft.com/playwright:v1.62.1-noble@sha256:dcc5531e97840b9b5e794f2814476b21571c5124a3fca2267d73041f56e7580e
+      options: --init --ipc=host --user 1001
+    defaults:
+      run:
+        shell: bash
     timeout-minutes: 25
     env:
       VITEST_MAX_WORKERS: "1"
@@ -36,7 +43,6 @@ jobs:
           node-version: 24
           cache: pnpm
       - run: pnpm install --frozen-lockfile
-      - run: pnpm exec playwright install --with-deps chromium
       - name: Test the actual phone interactions without retries
         run: |
           pnpm exec playwright test e2e/touch-playground-ux.spec.ts e2e/touch-tap-diagnostic.spec.ts --workers=1 --retries=0 --reporter=json --output=artifacts/phone-results > artifacts/phone-browser.json

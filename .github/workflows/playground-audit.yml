@@ -12,6 +12,13 @@ permissions:
 jobs:
   features:
     runs-on: ubuntu-latest
+    container:
+      # Keep this image aligned with @playwright/test in package.json.
+      image: mcr.microsoft.com/playwright:v1.62.1-noble@sha256:dcc5531e97840b9b5e794f2814476b21571c5124a3fca2267d73041f56e7580e
+      options: --init --ipc=host --user 1001
+    defaults:
+      run:
+        shell: bash
     timeout-minutes: 20
     strategy:
       fail-fast: false
@@ -29,7 +36,6 @@ jobs:
           node-version: 24
           cache: pnpm
       - run: pnpm install --frozen-lockfile
-      - run: pnpm exec playwright install --with-deps chromium firefox webkit
       - name: Exercise all playground controls on ${{ matrix.project }}
         run: |
           mkdir -p artifacts
@@ -50,6 +56,13 @@ jobs:
     needs: features
     if: github.event.pull_request.head.repo.full_name == github.repository
     runs-on: ubuntu-latest
+    container:
+      # Keep this image aligned with @playwright/test in package.json.
+      image: mcr.microsoft.com/playwright:v1.62.1-noble@sha256:dcc5531e97840b9b5e794f2814476b21571c5124a3fca2267d73041f56e7580e
+      options: --init --ipc=host --user 1001
+    defaults:
+      run:
+        shell: bash
     timeout-minutes: 15
     strategy:
       fail-fast: false
@@ -70,7 +83,6 @@ jobs:
           node-version: 24
           cache: pnpm
       - run: pnpm install --frozen-lockfile
-      - run: pnpm exec playwright install --with-deps chromium firefox webkit
       - name: Verify the deployed revision, then audit the public playground
         run: |
           mkdir -p artifacts

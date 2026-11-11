@@ -21,6 +21,11 @@ requirements and conformance data, builds, conformance structure, a performance 
 strict TypeScript, tests, and the demo plus documentation/marketing build. Run both Playwright
 suites when browser, demo, documentation, or site behavior changes.
 
+The main browser CI and playground review/audit jobs use the official Playwright image with browsers
+and system dependencies preinstalled. Its version and immutable image digest are pinned in those
+workflows. Update these pins together with `@playwright/test` so the image and test package continue
+to use the same browser builds.
+
 All packages remain workspace-local and experimental. Do not add publishing instructions, stable
 support ranges, or certification language without the corresponding release decision and evidence.
 
