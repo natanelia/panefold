@@ -201,6 +201,30 @@ The interruption does not dispatch a layout command or create an undo entry; a l
 cannot commit the abandoned gesture. Events in a different document and ordinary element focus
 changes do not cancel it. The next pointer gesture starts normally.
 
+## Lock pane sizes
+
+Set `splitResizeDisabled` on `WorkspaceSurface` or `ModelWorkspaceSurface` to disable pointer and
+keyboard resizing of every pane divider in that surface, including dividers inside floating windows.
+The prop defaults to `false` and can change at runtime:
+
+```tsx
+<ModelWorkspaceSurface bindings={session} panels={panels} splitResizeDisabled={lockPaneSizes} />
+```
+
+Switching it on during a drag restores the committed sizes, removes any divider preview and cancels
+pending movement. Releasing the pointer afterward cannot commit the cancelled resize or add an undo
+entry. Switching it off enables resizing again.
+
+Disabled dividers keep their separator labels, pane relationships and size values, expose
+`aria-disabled="true"`, and leave the Tab and F6 navigation sequence. A divider that already has focus
+keeps it, so disabling does not unexpectedly move focus. Disabled dividers have no enlarged grab area
+or resize cursor, and leave touch scrolling available.
+
+This is a view setting for pane dividers. Panel content, tab actions, floating-window movement and edge
+resizing, and application-dispatched `resize-split` commands remain available. Keep application
+permissions in the runtime's command policy. The setting is not part of the saved layout. Try it in
+the demo under **Workspace appearance → Lock pane sizes**.
+
 ## Resize with the keyboard
 
 Focus a divider with Tab. Arrow keys resize along its axis; Shift increases the step from 2% to 10% of the adjacent pair. Inline arrows follow `direction`, including RTL. With the built-in solvers, Home gives the primary pane its smallest verified size, and End gives it its largest, while keeping the other panes in the split fixed. Alt, Ctrl and Meta combinations remain available to the browser and application.

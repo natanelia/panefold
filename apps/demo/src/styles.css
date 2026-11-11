@@ -304,6 +304,13 @@
     background: var(--demo-surface);
   }
 
+  .demo-settings-popover > .demo-settings-checkbox {
+    grid-template-columns: auto 1fr;
+    gap: 7px;
+    min-block-size: 31px;
+    color: var(--demo-text);
+  }
+
   .demo-settings-popover fieldset {
     display: grid;
     gap: 8px;
@@ -1840,6 +1847,7 @@
     }
 
     .demo-settings-popover select,
+    .demo-settings-popover > .demo-settings-checkbox,
     .demo-settings-reset,
     .demo-settings-popover fieldset label {
       min-block-size: 44px;
@@ -2210,7 +2218,8 @@
     background: var(--demo-border);
   }
 
-  .demo-app .pf-splitter:is(:hover, :focus-visible) .pf-splitter-line {
+  .demo-app .pf-splitter:not([aria-disabled="true"]):hover .pf-splitter-line,
+  .demo-app .pf-splitter:focus-visible .pf-splitter-line {
     background: var(--demo-accent);
   }
 

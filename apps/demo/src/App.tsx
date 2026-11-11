@@ -160,6 +160,7 @@ function CodeWorkspaceApp({ session }: { readonly session: DemoWorkspaceSession 
   const [compactGroupId, setCompactGroupId] = useState("primary");
   const [focusMode, setFocusMode] = useState(false);
   const [resizePreviewMode, setResizePreviewMode] = useState<WorkspaceResizePreviewMode>("auto");
+  const [splitResizeDisabled, setSplitResizeDisabled] = useState(false);
   const touchWorkbench = useTouchWorkbench();
   // The compact view must follow activation from menus, history and panel moves.
   // Changing the region selector itself stays a view-only operation.
@@ -389,6 +390,8 @@ function CodeWorkspaceApp({ session }: { readonly session: DemoWorkspaceSession 
           tabContent={tabContent}
           resizePreviewMode={resizePreviewMode}
           onResizePreviewMode={setResizePreviewMode}
+          splitResizeDisabled={splitResizeDisabled}
+          onSplitResizeDisabled={setSplitResizeDisabled}
           onTheme={(value) => {
             updatePreferences({ theme: value });
           }}
@@ -492,6 +495,7 @@ function CodeWorkspaceApp({ session }: { readonly session: DemoWorkspaceSession 
             direction={direction}
             motion={motion}
             resizePreviewMode={resizePreviewMode}
+            splitResizeDisabled={splitResizeDisabled}
             workspaceLabel="Panefold Code workbench"
             className="demo-workspace"
             responsive={focusMode ? "auto" : false}
@@ -867,12 +871,14 @@ function SettingsMenu({
   tabPlacement,
   tabContent,
   resizePreviewMode,
+  splitResizeDisabled,
   onTheme,
   onDirection,
   onMotion,
   onTabPlacement,
   onTabContent,
   onResizePreviewMode,
+  onSplitResizeDisabled,
   onResetLayout,
 }: {
   readonly theme: DemoTheme;
@@ -881,12 +887,14 @@ function SettingsMenu({
   readonly tabPlacement: WorkspaceTabPlacement;
   readonly tabContent: WorkspaceTabContent;
   readonly resizePreviewMode: WorkspaceResizePreviewMode;
+  readonly splitResizeDisabled: boolean;
   readonly onTheme: (value: DemoTheme) => void;
   readonly onDirection: (value: WorkspaceDirection) => void;
   readonly onMotion: (value: DemoMotionProfile) => void;
   readonly onTabPlacement: (value: WorkspaceTabPlacement) => void;
   readonly onTabContent: (value: WorkspaceTabContent) => void;
   readonly onResizePreviewMode: (value: WorkspaceResizePreviewMode) => void;
+  readonly onSplitResizeDisabled: (value: boolean) => void;
   readonly onResetLayout: () => void;
 }) {
   const [open, setOpen] = useState(false);
@@ -1017,6 +1025,16 @@ function SettingsMenu({
               <option value="live">Live panels</option>
               <option value="separator">Divider only</option>
             </select>
+          </label>
+          <label className="demo-settings-checkbox">
+            <input
+              type="checkbox"
+              checked={splitResizeDisabled}
+              onChange={(event) => {
+                onSplitResizeDisabled(event.target.checked);
+              }}
+            />
+            Lock pane sizes
           </label>
           <button className="demo-settings-reset" type="button" onClick={onResetLayout}>
             Reset saved layout
