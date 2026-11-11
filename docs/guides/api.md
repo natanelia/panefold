@@ -20,21 +20,22 @@ All packages are currently unpublished workspace packages. For the complete pack
 
 ## The renderer props you will use most
 
-| Prop                              | Use                                                    |
-| --------------------------------- | ------------------------------------------------------ |
-| `projector`                       | Snapshot → `WorkspaceProjection`                       |
-| `commands`                        | UI intent → your semantic command                      |
-| `panels`                          | Type → `{ render, icon?, onLifecycleChange? }`         |
-| `layoutSolver`                    | Bridge canonical constraints into geometry             |
-| `className`, `workspaceLabel`     | Scoped theme and accessible workspace name             |
-| `tabPresentation`                 | Static or per-group placement/content policy           |
-| `direction`, `messageCatalog`     | Logical direction and interaction messages             |
-| `motion`                          | `off`, `reduced` or `productive`                       |
-| `resizePreviewMode`               | `auto`, `live` or a divider-only `separator` preview   |
-| `dropBehavior`                    | Edge splitting and center-group swap/merge preferences |
-| `responsive`, `compactBreakpoint` | Reversible single-region projection policy             |
-| `onCommandResult`                 | Observe dispatch outcomes                              |
-| `onExternalPanelRequest`          | Inject controlled external-window integration          |
+| Prop                              | Use                                                        |
+| --------------------------------- | ---------------------------------------------------------- |
+| `projector`                       | Snapshot → `WorkspaceProjection`                           |
+| `commands`                        | UI intent → your semantic command                          |
+| `panels`                          | Type → `{ render, icon?, onLifecycleChange? }`             |
+| `layoutSolver`                    | Bridge canonical constraints into geometry                 |
+| `className`, `workspaceLabel`     | Scoped theme and accessible workspace name                 |
+| `tabPresentation`                 | Static or per-group placement/content policy               |
+| `direction`, `messageCatalog`     | Logical direction and interaction messages                 |
+| `motion`                          | `off`, `reduced` or `productive`                           |
+| `resizePreviewMode`               | `auto`, `live` or a divider-only `separator` preview       |
+| `splitResizeDisabled`             | Disable pane-divider input; cancel any active divider drag |
+| `dropBehavior`                    | Edge splitting and center-group swap/merge preferences     |
+| `responsive`, `compactBreakpoint` | Reversible single-region projection policy                 |
+| `onCommandResult`                 | Observe dispatch outcomes                                  |
+| `onExternalPanelRequest`          | Inject controlled external-window integration              |
 
 Read the exact [WorkspaceSurfaceProps](../../packages/react/src/WorkspaceSurface.tsx) and [renderer types](../../packages/react/src/types.ts), including optional hooks and their constraints.
 

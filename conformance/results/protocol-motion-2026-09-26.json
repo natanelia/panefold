@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "kind": "protocol-motion-result",
   "profile": "compact-react-chromium-desktop",
-  "producedAt": "2026-11-11T15:25:09.397Z",
+  "producedAt": "2026-11-11T17:27:33.889Z",
   "status": "passed",
   "runner": "Vitest",
   "command": "pnpm exec vitest run --reporter=json --outputFile=artifacts/preview-unit.json",
@@ -12,16 +12,16 @@
     "browserVersion": "151.0.7922.34"
   },
   "summary": {
-    "tests": 813,
-    "passed": 813,
+    "tests": 822,
+    "passed": 822,
     "failed": 0,
-    "files": 91,
+    "files": 92,
     "protocolMotionTestFiles": 9,
     "protocolMotionTests": 86,
     "protocolMotionPassed": 86,
-    "reactIntegrationTestFiles": 21,
-    "reactIntegrationTests": 311,
-    "reactIntegrationPassed": 311
+    "reactIntegrationTestFiles": 22,
+    "reactIntegrationTests": 320,
+    "reactIntegrationPassed": 320
   },
   "tests": [
     {
@@ -300,41 +300,6 @@
       "passed": 22
     },
     {
-      "file": "packages/runtime/test/envelope-serialization.test.ts",
-      "status": "passed",
-      "passed": 5
-    },
-    {
-      "file": "packages/runtime/test/persistence-byte-count.test.ts",
-      "status": "passed",
-      "passed": 5
-    },
-    {
-      "file": "packages/runtime/test/persistence.test.ts",
-      "status": "passed",
-      "passed": 14
-    },
-    {
-      "file": "packages/runtime/test/policy.test.ts",
-      "status": "passed",
-      "passed": 2
-    },
-    {
-      "file": "packages/runtime/test/post-commit-effects.test.ts",
-      "status": "passed",
-      "passed": 14
-    },
-    {
-      "file": "packages/runtime/test/runtime.test.ts",
-      "status": "passed",
-      "passed": 17
-    },
-    {
-      "file": "packages/runtime-effect/test/persistence.test.ts",
-      "status": "passed",
-      "passed": 5
-    },
-    {
       "file": "packages/react/test/WorkspaceSurface.test.tsx",
       "status": "passed",
       "passed": 105
@@ -420,6 +385,11 @@
       "passed": 6
     },
     {
+      "file": "packages/react/test/splitter-disabled.test.tsx",
+      "status": "passed",
+      "passed": 9
+    },
+    {
       "file": "packages/react/test/splitter-interruption.test.tsx",
       "status": "passed",
       "passed": 22
@@ -438,6 +408,41 @@
       "file": "packages/react/test/touch-drop-policy.test.ts",
       "status": "passed",
       "passed": 2
+    },
+    {
+      "file": "packages/runtime/test/envelope-serialization.test.ts",
+      "status": "passed",
+      "passed": 5
+    },
+    {
+      "file": "packages/runtime/test/persistence-byte-count.test.ts",
+      "status": "passed",
+      "passed": 5
+    },
+    {
+      "file": "packages/runtime/test/persistence.test.ts",
+      "status": "passed",
+      "passed": 14
+    },
+    {
+      "file": "packages/runtime/test/policy.test.ts",
+      "status": "passed",
+      "passed": 2
+    },
+    {
+      "file": "packages/runtime/test/post-commit-effects.test.ts",
+      "status": "passed",
+      "passed": 14
+    },
+    {
+      "file": "packages/runtime/test/runtime.test.ts",
+      "status": "passed",
+      "passed": 17
+    },
+    {
+      "file": "packages/runtime-effect/test/persistence.test.ts",
+      "status": "passed",
+      "passed": 5
     },
     {
       "file": "packages/surfaces/test/browser-adapter.test.ts",
@@ -465,11 +470,6 @@
       "passed": 6
     },
     {
-      "file": "packages/vue/test/vue.test.ts",
-      "status": "passed",
-      "passed": 1
-    },
-    {
       "file": "packages/web-components/test/ssr-import.test.ts",
       "status": "passed",
       "passed": 1
@@ -478,12 +478,17 @@
       "file": "packages/web-components/test/web-components.test.ts",
       "status": "passed",
       "passed": 2
+    },
+    {
+      "file": "packages/vue/test/vue.test.ts",
+      "status": "passed",
+      "passed": 1
     }
   ],
   "rawReport": {
     "path": "artifacts/preview-unit.json",
-    "sha256": "1dccbd3ca131b86595487829b07ebafcf9abbbb4b4c903a68db0f8b1530f6e90",
-    "runUrl": "https://github.com/natanelia/panefold/actions/runs/43047032419",
+    "sha256": "8049a51ad229c8ed83ca4b99e0c7f695c2efac433ce2f8d6b1cc9b13004adef2",
+    "runUrl": "https://github.com/natanelia/panefold/actions/runs/43067472459",
     "artifact": "preview-executed-evidence"
   },
   "sourceDigests": {
@@ -510,6 +515,7 @@
     "e2e/native-touch-audit.ts": "31e07885233945c7f47f7965a0fa66df5d73973ece27a211cc952e34c76d183b",
     "e2e/scaled-coordinates.spec.ts": "5a086a41e1494cca8ca29f6d3d2acdc9dae5df138e07ee16f492bc37136d0630",
     "e2e/splitter-accessibility.spec.ts": "a444a95b1ce7f3345f476d888a86a0d6b5310f8d47bd43990d89c1ea91536ea3",
+    "e2e/splitter-disabled.spec.ts": "bd08d36628c855cbeaab886ff04fb03dae46eb8900cfa610d2d028151de6fde4",
     "e2e/touch-helpers.ts": "bf7072e192e7395fb26f23d2f172669a8790063f26c35a8442eb1d2c1d77c511",
     "e2e/touch-layout.spec.ts": "15a09005c8bcc752b1520d30b619c257912a60fa518066b5392a0c9853dc8eef",
     "e2e/touch-playground-operations.spec.ts": "d594a5a80b176d7be8c721d13546aede0b69e7ce72dea879d59498dc69123d5b",
@@ -587,7 +593,7 @@
     "packages/protocol/test/protocol.test.ts": "dd118363496c22c9df3110c3a3ab05e7b1bee643fe0c613c75503c2f2262fd4f",
     "packages/protocol/tsconfig.json": "3f465de909ed88bb206aa2ee7095c56a63223c3a11efa84ad39e69b1d1abd1a8",
     "packages/react/package.json": "39bcbf2fc9e64daa7167f035fc67b01a0c725c3e4a77282644df560a6d8a9b72",
-    "packages/react/src/WorkspaceSurface.tsx": "3deebf07c0fae2f325d0ad2fb58f0261ee6a8e075474cf5628ad00ca2578cb06",
+    "packages/react/src/WorkspaceSurface.tsx": "f03d89f9ba924ef2de5b5eb2e1383039cacadcc6c7b8eb96493bd8ef30d9381d",
     "packages/react/src/client-coordinates.ts": "f70aaae0922037939b3f21583cfceaf34289d2d811654991da775ac23241411e",
     "packages/react/src/drop-modifiers.ts": "542583898dfa7d121b0d91f51171df8a3db47a8e749422437da903372a60c6ee",
     "packages/react/src/drop-preview.ts": "7c84edb3ba5ee124e207ca6fc5fb3f2a8b8e07178d90f11b96a68504b4402de7",
@@ -608,7 +614,7 @@
     "packages/react/src/pointer-interruption.ts": "0dbbc742ce180b4fd12ef2ea32d8ab3cb97ba2685168b7ca9662548ca0510b37",
     "packages/react/src/resize-preview.ts": "ec6d7eac3d639828b2630592fe5090d9da59f842dae6a88596aad9b8c91d1938",
     "packages/react/src/runtime-context.tsx": "e689cab978f13b4a3cafef4c30fdb682abea7d043ca4e8001632e8faf364d9cc",
-    "packages/react/src/styles.css": "9e471d644146b497b56569a9351d63f5a028beb566255472c169301a2cc5146d",
+    "packages/react/src/styles.css": "9f188b1a7b506887b3291b179a03611100d9eccdb783d01cc7df48c9204decd5",
     "packages/react/src/tab-insertion.ts": "e611ecfe7cb4b0b9fb7e748a747f2584e35dbaa72111a907008f6dc6b11f1670",
     "packages/react/src/tab-presentation.ts": "eeeac41f560e89ed8db685a0df1d6190703ed306507e2cc3cff81f5f4e460143",
     "packages/react/src/tab-reorder.ts": "c139803bc37c5f2c6fc6a17eb836784ff8d203b7bae8acebedcbf290cdabc599",
@@ -629,6 +635,7 @@
     "packages/react/test/panel-context.test.tsx": "abf4141ff6dec4ee77e1bf6f3e215b141d4ddfa4d8d4340035be3b7d21ac4a63",
     "packages/react/test/panel-drop.test.ts": "33b5839fb82ad5ab3e79c61badaec03589b8024377e85e549e4af80797a4024c",
     "packages/react/test/resize-policy.test.tsx": "f5a57b9914dc6e2b74fcb75bdbf83c4ea4dd71394b4b115c1ef6f850b7c42701",
+    "packages/react/test/splitter-disabled.test.tsx": "bb6f127625e59fc2231bc693b6e2bf2d41da2fd6cc88f290088fe4d6aeb73754",
     "packages/react/test/splitter-interruption.test.tsx": "f0a6b2c8ea05b9ac34b773f2feadd70406b2fcf44e548acae7b695be3068a3c1",
     "packages/react/test/tab-insertion.test.ts": "5c65997257abdca9b2605b13ed733bc9670991b962cd3096674d503f2ed77960",
     "packages/react/test/tab-reorder.test.ts": "da6e97901c25a0e5b32480ffd0450e058bb1f6070eef5df5d3e062067282dae2",
@@ -637,7 +644,7 @@
     "pnpm-workspace.yaml": "d51950e32647c121ad667b578a448b703ea5f74637fd91524b7012dd53167169",
     "scripts/protocol-coverage-lib.d.mts": "ad9778fdda16883ddc6d8c8f366e119453673c61db21abc5a058e648f39e33ca",
     "scripts/protocol-coverage-lib.mjs": "a6172fbdc67ad48298c7866f47ff25895d255dcbb47976f65e7098825a758f8e",
-    "scripts/record-preview-evidence.mjs": "413a4692b14bc174058e622d8cf43f6969b91d43d40b65cfff01f7de82820f23",
+    "scripts/record-preview-evidence.mjs": "ca765af1798397244230f47ac091ab52bb8fd09f52b78d4ceab34fc88a2ca146",
     "scripts/run-protocol-coverage.mjs": "51345937f17b41822986377ed74a6b6f52a88dcc1ac1482fc1580af9a8a0eb9a",
     "scripts/verify-protocol-coverage.d.mts": "353a5ec6ec45b69ccdac52b7f1d4cc5d308e9360fa7627241c178b52684643cf",
     "scripts/verify-protocol-coverage.mjs": "4dfe1a18a090b39a352190eff73b8c12949c0853cce3a6f2ef7f1c374a82d1ef",

@@ -141,6 +141,11 @@ export interface WorkspaceSurfaceProps<TSnapshot, TCommand, TResult> {
    * Keyboard resizing always applies immediately.
    */
   readonly resizePreviewMode?: WorkspaceResizePreviewMode;
+  /**
+   * Disables pointer and keyboard split resizing. Enabling this cancels an active
+   * divider drag; application-dispatched commands remain available.
+   */
+  readonly splitResizeDisabled?: boolean;
   /** Floating titlebar height in CSS pixels; shared by chrome and docking geometry. */
   readonly floatingTitlebarSize?: number;
   /**
@@ -265,6 +270,7 @@ function SurfaceRenderer<TSnapshot, TCommand, TResult>({
   layoutBounds,
   splitterSize = 6,
   resizePreviewMode = "auto",
+  splitResizeDisabled = false,
   floatingTitlebarSize = 34,
   responsive = false,
   compactBreakpoint = 720,
@@ -1271,6 +1277,7 @@ function SurfaceRenderer<TSnapshot, TCommand, TResult>({
             previewSplit={previewSplit}
             solveSplitCandidate={solveSplitCandidate}
             getResizePreviewMode={getResizePreviewMode}
+            splitResizeDisabled={splitResizeDisabled}
             commitSplit={commitSplit}
             clearSplitPreview={clearSplitPreview}
             dispatch={dispatch}
@@ -1445,6 +1452,7 @@ function SurfaceRenderer<TSnapshot, TCommand, TResult>({
                     previewSplit={previewSplit}
                     solveSplitCandidate={solveSplitCandidate}
                     getResizePreviewMode={getResizePreviewMode}
+                    splitResizeDisabled={splitResizeDisabled}
                     commitSplit={commitSplit}
                     clearSplitPreview={clearSplitPreview}
                     dispatch={dispatch}
@@ -1719,6 +1727,7 @@ interface LayoutNodeProps<TCommand, TResult> {
     preview: Omit<SplitResizePreview, "splitId">,
   ) => ResolvedLayout;
   readonly getResizePreviewMode: (splitId: string) => ResolvedResizePreviewMode;
+  readonly splitResizeDisabled: boolean;
   readonly solveSplitCandidate: (splitId: string, weights: readonly number[]) => ResolvedLayout;
   readonly commitSplit: (
     splitId: string,
@@ -1807,6 +1816,7 @@ function SplitNode<TCommand, TResult>({
                 afterIndex={afterIndex}
                 weights={weights}
                 direction={props.direction}
+                disabled={props.splitResizeDisabled}
                 resolvedLayout={props.resolvedLayout}
                 primaryPaneId={splitChildId(props.domIdPrefix, precedingSplitter.beforeNodeId)}
                 projectionRevision={props.projectionRevision}
@@ -1850,6 +1860,7 @@ function SplitNode<TCommand, TResult>({
 }
 
 interface SplitterProps {
+  readonly disabled: boolean;
   readonly primaryPaneId: string;
   readonly split: WorkspaceSplitView;
   readonly splitter: ResolvedSplitter;
@@ -1876,6 +1887,7 @@ interface SplitterProps {
 }
 
 function Splitter({
+  disabled,
   primaryPaneId,
   split,
   splitter,
@@ -1935,6 +1947,8 @@ function Splitter({
   const pairSize = beforeSize + afterSize;
   const value = pairSize === 0 ? 50 : (beforeSize / pairSize) * 100;
   const [focused, setFocused] = useState(false);
+  // Removing tabindex from the focused divider drops focus in Chromium.
+  const tabIndex = disabled ? (focused ? -1 : undefined) : 0;
   // Custom solvers without compatible resize metadata retain solver-probed limits.
   // Full layout solves are only done for a focused divider, never on pointer frames.
   const attainableRange = useMemo(() => {
@@ -2036,6 +2050,7 @@ function Splitter({
 
   useLayoutEffect(() => {
     if (
+      !disabled &&
       handledRevisionRef.current === projectionRevision &&
       handledGeometryRef.current === geometryKey
     )
@@ -2049,13 +2064,25 @@ function Splitter({
     if (session !== null) session.pending = undefined;
     sessionRef.current = null;
     const state = send(actor, { type: "CANCEL" });
-    onCancel();
-    if (session?.captureElement.hasPointerCapture?.(session.pointerId)) {
-      session.captureElement.releasePointerCapture?.(session.pointerId);
+    try {
+      onCancel();
+    } finally {
+      if (session?.captureElement.hasPointerCapture?.(session.pointerId)) {
+        session.captureElement.releasePointerCapture?.(session.pointerId);
+      }
+      if (state === "cancelling") send(actor, { type: "RETURNED" });
+      disposeActor(actor);
     }
-    if (state === "cancelling") send(actor, { type: "RETURNED" });
-    disposeActor(actor);
-  }, [disposeActor, geometryKey, onCancel, projectionRevision, scheduleKey, scheduler, send]);
+  }, [
+    disabled,
+    disposeActor,
+    geometryKey,
+    onCancel,
+    projectionRevision,
+    scheduleKey,
+    scheduler,
+    send,
+  ]);
 
   const updatePair = useCallback(
     (
@@ -2083,7 +2110,8 @@ function Splitter({
   );
 
   const onPointerDown = (event: ReactPointerEvent<HTMLDivElement>) => {
-    if (event.button !== 0 || sessionRef.current !== null || actorRef.current !== null) return;
+    if (disabled || event.button !== 0 || sessionRef.current !== null || actorRef.current !== null)
+      return;
     const coordinate = split.axis === "inline" ? event.clientX : event.clientY;
     const actor = createResizeActor();
     actor.start();
@@ -2255,7 +2283,7 @@ function Splitter({
       if (focusNextSplitter(event.currentTarget, event.shiftKey ? -1 : 1)) event.preventDefault();
       return;
     }
-    if (event.altKey || event.ctrlKey || event.metaKey) return;
+    if (disabled || event.altKey || event.ctrlKey || event.metaKey) return;
     const boundary = event.key === "Home" ? "min" : event.key === "End" ? "max" : undefined;
     const extreme =
       resizeBounds === undefined || boundary === undefined
@@ -2338,7 +2366,8 @@ function Splitter({
       ref={splitterRef}
       className="pf-splitter"
       role="separator"
-      tabIndex={0}
+      tabIndex={tabIndex}
+      aria-disabled={disabled || undefined}
       aria-label={messages.resizeAdjacentPanes()}
       aria-controls={primaryPaneId}
       aria-orientation={split.axis === "inline" ? "vertical" : "horizontal"}
