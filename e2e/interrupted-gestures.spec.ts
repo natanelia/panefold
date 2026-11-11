@@ -278,3 +278,149 @@ for (const mode of ["move", "resize"] as const) {
     await expect(frame).toHaveAttribute("data-floating-manipulation", "idle");
   });
 }
+
+async function floatingEditor(page: Page) {
+  await prepare(page);
+  await page.getByRole("tab", { name: "workspace.ts" }).click();
+  await page.getByRole("button", { name: "Actions for workspace.ts" }).click();
+  await page.getByRole("menuitem", { name: "Float workspace.ts" }).click();
+  const frame = page.locator('[data-workspace-floating-surface^="floating:notes:"]');
+  const editor = frame.getByRole("textbox", { name: "workspace.ts editor", exact: true });
+  await expect(editor).toBeVisible();
+  return { frame, editor };
+}
+
+for (const mode of ["move", "resize"] as const) {
+  test(`Escape cancels a floating ${mode} with editor focus and leaves undo history intact`, async ({
+    page,
+  }) => {
+    const { frame, editor } = await floatingEditor(page);
+    const handle = frame.locator(
+      mode === "move" ? ".pf-floating-header-drag-region" : '[data-resize-edge="bottom-right"]',
+    );
+    const captureOwner = mode === "move" ? frame.locator(".pf-floating-titlebar") : handle;
+    const before = await boxOf(frame);
+    const revision = await revisionOf(page);
+    const changedAxis = mode === "move" ? "x" : "width";
+    await editor.fill("Keep this editor content through cancellation and undo.");
+    await editor.focus();
+
+    const pointerId = await startDrag(page, handle, 24, 16);
+    await expect(editor).toBeFocused();
+    await expect(frame).toHaveAttribute("data-floating-manipulation", "manipulating");
+    await expect.poll(async () => (await boxOf(frame))[changedAxis]).toBe(before[changedAxis] + 24);
+    expect(
+      await captureOwner.evaluate((element, id) => element.hasPointerCapture(id), pointerId),
+    ).toBe(true);
+    expect(await revisionOf(page)).toBe(revision);
+
+    await page.keyboard.press("Escape");
+    await expect(frame).toHaveAttribute("data-floating-manipulation", "idle");
+    expect(await boxOf(frame)).toEqual(before);
+    await expect(editor).toBeFocused();
+    expect(
+      await captureOwner.evaluate((element, id) => element.hasPointerCapture(id), pointerId),
+    ).toBe(false);
+    await page.mouse.up();
+    expect(await revisionOf(page)).toBe(revision);
+
+    await startDrag(page, handle, 24, 16);
+    await page.mouse.up();
+    await expect.poll(() => revisionOf(page)).toBe(revision + 1);
+    await expect.poll(async () => (await boxOf(frame))[changedAxis]).toBe(before[changedAxis] + 24);
+    await page.getByRole("button", { name: "Undo layout change", exact: true }).click();
+    await expect.poll(() => boxOf(frame)).toEqual(before);
+    // The next undo reverses the original float, not an abandoned drag.
+    await page.getByRole("button", { name: "Undo layout change", exact: true }).click();
+    await expect(frame).toHaveCount(0);
+    await expect(
+      page.getByRole("textbox", { name: "workspace.ts editor", exact: true }),
+    ).toHaveValue("Keep this editor content through cancellation and undo.");
+  });
+
+  test(`floating keyboard ${mode} preserves shortcuts and cannot compete with a pointer gesture`, async ({
+    page,
+  }) => {
+    const { frame } = await floatingEditor(page);
+    const control = frame.locator(
+      mode === "move" ? ".pf-floating-titlebar" : '[data-resize-edge="right"]',
+    );
+    const dragHandle = mode === "move" ? frame.locator(".pf-floating-header-drag-region") : control;
+    const before = await boxOf(frame);
+    const revision = await revisionOf(page);
+    const changedAxis = mode === "move" ? "x" : "width";
+    await control.focus();
+    await control.evaluate((element) => {
+      element.ownerDocument.defaultView?.addEventListener("keydown", (event) => {
+        if (event.key === "ArrowRight")
+          element.setAttribute("data-test-default-prevented", String(event.defaultPrevented));
+      });
+    });
+    for (const chord of ["Alt+ArrowRight", "Control+ArrowRight", "Meta+ArrowRight"]) {
+      await control.evaluate((element) => element.removeAttribute("data-test-default-prevented"));
+      await page.keyboard.press(chord);
+      expect(await boxOf(frame)).toEqual(before);
+      expect(await revisionOf(page)).toBe(revision);
+      await expect(control).toHaveAttribute("data-test-default-prevented", "false");
+    }
+
+    // A host shortcut and an IME event must not reach the layout command path.
+    await control.evaluate((element) => {
+      element.addEventListener("keydown", (event) => event.preventDefault(), {
+        capture: true,
+        once: true,
+      });
+    });
+    await page.keyboard.press("ArrowRight");
+    await control.dispatchEvent("keydown", { key: "ArrowRight", isComposing: true });
+    expect(await boxOf(frame)).toEqual(before);
+    expect(await revisionOf(page)).toBe(revision);
+
+    await page.keyboard.press("ArrowRight");
+    await expect.poll(async () => (await boxOf(frame))[changedAxis]).toBe(before[changedAxis] + 8);
+    await page.keyboard.press("Shift+ArrowRight");
+    await expect.poll(async () => (await boxOf(frame))[changedAxis]).toBe(before[changedAxis] + 40);
+    await expect.poll(() => revisionOf(page)).toBe(revision + 2);
+    const committed = await boxOf(frame);
+
+    await startDrag(page, dragHandle, 24, 0);
+    await expect(control).toBeFocused();
+    await expect
+      .poll(async () => (await boxOf(frame))[changedAxis])
+      .toBe(committed[changedAxis] + 24);
+    await page.keyboard.press("ArrowRight");
+    await page.keyboard.press("Shift+ArrowRight");
+    expect(await revisionOf(page)).toBe(revision + 2);
+    await expect(frame).toHaveAttribute("data-floating-manipulation", "manipulating");
+    await page.keyboard.press("Escape");
+    expect(await boxOf(frame)).toEqual(committed);
+    await page.mouse.up();
+    expect(await revisionOf(page)).toBe(revision + 2);
+  });
+}
+
+test("floating Escape respects an editor's claimed event and text composition", async ({
+  page,
+}) => {
+  const { frame, editor } = await floatingEditor(page);
+  const before = await boxOf(frame);
+  const revision = await revisionOf(page);
+  await editor.focus();
+  await startDrag(page, frame.locator(".pf-floating-header-drag-region"), 24, 16);
+  await expect.poll(async () => (await boxOf(frame)).x).toBe(before.x + 24);
+  await editor.evaluate((element) => {
+    element.addEventListener("keydown", (event) => event.preventDefault(), { once: true });
+  });
+  await page.keyboard.press("Escape");
+  await editor.dispatchEvent("keydown", { key: "Escape", isComposing: true });
+  await expect(frame).toHaveAttribute("data-floating-manipulation", "manipulating");
+  expect((await boxOf(frame)).x).toBe(before.x + 24);
+  expect(await revisionOf(page)).toBe(revision);
+
+  await page.keyboard.press("Escape");
+  await expect(frame).toHaveAttribute("data-floating-manipulation", "idle");
+  expect(await boxOf(frame)).toEqual(before);
+  await expect(editor).toBeFocused();
+  await page.mouse.up();
+  expect(await revisionOf(page)).toBe(revision);
+});

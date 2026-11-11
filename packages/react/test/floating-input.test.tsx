@@ -21,8 +21,10 @@ function HeaderTab({ navigate }: { readonly navigate: () => void }) {
       )
     : null;
 }
-function setup() {
+function setup(options: { readonly active?: boolean; readonly frontmost?: boolean } = {}) {
   const move = vi.fn(() => ({ status: "committed" as const }));
+  const resize = vi.fn(() => ({ status: "committed" as const }));
+  const raise = vi.fn();
   const maximize = vi.fn(() => ({ status: "committed" as const }));
   const navigate = vi.fn();
   const bounds = { x: 100, y: 80, width: 320, height: 240 };
@@ -33,8 +35,8 @@ function setup() {
       bounds={bounds}
       projectionRevision="0"
       title="Tools"
-      active
-      frontmost
+      active={options.active ?? true}
+      frontmost={options.frontmost ?? true}
       zIndex={1}
       viewportWidth={800}
       viewportHeight={600}
@@ -42,14 +44,18 @@ function setup() {
       scheduleKey="test-float"
       messages={resolveWorkspaceInteractionMessages(ENGLISH_WORKSPACE_MESSAGES)}
       onMove={move}
+      onResize={resize}
+      onRaise={raise}
       onMaximize={maximize}
     >
       <HeaderTab navigate={navigate} />
     </FloatingSurfaceFrame>,
   );
-  const titlebar = view.container.querySelector(".pf-floating-titlebar");
+  const titlebar = view.container.querySelector<HTMLElement>(".pf-floating-titlebar");
+  const rightHandle = view.container.querySelector<HTMLElement>('[data-resize-edge="right"]');
   if (!titlebar) throw new Error("Missing titlebar");
-  return { move, maximize, navigate, titlebar };
+  if (!rightHandle) throw new Error("Missing resize handle");
+  return { ...view, move, resize, raise, maximize, navigate, titlebar, rightHandle };
 }
 
 describe("floating titlebar event boundaries", () => {
@@ -77,5 +83,84 @@ describe("floating titlebar event boundaries", () => {
     expect(maximize).not.toHaveBeenCalled();
     fireEvent.doubleClick(titlebar);
     expect(maximize).toHaveBeenCalledExactlyOnceWith("pointer");
+  });
+});
+
+describe("floating keyboard commands", () => {
+  for (const mode of ["move", "resize"] as const) {
+    it.each([
+      ["Alt", { altKey: true }],
+      ["Ctrl", { ctrlKey: true }],
+      ["Meta", { metaKey: true }],
+      ["IME composition", { isComposing: true }],
+    ] as const)(`leaves %s keys available during keyboard ${mode}`, (_name, options) => {
+      const fixture = setup({ active: false, frontmost: false });
+      const target = mode === "move" ? fixture.titlebar : fixture.rightHandle;
+      for (const key of ["ArrowRight", "Enter", " "]) {
+        expect(fireEvent.keyDown(target, { key, ...options })).toBe(true);
+      }
+      expect(fixture.move).not.toHaveBeenCalled();
+      expect(fixture.resize).not.toHaveBeenCalled();
+      expect(fixture.raise).not.toHaveBeenCalled();
+    });
+
+    it(`respects keys already claimed by the application during keyboard ${mode}`, () => {
+      const fixture = setup({ active: false, frontmost: false });
+      const target = mode === "move" ? fixture.titlebar : fixture.rightHandle;
+      for (const key of ["ArrowRight", "Enter", " "]) {
+        target.addEventListener("keydown", (event) => event.preventDefault(), { once: true });
+        fireEvent.keyDown(target, { key });
+      }
+      expect(fixture.move).not.toHaveBeenCalled();
+      expect(fixture.resize).not.toHaveBeenCalled();
+      expect(fixture.raise).not.toHaveBeenCalled();
+    });
+
+    it.each([false, true])(`preserves the Shift=%s keyboard ${mode} step`, (shiftKey) => {
+      const fixture = setup();
+      const target = mode === "move" ? fixture.titlebar : fixture.rightHandle;
+      expect(fireEvent.keyDown(target, { key: "ArrowRight", shiftKey })).toBe(false);
+      expect(mode === "move" ? fixture.move : fixture.resize).toHaveBeenCalledExactlyOnceWith(
+        {
+          x: mode === "move" ? (shiftKey ? 132 : 108) : 100,
+          y: 80,
+          width: mode === "resize" ? (shiftKey ? 352 : 328) : 320,
+          height: 240,
+        },
+        "keyboard",
+      );
+      expect(mode === "move" ? fixture.resize : fixture.move).not.toHaveBeenCalled();
+    });
+  }
+
+  it("keeps descendant keys and perpendicular arrows out of resize commands", () => {
+    const { rightHandle, resize } = setup();
+    const input = document.createElement("input");
+    rightHandle.append(input);
+    expect(fireEvent.keyDown(input, { key: "ArrowRight" })).toBe(true);
+    expect(fireEvent.keyDown(rightHandle, { key: "ArrowDown" })).toBe(true);
+    expect(resize).not.toHaveBeenCalled();
+  });
+
+  it.each(["Enter", " "])("still raises an inactive floating frame with %s", (key) => {
+    const { titlebar, raise, move, resize } = setup({ active: false, frontmost: false });
+    expect(fireEvent.keyDown(titlebar, { key })).toBe(false);
+    expect(raise).toHaveBeenCalledExactlyOnceWith("keyboard");
+    expect(move).not.toHaveBeenCalled();
+    expect(resize).not.toHaveBeenCalled();
+  });
+
+  it("does not raise an inactive floating frame from the keyboard during a pointer gesture", () => {
+    const { titlebar, raise, move, resize } = setup({ active: false, frontmost: false });
+    fireEvent.pointerDown(titlebar, { button: 0, pointerId: 11, clientX: 100, clientY: 80 });
+    for (const key of ["Enter", " "]) {
+      expect(fireEvent.keyDown(titlebar, { key })).toBe(true);
+    }
+    expect(raise).not.toHaveBeenCalled();
+    expect(move).not.toHaveBeenCalled();
+    expect(resize).not.toHaveBeenCalled();
+    fireEvent.pointerCancel(titlebar, { pointerId: 11 });
+    expect(fireEvent.keyDown(titlebar, { key: "Enter" })).toBe(false);
+    expect(raise).toHaveBeenCalledExactlyOnceWith("keyboard");
   });
 });

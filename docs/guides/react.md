@@ -211,6 +211,20 @@ Both built-in solvers provide the resize metadata needed for these bounds. A cus
 
 F6 moves focus to the next visible, enabled divider in the same workspace; Shift+F6 moves backward. Both wrap at the ends. Starting a pointer resize focuses its divider, so Escape cancels the active resize and restores its previous geometry. Keyboard sizing uses the same semantic resize command and result handling as pointer resizing.
 
+### Floating windows
+
+Focus a floating window's titlebar to move it with the arrow keys, or one of its four edge handles
+to resize it along that edge. Each step is 8 CSS pixels; Shift increases it to 32. Alt, Ctrl and Meta
+combinations remain available to the browser and application. Events already handled by an embedded
+editor and keys used during text composition do not dispatch layout commands.
+
+During a pointer move or resize, Escape restores the committed bounds without adding an undo entry,
+even when focus remains in an editor. The listener belongs to the active gesture's document and is
+removed when the gesture ends. An editor can claim Escape with `preventDefault()` or stop its
+propagation; composing and Alt/Ctrl/Meta-modified Escape events are also left alone. Other floating
+keyboard commands are ignored while the pointer gesture is active. Cancellation keeps keyboard
+focus where it was, discards queued movement, and makes a later pointer release harmless.
+
 ## Handle results and cleanup
 
 Use `onCommandResult` to present rejected operations without treating them as successful UI changes. Dispatch receipts can be `committed`, `rejected` or `queued`; a queued receipt is not proof of a completed commit.
