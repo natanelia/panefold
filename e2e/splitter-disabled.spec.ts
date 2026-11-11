@@ -204,6 +204,7 @@ for (const mode of ["live", "separator"] as const) {
     await expect(splitter).toHaveAttribute("aria-disabled", "true");
     await expect(splitter).toHaveAttribute("data-resize-state", "idle");
     await expect(splitter).toBeFocused();
+    await expect(splitter).toHaveAttribute("tabindex", "-1");
     await expect(marker).toBeHidden();
     expect(await boxOf(splitter)).toEqual(before.splitter);
     expect(await boxOf(primary)).toEqual(before.primary);
@@ -223,6 +224,11 @@ for (const mode of ["live", "separator"] as const) {
     expect(await revisionOf(page)).toBe(before.revision);
     expect(await boxOf(primary)).toEqual(before.primary);
 
+    const lockControl = page.getByRole("checkbox", { name: "Lock pane sizes" });
+    await lockControl.focus();
+    await expect.poll(() => splitter.getAttribute("tabindex")).toBeNull();
+    await splitter.evaluate((element) => (element as HTMLElement).focus());
+    await expect(lockControl).toBeFocused();
     await page.getByRole("checkbox", { name: "Lock pane sizes" }).uncheck();
     await page.getByRole("button", { name: "Close appearance settings" }).click();
     await page.mouse.move(start.x, start.y);

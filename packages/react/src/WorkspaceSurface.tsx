@@ -1947,6 +1947,8 @@ function Splitter({
   const pairSize = beforeSize + afterSize;
   const value = pairSize === 0 ? 50 : (beforeSize / pairSize) * 100;
   const [focused, setFocused] = useState(false);
+  // Removing tabindex from the focused divider drops focus in Chromium.
+  const tabIndex = disabled ? (focused ? -1 : undefined) : 0;
   // Custom solvers without compatible resize metadata retain solver-probed limits.
   // Full layout solves are only done for a focused divider, never on pointer frames.
   const attainableRange = useMemo(() => {
@@ -2364,7 +2366,7 @@ function Splitter({
       ref={splitterRef}
       className="pf-splitter"
       role="separator"
-      tabIndex={disabled ? undefined : 0}
+      tabIndex={tabIndex}
       aria-disabled={disabled || undefined}
       aria-label={messages.resizeAdjacentPanes()}
       aria-controls={primaryPaneId}

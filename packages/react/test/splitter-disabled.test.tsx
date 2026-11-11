@@ -242,6 +242,7 @@ describe("disabled split resizing", () => {
           view.rerender(fixture.surface(true));
 
           expect(document.activeElement).toBe(splitter);
+          expect(splitter.getAttribute("tabindex")).toBe("-1");
           expect(splitter.dataset.resizeState).toBe("idle");
           expect(fixture.size()).toBe(size);
           expect(fixture.values()).toEqual(values);
@@ -284,10 +285,18 @@ describe("disabled split resizing", () => {
       fireEvent.pointerDown(fixture.splitter, fixture.sample());
       expect(fixture.splitter.hasPointerCapture(41)).toBe(true);
       fixture.view.rerender(fixture.surface(true));
+      expect(document.activeElement).toBe(fixture.splitter);
+      expect(fixture.splitter.getAttribute("tabindex")).toBe("-1");
       fireEvent.pointerUp(fixture.splitter, fixture.sample(30));
       expect(fixture.splitter.hasPointerCapture(41)).toBe(false);
       expect(fixture.splitter.dataset.resizeState).toBe("idle");
       expect(activeActorCount()).toBe(0);
+      const input = required(fixture.view.container.querySelector("input"));
+      act(() => input.focus());
+      expect(document.activeElement).toBe(input);
+      expect(fixture.splitter.hasAttribute("tabindex")).toBe(false);
+      act(() => fixture.splitter.focus());
+      expect(document.activeElement).toBe(input);
       expect(fixture.session.runtime.getSnapshot()).toBe(snapshot);
       expect(fixture.session.runtime.canUndo()).toBe(false);
     } finally {
