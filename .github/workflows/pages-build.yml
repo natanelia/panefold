@@ -148,12 +148,12 @@ jobs:
           ref: ${{ github.workflow_sha }}
           persist-credentials: false
           path: tools
-      - uses: actions/download-artifact@v7
+      - uses: actions/download-artifact@v8
         with:
           artifact-ids: ${{ needs.production.outputs.artifact-id }}
           path: incoming/site-production
           merge-multiple: true
-      - uses: actions/download-artifact@v7
+      - uses: actions/download-artifact@v8
         if: needs.plan.outputs.has-previews == 'true'
         with:
           pattern: site-pr-*
