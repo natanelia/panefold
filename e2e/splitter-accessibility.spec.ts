@@ -99,6 +99,60 @@ for (const coarse of [false, true]) {
 test.describe("constrained divider shortcuts", () => {
   test.use({ viewport: { width: 1600, height: 1000 } });
 
+  test("preserves claimed and composing divider shortcuts", async ({ page }) => {
+    const workspace = await prepareConstrainedWorkspace(page, "ltr");
+    const revision = await workspaceRevision(page);
+    for (const [splitId, arrow] of [
+      ["root", "ArrowRight"],
+      ["center-stack", "ArrowDown"],
+    ] as const) {
+      const split = workspace.locator(`[data-workspace-split="${splitId}"]`);
+      const splitter = split.locator(":scope > [data-workspace-splitter]").first();
+      const before = await childBoxes(split);
+      const value = await splitter.getAttribute("aria-valuenow");
+      await splitter.focus();
+      for (const key of [arrow, "Home", "End", "F6"]) {
+        // A host handler claims the native key before React's delegated handler.
+        await splitter.evaluate((element) => {
+          element.addEventListener("keydown", (event) => event.preventDefault(), {
+            capture: true,
+            once: true,
+          });
+        });
+        await page.keyboard.press(key);
+        await expect(splitter).toBeFocused();
+        expect(await childBoxes(split)).toEqual(before);
+        expect(await workspaceRevision(page)).toBe(revision);
+
+        const consumed = await splitter.evaluate((element, key) => {
+          const event = new KeyboardEvent("keydown", {
+            key,
+            isComposing: true,
+            bubbles: true,
+            cancelable: true,
+          });
+          element.dispatchEvent(event);
+          return event.defaultPrevented;
+        }, key);
+        expect(consumed).toBe(false);
+        await expect(splitter).toBeFocused();
+        expect(await childBoxes(split)).toEqual(before);
+        expect(await splitter.getAttribute("aria-valuenow")).toBe(value);
+        expect(await workspaceRevision(page)).toBe(revision);
+      }
+    }
+
+    const splitters = workspace.locator("[data-workspace-splitter]");
+    const first = splitters.first();
+    await first.focus();
+    await page.keyboard.press("F6");
+    await expect(splitters.nth(1)).toBeFocused();
+    await page.keyboard.press("Shift+F6");
+    await expect(first).toBeFocused();
+    await page.keyboard.press("Shift+ArrowRight");
+    await expect.poll(() => workspaceRevision(page)).toBe(revision + 1);
+  });
+
   for (const direction of ["ltr", "rtl"] as const) {
     for (const axis of ["inline", "block"] as const) {
       test(`Home and End reach the attainable ${axis} limits in ${direction}`, async ({ page }) => {

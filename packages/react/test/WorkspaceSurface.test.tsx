@@ -951,6 +951,17 @@ describe("WorkspaceSurface", () => {
       view.container.querySelector<HTMLElement>('[data-workspace-split-child="left-node"]'),
     );
     splitter.focus();
+    const snapshot = runtime.getSnapshot();
+    for (const key of ["ArrowUp", "ArrowDown"]) {
+      view.container.addEventListener("keydown", (event) => event.preventDefault(), {
+        capture: true,
+        once: true,
+      });
+      expect(fireEvent.keyDown(splitter, { key })).toBe(false);
+      expect(runtime.getSnapshot()).toBe(snapshot);
+      expect(fireEvent.keyDown(splitter, { key, isComposing: true })).toBe(true);
+      expect(runtime.getSnapshot()).toBe(snapshot);
+    }
     await user.keyboard("{Home}");
     await waitFor(() => expect(Number(first.dataset.blockSize)).toBeLessThan(2));
     await user.keyboard("{End}");
@@ -996,6 +1007,17 @@ describe("WorkspaceSurface", () => {
     nestedWorkspace.append(nestedSplitter);
     first.closest(".pf-workspace")?.append(nestedWorkspace);
     first.focus();
+
+    for (const shiftKey of [false, true]) {
+      view.container.addEventListener("keydown", (event) => event.preventDefault(), {
+        capture: true,
+        once: true,
+      });
+      expect(fireEvent.keyDown(first, { key: "F6", shiftKey })).toBe(false);
+      expect(document.activeElement).toBe(first);
+      expect(fireEvent.keyDown(first, { key: "F6", shiftKey, isComposing: true })).toBe(true);
+      expect(document.activeElement).toBe(first);
+    }
 
     await userEvent.keyboard("{F6}");
     expect(document.activeElement).toBe(middle);

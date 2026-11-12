@@ -2263,6 +2263,14 @@ function Splitter({
   };
 
   const onKeyDown = (event: KeyboardEvent<HTMLDivElement>) => {
+    if (
+      event.defaultPrevented ||
+      event.nativeEvent.isComposing ||
+      event.altKey ||
+      event.ctrlKey ||
+      event.metaKey
+    )
+      return;
     if (event.key === "Escape" && sessionRef.current !== null) {
       event.preventDefault();
       const session = sessionRef.current;
@@ -2279,11 +2287,11 @@ function Splitter({
       return;
     }
     if (actorRef.current !== null) return;
-    if (event.key === "F6" && !event.altKey && !event.ctrlKey && !event.metaKey) {
+    if (event.key === "F6") {
       if (focusNextSplitter(event.currentTarget, event.shiftKey ? -1 : 1)) event.preventDefault();
       return;
     }
-    if (disabled || event.altKey || event.ctrlKey || event.metaKey) return;
+    if (disabled) return;
     const boundary = event.key === "Home" ? "min" : event.key === "End" ? "max" : undefined;
     const extreme =
       resizeBounds === undefined || boundary === undefined

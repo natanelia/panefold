@@ -235,6 +235,12 @@ Both built-in solvers provide the resize metadata needed for these bounds. A cus
 
 F6 moves focus to the next visible, enabled divider in the same workspace; Shift+F6 moves backward. Both wrap at the ends. Starting a pointer resize focuses its divider, so Escape cancels the active resize and restores its previous geometry. Keyboard sizing uses the same semantic resize command and result handling as pointer resizing.
 
+Divider shortcuts leave events already handled with `preventDefault()`, events used during text
+composition, and Alt/Ctrl/Meta combinations alone. This applies to resizing, F6 navigation and Escape
+cancellation. To reserve a shortcut, handle it in a capture handler before it reaches the divider.
+An ignored Escape leaves the pointer drag active; an ordinary Escape still cancels it. Shift remains
+available for larger resize steps, reverse F6 navigation and Escape cancellation.
+
 ### Floating windows
 
 Focus a floating window's titlebar to move it with the arrow keys, or one of its four edge handles

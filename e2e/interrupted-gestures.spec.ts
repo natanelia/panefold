@@ -95,6 +95,79 @@ async function startDrag(page: Page, handle: Locator, dx: number, dy: number) {
 }
 
 for (const mode of ["live", "separator"] as const) {
+  test(`claimed and composing Escape preserve a ${mode} splitter drag`, async ({ page }) => {
+    const workspace = await prepare(page, mode);
+    const splitter = workspace
+      .locator('[data-workspace-splitter][aria-orientation="vertical"]')
+      .first();
+    const primary = splitter.locator("xpath=preceding-sibling::*[1]");
+    const marker = workspace.locator("[data-workspace-resize-preview]");
+    const before = await boxOf(primary);
+    const valueBefore = await splitter.getAttribute("aria-valuenow");
+    const revision = await revisionOf(page);
+    const pointerId = await startDrag(page, splitter, 24, 0);
+    await expect(splitter).toBeFocused();
+    if (mode === "live") {
+      await expect.poll(async () => (await boxOf(primary)).width).toBe(before.width + 24);
+    } else {
+      await expect(marker).toBeVisible();
+    }
+    const preview = await boxOf(primary);
+    const previewValue = await splitter.getAttribute("aria-valuenow");
+    const assertDragging = async () => {
+      await expect(splitter).toHaveAttribute("data-resize-state", "resizing");
+      expect(
+        await splitter.evaluate((element, id) => element.hasPointerCapture(id), pointerId),
+      ).toBe(true);
+      expect(await boxOf(primary)).toEqual(preview);
+      expect(await splitter.getAttribute("aria-valuenow")).toBe(previewValue);
+      expect(await marker.isVisible()).toBe(mode === "separator");
+      expect(await revisionOf(page)).toBe(revision);
+    };
+    await assertDragging();
+
+    await splitter.evaluate((element) => {
+      element.addEventListener("keydown", (event) => event.preventDefault(), {
+        capture: true,
+        once: true,
+      });
+    });
+    await page.keyboard.press("Escape");
+    await assertDragging();
+    // Exercise composition/modifier routing without invoking OS-level shortcuts.
+    for (const flag of ["isComposing", "altKey", "ctrlKey", "metaKey"]) {
+      const consumed = await splitter.evaluate((element, flag) => {
+        const event = new KeyboardEvent("keydown", {
+          key: "Escape",
+          [flag]: true,
+          bubbles: true,
+          cancelable: true,
+        });
+        element.dispatchEvent(event);
+        return event.defaultPrevented;
+      }, flag);
+      expect(consumed).toBe(false);
+      await assertDragging();
+    }
+
+    await page.keyboard.press("Escape");
+    await expect(splitter).toHaveAttribute("data-resize-state", "idle");
+    expect(await splitter.evaluate((element, id) => element.hasPointerCapture(id), pointerId)).toBe(
+      false,
+    );
+    await expect(marker).toBeHidden();
+    expect(await boxOf(primary)).toEqual(before);
+    expect(await splitter.getAttribute("aria-valuenow")).toBe(valueBefore);
+    await page.mouse.up();
+    expect(await revisionOf(page)).toBe(revision);
+    await expect(page.getByRole("button", { name: "Undo layout change" })).toBeDisabled();
+
+    await startDrag(page, splitter, 24, 0);
+    await page.mouse.up();
+    await expect.poll(() => revisionOf(page)).toBe(revision + 1);
+    await expect.poll(async () => (await boxOf(primary)).width).toBe(before.width + 24);
+  });
+
   for (const reason of interruptions) {
     test(`${reason} cancels a ${mode} splitter preview without committing`, async ({ page }) => {
       const workspace = await prepare(page, mode);
