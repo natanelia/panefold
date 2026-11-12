@@ -306,6 +306,112 @@ describe("splitter pointer interruptions", () => {
   });
 });
 
+describe("splitter keyboard event boundaries", () => {
+  it.each(["claimed", "composing"] as const)(
+    "leaves %s sizing keys unchanged and accepts an ordinary Shift resize afterward",
+    (kind) => {
+      const fixture = setup("live");
+      try {
+        const { session, splitter, primary } = fixture;
+        // Start inside both bounds so Home and End would each change the layout.
+        act(() => session.runtime.dispatch(session.commands.resizeSplit("root", [1, 1])));
+        const snapshot = session.runtime.getSnapshot();
+        const values = fixture.values();
+        expect(primary.dataset.inlineSize).toBe("497");
+        for (const key of ["ArrowLeft", "ArrowRight", "Home", "End"]) {
+          if (kind === "claimed") {
+            fixture.view.container.addEventListener("keydown", (event) => event.preventDefault(), {
+              capture: true,
+              once: true,
+            });
+          }
+          expect(fireEvent.keyDown(splitter, { key, isComposing: kind === "composing" })).toBe(
+            kind !== "claimed",
+          );
+          expect(session.runtime.getSnapshot()).toBe(snapshot);
+          expect(fixture.values()).toEqual(values);
+          expect(resizeActors.size).toBe(0);
+          expect(fixture.hasPending()).toBe(false);
+        }
+
+        expect(fireEvent.keyDown(splitter, { key: "ArrowRight", shiftKey: true })).toBe(false);
+        expect(primary.dataset.inlineSize).toBe("596");
+        expect(session.runtime.getSnapshot().revision).toBe(snapshot.revision + 1n);
+        expect(activeActorCount()).toBe(0);
+      } finally {
+        fixture.dispose();
+      }
+    },
+  );
+
+  it.each(["live", "separator"] as const)(
+    "preserves a %s drag through claimed, composing and modified Escape",
+    (mode) => {
+      const fixture = setup(mode);
+      try {
+        const { session, splitter, primary, marker, start } = fixture;
+        const snapshot = session.runtime.getSnapshot();
+        const values = fixture.values();
+        fixture.begin();
+        const ignored = [
+          { claimed: true },
+          { isComposing: true },
+          { altKey: true },
+          { ctrlKey: true },
+          { metaKey: true },
+        ] satisfies (KeyboardEventInit & { claimed?: boolean })[];
+        for (const options of ignored) {
+          const claimed = "claimed" in options;
+          if (claimed) {
+            fixture.view.container.addEventListener("keydown", (event) => event.preventDefault(), {
+              capture: true,
+              once: true,
+            });
+          }
+          expect(fireEvent.keyDown(splitter, { key: "Escape", ...options })).toBe(!claimed);
+          expect(splitter.hasPointerCapture(41)).toBe(true);
+          expect(fixture.hasPending()).toBe(true);
+          expect(activeActorCount()).toBe(1);
+          expect(session.runtime.getSnapshot()).toBe(snapshot);
+          expect(session.runtime.canUndo()).toBe(false);
+          // The first blocked key preserves the queued frame; later keys also
+          // preserve a painted preview while another frame is waiting.
+          act(() => fixture.flush());
+          expect(splitter.dataset.resizeState).toBe("resizing");
+          expect(primary.dataset.inlineSize).toBe(mode === "live" ? "450" : "420");
+          expect(marker.hidden).toBe(mode === "live");
+          fireEvent.pointerMove(splitter, { pointerId: 41, clientX: start + 30 });
+        }
+
+        if (mode === "separator") {
+          expect(fireEvent.keyDown(splitter, { key: "Escape", shiftKey: true })).toBe(false);
+          expect(primary.dataset.inlineSize).toBe("420");
+          expect(fixture.values()).toEqual(values);
+          expect(marker.hidden).toBe(true);
+          fireEvent.pointerUp(splitter, { pointerId: 41, clientX: start + 30 });
+          expect(session.runtime.getSnapshot()).toBe(snapshot);
+          expect(session.runtime.canUndo()).toBe(false);
+        } else {
+          fireEvent.pointerUp(splitter, { pointerId: 41, clientX: start + 30 });
+          expect(primary.dataset.inlineSize).toBe("450");
+          expect(session.runtime.getSnapshot().revision).toBe(snapshot.revision + 1n);
+          const committed = session.runtime.getSnapshot();
+          fireEvent.pointerUp(splitter, { pointerId: 41, clientX: start + 50 });
+          expect(session.runtime.getSnapshot()).toBe(committed);
+          act(() => session.runtime.undo());
+          expect(primary.dataset.inlineSize).toBe("420");
+          expect(session.runtime.canUndo()).toBe(false);
+        }
+        expect(fixture.hasPending()).toBe(false);
+        expect(splitter.hasPointerCapture(41)).toBe(false);
+        expect(activeActorCount()).toBe(0);
+      } finally {
+        fixture.dispose();
+      }
+    },
+  );
+});
+
 function required<T>(value: T | null | undefined): T {
   if (value === null || value === undefined) throw new Error("Missing interruption fixture value");
   return value;
