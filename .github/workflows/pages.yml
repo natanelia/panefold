@@ -65,7 +65,7 @@ jobs:
         with:
           ref: ${{ github.workflow_sha }}
           persist-credentials: false
-      - uses: actions/github-script@v8
+      - uses: actions/github-script@v9
         env:
           PREVIEW_MANIFEST: ${{ needs.build.outputs.manifest }}
           SITE_URL: ${{ needs.deploy.outputs.url }}
