@@ -383,7 +383,7 @@
       "verificationClass": "code-verifiable",
       "artifactRole": "source",
       "uri": "repo://packages/react/test/WorkspaceSurface.test.tsx",
-      "sha256": "63ff3e887f0d0d0fec33c94d399dfa7136925077f34e3a60eae2c858388b78ac",
+      "sha256": "00fb391c278bc04d2327ecf2890272ad6578b8ce492d8eb8f44399322760b5ed",
       "producedAt": "2026-08-14T07:19:51.074Z",
       "requirementIds": [
         "A11Y-003",
@@ -760,7 +760,7 @@
       "verificationClass": "code-verifiable",
       "artifactRole": "source",
       "uri": "repo://packages/react/test/WorkspaceSurface.test.tsx",
-      "sha256": "63ff3e887f0d0d0fec33c94d399dfa7136925077f34e3a60eae2c858388b78ac",
+      "sha256": "00fb391c278bc04d2327ecf2890272ad6578b8ce492d8eb8f44399322760b5ed",
       "producedAt": "2026-08-14T07:19:51.074Z",
       "requirementIds": [
         "I18N-001",
@@ -1000,8 +1000,8 @@
       "verificationClass": "environment-verifiable",
       "artifactRole": "result",
       "uri": "repo://conformance/results/chromium-reference-2026-09-26.json",
-      "sha256": "ca933408a2a6af5a8d6bffd7f647985f270cfced58ffa3d6049a78f6a197fc7e",
-      "producedAt": "2026-11-11T17:27:33.889Z",
+      "sha256": "0cca64d6dab3a62edb5556209636d100f0ffd0ad948cc5c1f798438229cd551b",
+      "producedAt": "2026-11-12T16:22:33.963Z",
       "requirementIds": [
         "A11Y-002",
         "A11Y-003",
@@ -1037,8 +1037,8 @@
       "verificationClass": "environment-verifiable",
       "artifactRole": "result",
       "uri": "repo://conformance/results/interaction-performance-2026-09-26.json",
-      "sha256": "c3567aacc48747d819183c10a7a09af5cc3fd4ae94f2347a04275435efaecbad",
-      "producedAt": "2026-11-11T17:27:33.889Z",
+      "sha256": "5a735a8a8f1e3e04c3aa8b918ad59c8bf44c957d625b9f8d64f3c18b45217cf8",
+      "producedAt": "2026-11-12T16:22:33.963Z",
       "requirementIds": [
         "PRF-001",
         "PRF-006",
@@ -1075,8 +1075,8 @@
       "verificationClass": "environment-verifiable",
       "artifactRole": "result",
       "uri": "repo://conformance/results/protocol-motion-2026-09-26.json",
-      "sha256": "fe6b3e5a9109d56eeb49729b40e7e96117eb00f8ba9907d21cbd55ec5dee8f28",
-      "producedAt": "2026-11-11T17:27:33.889Z",
+      "sha256": "477ebef24b61e9a7de23496de7fe357e1acfb24ab2dc19188aff236a5bf7bbdc",
+      "producedAt": "2026-11-12T16:22:33.963Z",
       "requirementIds": [
         "A11Y-002",
         "ARC-002",
