@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "kind": "browser-profile-result",
   "profile": "compact-react-chromium-desktop",
-  "producedAt": "2026-11-12T16:22:33.963Z",
+  "producedAt": "2026-11-13T03:34:34.166Z",
   "status": "passed",
   "runner": "Playwright",
   "command": "pnpm exec playwright test --reporter=json",
@@ -13,11 +13,11 @@
     "browserVersion": "151.0.7922.34"
   },
   "summary": {
-    "tests": 140,
-    "passed": 140,
+    "tests": 144,
+    "passed": 144,
     "skipped": 0,
     "failed": 0,
-    "durationMs": 123912.16600000001
+    "durationMs": 131758.53399999999
   },
   "tests": [
     {
@@ -73,6 +73,26 @@
     {
       "file": "code-workbench-cases.ts",
       "title": "reorders tabs by drag in horizontal LTR, RTL, and vertical rails without remounting",
+      "ok": true
+    },
+    {
+      "file": "code-workbench-cases.ts",
+      "title": "reveals a selected overflow tab without moving focus in horizontal LTR",
+      "ok": true
+    },
+    {
+      "file": "code-workbench-cases.ts",
+      "title": "reveals a selected overflow tab without moving focus in horizontal RTL",
+      "ok": true
+    },
+    {
+      "file": "code-workbench-cases.ts",
+      "title": "reveals a selected overflow tab without moving focus in vertical",
+      "ok": true
+    },
+    {
+      "file": "code-workbench-cases.ts",
+      "title": "reveals a restored tab after its hidden strip becomes visible without scrolling ancestors",
       "ok": true
     },
     {
@@ -723,8 +743,8 @@
   ],
   "rawReport": {
     "path": "artifacts/preview-browser.json",
-    "sha256": "5d735332ef430098f948ef1df5bb4904b479f0cf5f2b45932475208fba46b2be",
-    "runUrl": "https://github.com/natanelia/panefold/actions/runs/43256972486",
+    "sha256": "38e733dab5876471edcaae7bf0bae20b1d2daa5c2819e686bffdc4d170db49de",
+    "runUrl": "https://github.com/natanelia/panefold/actions/runs/43359280598",
     "artifact": "preview-executed-evidence"
   },
   "sourceDigests": {
@@ -750,7 +770,7 @@
     "apps/demo/src/use-touch-workbench.ts": "c913911471945a857994e2078eb36420b14cdcb8cd3d7437b5d562c32a02f04c",
     "apps/demo/src/workspace-config.ts": "96d52c3e7452fdb4fe8f0926fb406c26572e89c80c931d063107f618851415b0",
     "apps/demo/vite.config.ts": "70dd28bb53e3ea556d4c750aee26762312fa7884b2052c9c0cb073a1584cc663",
-    "e2e/code-workbench-cases.ts": "e83979a7be6e659fa238414e65f7f28ec74828274567e8f181ea002ed3212d39",
+    "e2e/code-workbench-cases.ts": "9863416092bf01ed14e804a4acf29b53c8d1339c997a3e57044f95fb56658b52",
     "e2e/deferred-resize.spec.ts": "87cee00ab3529a9fe7f4c82addd017c951b2cc10a7ebc264ee3b4b8e680899b7",
     "e2e/demo.spec.ts": "bb53cbcba475d8957c6f89bf398f005d63320e90f92448a118045e69ac87b889",
     "e2e/drag-parity.spec.ts": "a7c7da7513e3b56de9b832cce5fa2fc6236f55d74ba9ea3aa9be1600f6620bce",
@@ -787,8 +807,8 @@
     "packages/model/src/split-weights.ts": "05695900c92d98b016c21adae3e17ca20ee97134f10e1b6a3d91c0a35cf19ea6",
     "packages/motion/src/coordinator.ts": "50eff7dd6a1b8f6433ac3f5bfc5f8d74b99a501e43e712ccb3e1a82520574c6d",
     "packages/motion/src/motion-dom-driver.ts": "57092ac380b7d666ed807c31d2f691fea906d63d9cdff9095f5c2bc32260323b",
-    "packages/react/src/WorkspaceSurface.tsx": "117724e1607c256ffc70cc290537f7182edba6ece4ea09cc071109cd403b2125",
-    "packages/react/src/client-coordinates.ts": "f70aaae0922037939b3f21583cfceaf34289d2d811654991da775ac23241411e",
+    "packages/react/src/WorkspaceSurface.tsx": "a4193565302faf4c0debb037b341295ae47c6e03623524adc73b0371a2da07f5",
+    "packages/react/src/client-coordinates.ts": "a384a2a0a4728a0846673f9500a2f6068e7436b0acdfcd9060531d0165a3923f",
     "packages/react/src/drop-modifiers.ts": "542583898dfa7d121b0d91f51171df8a3db47a8e749422437da903372a60c6ee",
     "packages/react/src/drop-preview.ts": "7c84edb3ba5ee124e207ca6fc5fb3f2a8b8e07178d90f11b96a68504b4402de7",
     "packages/react/src/drop-target.ts": "6626985475da22f7a7938e2c7dd59cd6ce83f07902561a1cf6b77fec3ed361ff",
@@ -810,7 +830,7 @@
     "packages/react/src/tab-insertion.ts": "e611ecfe7cb4b0b9fb7e748a747f2584e35dbaa72111a907008f6dc6b11f1670",
     "packages/react/src/tab-reorder.ts": "c139803bc37c5f2c6fc6a17eb836784ff8d203b7bae8acebedcbf290cdabc599",
     "packages/react/src/types.ts": "75f063061f6af77986f752c7c4fa5512ca4e403301e7377e67a2622596e48bad",
-    "packages/react/test/client-coordinates.test.ts": "11492358f3ecc0ad0b0530abc11e6237e20fb60ce7132d7bead8625467a45389",
+    "packages/react/test/client-coordinates.test.ts": "71c0b6798cafc8ffee375e023652ad9dc9a6ef298587910edc2677fd9f5d9e99",
     "packages/react/test/constrained-resize.test.tsx": "9a261e6135f34510627296e9545ae3bbecab5e7c8ca4805d1b6dec0b426df446",
     "packages/react/test/drag-parity.test.ts": "1f0bca650b8647cf7473639a0afa59839bdd60327892e428f30a98642cd67443",
     "packages/react/test/drop-preview.test.ts": "bdc1de685dce3a9bc5c073cf9fb7f2325de07251a8f71d4b318f09990c22211c",

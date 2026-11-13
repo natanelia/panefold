@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "kind": "protocol-motion-result",
   "profile": "compact-react-chromium-desktop",
-  "producedAt": "2026-11-12T16:22:33.963Z",
+  "producedAt": "2026-11-13T03:34:34.166Z",
   "status": "passed",
   "runner": "Vitest",
   "command": "pnpm exec vitest run --reporter=json --outputFile=artifacts/preview-unit.json",
@@ -12,16 +12,16 @@
     "browserVersion": "151.0.7922.34"
   },
   "summary": {
-    "tests": 826,
-    "passed": 826,
+    "tests": 842,
+    "passed": 842,
     "failed": 0,
     "files": 92,
     "protocolMotionTestFiles": 9,
     "protocolMotionTests": 86,
     "protocolMotionPassed": 86,
     "reactIntegrationTestFiles": 22,
-    "reactIntegrationTests": 324,
-    "reactIntegrationPassed": 324
+    "reactIntegrationTests": 340,
+    "reactIntegrationPassed": 340
   },
   "tests": [
     {
@@ -255,11 +255,6 @@
       "passed": 3
     },
     {
-      "file": "packages/protocol/test/protocol.test.ts",
-      "status": "passed",
-      "passed": 3
-    },
-    {
       "file": "packages/motion/test/motion-lifecycle.test.ts",
       "status": "passed",
       "passed": 13
@@ -268,6 +263,11 @@
       "file": "packages/motion/test/motion.test.ts",
       "status": "passed",
       "passed": 7
+    },
+    {
+      "file": "packages/protocol/test/protocol.test.ts",
+      "status": "passed",
+      "passed": 3
     },
     {
       "file": "packages/protocol-xstate/test/catalog-machines.test.ts",
@@ -300,49 +300,14 @@
       "passed": 22
     },
     {
-      "file": "packages/runtime/test/envelope-serialization.test.ts",
-      "status": "passed",
-      "passed": 5
-    },
-    {
-      "file": "packages/runtime/test/persistence-byte-count.test.ts",
-      "status": "passed",
-      "passed": 5
-    },
-    {
-      "file": "packages/runtime/test/persistence.test.ts",
-      "status": "passed",
-      "passed": 14
-    },
-    {
-      "file": "packages/runtime/test/policy.test.ts",
-      "status": "passed",
-      "passed": 2
-    },
-    {
-      "file": "packages/runtime/test/post-commit-effects.test.ts",
-      "status": "passed",
-      "passed": 14
-    },
-    {
-      "file": "packages/runtime/test/runtime.test.ts",
-      "status": "passed",
-      "passed": 17
-    },
-    {
-      "file": "packages/runtime-effect/test/persistence.test.ts",
-      "status": "passed",
-      "passed": 5
-    },
-    {
       "file": "packages/react/test/WorkspaceSurface.test.tsx",
       "status": "passed",
-      "passed": 105
+      "passed": 109
     },
     {
       "file": "packages/react/test/client-coordinates.test.ts",
       "status": "passed",
-      "passed": 12
+      "passed": 24
     },
     {
       "file": "packages/react/test/constrained-resize.test.tsx",
@@ -445,6 +410,41 @@
       "passed": 2
     },
     {
+      "file": "packages/runtime-effect/test/persistence.test.ts",
+      "status": "passed",
+      "passed": 5
+    },
+    {
+      "file": "packages/runtime/test/envelope-serialization.test.ts",
+      "status": "passed",
+      "passed": 5
+    },
+    {
+      "file": "packages/runtime/test/persistence-byte-count.test.ts",
+      "status": "passed",
+      "passed": 5
+    },
+    {
+      "file": "packages/runtime/test/persistence.test.ts",
+      "status": "passed",
+      "passed": 14
+    },
+    {
+      "file": "packages/runtime/test/policy.test.ts",
+      "status": "passed",
+      "passed": 2
+    },
+    {
+      "file": "packages/runtime/test/post-commit-effects.test.ts",
+      "status": "passed",
+      "passed": 14
+    },
+    {
+      "file": "packages/runtime/test/runtime.test.ts",
+      "status": "passed",
+      "passed": 17
+    },
+    {
       "file": "packages/surfaces/test/browser-adapter.test.ts",
       "status": "passed",
       "passed": 14
@@ -470,6 +470,11 @@
       "passed": 6
     },
     {
+      "file": "packages/vue/test/vue.test.ts",
+      "status": "passed",
+      "passed": 1
+    },
+    {
       "file": "packages/web-components/test/ssr-import.test.ts",
       "status": "passed",
       "passed": 1
@@ -478,17 +483,12 @@
       "file": "packages/web-components/test/web-components.test.ts",
       "status": "passed",
       "passed": 2
-    },
-    {
-      "file": "packages/vue/test/vue.test.ts",
-      "status": "passed",
-      "passed": 1
     }
   ],
   "rawReport": {
     "path": "artifacts/preview-unit.json",
-    "sha256": "8dd5bd9c961e2636235b0da2bbe1468a1c24702dff80afe59427be10701e61cc",
-    "runUrl": "https://github.com/natanelia/panefold/actions/runs/43256972486",
+    "sha256": "7f70c146d92704892b1f5e3ea55abe9a1c01efe6cfcd9caa2c75f49c536b36ba",
+    "runUrl": "https://github.com/natanelia/panefold/actions/runs/43359280598",
     "artifact": "preview-executed-evidence"
   },
   "sourceDigests": {
@@ -506,7 +506,7 @@
     "apps/demo/src/touch-floating.css": "3a7e05c611f84b8e9552d9d177a685d3756d1ec34942541ed25b64c20d2394cb",
     "apps/demo/src/touch-playground.css": "f85cd5505e93e38f3301c5d419a6790e16edde937c0eea2c061213a8fc182d6c",
     "apps/demo/src/use-touch-workbench.ts": "c913911471945a857994e2078eb36420b14cdcb8cd3d7437b5d562c32a02f04c",
-    "e2e/code-workbench-cases.ts": "e83979a7be6e659fa238414e65f7f28ec74828274567e8f181ea002ed3212d39",
+    "e2e/code-workbench-cases.ts": "9863416092bf01ed14e804a4acf29b53c8d1339c997a3e57044f95fb56658b52",
     "e2e/deferred-resize.spec.ts": "87cee00ab3529a9fe7f4c82addd017c951b2cc10a7ebc264ee3b4b8e680899b7",
     "e2e/drag-parity.spec.ts": "a7c7da7513e3b56de9b832cce5fa2fc6236f55d74ba9ea3aa9be1600f6620bce",
     "e2e/interrupted-gestures.spec.ts": "5d6b2d472d324c00ae7d251b5d5a57768d74e8a1e7f34552c28ff1b478d17bf9",
@@ -593,8 +593,8 @@
     "packages/protocol/test/protocol.test.ts": "dd118363496c22c9df3110c3a3ab05e7b1bee643fe0c613c75503c2f2262fd4f",
     "packages/protocol/tsconfig.json": "3f465de909ed88bb206aa2ee7095c56a63223c3a11efa84ad39e69b1d1abd1a8",
     "packages/react/package.json": "39bcbf2fc9e64daa7167f035fc67b01a0c725c3e4a77282644df560a6d8a9b72",
-    "packages/react/src/WorkspaceSurface.tsx": "117724e1607c256ffc70cc290537f7182edba6ece4ea09cc071109cd403b2125",
-    "packages/react/src/client-coordinates.ts": "f70aaae0922037939b3f21583cfceaf34289d2d811654991da775ac23241411e",
+    "packages/react/src/WorkspaceSurface.tsx": "a4193565302faf4c0debb037b341295ae47c6e03623524adc73b0371a2da07f5",
+    "packages/react/src/client-coordinates.ts": "a384a2a0a4728a0846673f9500a2f6068e7436b0acdfcd9060531d0165a3923f",
     "packages/react/src/drop-modifiers.ts": "542583898dfa7d121b0d91f51171df8a3db47a8e749422437da903372a60c6ee",
     "packages/react/src/drop-preview.ts": "7c84edb3ba5ee124e207ca6fc5fb3f2a8b8e07178d90f11b96a68504b4402de7",
     "packages/react/src/drop-target.ts": "6626985475da22f7a7938e2c7dd59cd6ce83f07902561a1cf6b77fec3ed361ff",
@@ -619,8 +619,8 @@
     "packages/react/src/tab-presentation.ts": "eeeac41f560e89ed8db685a0df1d6190703ed306507e2cc3cff81f5f4e460143",
     "packages/react/src/tab-reorder.ts": "c139803bc37c5f2c6fc6a17eb836784ff8d203b7bae8acebedcbf290cdabc599",
     "packages/react/src/types.ts": "75f063061f6af77986f752c7c4fa5512ca4e403301e7377e67a2622596e48bad",
-    "packages/react/test/WorkspaceSurface.test.tsx": "00fb391c278bc04d2327ecf2890272ad6578b8ce492d8eb8f44399322760b5ed",
-    "packages/react/test/client-coordinates.test.ts": "11492358f3ecc0ad0b0530abc11e6237e20fb60ce7132d7bead8625467a45389",
+    "packages/react/test/WorkspaceSurface.test.tsx": "fee9275b5bf51ac55ba33de2fa0f9581e5d67a1be82a456ded755c61ca89cc13",
+    "packages/react/test/client-coordinates.test.ts": "71c0b6798cafc8ffee375e023652ad9dc9a6ef298587910edc2677fd9f5d9e99",
     "packages/react/test/constrained-resize.test.tsx": "9a261e6135f34510627296e9545ae3bbecab5e7c8ca4805d1b6dec0b426df446",
     "packages/react/test/drag-parity.test.ts": "1f0bca650b8647cf7473639a0afa59839bdd60327892e428f30a98642cd67443",
     "packages/react/test/drop-preview.test.ts": "bdc1de685dce3a9bc5c073cf9fb7f2325de07251a8f71d4b318f09990c22211c",
