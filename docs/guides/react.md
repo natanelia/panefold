@@ -186,6 +186,19 @@ bridge calls `solveLayout(snapshot, nodeId(request.rootNodeId), request.bounds, 
 splitter size and temporary split overrides. Omitting it from a generic surface uses a
 constraint-free compatibility solver.
 
+## Keep selected tabs visible
+
+An overflowing tab strip reveals its selected tab when it first renders, when selection changes,
+or when the selected tab's order in the strip or presentation changes. This includes selection restored from
+a saved workspace and selection made by application controls outside the strip. Horizontal,
+vertical and right-to-left strips scroll only as far as needed. For a tab larger than the available
+space, its nearest edge is brought into view when needed.
+
+The reveal scrolls only the tab strip and preserves keyboard focus and surrounding scroll
+positions. A strip first rendered without a measurable size reveals its selection when it becomes
+visible. After that, ordinary scrolling and resizing leave the user's scroll position alone.
+Revealing a tab is a presentation change and does not dispatch a command or create an undo entry.
+
 ## Resize expensive content on release
 
 `WorkspaceSurface` accepts `resizePreviewMode="separator"` to move a divider marker while panel contents keep their committed dimensions. Pointer release dispatches one resize command. Escape, lost capture, cancellation, a changed layout, or a rejected command removes the preview. Keyboard resizing still applies each step immediately.

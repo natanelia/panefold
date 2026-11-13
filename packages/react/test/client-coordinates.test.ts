@@ -1,7 +1,11 @@
 // @vitest-environment jsdom
 
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { measureClientScale, measureContentBox } from "../src/client-coordinates";
+import {
+  measureClientScale,
+  measureContentBox,
+  revealInScrollport,
+} from "../src/client-coordinates";
 
 afterEach(() => {
   vi.restoreAllMocks();
@@ -77,5 +81,125 @@ describe("initial workspace size", () => {
     element.style.padding = "20px";
     document.body.append(element);
     expect(measureContentBox(element)).toEqual({ width: 0, height: 0 });
+  });
+});
+
+function scrollFixture(
+  orientation: "horizontal" | "vertical",
+  start: number,
+  size: number,
+  scaleX = 1,
+  scaleY = 1,
+  direction: "ltr" | "rtl" = "ltr",
+) {
+  const scrollport = elementWithSizes(204, 44, 204 * scaleX, 44 * scaleY);
+  scrollport.dir = direction;
+  scrollport.style.scrollBehavior = "smooth";
+  const horizontal = orientation === "horizontal";
+  const initial = direction === "rtl" && horizontal ? -400 : 400;
+  scrollport.scrollLeft = horizontal ? initial : 17;
+  scrollport.scrollTop = horizontal ? 23 : initial;
+  const scroll = vi.fn((options: ScrollToOptions) => {
+    scrollport.scrollLeft += options.left ?? 0;
+    scrollport.scrollTop += options.top ?? 0;
+  });
+  Object.defineProperties(scrollport, {
+    clientLeft: { value: 2 },
+    clientTop: { value: 2 },
+    clientWidth: { configurable: true, value: 200 },
+    clientHeight: { configurable: true, value: 40 },
+    scrollWidth: { configurable: true, value: 2000 },
+    scrollHeight: { configurable: true, value: 2000 },
+    scrollBy: { value: scroll },
+  });
+  const element = document.createElement("button");
+  vi.spyOn(element, "getBoundingClientRect").mockImplementation(() => {
+    const offset = start + initial - (horizontal ? scrollport.scrollLeft : scrollport.scrollTop);
+    return horizontal
+      ? new DOMRect(50 + (2 + offset) * scaleX, 30 + 2 * scaleY, size * scaleX, 20 * scaleY)
+      : new DOMRect(50 + 2 * scaleX, 30 + (2 + offset) * scaleY, 80 * scaleX, size * scaleY);
+  });
+  scrollport.append(element);
+  document.body.append(scrollport);
+  return { element, scrollport, scroll, initial };
+}
+
+describe("selected element visibility", () => {
+  it.each([0.75, 1, 1.5])("reveals only the bordered scrollport at scale %s", (scale) => {
+    const { element, scrollport, scroll, initial } = scrollFixture(
+      "horizontal",
+      180,
+      80,
+      scale,
+      1.5,
+    );
+    const ancestor = document.createElement("div");
+    document.body.append(ancestor);
+    ancestor.append(scrollport);
+    ancestor.scrollLeft = 31;
+    ancestor.scrollTop = 47;
+    expect(revealInScrollport(element, scrollport, "horizontal")).toBe(true);
+    expect(scrollport.scrollLeft).toBe(initial + 60);
+    expect(scrollport.scrollTop).toBe(23);
+    expect(scroll).toHaveBeenCalledWith({ left: 60, behavior: "instant" });
+    expect(ancestor.scrollLeft).toBe(31);
+    expect(ancestor.scrollTop).toBe(47);
+    expect(revealInScrollport(element, scrollport, "horizontal")).toBe(true);
+    expect(scroll).toHaveBeenCalledTimes(1);
+  });
+
+  it("reveals a vertical strip using its independent scale", () => {
+    const { element, scrollport, scroll, initial } = scrollFixture("vertical", 30, 20, 1.5, 0.75);
+    expect(revealInScrollport(element, scrollport, "vertical")).toBe(true);
+    expect(scrollport.scrollTop).toBe(initial + 10);
+    expect(scrollport.scrollLeft).toBe(17);
+    expect(scroll).toHaveBeenCalledWith({ top: 10, behavior: "instant" });
+  });
+
+  it("uses negative RTL offsets without reversing physical deltas", () => {
+    const { element, scrollport, scroll, initial } = scrollFixture(
+      "horizontal",
+      -80,
+      80,
+      1.5,
+      1,
+      "rtl",
+    );
+    expect(revealInScrollport(element, scrollport, "horizontal")).toBe(true);
+    expect(scrollport.scrollLeft).toBe(initial - 80);
+    expect(scroll).toHaveBeenCalledWith({ left: -80, behavior: "instant" });
+    revealInScrollport(element, scrollport, "horizontal");
+    expect(scroll).toHaveBeenCalledTimes(1);
+  });
+
+  it.each([
+    { start: 40, size: 80, delta: 0 },
+    { start: -30, size: 80, delta: -30 },
+    { start: -20, size: 240, delta: 0 },
+    { start: -260, size: 240, delta: -220 },
+    { start: 240, size: 260, delta: 240 },
+  ])("uses nearest alignment for a tab at $start with size $size", ({ start, size, delta }) => {
+    const { element, scrollport, scroll, initial } = scrollFixture("horizontal", start, size);
+    expect(revealInScrollport(element, scrollport, "horizontal")).toBe(true);
+    expect(scrollport.scrollLeft).toBe(initial + delta);
+    revealInScrollport(element, scrollport, "horizontal");
+    expect(scroll).toHaveBeenCalledTimes(delta === 0 ? 0 : 1);
+  });
+
+  it("waits for a measurable strip and selected element", () => {
+    const { element, scrollport, scroll } = scrollFixture("horizontal", 180, 80);
+    Object.defineProperty(scrollport, "clientWidth", { configurable: true, value: 0 });
+    expect(revealInScrollport(element, scrollport, "horizontal")).toBe(false);
+    Object.defineProperty(scrollport, "clientWidth", { configurable: true, value: 200 });
+    vi.spyOn(element, "getBoundingClientRect").mockReturnValue(new DOMRect());
+    expect(revealInScrollport(element, scrollport, "horizontal")).toBe(false);
+    expect(scroll).not.toHaveBeenCalled();
+  });
+
+  it("does not scroll a strip without overflow", () => {
+    const { element, scrollport, scroll } = scrollFixture("horizontal", 180, 80);
+    Object.defineProperty(scrollport, "scrollWidth", { configurable: true, value: 200 });
+    expect(revealInScrollport(element, scrollport, "horizontal")).toBe(true);
+    expect(scroll).not.toHaveBeenCalled();
   });
 });

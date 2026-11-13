@@ -17,31 +17,31 @@
   },
   "sampleCount": 179,
   "summary": {
-    "minimum": 16.5,
-    "maximum": 16.8,
-    "mean": 16.666,
+    "minimum": 16.6,
+    "maximum": 33.4,
+    "mean": 16.759,
     "median": 16.7,
-    "p95": 16.8,
+    "p95": 16.7,
     "p99": 16.8
   },
   "rawFrameDeltasMs": [
-    16.6, 16.6, 16.7, 16.7, 16.7, 16.7, 16.6, 16.6, 16.7, 16.7, 16.6, 16.8, 16.6, 16.6, 16.8, 16.6,
-    16.7, 16.6, 16.7, 16.7, 16.6, 16.7, 16.7, 16.6, 16.7, 16.7, 16.6, 16.7, 16.6, 16.7, 16.6, 16.8,
-    16.6, 16.7, 16.6, 16.8, 16.5, 16.8, 16.7, 16.6, 16.7, 16.6, 16.7, 16.6, 16.7, 16.7, 16.7, 16.7,
-    16.5, 16.7, 16.7, 16.7, 16.6, 16.7, 16.7, 16.6, 16.7, 16.6, 16.8, 16.6, 16.7, 16.7, 16.6, 16.7,
-    16.6, 16.7, 16.7, 16.6, 16.7, 16.7, 16.7, 16.6, 16.6, 16.7, 16.7, 16.6, 16.7, 16.6, 16.8, 16.6,
-    16.7, 16.6, 16.8, 16.6, 16.6, 16.7, 16.7, 16.6, 16.7, 16.7, 16.7, 16.6, 16.7, 16.7, 16.6, 16.7,
-    16.7, 16.6, 16.7, 16.6, 16.7, 16.7, 16.6, 16.7, 16.7, 16.7, 16.7, 16.6, 16.6, 16.8, 16.6, 16.6,
-    16.7, 16.7, 16.7, 16.6, 16.6, 16.8, 16.6, 16.7, 16.7, 16.6, 16.6, 16.7, 16.7, 16.7, 16.7, 16.6,
-    16.6, 16.7, 16.7, 16.6, 16.7, 16.7, 16.7, 16.6, 16.7, 16.7, 16.7, 16.6, 16.7, 16.6, 16.7, 16.6,
-    16.7, 16.6, 16.7, 16.7, 16.6, 16.8, 16.6, 16.7, 16.6, 16.7, 16.7, 16.6, 16.7, 16.6, 16.7, 16.7,
-    16.7, 16.7, 16.6, 16.6, 16.7, 16.7, 16.6, 16.8, 16.6, 16.6, 16.7, 16.6, 16.8, 16.6, 16.7, 16.7,
-    16.6, 16.7, 16.7
+    16.7, 16.6, 16.6, 16.8, 16.6, 16.6, 16.8, 16.6, 16.7, 16.6, 16.7, 16.7, 16.7, 16.7, 16.6, 16.6,
+    16.8, 16.6, 16.6, 16.7, 16.6, 16.7, 16.7, 16.7, 16.7, 16.6, 16.7, 16.6, 16.7, 16.7, 16.6, 16.7,
+    16.7, 16.6, 16.6, 16.8, 16.6, 16.7, 16.7, 16.6, 16.7, 16.7, 16.6, 16.7, 16.7, 16.7, 16.6, 16.6,
+    16.7, 16.7, 16.6, 16.7, 16.7, 16.7, 16.6, 16.7, 16.7, 16.6, 16.7, 16.6, 16.7, 16.7, 16.6, 16.7,
+    16.7, 16.7, 16.6, 16.6, 16.8, 16.6, 16.7, 16.7, 16.6, 16.7, 16.6, 16.7, 16.7, 16.7, 16.6, 16.7,
+    16.6, 16.7, 16.7, 16.7, 16.6, 16.6, 16.7, 16.7, 16.7, 16.6, 16.7, 16.6, 16.7, 16.7, 33.4, 16.6,
+    16.7, 16.6, 16.7, 16.6, 16.8, 16.6, 16.7, 16.6, 16.7, 16.6, 16.7, 16.7, 16.7, 16.7, 16.6, 16.6,
+    16.7, 16.7, 16.7, 16.6, 16.7, 16.7, 16.6, 16.6, 16.7, 16.7, 16.6, 16.7, 16.7, 16.7, 16.7, 16.6,
+    16.7, 16.7, 16.6, 16.7, 16.6, 16.7, 16.7, 16.7, 16.6, 16.7, 16.6, 16.7, 16.7, 16.6, 16.7, 16.6,
+    16.7, 16.7, 16.7, 16.6, 16.7, 16.7, 16.6, 16.7, 16.6, 16.7, 16.7, 16.6, 16.7, 16.7, 16.6, 16.7,
+    16.7, 16.6, 16.7, 16.7, 16.6, 16.7, 16.7, 16.6, 16.7, 16.7, 16.6, 16.8, 16.6, 16.6, 16.7, 16.7,
+    16.7, 16.6, 16.7
   ],
   "longTasks": [
     {
-      "startTime": 174.5,
-      "duration": 63
+      "startTime": 174.80000000004657,
+      "duration": 67
     }
   ],
   "baseline": {
@@ -53,7 +53,7 @@
     "longTaskMaximumCount": 12,
     "minimumSamples": 120
   },
-  "producedAt": "2026-11-12T16:22:33.963Z",
+  "producedAt": "2026-11-13T03:34:34.166Z",
   "nodeSmoke": {
     "schemaVersion": 1,
     "environment": {
@@ -61,24 +61,24 @@
       "v8": "13.6.233.17-node.63",
       "platform": "linux",
       "architecture": "x64",
-      "cpu": "INTEL(R) XEON(R) PLATINUM 8573C"
+      "cpu": "AMD EPYC 7763 64-Core Processor"
     },
     "kernel": {
       "iterations": 10000,
-      "elapsedMs": 1992.67
+      "elapsedMs": 2292.1
     },
     "geometry": {
       "iterations": 100000,
-      "elapsedMs": 293.88
+      "elapsedMs": 331.03
     },
     "reorderProfiles": [
       {
         "panelCount": 50,
         "warmupCount": 250,
         "sampleCount": 2000,
-        "medianMs": 0.3189,
-        "p95Ms": 0.5474,
-        "p99Ms": 0.7793,
+        "medianMs": 0.3498,
+        "p95Ms": 0.5096,
+        "p99Ms": 0.6492,
         "designTargetMs": 1,
         "withinDesignTargetOnThisMachine": true,
         "invariantViolations": 0
@@ -87,9 +87,9 @@
         "panelCount": 500,
         "warmupCount": 100,
         "sampleCount": 1000,
-        "medianMs": 2.8972,
-        "p95Ms": 3.2892,
-        "p99Ms": 4.3706,
+        "medianMs": 3.0193,
+        "p95Ms": 3.2439,
+        "p99Ms": 4.1345,
         "designTargetMs": 5,
         "withinDesignTargetOnThisMachine": true,
         "invariantViolations": 0
@@ -99,30 +99,30 @@
       {
         "nodeCount": 100,
         "sampleCount": 10000,
-        "elapsedMs": 46.67,
-        "meanMicroseconds": 4.667
+        "elapsedMs": 48.89,
+        "meanMicroseconds": 4.889
       },
       {
         "nodeCount": 500,
         "sampleCount": 10000,
-        "elapsedMs": 239.51,
-        "meanMicroseconds": 23.951
+        "elapsedMs": 259.78,
+        "meanMicroseconds": 25.978
       },
       {
         "nodeCount": 1000,
         "sampleCount": 10000,
-        "elapsedMs": 485.13,
-        "meanMicroseconds": 48.513
+        "elapsedMs": 560.76,
+        "meanMicroseconds": 56.076
       }
     ],
-    "totalElapsedMs": 7199.35,
+    "totalElapsedMs": 7775.48,
     "finalRevision": "10000",
     "invariantViolations": 0
   },
   "rawReport": {
     "path": "artifacts/preview-browser.json",
-    "sha256": "5d735332ef430098f948ef1df5bb4904b479f0cf5f2b45932475208fba46b2be",
-    "runUrl": "https://github.com/natanelia/panefold/actions/runs/43256972486",
+    "sha256": "38e733dab5876471edcaae7bf0bae20b1d2daa5c2819e686bffdc4d170db49de",
+    "runUrl": "https://github.com/natanelia/panefold/actions/runs/43359280598",
     "artifact": "preview-executed-evidence"
   },
   "sourceDigests": {
@@ -140,7 +140,7 @@
     "apps/demo/src/touch-floating.css": "3a7e05c611f84b8e9552d9d177a685d3756d1ec34942541ed25b64c20d2394cb",
     "apps/demo/src/touch-playground.css": "f85cd5505e93e38f3301c5d419a6790e16edde937c0eea2c061213a8fc182d6c",
     "apps/demo/src/use-touch-workbench.ts": "c913911471945a857994e2078eb36420b14cdcb8cd3d7437b5d562c32a02f04c",
-    "e2e/code-workbench-cases.ts": "e83979a7be6e659fa238414e65f7f28ec74828274567e8f181ea002ed3212d39",
+    "e2e/code-workbench-cases.ts": "9863416092bf01ed14e804a4acf29b53c8d1339c997a3e57044f95fb56658b52",
     "e2e/deferred-resize.spec.ts": "87cee00ab3529a9fe7f4c82addd017c951b2cc10a7ebc264ee3b4b8e680899b7",
     "e2e/drag-parity.spec.ts": "a7c7da7513e3b56de9b832cce5fa2fc6236f55d74ba9ea3aa9be1600f6620bce",
     "e2e/interrupted-gestures.spec.ts": "5d6b2d472d324c00ae7d251b5d5a57768d74e8a1e7f34552c28ff1b478d17bf9",
@@ -176,8 +176,8 @@
     "packages/kernel-optimized/src/indexes.ts": "c6d962626b3c0cac8d7d89f156aed383b1e313a201f7c3ce5f228d97959ac0a8",
     "packages/model/src/split-weights.ts": "05695900c92d98b016c21adae3e17ca20ee97134f10e1b6a3d91c0a35cf19ea6",
     "packages/motion/src/coordinator.ts": "50eff7dd6a1b8f6433ac3f5bfc5f8d74b99a501e43e712ccb3e1a82520574c6d",
-    "packages/react/src/WorkspaceSurface.tsx": "117724e1607c256ffc70cc290537f7182edba6ece4ea09cc071109cd403b2125",
-    "packages/react/src/client-coordinates.ts": "f70aaae0922037939b3f21583cfceaf34289d2d811654991da775ac23241411e",
+    "packages/react/src/WorkspaceSurface.tsx": "a4193565302faf4c0debb037b341295ae47c6e03623524adc73b0371a2da07f5",
+    "packages/react/src/client-coordinates.ts": "a384a2a0a4728a0846673f9500a2f6068e7436b0acdfcd9060531d0165a3923f",
     "packages/react/src/drop-modifiers.ts": "542583898dfa7d121b0d91f51171df8a3db47a8e749422437da903372a60c6ee",
     "packages/react/src/drop-preview.ts": "7c84edb3ba5ee124e207ca6fc5fb3f2a8b8e07178d90f11b96a68504b4402de7",
     "packages/react/src/drop-target.ts": "6626985475da22f7a7938e2c7dd59cd6ce83f07902561a1cf6b77fec3ed361ff",
@@ -196,7 +196,7 @@
     "packages/react/src/resize-preview.ts": "ec6d7eac3d639828b2630592fe5090d9da59f842dae6a88596aad9b8c91d1938",
     "packages/react/src/styles.css": "9f188b1a7b506887b3291b179a03611100d9eccdb783d01cc7df48c9204decd5",
     "packages/react/src/tab-insertion.ts": "e611ecfe7cb4b0b9fb7e748a747f2584e35dbaa72111a907008f6dc6b11f1670",
-    "packages/react/test/client-coordinates.test.ts": "11492358f3ecc0ad0b0530abc11e6237e20fb60ce7132d7bead8625467a45389",
+    "packages/react/test/client-coordinates.test.ts": "71c0b6798cafc8ffee375e023652ad9dc9a6ef298587910edc2677fd9f5d9e99",
     "packages/react/test/constrained-resize.test.tsx": "9a261e6135f34510627296e9545ae3bbecab5e7c8ca4805d1b6dec0b426df446",
     "packages/react/test/drag-parity.test.ts": "1f0bca650b8647cf7473639a0afa59839bdd60327892e428f30a98642cd67443",
     "packages/react/test/drop-preview.test.ts": "bdc1de685dce3a9bc5c073cf9fb7f2325de07251a8f71d4b318f09990c22211c",
