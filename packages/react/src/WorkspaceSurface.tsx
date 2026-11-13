@@ -35,7 +35,7 @@ import {
 } from "@panefold/motion";
 import { createResizeActor, type ResizeEvent } from "@panefold/protocol-xstate";
 
-import { measureClientScale, measureContentBox } from "./client-coordinates";
+import { measureClientScale, measureContentBox, revealInScrollport } from "./client-coordinates";
 import {
   FloatingSurfaceFrame,
   floatingSurfaceContentBounds,
@@ -2442,6 +2442,7 @@ function PanelGroup<TCommand, TResult>({
   const pointerFocusPanelRef = useRef<string | undefined>(undefined);
   const reorderFocusPanelRef = useRef<string | undefined>(undefined);
   const groupRef = useRef<HTMLElement>(null);
+  const tablistRef = useRef<HTMLDivElement>(null);
   const groupLabelId = useId();
   const floatingHeaderTarget = useFloatingSurfaceHeaderSlot(group.id);
   const groupPanels = group.panelIds
@@ -2459,6 +2460,38 @@ function PanelGroup<TCommand, TResult>({
   const presentation = resolveTabPresentation(tabPresentation, group, projection);
   const orientation =
     floatingHeaderTarget === undefined ? tabOrientation(presentation) : "horizontal";
+  // Neighbor order can move the selected tab without changing its own index.
+  const tabOrder = JSON.stringify(groupPanels.map((panel) => panel.id));
+  useLayoutEffect(() => {
+    const tablist = tablistRef.current;
+    const tab = tablist?.querySelector<HTMLElement>('[role="tab"][aria-selected="true"]');
+    if (tablist === null || tab === null || tab === undefined) return;
+    if (revealInScrollport(tab, tablist, orientation)) return;
+    const Observer = tablist.ownerDocument.defaultView?.ResizeObserver;
+    if (Observer === undefined) return;
+    let pending = true;
+    const observer = new Observer(() => {
+      if (!pending || !revealInScrollport(tab, tablist, orientation)) return;
+      pending = false;
+      observer.disconnect();
+    });
+    // Hidden initial layouts get one reveal when measurable. Ordinary resizing
+    // and manual scrolling must not keep pulling the user back to selection.
+    observer.observe(tablist);
+    observer.observe(tab);
+    return () => {
+      pending = false;
+      observer.disconnect();
+    };
+  }, [
+    direction,
+    floatingHeaderTarget,
+    group.selectedPanelId,
+    orientation,
+    presentation.content,
+    presentation.placement,
+    tabOrder,
+  ]);
   const empty = groupPanels.length === 0;
   const groupRect = resolvedLayout.groupRects[group.id] ?? ZERO_LOGICAL_RECT;
   const rootRect = resolvedLayout.nodeRects[resolvedLayout.rootNodeId] ?? groupRect;
@@ -2684,6 +2717,7 @@ function PanelGroup<TCommand, TResult>({
       {placePanelGroupTabStrip(
         <div className="pf-tab-strip">
           <div
+            ref={tablistRef}
             className="pf-tab-list"
             role="tablist"
             aria-labelledby={groupLabelId}

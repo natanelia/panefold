@@ -491,6 +491,183 @@ test("reorders tabs by drag in horizontal LTR, RTL, and vertical rails without r
   await expect(editor).toHaveValue("Tab reorder keeps this live editor.");
 });
 
+const selectedTabOverflowStyles = `
+  [data-workspace-group="primary"] .pf-tab-list {
+    border: 3px solid transparent;
+    scroll-behavior: smooth;
+    transform: scale(1.25, 0.75);
+    transform-origin: top left;
+  }
+  [data-workspace-group="primary"][data-tab-orientation="horizontal"] .pf-tab-list {
+    flex: 0 0 260px;
+    max-inline-size: 260px;
+  }
+  [data-workspace-group="primary"][data-tab-orientation="vertical"] .pf-tab-list {
+    flex: 0 0 260px;
+    max-block-size: 260px;
+  }
+  [data-workspace-group="primary"] .pf-tab {
+    flex: 0 0 220px;
+  }
+  [data-workspace-group="primary"][data-tab-orientation="horizontal"] .pf-tab {
+    min-inline-size: 220px;
+  }
+`;
+
+async function tabClipAmount(tab: Locator) {
+  return tab.evaluate((element) => {
+    const list = element.parentElement;
+    if (list === null) throw new Error("Tab list is missing");
+    const vertical = list.getAttribute("aria-orientation") === "vertical";
+    const listRect = list.getBoundingClientRect();
+    const tabRect = element.getBoundingClientRect();
+    const scale = vertical
+      ? listRect.height / list.offsetHeight
+      : listRect.width / list.offsetWidth;
+    const start = vertical
+      ? listRect.top + list.clientTop * scale
+      : listRect.left + list.clientLeft * scale;
+    const end = start + (vertical ? list.clientHeight : list.clientWidth) * scale;
+    return Math.max(
+      0,
+      start - (vertical ? tabRect.top : tabRect.left),
+      (vertical ? tabRect.bottom : tabRect.right) - end,
+    );
+  });
+}
+
+async function selectPanelFromPalette(page: Page, title: string) {
+  const trigger = page.getByRole("button", { name: "Open Command Palette", exact: true });
+  await trigger.click();
+  const palette = page.getByRole("dialog", { name: "Command Palette", exact: true });
+  await palette.getByRole("textbox", { name: "Search panels and commands" }).fill(title);
+  await palette.getByRole("button").filter({ hasText: title }).click();
+  await expect(palette).toHaveCount(0);
+  await expect(trigger).toBeFocused();
+}
+
+for (const setup of [
+  { name: "horizontal LTR", direction: "ltr", tabPlacement: "block-start", vertical: false },
+  { name: "horizontal RTL", direction: "rtl", tabPlacement: "block-start", vertical: false },
+  { name: "vertical", direction: "ltr", tabPlacement: "inline-start", vertical: true },
+] as const) {
+  test(`reveals a selected overflow tab without moving focus in ${setup.name}`, async ({
+    page,
+  }) => {
+    await page.addInitScript(({ direction, tabPlacement }) => {
+      localStorage.setItem(
+        "panefold.atlas.view.v1",
+        JSON.stringify({ direction, tabPlacement, motion: "off" }),
+      );
+    }, setup);
+    await page.goto("/");
+    await page.addStyleTag({ content: selectedTabOverflowStyles });
+    const primary = page.locator('[data-workspace-group="primary"]');
+    const list = primary.getByRole("tablist");
+    const tab = primary.locator('[data-workspace-panel-tab="notes"]');
+    await expect(list).toHaveAttribute(
+      "aria-orientation",
+      setup.vertical ? "vertical" : "horizontal",
+    );
+    await expect.poll(() => tabClipAmount(tab)).toBeGreaterThan(20);
+    const before = await revisionOf(page);
+    const pageScroll = await page.evaluate(() => [window.scrollX, window.scrollY]);
+
+    // This dispatches selection from outside the rail, without browser focus
+    // scrolling the hidden tab into view on the implementation's behalf.
+    await selectPanelFromPalette(page, "workspace.ts");
+    await expect(tab).toHaveAttribute("aria-selected", "true");
+    await expect.poll(() => tabClipAmount(tab)).toBeLessThan(1);
+    await expect.poll(() => revisionOf(page)).toBe(before + 1);
+    expect(await page.evaluate(() => [window.scrollX, window.scrollY])).toEqual(pageScroll);
+
+    await list.evaluate((element) => {
+      element.scrollTo({ left: 0, top: 0, behavior: "instant" });
+    });
+    await page.getByRole("button", { name: "Explorer", exact: true }).click();
+    await expect(tab).toHaveAttribute("aria-selected", "true");
+    await list.evaluate((element, vertical) => {
+      element.style.flexBasis = "240px";
+      if (vertical) element.style.maxBlockSize = "240px";
+      else element.style.maxInlineSize = "240px";
+    }, setup.vertical);
+    await page.evaluate(
+      () =>
+        new Promise<void>((resolve) => {
+          requestAnimationFrame(() => requestAnimationFrame(() => resolve()));
+        }),
+    );
+    expect(
+      await list.evaluate(
+        (element, vertical) => (vertical ? element.scrollTop : element.scrollLeft),
+        setup.vertical,
+      ),
+    ).toBe(0);
+    expect(await tabClipAmount(tab)).toBeGreaterThan(20);
+  });
+}
+
+test("reveals a restored tab after its hidden strip becomes visible without scrolling ancestors", async ({
+  page,
+}) => {
+  await page.addInitScript(() => {
+    localStorage.setItem("panefold.atlas.view.v1", JSON.stringify({ motion: "off" }));
+  });
+  await page.goto("/");
+  await selectPanelFromPalette(page, "workspace.ts");
+  const savedRevision = await revisionOf(page);
+  await expect(page.locator("[data-persistence-state='saved']")).toHaveAttribute(
+    "data-persisted-revision",
+    String(savedRevision),
+  );
+  await page.route("**/?fixture=code", async (route) => {
+    const response = await route.fetch();
+    await route.fulfill({
+      response,
+      body: (await response.text()).replace(
+        "<head>",
+        `<head><style>${selectedTabOverflowStyles}
+          .demo-main { overflow: auto !important; }
+          .demo-workspace-shell { position: relative; top: 900px; }
+        </style><style id="defer-tab-reveal">
+          [data-workspace-group="primary"] .pf-tab-list { display: none; }
+        </style>`,
+      ),
+    });
+  });
+  await page.reload();
+  await expect(page.locator("[data-persistence-state='restored']")).toBeVisible();
+  const primary = page.locator('[data-workspace-group="primary"]');
+  const list = primary.locator(".pf-tab-list");
+  const tab = primary.locator('[data-workspace-panel-tab="notes"]');
+  const ancestor = page.locator(".demo-main");
+  await expect(tab).toHaveAttribute("aria-selected", "true");
+  await expect(list).toHaveCSS("display", "none");
+  await expect
+    .poll(() => ancestor.evaluate((element) => element.scrollHeight - element.clientHeight))
+    .toBeGreaterThan(100);
+  await ancestor.evaluate((element) => {
+    element.scrollTop = 40;
+  });
+  const trigger = page.getByRole("button", { name: "Open Command Palette", exact: true });
+  await trigger.focus();
+  const before = await revisionOf(page);
+  const pageScroll = await page.evaluate(() => [window.scrollX, window.scrollY]);
+  const ancestorScroll = await ancestor.evaluate((element) => [
+    element.scrollLeft,
+    element.scrollTop,
+  ]);
+  await page.locator("#defer-tab-reveal").evaluate((element) => element.remove());
+
+  await expect.poll(() => tabClipAmount(tab)).toBeLessThan(1);
+  await expect(trigger).toBeFocused();
+  expect(await ancestor.evaluate((element) => [element.scrollLeft, element.scrollTop])).toEqual(
+    ancestorScroll,
+  );
+  expect(await page.evaluate(() => [window.scrollX, window.scrollY])).toEqual(pageScroll);
+  expect(await revisionOf(page)).toBe(before);
+});
+
 test("autoscrolls an overflowing tab strip and retains the final insertion target", async ({
   page,
 }) => {

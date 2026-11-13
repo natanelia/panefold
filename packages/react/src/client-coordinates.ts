@@ -32,6 +32,47 @@ export function measureContentBox(element: HTMLElement) {
   };
 }
 
+/** Reveal within this scrollport only. False means layout is not measurable yet. */
+export function revealInScrollport(
+  element: HTMLElement,
+  scrollport: HTMLElement,
+  orientation: "horizontal" | "vertical",
+): boolean {
+  if (scrollport.clientWidth <= 0 || scrollport.clientHeight <= 0) return false;
+  const portRect = scrollport.getBoundingClientRect();
+  const rect = element.getBoundingClientRect();
+  if (portRect.width <= 0 || portRect.height <= 0 || rect.width <= 0 || rect.height <= 0) {
+    return false;
+  }
+  const horizontal = orientation === "horizontal";
+  const viewportSize = horizontal ? scrollport.clientWidth : scrollport.clientHeight;
+  if ((horizontal ? scrollport.scrollWidth : scrollport.scrollHeight) <= viewportSize) return true;
+  const scale = measureClientScale(scrollport)[horizontal ? "x" : "y"];
+  const start =
+    (horizontal ? portRect.left : portRect.top) +
+    (horizontal ? scrollport.clientLeft : scrollport.clientTop) * scale;
+  const end = start + viewportSize * scale;
+  const elementStart = horizontal ? rect.left : rect.top;
+  const elementEnd = horizontal ? rect.right : rect.bottom;
+  const spansViewport = elementStart <= start && elementEnd >= end;
+  const oversized = elementEnd - elementStart > end - start;
+  let delta = 0;
+  if (!spansViewport) {
+    if (elementStart < start) delta = oversized ? elementEnd - end : elementStart - start;
+    else if (elementEnd > end) delta = oversized ? elementStart - start : elementEnd - end;
+  }
+  if (delta !== 0) {
+    // Physical deltas also handle the negative scrollLeft used by RTL strips.
+    // Instant scrolling avoids leaving an animation after selection changes.
+    scrollport.scrollBy(
+      horizontal
+        ? { left: delta / scale, behavior: "instant" }
+        : { top: delta / scale, behavior: "instant" },
+    );
+  }
+  return true;
+}
+
 function clientScale(clientSize: number, layoutSize: number): number {
   if (
     !Number.isFinite(clientSize) ||

@@ -404,6 +404,180 @@ describe("WorkspaceSurface", () => {
     expect(runtime.transactions.at(-1)?.origin).toBe("keyboard");
   });
 
+  it("reveals a selected offscreen tab without moving focus or adding a transaction", async () => {
+    const runtime = new FixtureRuntime(initialProjection);
+    const view = renderWorkspace(runtime);
+    const tablist = await screen.findByRole("tablist", { name: "Left" });
+    const alpha = screen.getByRole("tab", { name: "Alpha" });
+    const beta = screen.getByRole("tab", { name: "Beta" });
+    const scroll = measureTabScrollport(tablist);
+    setElementRect(alpha, { left: 0, top: 0, width: 80, height: 34 });
+    setElementRect(beta, { left: 240, top: 0, width: 80, height: 34 });
+    const outside = view.container.appendChild(document.createElement("button"));
+    outside.focus();
+
+    act(() => {
+      runtime.dispatch({ type: "select", panelId: "beta" });
+    });
+
+    expect(tablist.scrollLeft).toBe(120);
+    expect(scroll).toHaveBeenCalledWith({ left: 120, behavior: "instant" });
+    expect(document.activeElement).toBe(outside);
+    expect(runtime.transactions).toHaveLength(1);
+    expect(runtime.getSnapshot().projection.revision).toBe("1");
+
+    tablist.scrollLeft = 0;
+    fireEvent.scroll(tablist);
+    act(() => {
+      runtime.dispatch({ type: "resize", splitId: "root", weights: [2, 1] });
+    });
+    expect(tablist.scrollLeft).toBe(0);
+    expect(scroll).toHaveBeenCalledTimes(1);
+    expect(document.activeElement).toBe(outside);
+  });
+
+  it("reveals a restored selection when a hidden tab strip first becomes measurable", async () => {
+    const observers = installControllableResizeObserver();
+    try {
+      const left = initialProjection.groups.left;
+      if (left === undefined) throw new Error("Expected the left group");
+      const runtime = new FixtureRuntime({
+        ...initialProjection,
+        activePanelId: "beta",
+        groups: { ...initialProjection.groups, left: { ...left, selectedPanelId: "beta" } },
+      });
+      const view = renderWorkspace(runtime);
+      const tablist = await screen.findByRole("tablist", { name: "Left" });
+      const beta = screen.getByRole("tab", { name: "Beta" });
+      const observer = observers.instances.find((item) => item.hasObserved(tablist));
+      expect(observer).toBeDefined();
+      if (observer === undefined) throw new Error("Expected a pending selection reveal");
+      const outside = view.container.appendChild(document.createElement("button"));
+      outside.focus();
+
+      act(() => observer.notify());
+      expect(tablist.scrollLeft).toBe(0);
+      expect(observer.hasObserved(tablist)).toBe(true);
+      expect(observer.hasObserved(beta)).toBe(true);
+      const scroll = measureTabScrollport(tablist);
+      act(() => observer.notify());
+      expect(scroll).not.toHaveBeenCalled();
+      expect(observer.hasObserved(tablist)).toBe(true);
+      expect(observer.hasObserved(beta)).toBe(true);
+      setElementRect(beta, { left: 240, top: 0, width: 80, height: 34 });
+      act(() => observer.notify());
+
+      expect(tablist.scrollLeft).toBe(120);
+      expect(observer.hasObserved(tablist)).toBe(false);
+      expect(observer.hasObserved(beta)).toBe(false);
+      expect(document.activeElement).toBe(outside);
+      expect(runtime.transactions).toHaveLength(0);
+      expect(runtime.getSnapshot().projection.revision).toBe("0");
+      tablist.scrollLeft = 0;
+      act(() => observer.deliverQueued());
+      expect(tablist.scrollLeft).toBe(0);
+      expect(scroll).toHaveBeenCalledTimes(1);
+    } finally {
+      observers.restore();
+    }
+  });
+
+  it("discards pending tab reveals after selection changes and unmount", async () => {
+    const observers = installControllableResizeObserver();
+    try {
+      const runtime = new FixtureRuntime(initialProjection);
+      const view = renderWorkspace(runtime);
+      const tablist = await screen.findByRole("tablist", { name: "Left" });
+      const alpha = screen.getByRole("tab", { name: "Alpha" });
+      const beta = screen.getByRole("tab", { name: "Beta" });
+      const original = observers.instances.find((item) => item.hasObserved(tablist));
+      expect(original).toBeDefined();
+      if (original === undefined) throw new Error("Expected an initial pending reveal");
+      act(() => runtime.dispatch({ type: "select", panelId: "beta" }));
+      const current = observers.instances.find((item) => item.hasObserved(tablist));
+      expect(original.hasObserved(tablist)).toBe(false);
+      expect(original.hasObserved(alpha)).toBe(false);
+      expect(current).toBeDefined();
+      expect(current).not.toBe(original);
+      if (current === undefined) throw new Error("Expected the current pending reveal");
+      const scroll = measureTabScrollport(tablist);
+      setElementRect(alpha, { left: -80, top: 0, width: 80, height: 34 });
+      setElementRect(beta, { left: 240, top: 0, width: 80, height: 34 });
+      act(() => original.deliverQueued());
+      expect(scroll).not.toHaveBeenCalled();
+
+      view.unmount();
+      expect(current.hasObserved(tablist)).toBe(false);
+      expect(current.hasObserved(beta)).toBe(false);
+      act(() => current.deliverQueued());
+      expect(scroll).not.toHaveBeenCalled();
+      expect(runtime.transactions).toHaveLength(1);
+    } finally {
+      observers.restore();
+    }
+  });
+
+  it("reveals a selected tab after reordering and changing its rail orientation", async () => {
+    let vertical = false;
+    const left = initialProjection.groups.left;
+    if (left === undefined) throw new Error("Expected the left group");
+    const runtime = new FixtureRuntime({
+      ...initialProjection,
+      activePanelId: "beta",
+      groups: {
+        ...initialProjection.groups,
+        left: { ...left, panelIds: ["alpha", "beta", "delta"], selectedPanelId: "beta" },
+      },
+      panels: { ...initialProjection.panels, delta: panel("delta", "Delta") },
+    });
+    renderWorkspace(runtime, {
+      tabPresentation: () => ({
+        placement: vertical ? "inline-start" : "block-start",
+        content: "label-only",
+      }),
+    });
+    const tablist = await screen.findByRole("tablist", { name: "Left" });
+    const alpha = screen.getByRole("tab", { name: "Alpha" });
+    const beta = screen.getByRole("tab", { name: "Beta" });
+    const delta = screen.getByRole("tab", { name: "Delta" });
+    measureTabScrollport(tablist);
+    // Swapping unequal-width neighbors moves Beta even though its index stays one.
+    setElementRect(delta, { left: 0, top: 0, width: 240, height: 34 });
+    setElementRect(beta, { left: 240, top: 0, width: 80, height: 34 });
+    setElementRect(alpha, { left: 320, top: 0, width: 80, height: 34 });
+    const projection = runtime.getSnapshot().projection;
+    const group = projection.groups.left;
+    if (group === undefined) throw new Error("Expected the selected group");
+    act(() =>
+      runtime.publishProjection({
+        ...projection,
+        groups: { ...projection.groups, left: { ...group, panelIds: ["delta", "beta", "alpha"] } },
+      }),
+    );
+    expect(tablist.scrollLeft).toBe(120);
+    expect(beta.getAttribute("aria-selected")).toBe("true");
+
+    setElementRect(beta, { left: -40, top: 0, width: 80, height: 34 });
+    act(() =>
+      runtime.dispatch({
+        type: "reorder",
+        panelId: "beta",
+        groupId: "left",
+        beforePanelId: "delta",
+      }),
+    );
+    expect(tablist.scrollLeft).toBe(80);
+
+    tablist.scrollLeft = 0;
+    measureTabScrollport(tablist, "vertical");
+    setElementRect(beta, { left: 0, top: 240, width: 100, height: 60 });
+    vertical = true;
+    act(() => runtime.publishProjection(runtime.getSnapshot().projection));
+    expect(tablist.scrollTop).toBe(200);
+    expect(tablist.scrollLeft).toBe(0);
+    expect(runtime.transactions).toHaveLength(1);
+  });
+
   it("projects same-document floating surfaces without modal semantics", async () => {
     const runtime = new FixtureRuntime(floatingProjection);
     const user = userEvent.setup();
@@ -3044,7 +3218,9 @@ describe("WorkspaceSurface", () => {
       });
       act(() => frames.flush());
       expect(view.container.querySelector("[data-workspace-panel-drag]")).toBeTruthy();
-      const tabObserver = resizeObservers.instances.find((observer) => observer.hasObserved(alpha));
+      const tabObserver = resizeObservers.instances.find(
+        (observer) => observer.hasObserved(alpha) && observer.hasObserved(beta),
+      );
       if (tabObserver === undefined) throw new Error("Expected an active tab ResizeObserver");
 
       setElementRect(alpha, { left: 0, top: 0, width: 180, height: 34 });
@@ -4630,6 +4806,29 @@ function recreatePanelViews(projection: WorkspaceProjection): WorkspaceProjectio
   };
 }
 
+function measureTabScrollport(
+  tablist: HTMLElement,
+  orientation: "horizontal" | "vertical" = "horizontal",
+) {
+  const width = orientation === "horizontal" ? 200 : 100;
+  const height = orientation === "horizontal" ? 34 : 100;
+  setElementRect(tablist, { left: 0, top: 0, width, height });
+  const scroll = vi.fn((options: ScrollToOptions) => {
+    tablist.scrollLeft += options.left ?? 0;
+    tablist.scrollTop += options.top ?? 0;
+  });
+  Object.defineProperties(tablist, {
+    offsetWidth: { configurable: true, value: width },
+    offsetHeight: { configurable: true, value: height },
+    clientWidth: { configurable: true, value: width },
+    clientHeight: { configurable: true, value: height },
+    scrollWidth: { configurable: true, value: 500 },
+    scrollHeight: { configurable: true, value: 500 },
+    scrollBy: { configurable: true, value: scroll },
+  });
+  return scroll;
+}
+
 function createManualFrameScheduler() {
   let pending: FrameRequestCallback | undefined;
   let nextHandle = 0;
@@ -4686,6 +4885,10 @@ class ControllableResizeObserver implements ResizeObserver {
 
   public notify() {
     if (!this.disconnected) this.callback([], this);
+  }
+
+  public deliverQueued() {
+    this.callback([], this);
   }
 }
 
