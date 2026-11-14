@@ -103,6 +103,7 @@
     "packages/model/src/ids.ts": "cbf1947c1c8ed51447a6e3b5d77b04734e0b6b59e588099f442b99c3bde953c1",
     "packages/model/src/index.ts": "ff5e289957809f04fa04ae73ebc7070857f0d3bb261471ff36c96d1d0e2686f8",
     "packages/model/src/json.ts": "71b1008440a2511a701e7ff4484e0373fd0f0dfac78a39eb099da31f0ee389f5",
+    "packages/model/src/layout.ts": "482a151700baf247a17b210ec30c07ddee4a4b0142509f4b1a875c928d898d24",
     "packages/model/src/panel-registry.ts": "0a84a2ea260b55bf2c8efaa8462aae4e698045865f533d6e937a93ab8af9af5c",
     "packages/model/src/results.ts": "f66a7e790365153a33f72df22e7961890d74f0e1723cf9ed2f13fcdd58c50fec",
     "packages/kernel-optimized/test/benchmark.test.ts": "1ed3acf97650eb802217931c29ec14021f14ffb7134873345975cf370ba6587c",

@@ -1126,7 +1126,7 @@
       "verificationClass": "code-verifiable",
       "artifactRole": "result",
       "uri": "repo://conformance/results/independent-semantic-oracle-2026-09-27.json",
-      "sha256": "80fee22092dc665b2cb2a21bdd893ce38777f535bf1b5e953be4e1eaa7d29afd",
+      "sha256": "b0bff00e9ac5e25e669cce4f13abbb8a9ae466ac37b15dad7a30aff3f5de0d5e",
       "producedAt": "2026-11-14T23:40:47.304Z",
       "requirementIds": [
         "MOD-004",
