@@ -83,6 +83,46 @@ Read [Command support](docs/COMMANDS.md), [Support matrix](docs/SUPPORT.md),
 [Conformance status](docs/CONFORMANCE.md), and the requirement-by-requirement
 [system-design audit](docs/DESIGN_AUDIT.md) before adopting any package.
 
+## Start with a small workspace
+
+Describe panels and their arrangement directly. The builder fills panel defaults, creates the
+group/node/surface records, and turns relative weights into canonical proportions:
+
+```ts
+import { createWorkspace } from "@panefold/runtime";
+
+const workspace = createWorkspace({
+  panels: [
+    { id: "notes", type: "note", title: "Notes" },
+    { id: "preview", type: "preview", title: "Preview" },
+  ],
+  layout: { id: "main", panels: ["notes", "preview"] },
+});
+const receipt = workspace.actions.selectPanel("preview");
+if (receipt.status === "rejected") console.error(receipt.result.error);
+workspace.dispose(); // When this workspace session ends.
+```
+
+Prepare composable operations with `workspace.plan`, then pass them to
+`workspace.actions.batch(plans)` for one atomic commit and one undo step.
+
+In React, `Workspace` owns setup and cleanup. Compose its children in your application's layout;
+`WorkspaceSurface` renders the panels, and typed hooks connect your controls to the same runtime:
+
+```tsx
+<Workspace initial={options}>
+  <Toolbar />
+  <WorkspaceSurface panels={renderers} className="my-workspace" />
+  <StatusBar />
+</Workspace>
+```
+
+Follow the [complete React example](docs/guides/react.md) or the
+[compiled starter](apps/demo/src/docs-starter.tsx). The existing snapshot factories, command
+dispatch API and generic renderer remain available for advanced integrations. Generic React
+integrations now import from `@panefold/react/adapter`; see the
+[migration table](docs/guides/react.md#advanced-adapters-and-migration).
+
 ## Architecture
 
 ```mermaid

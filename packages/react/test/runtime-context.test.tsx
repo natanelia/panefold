@@ -4,13 +4,17 @@ import { StrictMode, Suspense, startTransition, useState } from "react";
 import { renderToString } from "react-dom/server";
 import { act, cleanup, fireEvent, render, screen } from "@testing-library/react";
 import { afterEach, describe, expect, it } from "vitest";
+import { panelId } from "@panefold/model";
+import { createWorkspaceRuntime } from "@panefold/runtime";
 
 import {
   WorkspaceRuntimeProvider,
   useWorkspaceProjection,
   useWorkspaceSnapshot,
+  useWorkspaceTransactions,
 } from "../src/runtime-context";
 import type { WorkspaceRuntimeLike } from "../src/types";
+import { modelFixture } from "./model-fixture";
 
 interface Snapshot {
   readonly revision: number;
@@ -221,5 +225,135 @@ describe("useWorkspaceProjection", () => {
       await pending;
     });
     expect(screen.getByText("Current inspector")).toBeDefined();
+  });
+});
+
+describe("useWorkspaceTransactions", () => {
+  it("subscribes to a real runtime with its method receiver and observes bounded log replacement", () => {
+    const runtime = createWorkspaceRuntime({
+      initialSnapshot: modelFixture(),
+      transactionLimit: 1,
+    });
+    let observed: readonly unknown[] = [];
+    let renders = 0;
+    function Transactions() {
+      observed = useWorkspaceTransactions();
+      renders += 1;
+      return <output>{observed.length}</output>;
+    }
+    try {
+      const view = render(
+        <StrictMode>
+          <WorkspaceRuntimeProvider runtime={runtime}>
+            <Transactions />
+          </WorkspaceRuntimeProvider>
+        </StrictMode>,
+      );
+      expect(screen.getByText("0")).toBeDefined();
+      act(() => {
+        runtime.dispatch({ type: "select-panel", panelId: panelId("b") });
+      });
+      expect(observed).toEqual(runtime.getTransactions());
+      expect(screen.getByText("1")).toBeDefined();
+      const firstTransaction = observed[0];
+      const afterFirst = renders;
+      act(() => {
+        runtime.dispatch({ type: "select-panel", panelId: panelId("a") });
+      });
+      expect(observed).toEqual(runtime.getTransactions());
+      expect(observed[0]).not.toBe(firstTransaction);
+      expect(renders).toBeGreaterThan(afterFirst);
+      view.unmount();
+      const afterUnmount = renders;
+      act(() => {
+        runtime.dispatch({ type: "select-panel", panelId: panelId("b") });
+      });
+      expect(renders).toBe(afterUnmount);
+    } finally {
+      runtime.dispose();
+    }
+  });
+
+  it("reads the replacement runtime's current log immediately and unsubscribes the old runtime", () => {
+    const first = createWorkspaceRuntime({ initialSnapshot: modelFixture() });
+    const second = createWorkspaceRuntime({ initialSnapshot: modelFixture() });
+    second.dispatch({ type: "select-panel", panelId: panelId("b") });
+    second.dispatch({ type: "select-panel", panelId: panelId("a") });
+    let observed: readonly unknown[] = [];
+    let renders = 0;
+    function Transactions() {
+      observed = useWorkspaceTransactions();
+      renders += 1;
+      return <output>{observed.length}</output>;
+    }
+    try {
+      const view = render(
+        <WorkspaceRuntimeProvider runtime={first}>
+          <Transactions />
+        </WorkspaceRuntimeProvider>,
+      );
+      expect(screen.getByText("0")).toBeDefined();
+      view.rerender(
+        <WorkspaceRuntimeProvider runtime={second}>
+          <Transactions />
+        </WorkspaceRuntimeProvider>,
+      );
+      expect(screen.getByText("2")).toBeDefined();
+      expect(observed).toEqual(second.getTransactions());
+      const afterSwitch = renders;
+      act(() => {
+        first.dispatch({ type: "select-panel", panelId: panelId("b") });
+      });
+      expect(renders).toBe(afterSwitch);
+      act(() => {
+        second.dispatch({ type: "select-panel", panelId: panelId("b") });
+      });
+      expect(screen.getByText("3")).toBeDefined();
+      view.unmount();
+    } finally {
+      first.dispose();
+      second.dispose();
+    }
+  });
+
+  it("handles transaction-only updates and stable empty logs for generic runtimes", () => {
+    const source = createSource();
+    const records: string[] = [];
+    const listeners = new Set<() => void>();
+    const runtime = {
+      ...source.runtime,
+      getTransactions: () => [...records],
+      subscribeTransactions: (listener: () => void) => {
+        listeners.add(listener);
+        return () => listeners.delete(listener);
+      },
+    };
+    function Transactions() {
+      const transactions = useWorkspaceTransactions();
+      return <output>{transactions.join(",") || "empty"}</output>;
+    }
+    const view = render(
+      <WorkspaceRuntimeProvider runtime={runtime}>
+        <Transactions />
+      </WorkspaceRuntimeProvider>,
+    );
+    expect(listeners.size).toBe(1);
+    expect(source.listenerCount()).toBe(0);
+    act(() => {
+      records.push("committed");
+      for (const listener of listeners) listener();
+    });
+    expect(screen.getByText("committed")).toBeDefined();
+    view.rerender(
+      <WorkspaceRuntimeProvider runtime={source.runtime}>
+        <Transactions />
+      </WorkspaceRuntimeProvider>,
+    );
+    expect(listeners.size).toBe(0);
+    expect(source.listenerCount()).toBe(1);
+    act(() => source.publish());
+    expect(screen.getByText("empty")).toBeDefined();
+    view.unmount();
+    expect(source.listenerCount()).toBe(0);
   });
 });

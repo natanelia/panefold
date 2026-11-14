@@ -24,7 +24,7 @@ import {
   type WorkspaceLayoutSolver,
   type WorkspacePanelRegistry,
   type WorkspacePanelRenderProps,
-} from "@panefold/react";
+} from "@panefold/react/adapter";
 import { createWorkspaceRuntime, type WorkspaceRuntime } from "@panefold/runtime";
 // This source-only fixture consumes the same implementation exported by @panefold/ecosystem.
 import {

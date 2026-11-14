@@ -15,7 +15,7 @@ import {
   type WorkspaceCommand,
   type WorkspaceSnapshot,
 } from "@panefold/model";
-import type { WorkspaceCommandAdapter, WorkspaceProjection } from "@panefold/react";
+import type { WorkspaceCommandAdapter, WorkspaceProjection } from "@panefold/react/adapter";
 import { createModelWorkspaceCommands, projectModelWorkspace } from "@panefold/react/model";
 import { solveDemoLayout } from "./responsive-layout";
 

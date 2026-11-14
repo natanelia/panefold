@@ -1,8 +1,7 @@
 import {
   createContext,
   useContext,
-  useEffect,
-  useState,
+  useMemo,
   useSyncExternalStore,
   type PropsWithChildren,
 } from "react";
@@ -66,16 +65,40 @@ export function useWorkspaceProjection<TSnapshot, TCommand, TResult, TSelection>
 
 export function useWorkspaceTransactions<TSnapshot, TCommand, TResult>() {
   const runtime = useWorkspaceRuntime<TSnapshot, TCommand, TResult>();
-  const [transactions, setTransactions] = useState<readonly unknown[]>(
-    () => runtime.getTransactions?.() ?? [],
-  );
+  return useRuntimeTransactions(runtime);
+}
 
-  useEffect(() => {
-    const subscribe = runtime.subscribeTransactions ?? runtime.subscribe;
-    return subscribe(() => {
-      setTransactions(runtime.getTransactions?.() ?? []);
-    });
+interface TransactionSource<Transaction> {
+  readonly getTransactions?: () => readonly Transaction[];
+  readonly subscribeTransactions?: (listener: () => void) => () => void;
+  readonly subscribe: (listener: () => void) => () => void;
+}
+
+/** Shared implementation for generic adapters and the typed model binding. */
+export function useRuntimeTransactions<Transaction>(
+  runtime: TransactionSource<Transaction>,
+): readonly Transaction[] {
+  const source = useMemo(() => {
+    let previous: readonly Transaction[] = [];
+    const getSnapshot = () => {
+      const next = runtime.getTransactions?.() ?? [];
+      // The model runtime returns a fresh array for its bounded transaction log.
+      // Cache by entries so external-store reads retain a stable snapshot.
+      if (
+        next.length !== previous.length ||
+        next.some((entry, index) => entry !== previous[index])
+      ) {
+        previous = [...next];
+      }
+      return previous;
+    };
+    return {
+      getSnapshot,
+      subscribe: (listener: () => void) =>
+        runtime.subscribeTransactions === undefined
+          ? runtime.subscribe(listener)
+          : runtime.subscribeTransactions(listener),
+    };
   }, [runtime]);
-
-  return transactions;
+  return useSyncExternalStore(source.subscribe, source.getSnapshot, source.getSnapshot);
 }

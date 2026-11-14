@@ -12,14 +12,17 @@ import {
   type WorkspaceCommand,
 } from "@panefold/model";
 import { canonicalizeWorkspace, reduceWorkspace, validateWorkspace } from "@panefold/kernel";
-import { resolveFloatingSurfaceBounds, floatingSurfaceContentBounds } from "@panefold/react";
+import {
+  resolveFloatingSurfaceBounds,
+  floatingSurfaceContentBounds,
+} from "@panefold/react/adapter";
 import { solveLayout, type LogicalRect } from "@panefold/geometry";
 import type {
   WorkspaceCommandAdapter,
   WorkspaceLayoutSolver,
   WorkspacePanelDropRequest,
   WorkspacePanelDropPlanContext,
-} from "@panefold/react";
+} from "@panefold/react/adapter";
 import { createDemoCommands, projectWorkspace } from "./workspace-config";
 
 export const PANE_MIN_WIDTH = 176;

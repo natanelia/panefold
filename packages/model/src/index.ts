@@ -4,6 +4,7 @@ export * from "./effects";
 export * from "./factories";
 export * from "./ids";
 export * from "./json";
+export * from "./layout";
 export * from "./panel-registry";
 export * from "./results";
 export * from "./split-weights";

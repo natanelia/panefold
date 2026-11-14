@@ -2,119 +2,185 @@
 
 **Your components. One workspace contract.** The renderer does not need to understand your application data model, and your kernel does not need to know React.
 
-## Start with the model integration
+## Start with a workspace
 
-For an application using `WorkspaceSnapshot`, import the opt-in `@panefold/react/model` entry point.
-It provides a complete bridge without requiring you to copy the demo's projector or command
-factories. The packages remain experimental and source-only; these imports resolve inside the
-Panefold workspace or after you vendor its built workspace packages.
-
-The [compiled starter](../../apps/demo/src/docs-starter.tsx) supplies `initialSnapshot` and
-`starterPanels`. Its lifecycle and surface wiring are:
+`@panefold/react` provides the canonical-model integration by default. `Workspace` owns the runtime
+and context. `WorkspaceSurface` renders the layout wherever you place it beneath that root:
 
 ```tsx
-import { useEffect, useState } from "react";
-import {
-  createModelWorkspaceSession,
-  ModelWorkspaceSurface,
-  type ModelWorkspaceSession,
-} from "@panefold/react/model";
+import { Workspace, WorkspaceSurface } from "@panefold/react";
 import "@panefold/react/styles.css";
+import "./workspace.css";
 
-function StarterWorkspace() {
-  const [session, setSession] = useState<ModelWorkspaceSession>();
-  useEffect(() => {
-    const next = createModelWorkspaceSession({ initialSnapshot, historyLimit: 50 });
-    setSession(next);
-    return () => next.dispose();
-  }, []);
+const initial = {
+  panels: [
+    { id: "notes", type: "note", title: "Notes" },
+    { id: "preview", type: "preview", title: "Preview" },
+  ],
+  layout: { id: "main", panels: ["notes", "preview"] },
+  historyLimit: 50,
+};
+const panels = {
+  note: { render: () => <textarea aria-label="Your note" /> },
+  preview: { render: () => <p>Your preview goes here.</p> },
+};
 
-  return session ? (
-    <ModelWorkspaceSurface
-      bindings={session}
-      panels={starterPanels}
-      workspaceLabel="Starter workspace"
-      className="starter-surface"
-      motion="off"
-    />
-  ) : (
-    <p role="status">Starting workspace…</p>
+export function App() {
+  return (
+    <Workspace initial={initial} fallback={<p role="status">Starting workspace…</p>}>
+      <WorkspaceSurface panels={panels} workspaceLabel="My workspace" className="my-workspace" />
+    </Workspace>
   );
 }
 ```
 
-The session owns one in-memory runtime and bounded workspace history. Its `runtime` exposes the
-normal dispatch, undo/redo and subscription APIs. Creating it in an effect keeps abandoned React
-renders from owning live resources; cleanup disposes that exact instance, including Strict Mode's
-development setup/cleanup cycle.
+```css
+.my-workspace {
+  height: 480px;
+}
+```
 
-`ModelWorkspaceSurface` always installs the model-aware solver. It enforces panel constraints for
-both committed layouts and temporary resize geometry. Docking, splitting, tab/container moves,
-reordering, closing, floating and redocking go through existing kernel commands; a planned drop
-retains one command and the preview computed from that command.
+The packages remain experimental and source-only; these imports resolve inside the Panefold
+workspace or after you vendor its built workspace packages. The
+[compiled starter](../../apps/demo/src/docs-starter.tsx) adds nested layout, a toolbar, typed
+selectors and tab presentation.
 
-To use a runtime opened through your persistence layer, call
-`createModelWorkspaceBindings(runtime, options?)` once for that runtime and pass the returned
-bindings to the surface. This helper does not own or dispose the existing runtime. Continue to
-follow your durable session's cleanup contract.
+`Workspace` creates the runtime in an effect and disposes that exact instance on cleanup,
+including React Strict Mode's development setup/cleanup cycle. Before setup, including server
+rendering, it renders `fallback`. Abandoned renders do not own live runtimes.
+
+`initial` and `options` are **setup values**. Inline objects do not recreate the workspace, and later
+changes do not reset a user's arrangement. To open a different workspace, change the React `key`
+on `Workspace`. A lazy `initial={() => options}` initializer is also supported; keep it safe to run
+again after cleanup in development Strict Mode. Presentation props on `WorkspaceSurface`, such as
+`tabPresentation`, `motion` and `splitResizeDisabled`, can update normally.
+
+The default model solver enforces panel constraints for both committed layouts and temporary
+resize geometry. Docking, splitting, tab/container moves, closing, floating and redocking go
+through the existing kernel commands.
+
+## Use typed actions and state
+
+Compose your controls, wrappers, surface and status content as ordinary React children. The root
+adds no DOM wrapper or implicit surface and imposes no ordering. Descendants share its typed
+workspace context:
+
+```tsx
+import {
+  Workspace,
+  WorkspaceSurface,
+  useWorkspaceActions,
+  useWorkspaceSelector,
+} from "@panefold/react";
+
+function NotesButton() {
+  const actions = useWorkspaceActions();
+  const exists = useWorkspaceSelector((snapshot) => snapshot.panels.byId.notes !== undefined);
+  return (
+    <button disabled={!exists} onClick={() => actions.selectPanel("notes")}>
+      Show notes
+    </button>
+  );
+}
+
+function PanelCount() {
+  const count = useWorkspaceSelector((snapshot) => snapshot.panels.ids.length);
+  return <output>{count} panels</output>;
+}
+
+// Using initial and panels from the first example:
+<Workspace initial={initial}>
+  <header>
+    <NotesButton />
+  </header>
+  <div className="workspace-area">
+    <WorkspaceSurface panels={panels} className="my-workspace" />
+  </div>
+  <footer>
+    <PanelCount />
+  </footer>
+</Workspace>;
+```
+
+No generic type arguments are needed. `useWorkspaceSnapshot()` reads the whole model snapshot;
+`useWorkspaceSelector(selector, isEqual?)` reads a selected value; `useWorkspaceRuntime()` exposes
+dispatch, subscriptions and history. `useWorkspaceTransactions()` reads typed committed
+transactions and updates when the provider changes.
+
+`useWorkspacePlans()` prepares immutable operations without dispatching them. Combine plans from
+different application controls or helper functions with `actions.batch(plans)` to commit one atomic,
+undoable change. See [composing actions](layouts.md#compose-actions-into-one-transaction).
+
+Actions return the original `committed`, `rejected` or `queued` receipt. Handle failures in your
+application controls as you would in the surface's `onCommandResult`; that surface callback does
+not observe commands dispatched by an unrelated button. A queued receipt is not a completed
+commit. See [layouts and commands](layouts.md) for open, close, split, move, float and reopen
+helpers.
+
+## Supply an existing runtime
+
+For an externally owned runtime, use `WorkspaceProvider` and `WorkspaceSurface` from the same root
+entry point. The provider prepares the model bindings; the surface reads them from context:
+
+```tsx
+import { WorkspaceProvider, WorkspaceSurface } from "@panefold/react";
+
+// workspace was created by your application or durable session.
+<WorkspaceProvider workspace={workspace}>
+  <NotesButton />
+  <WorkspaceSurface panels={panels} className="my-workspace" />
+</WorkspaceProvider>;
+```
+
+`WorkspaceProvider` never disposes the supplied runtime. Create it outside render and follow its
+owner's cleanup contract. For a plain in-memory runtime, use `createWorkspace(options)` from
+`@panefold/runtime`; it accepts a compact layout definition or an existing `initialSnapshot` and
+exposes `workspace.actions`, `workspace.plan` and the complete runtime API. A durable session retains its own
+restoration and disposal requirements.
 
 ## Customize application policy
 
-The optional second argument to `createModelWorkspaceSession` or `createModelWorkspaceBindings`
-supports `groupLabel`, `floatingBounds`, `redockTarget`, a shared model `solveLayout`, and individual
-`commands` overrides. The default redock destination is the first docked group in main-surface
-document order. Applications can choose a named region or relational tab placement instead.
+`Workspace` and `WorkspaceProvider` accept `options` with group labels, floating bounds, redock
+targets, a shared model `solveLayout`, and individual UI `commands` overrides. The default redock
+destination is the first docked group in main-surface document order. Actions returned by
+`useWorkspaceActions()` are the standard semantic helpers; UI factory overrides do not rewrite
+those actions. Put shared authorization or command transformation rules in runtime policies.
 
-Default drop previews apply pure kernel semantics, not runtime dispatch policies. They match the
-committed geometry when the retained command is applied unchanged. A runtime policy can still
-reject or transform that command. If a policy rewrites placement, provide corresponding
-`planPanelDrop`, `planPanelTabDrop` and/or `planGroupDrop` overrides so the preview describes the
-transformed arrangement. The bridge does not execute policies speculatively or consume runtime
-command IDs while previewing.
+Default drop previews apply pure kernel semantics. They match committed geometry when the planned
+command is applied unchanged. If a runtime policy rewrites placement, provide matching
+`planPanelDrop`, `planPanelTabDrop` and/or `planGroupDrop` overrides. The bridge does not execute
+policies speculatively or consume runtime command IDs while previewing.
 
-The surface cancels stale UI plans. When calling a planner directly, capture the snapshot revision
-used for the request and pass it as `runtime.dispatch(plan.command, { baseRevision })`; the command
-itself does not carry a revision guard.
+The surface cancels stale UI plans. When directly calling a UI drop planner from the advanced model
+bridge, capture the snapshot revision used for the request and pass it as
+`runtime.dispatch(plan.command, { baseRevision })`;
+the command itself does not carry a revision guard.
 
-Use the same model solver for preview and committed geometry. If your application changes
-constraint policy for smaller screens, supply it here so the visible preview matches the outcome.
-The workbench's [thin adapters](../../apps/demo/src/workspace-config.ts) demonstrate its own labels,
-small-screen constraints, window bounds and redock preference. Browser popouts still need a
-prepared external-window controller; these helpers do not open windows or add persistence.
+Use the same model solver for preview and committed geometry. The workbench's
+[thin adapters](../../apps/demo/src/workspace-config.ts) demonstrate custom labels, small-screen
+constraints, window bounds and redock preference. Browser popouts still need a prepared
+external-window controller; the React helpers do not open windows or add persistence.
 
-## Use the generic renderer when needed
+## Advanced adapters and migration
 
-`WorkspaceSurface` and `WorkspaceRuntimeProvider` remain available from `@panefold/react` for
-custom snapshots, commands or integration ownership. Its explicit pieces are:
+This release changes the React root API. The old generic renderer and hooks live at
+`@panefold/react/adapter`; the explicit model bridge remains at `@panefold/react/model`.
 
-| Piece                      | Responsibility                                  | Model integration              |
-| -------------------------- | ----------------------------------------------- | ------------------------------ |
-| `createWorkspaceSnapshot`  | Build normalized model records                  | `initialSnapshot`              |
-| `createWorkspaceRuntime`   | Own committed changes and history               | `createModelWorkspaceSession`  |
-| `WorkspaceRuntimeProvider` | Expose the runtime to descendants               | `ModelWorkspaceSurface`        |
-| `projector`                | Translate a snapshot into `WorkspaceProjection` | `projectModelWorkspace`        |
-| `commands`                 | Translate UI intent into semantic commands      | `createModelWorkspaceCommands` |
-| `panels`                   | Map panel types to React components             | `starterPanels`                |
-| `WorkspaceSurface`         | Render tabs, content hosts, splits and floats   | `ModelWorkspaceSurface`        |
+| Previous integration                                                                 | Current API                                                                                                                      |
+| ------------------------------------------------------------------------------------ | -------------------------------------------------------------------------------------------------------------------------------- |
+| Effect-created `createModelWorkspaceSession` plus `ModelWorkspaceSurface`            | `<Workspace initial={options}><WorkspaceSurface panels={renderers} /></Workspace>`                                               |
+| `createModelWorkspaceBindings(runtime)` and a surface with `bindings`                | `<WorkspaceProvider workspace={runtime}><WorkspaceSurface panels={renderers} /></WorkspaceProvider>`                             |
+| Model-specific prefixed hooks                                                        | Root `useWorkspaceActions`, `useWorkspaceRuntime`, `useWorkspaceSnapshot`, `useWorkspaceSelector` and `useWorkspaceTransactions` |
+| Generic root `WorkspaceSurface` accepting `projector`, `commands` and `layoutSolver` | The same generic `WorkspaceSurface` from `@panefold/react/adapter`                                                               |
+| Generic root `WorkspaceRuntimeProvider` and generic hooks                            | Import from `@panefold/react/adapter`                                                                                            |
+| `useWorkspaceProjection` for a canonical snapshot                                    | Root `useWorkspaceSelector`                                                                                                      |
+| `useWorkspaceProjection` for a custom snapshot                                       | `useWorkspaceProjection` from `@panefold/react/adapter`                                                                          |
 
-For a model runtime, obtain these bindings from `createModelWorkspaceBindings` instead of
-reimplementing them. The lower-level wiring below is an excerpt; `bindings`, `runtime` and
-`starterPanels` are application-owned values.
-
-```tsx
-<WorkspaceRuntimeProvider runtime={runtime}>
-  <WorkspaceSurface
-    projector={bindings.projector}
-    commands={bindings.commands}
-    panels={starterPanels}
-    layoutSolver={bindings.layoutSolver}
-    tabPresentation={{ placement: "block-start", content: "icon-and-label" }}
-    motion="off"
-    workspaceLabel="Starter workspace"
-    className="starter-surface"
-  />
-</WorkspaceRuntimeProvider>
-```
+Custom snapshots and commands still use the generic adapter. Model applications rarely need to
+provide projection, commands or geometry manually. The advanced `/model` exports remain useful
+for explicit model bindings, projection and revision-aware command planning. The generic root-to-
+adapter import change does not migrate saved layout data; the snapshot schema and command catalog
+are unchanged.
 
 ## Give the surface space
 
@@ -130,7 +196,9 @@ Import `@panefold/react/styles.css`. Set a real height on the workspace containe
 
 ## Keep identities stable
 
-Create one runtime per workspace session, not one per render. Keep the panel registry and command factories stable. The starter creates its runtime in an effect and disposes the exact instance in cleanup, including React development Strict Mode's setup/cleanup cycle.
+Create one runtime per workspace session. Keep the panel registry and command factories stable.
+`Workspace` handles effect setup and cleanup for in-memory sessions; applications
+that own a durable session keep its explicit cleanup contract.
 
 A registry entry is `{ render: Component, icon?: ReactNode }`, keyed by a panel's **type**, not its ID. The renderer passes `panel`, `selected`, `active`, `lifecycle` and lifecycle cancellation information to the component.
 
@@ -138,12 +206,13 @@ A registry entry is `{ render: Component, icon?: ReactNode }`, keyed by a panel'
 
 `useWorkspaceSnapshot()` updates a component whenever the runtime publishes a new snapshot.
 For a component that only needs part of that snapshot, use
-`useWorkspaceProjection(selector, isEqual?)`. It compares the selected value with `Object.is` by
-default, so an unrelated workspace change does not trigger that subscription's component render.
+`useWorkspaceSelector(selector, isEqual?)`. The generic adapter exposes the same selection behavior
+through `useWorkspaceProjection(selector, isEqual?)`. Both compare the selected value with
+`Object.is` by default, so an unrelated workspace change does not trigger that subscription's component render.
 Parent renders and the component's own state can still cause it to render.
 
 ```tsx
-import { useWorkspaceProjection } from "@panefold/react";
+import { useWorkspaceProjection } from "@panefold/react/adapter";
 
 type AppSnapshot = {
   readonly revision: number;
@@ -180,7 +249,8 @@ receives all 100 updates. This is a render-count check, not an application frame
 
 ## Make geometry model-aware
 
-`ModelWorkspaceSurface` always provides this bridge. When using the generic `WorkspaceSurface`,
+The root `WorkspaceSurface` always provides this bridge. For the generic
+`WorkspaceSurface` from `@panefold/react/adapter`,
 its optional `layoutSolver` lets the renderer use constraints from your canonical model. The model
 bridge calls `solveLayout(snapshot, nodeId(request.rootNodeId), request.bounds, options)`, forwarding
 splitter size and temporary split overrides. Omitting it from a generic surface uses a
@@ -216,12 +286,12 @@ changes do not cancel it. The next pointer gesture starts normally.
 
 ## Lock pane sizes
 
-Set `splitResizeDisabled` on `WorkspaceSurface` or `ModelWorkspaceSurface` to disable pointer and
+Set `splitResizeDisabled` on `WorkspaceSurface` to disable pointer and
 keyboard resizing of every pane divider in that surface, including dividers inside floating windows.
 The prop defaults to `false` and can change at runtime:
 
 ```tsx
-<ModelWorkspaceSurface bindings={session} panels={panels} splitResizeDisabled={lockPaneSizes} />
+<WorkspaceSurface panels={panels} splitResizeDisabled={lockPaneSizes} />
 ```
 
 Switching it on during a drag restores the committed sizes, removes any divider preview and cancels

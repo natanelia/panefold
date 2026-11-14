@@ -1,11 +1,27 @@
 export {
-  WorkspaceRuntimeProvider,
-  useWorkspaceProjection,
-  useWorkspaceRuntime,
-  useWorkspaceSnapshot,
-  useWorkspaceTransactions,
-} from "./runtime-context";
-export { WorkspaceSurface, type WorkspaceSurfaceProps } from "./WorkspaceSurface";
+  Workspace,
+  WorkspaceProvider,
+  WorkspaceSurface,
+  useModelWorkspaceActions as useWorkspaceActions,
+  useModelWorkspacePlans as useWorkspacePlans,
+  useModelWorkspaceRuntime as useWorkspaceRuntime,
+  useModelWorkspaceSelector as useWorkspaceSelector,
+  useModelWorkspaceSession as useWorkspaceSession,
+  useModelWorkspaceSnapshot as useWorkspaceSnapshot,
+  useModelWorkspaceTransactions as useWorkspaceTransactions,
+  type WorkspaceProps,
+  type WorkspaceProviderProps,
+  type WorkspaceSurfaceProps,
+  type ModelWorkspaceOptions,
+} from "./model";
+export type {
+  RuntimeDispatchReceipt,
+  WorkspaceActions,
+  WorkspaceActionPlan,
+  WorkspaceOptions,
+  WorkspacePlans,
+  WorkspaceRuntime,
+} from "@panefold/runtime";
 export { ENGLISH_WORKSPACE_MESSAGES } from "./messages";
 export { DEFAULT_WORKSPACE_TAB_PRESENTATION } from "./tab-presentation";
 export type {
@@ -13,17 +29,10 @@ export type {
   WorkspaceMessageCatalog,
   WorkspacePhysicalEdge,
 } from "./messages";
-export { solveWorkspaceProjectionLayout } from "./geometry";
-export type {
-  ProjectionLayoutOptions,
-  WorkspaceLayoutRequest,
-  WorkspaceLayoutSolver,
-} from "./geometry";
 export type {
   WorkspaceAnnouncement,
   WorkspaceAxis,
   WorkspaceCommandOrigin,
-  WorkspaceCommandAdapter,
   WorkspaceDirection,
   WorkspaceDropBehavior,
   WorkspaceDispatchContext,
@@ -54,18 +63,13 @@ export type {
   WorkspacePanelReorderPlacement,
   WorkspacePanelRenderProps,
   WorkspacePanelView,
-  WorkspaceProjection,
-  WorkspaceProjector,
-  WorkspaceRuntimeLike,
   WorkspaceResizeDelivery,
   WorkspaceResizePreviewMode,
   WorkspaceTabContent,
   WorkspaceTabPlacement,
   WorkspaceTabPresentation,
   WorkspaceTabPresentationResolver,
-  WorkspaceResultInterpreter,
   WorkspaceSplitView,
 } from "./types";
 
-export { resolveFloatingSurfaceBounds, floatingSurfaceContentBounds } from "./floating-surface";
 export { usePanelContext, type PanelContextSource } from "./panel-context";

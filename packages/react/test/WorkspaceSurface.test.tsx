@@ -40,7 +40,7 @@ import {
   type WorkspaceRuntimeLike,
   type WorkspaceTabPresentationResolver,
   type WorkspaceLayoutSolver,
-} from "../src";
+} from "../src/adapter";
 import { FLOATING_SURFACE_CHROME_SIZE } from "../src/floating-surface";
 
 const protocolActorInventory = vi.hoisted(() => ({
