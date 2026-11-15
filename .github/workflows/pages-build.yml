@@ -41,7 +41,7 @@ jobs:
           node-version: 24
           package-manager-cache: false
       - run: node --test scripts/pages-*.test.mjs
-      - uses: actions/github-script@v8
+      - uses: actions/github-script@v9
         id: plan
         with:
           script: |
@@ -158,7 +158,7 @@ jobs:
         with:
           pattern: site-pr-*
           path: incoming
-      - uses: actions/github-script@v8
+      - uses: actions/github-script@v9
         id: assemble
         env:
           PREVIEW_PLAN: ${{ needs.plan.outputs.plan }}
