@@ -21,29 +21,24 @@
     "maximum": 16.8,
     "mean": 16.666,
     "median": 16.7,
-    "p95": 16.7,
+    "p95": 16.8,
     "p99": 16.8
   },
   "rawFrameDeltasMs": [
-    16.8, 16.6, 16.7, 16.6, 16.7, 16.6, 16.8, 16.6, 16.7, 16.6, 16.7, 16.7, 16.7, 16.6, 16.7, 16.7,
-    16.6, 16.7, 16.7, 16.6, 16.7, 16.7, 16.6, 16.7, 16.6, 16.6, 16.7, 16.7, 16.7, 16.7, 16.6, 16.7,
-    16.6, 16.7, 16.7, 16.7, 16.6, 16.7, 16.7, 16.6, 16.6, 16.8, 16.6, 16.7, 16.6, 16.7, 16.7, 16.6,
-    16.7, 16.6, 16.7, 16.7, 16.7, 16.6, 16.7, 16.6, 16.7, 16.7, 16.6, 16.7, 16.7, 16.6, 16.7, 16.7,
-    16.6, 16.7, 16.7, 16.7, 16.6, 16.7, 16.6, 16.7, 16.7, 16.6, 16.7, 16.7, 16.6, 16.7, 16.7, 16.7,
-    16.6, 16.7, 16.6, 16.7, 16.7, 16.6, 16.7, 16.7, 16.6, 16.7, 16.7, 16.7, 16.6, 16.7, 16.6, 16.7,
-    16.6, 16.7, 16.7, 16.7, 16.7, 16.6, 16.7, 16.6, 16.7, 16.7, 16.6, 16.7, 16.6, 16.8, 16.6, 16.7,
-    16.6, 16.7, 16.7, 16.7, 16.6, 16.6, 16.7, 16.6, 16.8, 16.6, 16.7, 16.7, 16.6, 16.7, 16.7, 16.6,
-    16.7, 16.7, 16.6, 16.7, 16.7, 16.7, 16.6, 16.7, 16.6, 16.7, 16.6, 16.7, 16.7, 16.6, 16.7, 16.7,
-    16.7, 16.6, 16.7, 16.7, 16.6, 16.7, 16.6, 16.7, 16.7, 16.7, 16.6, 16.7, 16.7, 16.6, 16.6, 16.7,
-    16.7, 16.7, 16.6, 16.7, 16.6, 16.8, 16.6, 16.7, 16.6, 16.7, 16.7, 16.6, 16.7, 16.6, 16.7, 16.7,
-    16.6, 16.7, 16.7
+    16.7, 16.6, 16.7, 16.7, 16.6, 16.7, 16.6, 16.7, 16.7, 16.6, 16.7, 16.7, 16.7, 16.6, 16.7, 16.6,
+    16.8, 16.6, 16.6, 16.7, 16.6, 16.8, 16.6, 16.7, 16.6, 16.7, 16.7, 16.6, 16.7, 16.7, 16.7, 16.6,
+    16.6, 16.8, 16.6, 16.6, 16.7, 16.7, 16.7, 16.6, 16.7, 16.7, 16.6, 16.7, 16.7, 16.6, 16.7, 16.7,
+    16.6, 16.7, 16.6, 16.8, 16.6, 16.7, 16.6, 16.7, 16.6, 16.8, 16.6, 16.7, 16.6, 16.7, 16.7, 16.6,
+    16.6, 16.7, 16.7, 16.6, 16.8, 16.6, 16.7, 16.6, 16.7, 16.7, 16.7, 16.6, 16.7, 16.6, 16.8, 16.6,
+    16.7, 16.6, 16.7, 16.6, 16.7, 16.7, 16.6, 16.7, 16.6, 16.7, 16.7, 16.7, 16.6, 16.8, 16.6, 16.6,
+    16.7, 16.6, 16.8, 16.6, 16.7, 16.6, 16.7, 16.7, 16.6, 16.7, 16.7, 16.7, 16.6, 16.7, 16.6, 16.7,
+    16.7, 16.6, 16.7, 16.7, 16.6, 16.7, 16.7, 16.6, 16.7, 16.6, 16.8, 16.6, 16.6, 16.7, 16.7, 16.7,
+    16.6, 16.7, 16.7, 16.6, 16.6, 16.7, 16.7, 16.7, 16.7, 16.6, 16.7, 16.6, 16.7, 16.7, 16.6, 16.7,
+    16.6, 16.8, 16.6, 16.7, 16.7, 16.6, 16.7, 16.7, 16.6, 16.6, 16.7, 16.7, 16.6, 16.8, 16.6, 16.7,
+    16.6, 16.7, 16.6, 16.7, 16.7, 16.6, 16.7, 16.6, 16.7, 16.7, 16.7, 16.7, 16.6, 16.7, 16.7, 16.6,
+    16.7, 16.7, 16.6
   ],
-  "longTasks": [
-    {
-      "startTime": 147.20000000001164,
-      "duration": 53
-    }
-  ],
+  "longTasks": [],
   "baseline": {
     "schemaVersion": 1,
     "profile": "compact-react-chromium-desktop",
@@ -53,7 +48,7 @@
     "longTaskMaximumCount": 12,
     "minimumSamples": 120
   },
-  "producedAt": "2026-11-14T23:53:22.081Z",
+  "producedAt": "2026-11-15T00:15:57.079Z",
   "nodeSmoke": {
     "schemaVersion": 1,
     "environment": {
@@ -61,24 +56,24 @@
       "v8": "13.6.233.17-node.63",
       "platform": "linux",
       "architecture": "x64",
-      "cpu": "AMD EPYC 9V74 80-Core Processor"
+      "cpu": "AMD EPYC 9V45 96-Core Processor"
     },
     "kernel": {
       "iterations": 10000,
-      "elapsedMs": 1633.33
+      "elapsedMs": 1224.02
     },
     "geometry": {
       "iterations": 100000,
-      "elapsedMs": 250.78
+      "elapsedMs": 200.46
     },
     "reorderProfiles": [
       {
         "panelCount": 50,
         "warmupCount": 250,
         "sampleCount": 2000,
-        "medianMs": 0.249,
-        "p95Ms": 0.3824,
-        "p99Ms": 0.4614,
+        "medianMs": 0.1836,
+        "p95Ms": 0.2926,
+        "p99Ms": 0.3514,
         "designTargetMs": 1,
         "withinDesignTargetOnThisMachine": true,
         "invariantViolations": 0
@@ -87,9 +82,9 @@
         "panelCount": 500,
         "warmupCount": 100,
         "sampleCount": 1000,
-        "medianMs": 2.3709,
-        "p95Ms": 2.6135,
-        "p99Ms": 3.7579,
+        "medianMs": 1.6976,
+        "p95Ms": 1.951,
+        "p99Ms": 2.2719,
         "designTargetMs": 5,
         "withinDesignTargetOnThisMachine": true,
         "invariantViolations": 0
@@ -99,30 +94,30 @@
       {
         "nodeCount": 100,
         "sampleCount": 10000,
-        "elapsedMs": 39,
-        "meanMicroseconds": 3.9
+        "elapsedMs": 29.04,
+        "meanMicroseconds": 2.904
       },
       {
         "nodeCount": 500,
         "sampleCount": 10000,
-        "elapsedMs": 199.98,
-        "meanMicroseconds": 19.998
+        "elapsedMs": 150.28,
+        "meanMicroseconds": 15.028
       },
       {
         "nodeCount": 1000,
         "sampleCount": 10000,
-        "elapsedMs": 416.78,
-        "meanMicroseconds": 41.678
+        "elapsedMs": 320.14,
+        "meanMicroseconds": 32.014
       }
     ],
-    "totalElapsedMs": 5866.79,
+    "totalElapsedMs": 4349.46,
     "finalRevision": "10000",
     "invariantViolations": 0
   },
   "rawReport": {
     "path": "artifacts/preview-browser.json",
-    "sha256": "99ff6dca269bff1228ba3c4f51cd9cad5221b6562cd0ad1d7de11a9d47d3c7d7",
-    "runUrl": "https://github.com/natanelia/panefold/actions/runs/43655030985",
+    "sha256": "0c72064a772351f6946a7666440711f70493485492f6dfc990ba6d95db5ee0ea",
+    "runUrl": "https://github.com/natanelia/panefold/actions/runs/43656951716",
     "artifact": "preview-executed-evidence"
   },
   "sourceDigests": {
@@ -175,10 +170,11 @@
     "packages/geometry/test/rounding-compatibility.test.ts": "cd320f634822fefe70ab3d4933c321cb9bb8e793c36b8efed5014f5428588489",
     "packages/kernel-optimized/src/indexes.ts": "c6d962626b3c0cac8d7d89f156aed383b1e313a201f7c3ce5f228d97959ac0a8",
     "packages/model/src/index.ts": "ff5e289957809f04fa04ae73ebc7070857f0d3bb261471ff36c96d1d0e2686f8",
+    "packages/model/src/json.ts": "bfedbf987b02147cafce6759890cb19c248bb84b708af9335b622bc0620e4037",
     "packages/model/src/layout.ts": "482a151700baf247a17b210ec30c07ddee4a4b0142509f4b1a875c928d898d24",
     "packages/model/src/split-weights.ts": "05695900c92d98b016c21adae3e17ca20ee97134f10e1b6a3d91c0a35cf19ea6",
     "packages/model/test/layout.test.ts": "5b38625b63a4e08aa2d9a43fe481943feee5de6d16875ac5480962f442c3db9d",
-    "packages/model/test/panel-input.test.ts": "56184f1c20c4c77f9ce1243ebfa9c966e7d302946a821a4d7dca8f2585a44274",
+    "packages/model/test/panel-input.test.ts": "562e9d22ff731ea8e370395b90c4cf3d0cc0ba6dcbb1e5be7dae4f81fe4b40a6",
     "packages/motion/src/coordinator.ts": "50eff7dd6a1b8f6433ac3f5bfc5f8d74b99a501e43e712ccb3e1a82520574c6d",
     "packages/react/package.json": "168eb6699e244aea4ac6b86eb1f309be4fa5bd429f4735c79655043f3deca843",
     "packages/react/src/WorkspaceSurface.tsx": "a4193565302faf4c0debb037b341295ae47c6e03623524adc73b0371a2da07f5",
@@ -193,16 +189,17 @@
     "packages/react/src/index.ts": "e49451b8aacaea16e482c6ed2a2b2def70a04fbfb330f11caab4fa5ee9cbd08e",
     "packages/react/src/messages.ts": "b6ddb245d6f42d3054c50c2eede24814261649ab3464e55131bed934cb09eb30",
     "packages/react/src/model-adapter.ts": "51730ea5ba984ee33a67bee0f9d715873b11ae166020d9ac22c053e607286259",
-    "packages/react/src/model.tsx": "45d77efd5e6802b501fd5e8c6f7da00dfb8c521ae116f55010952cfbc33591e3",
+    "packages/react/src/model.tsx": "0a6d5c99d8dcd1c9525ea1872c707998a07413afbc803dac244c9800ff93504f",
     "packages/react/src/move-destination-controls.tsx": "c72fd93fc63ecefa7f732dde93291f04f1f3d075b9bee3e0b1b4d52ed18bd19d",
     "packages/react/src/node-motion.ts": "5f7efe09d09573ea1c2baa44744627d34fabe60cc6978f287da83e6b02ed52bb",
     "packages/react/src/panel-context.ts": "1eff71c604f23b75320210271e895c864cccf617584380e398bf72132eddb2d7",
     "packages/react/src/panel-drag.tsx": "e19befa4995182d66a76570990bcff60e2ab4ba5fb76f0fe8a63e020bca493cc",
     "packages/react/src/pointer-interruption.ts": "0dbbc742ce180b4fd12ef2ea32d8ab3cb97ba2685168b7ca9662548ca0510b37",
     "packages/react/src/resize-preview.ts": "ec6d7eac3d639828b2630592fe5090d9da59f842dae6a88596aad9b8c91d1938",
-    "packages/react/src/runtime-context.tsx": "c71471893b794c4d2a436d26560925ba9ee91317aefa1630443a289cac1a76bc",
+    "packages/react/src/runtime-context.tsx": "5fff7bd46c33ba3f140cc7a0449e92e3795afdf65924220259740302e9361291",
     "packages/react/src/styles.css": "9f188b1a7b506887b3291b179a03611100d9eccdb783d01cc7df48c9204decd5",
     "packages/react/src/tab-insertion.ts": "e611ecfe7cb4b0b9fb7e748a747f2584e35dbaa72111a907008f6dc6b11f1670",
+    "packages/react/src/types.ts": "57a6a85a949b64b1b7059b28b94a9a20c65b32a919de154671c8efe0ec6519eb",
     "packages/react/test/client-coordinates.test.ts": "71c0b6798cafc8ffee375e023652ad9dc9a6ef298587910edc2677fd9f5d9e99",
     "packages/react/test/constrained-resize.test.tsx": "9a261e6135f34510627296e9545ae3bbecab5e7c8ca4805d1b6dec0b426df446",
     "packages/react/test/drag-parity.test.ts": "1f0bca650b8647cf7473639a0afa59839bdd60327892e428f30a98642cd67443",
@@ -216,11 +213,12 @@
     "packages/react/test/model-surface.test.tsx": "b8e7c81df840378560618b039cfbfc486ae387bc1e364a077b2053e4ca6b5007",
     "packages/react/test/panel-context.test.tsx": "abf4141ff6dec4ee77e1bf6f3e215b141d4ddfa4d8d4340035be3b7d21ac4a63",
     "packages/react/test/resize-policy.test.tsx": "f5a57b9914dc6e2b74fcb75bdbf83c4ea4dd71394b4b115c1ef6f850b7c42701",
-    "packages/react/test/runtime-context.test.tsx": "662e6d72e7296e6663c9e90ad08c9b729cc94ad4bb1e55b61c37fbb086006266",
+    "packages/react/test/runtime-context.test.tsx": "3c159d45023564205deb47f61101ef3e031c0b7f78bd6d8484e5ab5e143e13ff",
     "packages/react/test/splitter-disabled.test.tsx": "bb6f127625e59fc2231bc693b6e2bf2d41da2fd6cc88f290088fe4d6aeb73754",
     "packages/react/test/splitter-interruption.test.tsx": "b31656bb2a197bb21b748c6dc9e8ced39f38ff6436c2c5c20f83253cd3bc73df",
     "packages/react/test/tab-insertion.test.ts": "5c65997257abdca9b2605b13ed733bc9670991b962cd3096674d503f2ed77960",
     "packages/react/test/touch-drop-policy.test.ts": "b58dba1e8cc540085ddde1e90538ccecbaaaef9a1fa519331d71399293d538f5",
+    "packages/react/test/workspace-activity.test.tsx": "c50d61ce27aff6baec63626e3b6b858c4209ba68a8dccab9612c7fe38182230b",
     "packages/react/test/workspace-api.test.tsx": "527e6ea279952c80630bc8c87e58bd6adda2970bf8c5a377fd9bc27c3d8f8da6",
     "packages/runtime/src/actions.ts": "da216f2dbac90ecf54f3d5fbca5b69a6f56f6e53c1e86953ea43d0824ffddf46",
     "packages/runtime/src/index.ts": "8c0efb4713cdcd472e55b2df0e3703ac741649c445cc8d5207b029d2dc7e6d6f",
@@ -230,7 +228,7 @@
     "packages/runtime/test/plans-review.test.ts": "696e589f03fa3265959e0ace4f90cf93a956880a7b76855d0b78d8646dc982fe",
     "pnpm-lock.yaml": "6f188132c287b0b7a559b11ac5d247f28252d473cee2a6abd3468d64f92959ba",
     "scripts/performance-smoke.mjs": "fc0d8ce5df966b75312b5d9fae367e07b5ce4f8215afa724d03a7a6cb17fdc95",
-    "scripts/record-preview-evidence.mjs": "8d1227875248a27ed1b200e95dce8907ede991691b7b780d0fe6571f00ffe7ec",
+    "scripts/record-preview-evidence.mjs": "2e92edc4086d6ac87a78d3c30fc4ce2e1e1a1d6ff23c3741b35cab92c23578b5",
     "site-e2e/developer-docs.spec.ts": "55230a7d0cc509d700254697cec3d4a74ec3b04cedec0a06987be7fc2354e153",
     "vitest.config.ts": "6f743b2639e8e091bdc454a4aaa6336a538b889e70af8814ee7d1f27c7a8769e"
   },
