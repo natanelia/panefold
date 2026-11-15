@@ -80,24 +80,53 @@ export function useRuntimeTransactions<Transaction>(
 ): readonly Transaction[] {
   const source = useMemo(() => {
     let previous: readonly Transaction[] = [];
+    let dirty = true;
     const getSnapshot = () => {
+      if (!dirty) return previous;
       const next = runtime.getTransactions?.() ?? [];
-      // The model runtime returns a fresh array for its bounded transaction log.
-      // Cache by entries so external-store reads retain a stable snapshot.
+      // Read only after a notification or subscription change. Custom adapters
+      // may reconstruct both the array and its entries on every call.
       if (
         next.length !== previous.length ||
         next.some((entry, index) => entry !== previous[index])
       ) {
         previous = [...next];
       }
+      dirty = false;
       return previous;
     };
     return {
       getSnapshot,
-      subscribe: (listener: () => void) =>
-        runtime.subscribeTransactions === undefined
-          ? runtime.subscribe(listener)
-          : runtime.subscribeTransactions(listener),
+      subscribe: (listener: () => void) => {
+        let active = true;
+        const onChange = () => {
+          if (!active) return;
+          dirty = true;
+          listener();
+        };
+        const unsubscribe =
+          runtime.subscribeTransactions === undefined
+            ? runtime.subscribe(onChange)
+            : runtime.subscribeTransactions(onChange);
+        // Attach before reading again to cover changes between render and
+        // subscription, including reattachment after an Activity was hidden.
+        dirty = true;
+        try {
+          getSnapshot();
+          // Activity can reconnect effects without rerendering the consumer.
+          // Notify React after refreshing so a hidden-period change is visible.
+          listener();
+        } catch (error) {
+          active = false;
+          unsubscribe();
+          throw error;
+        }
+        return () => {
+          active = false;
+          dirty = true;
+          unsubscribe();
+        };
+      },
     };
   }, [runtime]);
   return useSyncExternalStore(source.subscribe, source.getSnapshot, source.getSnapshot);

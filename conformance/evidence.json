@@ -1109,7 +1109,7 @@
       "verificationClass": "code-verifiable",
       "artifactRole": "result",
       "uri": "repo://conformance/results/protocol-state-machine-coverage-2026-08-14.json",
-      "sha256": "b5aa66236aa08cfa79d5e4beffdca696af48aa4656d4c3adfb61bf02e7f6ef46",
+      "sha256": "cab59042564862ae351fbc7cef256ad8c1ba7af2aa8c0185d3c7f09689986bb8",
       "producedAt": "2026-08-14T01:12:00Z",
       "requirementIds": [
         "TST-003"
@@ -1126,8 +1126,8 @@
       "verificationClass": "code-verifiable",
       "artifactRole": "result",
       "uri": "repo://conformance/results/independent-semantic-oracle-2026-09-27.json",
-      "sha256": "b0bff00e9ac5e25e669cce4f13abbb8a9ae466ac37b15dad7a30aff3f5de0d5e",
-      "producedAt": "2026-11-14T23:40:47.304Z",
+      "sha256": "f5035c0d84a23d5176b7768ac223fa9ed2004d6422bce2ba0303813d9afbc82d",
+      "producedAt": "2026-11-15T00:08:38.807Z",
       "requirementIds": [
         "MOD-004",
         "PRF-003",

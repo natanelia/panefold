@@ -52,12 +52,43 @@ rendering, it renders `fallback`. Abandoned renders do not own live runtimes.
 `initial` and `options` are **setup values**. Inline objects do not recreate the workspace, and later
 changes do not reset a user's arrangement. To open a different workspace, change the React `key`
 on `Workspace`. A lazy `initial={() => options}` initializer is also supported; keep it safe to run
-again after cleanup in development Strict Mode. Presentation props on `WorkspaceSurface`, such as
-`tabPresentation`, `motion` and `splitResizeDisabled`, can update normally.
+again after effect cleanup, including development Strict Mode and Activity reveal. Presentation props
+on `WorkspaceSurface`, such as `tabPresentation`, `motion` and `splitResizeDisabled`, can update normally.
 
 The default model solver enforces panel constraints for both committed layouts and temporary
 resize geometry. Docking, splitting, tab/container moves, closing, floating and redocking go
 through the existing kernel commands.
+
+## Keep layout and history across Activity
+
+React [`Activity`](https://react.dev/reference/react/Activity) cleans up its children's effects when
+hidden and runs them again when revealed. If `Workspace` is inside that boundary, hiding it disposes
+its runtime. Revealing it creates a new runtime from the captured `initial` values, resetting
+workspace layout and undo/redo history. The
+same ownership rule applies to `useWorkspaceSession` inside an Activity boundary.
+
+Keep `Workspace` outside `Activity` when layout and history must survive. Place the surface and
+controls inside the boundary so their effects can pause while the runtime remains alive:
+
+```tsx
+import { Activity } from "react";
+import { Workspace, WorkspaceSurface } from "@panefold/react";
+
+// Using initial, panels and styles from the first example:
+function ToggleableWorkspace({ visible }: { readonly visible: boolean }) {
+  return (
+    <Workspace initial={initial}>
+      <Activity mode={visible ? "visible" : "hidden"}>
+        <WorkspaceSurface panels={panels} className="my-workspace" />
+      </Activity>
+    </Workspace>
+  );
+}
+```
+
+For an application-owned lifetime, use `WorkspaceProvider` with a runtime whose owner is outside
+the Activity subtree. The provider never disposes that runtime; its owner decides when to end the
+session. See [supplying an existing runtime](#supply-an-existing-runtime).
 
 ## Use typed actions and state
 
@@ -181,6 +212,12 @@ provide projection, commands or geometry manually. The advanced `/model` exports
 for explicit model bindings, projection and revision-aware command planning. The generic root-to-
 adapter import change does not migrate saved layout data; the snapshot schema and command catalog
 are unchanged.
+
+For generic transaction logs, `getTransactions()` may reconstruct both the array and its entries.
+Entries are immutable: replace or reconstruct an entry when its data changes. The hook caches the
+log between notifications. Notify every log change through `subscribeTransactions`, or through
+`subscribe` when a separate transaction subscription is absent.
+The hook refreshes after subscribing, including when Activity resumes a hidden view.
 
 ## Give the surface space
 

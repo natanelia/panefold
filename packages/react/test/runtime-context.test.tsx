@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
 
-import { StrictMode, Suspense, startTransition, useState } from "react";
+import { Activity, StrictMode, Suspense, startTransition, useLayoutEffect, useState } from "react";
 import { renderToString } from "react-dom/server";
 import { act, cleanup, fireEvent, render, screen } from "@testing-library/react";
 import { afterEach, describe, expect, it } from "vitest";
@@ -229,6 +229,114 @@ describe("useWorkspaceProjection", () => {
 });
 
 describe("useWorkspaceTransactions", () => {
+  it.each(["transactions", "snapshot"] as const)(
+    "accepts reconstructed entries with %s notifications without a render loop",
+    (channel) => {
+      const source = createSource();
+      const records = ["first"];
+      const listeners = new Set<() => void>();
+      const subscribe = (listener: () => void) => {
+        listeners.add(listener);
+        return () => listeners.delete(listener);
+      };
+      const runtime = {
+        ...source.runtime,
+        getTransactions: () => records.map((id) => ({ id })),
+        subscribe,
+        ...(channel === "transactions" ? { subscribeTransactions: subscribe } : {}),
+      };
+      let observed: readonly unknown[] = [];
+      function Transactions({ label }: { readonly label: string }) {
+        observed = useWorkspaceTransactions();
+        return <output>{`${label}:${JSON.stringify(observed)}`}</output>;
+      }
+      const view = render(
+        <WorkspaceRuntimeProvider runtime={runtime}>
+          <Transactions label="before" />
+        </WorkspaceRuntimeProvider>,
+      );
+      expect(screen.getByText('before:[{"id":"first"}]')).toBeDefined();
+      expect(listeners.size).toBe(1);
+      const settled = observed;
+      view.rerender(
+        <WorkspaceRuntimeProvider runtime={runtime}>
+          <Transactions label="after" />
+        </WorkspaceRuntimeProvider>,
+      );
+      expect(observed).toBe(settled);
+      act(() => {
+        records.push("second");
+        for (const listener of listeners) listener();
+      });
+      expect(screen.getByText('after:[{"id":"first"},{"id":"second"}]')).toBeDefined();
+      expect(observed).not.toBe(settled);
+      view.unmount();
+      expect(listeners.size).toBe(0);
+    },
+  );
+
+  it("refreshes after subscribing when the log changed between render and subscription", () => {
+    const source = createSource();
+    const records = ["before"];
+    const runtime = {
+      ...source.runtime,
+      getTransactions: () => records.map((id) => ({ id })),
+    };
+    function Transactions() {
+      const transactions = useWorkspaceTransactions();
+      return <output>{JSON.stringify(transactions)}</output>;
+    }
+    function CommitBeforeSubscription() {
+      useLayoutEffect(() => {
+        expect(source.listenerCount()).toBe(0);
+        records.push("between");
+      }, []);
+      return null;
+    }
+    const view = render(
+      <WorkspaceRuntimeProvider runtime={runtime}>
+        <Transactions />
+        <CommitBeforeSubscription />
+      </WorkspaceRuntimeProvider>,
+    );
+    expect(screen.getByText('[{"id":"before"},{"id":"between"}]')).toBeDefined();
+    expect(source.listenerCount()).toBe(1);
+    view.unmount();
+    expect(source.listenerCount()).toBe(0);
+  });
+
+  it("refreshes reconstructed entries when Activity reconnects its subscription", () => {
+    const source = createSource();
+    const records = ["before"];
+    const runtime = {
+      ...source.runtime,
+      getTransactions: () => records.map((id) => ({ id })),
+    };
+    function Transactions() {
+      const transactions = useWorkspaceTransactions();
+      return <output>{JSON.stringify(transactions)}</output>;
+    }
+    function App({ visible }: { readonly visible: boolean }) {
+      return (
+        <Activity mode={visible ? "visible" : "hidden"}>
+          <WorkspaceRuntimeProvider runtime={runtime}>
+            <Transactions />
+          </WorkspaceRuntimeProvider>
+        </Activity>
+      );
+    }
+    const view = render(<App visible />);
+    expect(source.listenerCount()).toBe(1);
+    view.rerender(<App visible={false} />);
+    expect(source.listenerCount()).toBe(0);
+    records.push("while hidden");
+    view.rerender(<App visible />);
+    expect(screen.getByText('[{"id":"before"},{"id":"while hidden"}]')).toBeDefined();
+    expect(source.listenerCount()).toBe(1);
+    view.unmount();
+    expect(source.listenerCount()).toBe(0);
+  });
+
   it("subscribes to a real runtime with its method receiver and observes bounded log replacement", () => {
     const runtime = createWorkspaceRuntime({
       initialSnapshot: modelFixture(),

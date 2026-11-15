@@ -99,6 +99,8 @@ export function createModelWorkspaceSession(
  * the first effect, including during server rendering. Setup is captured on the
  * first render; remount with a different key to replace it. A lazy setup function
  * runs only inside the effect and may run again during Strict Mode's effect replay.
+ * Hiding this owner inside React Activity also disposes the session; revealing it
+ * creates a fresh session. Keep ownership outside Activity to preserve state.
  */
 export function useModelWorkspaceSession(
   runtimeOptions: WorkspaceOptions | (() => WorkspaceOptions),
@@ -111,7 +113,12 @@ export function useModelWorkspaceSession(
       typeof setup.runtimeOptions === "function" ? setup.runtimeOptions() : setup.runtimeOptions;
     const next = createModelWorkspaceSession(initial, setup.options);
     setSession(next);
-    return () => next.dispose();
+    return () => {
+      // Activity retains state while disconnecting effects. Remove this exact
+      // disposed instance so descendants cannot reconnect to it on reveal.
+      setSession((current) => (current === next ? undefined : current));
+      next.dispose();
+    };
   }, [setup]);
   return session;
 }

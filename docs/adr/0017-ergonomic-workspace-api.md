@@ -26,7 +26,10 @@ exports rather than carrying the generic integration as the default indefinitely
    effect. It renders an optional fallback before setup and during server rendering. `initial` and
    model `options` are captured setup values; changing the React key explicitly starts a new
    workspace. Surface presentation props remain reactive. The same lifecycle is available through the
-   optional `useWorkspaceSession` hook for custom compositions.
+   optional `useWorkspaceSession` hook for custom compositions. An owning root inside React
+   `Activity` is disposed when hidden and recreated from its setup values when revealed, resetting
+   layout and history. Applications that retain a session across hiding place the owning root above
+   `Activity`, or use a runtime whose owner lives outside that boundary with `WorkspaceProvider`.
 3. `WorkspaceProvider` accepts an application-owned runtime and builds its model bindings.
    `WorkspaceSurface` consumes those bindings without manual projector or command props. The
    provider does not take ownership of disposal or persistent storage. Durable sessions continue
@@ -71,9 +74,12 @@ exports rather than carrying the generic integration as the default indefinitely
     authorization and transformations remain runtime policies; placement-transforming policies
     still need matching UI planners for truthful previews. Browser windows and Picture-in-Picture
     remain prepared operational integrations, outside these convenience actions.
-11. Transaction hooks call runtime methods with their receiver intact and cache log snapshots by
-    transaction entries. This fixes the real runtime's unbound-subscription failure and replaces
-    the stale transaction view immediately when the provider changes.
+11. Transaction hooks call runtime methods with their receiver intact and cache log snapshots
+    between notifications. Generic stores may reconstruct transaction arrays and entries; changed
+    entries must be replaced rather than mutated. Either `subscribeTransactions` or the fallback
+    `subscribe` must notify every log change. Refreshing after attaching the subscription covers
+    changes between render and subscription and Activity resumption. Provider changes immediately
+    switch the transaction view to the new runtime.
 
 ## Consequences
 
@@ -85,9 +91,9 @@ exports rather than carrying the generic integration as the default indefinitely
   cross-document ownership, persistence and accessibility behavior remain unchanged.
 - Tests must exercise builder output against the real kernel, action rejection and history,
   unused plan isolation, atomic plan batches and revision conflicts,
-  queued input ownership and revision conflicts, React Strict Mode cleanup, typed selectors,
-  provider switching and compiled entry-point context sharing. The compiled starter uses the
-  default API so browser tests cover a real consumer.
+  queued input ownership and revision conflicts, React Strict Mode cleanup, Activity ownership,
+  typed selectors, provider switching and compiled entry-point context sharing. The compiled starter
+  uses the default API so browser tests cover a real consumer.
 - This change adds no stability, npm publication, device, assistive-technology or external
   certification claim.
 

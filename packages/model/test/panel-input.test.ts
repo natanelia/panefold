@@ -73,3 +73,54 @@ describe("panel configuration containers", () => {
     expect(getter).not.toHaveBeenCalled();
   });
 });
+
+describe.each([
+  {
+    label: "panel parameters",
+    create: (values: readonly number[]) =>
+      createPanel({ id: "map", type: "map", parameters: { values } }),
+    error: /parameters must contain only finite JSON values/,
+  },
+  {
+    label: "workspace metadata",
+    create: (values: readonly number[]) =>
+      createWorkspaceLayout({
+        panels: [{ id: "map", type: "map" }],
+        layout: { panels: ["map"] },
+        metadata: { values },
+      }),
+    error: /metadata must be a JSON object/,
+  },
+])("$label JSON arrays", ({ create, error }) => {
+  it("rejects array index accessors without invoking them", () => {
+    const getter = vi.fn().mockReturnValueOnce(1).mockReturnValue(Number.NaN);
+    const values: number[] = [];
+    Object.defineProperty(values, "0", { enumerable: true, get: getter });
+
+    expect(() => create(values)).toThrow(error);
+    expect(getter).not.toHaveBeenCalled();
+  });
+
+  it("rejects named array accessors without invoking them", () => {
+    const getter = vi.fn(() => Number.NaN);
+    const values = [1];
+    Object.defineProperty(values, "extra", { enumerable: true, get: getter });
+
+    expect(() => create(values)).toThrow(error);
+    expect(getter).not.toHaveBeenCalled();
+  });
+
+  it.each([Number.NaN, new Date(0)])("rejects named array properties containing %s", (extra) => {
+    const values = [1];
+    Object.defineProperty(values, "extra", { enumerable: true, value: extra });
+
+    expect(() => create(values)).toThrow(error);
+  });
+
+  it("continues to reject array holes", () => {
+    const values = [1, 2];
+    delete values[0];
+
+    expect(() => create(values)).toThrow(error);
+  });
+});
