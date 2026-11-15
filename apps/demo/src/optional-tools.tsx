@@ -6,7 +6,7 @@ import {
   type WorkspaceCommand,
   type WorkspaceSnapshot,
 } from "@panefold/model";
-import { useWorkspaceSnapshot, useWorkspaceTransactions } from "@panefold/react";
+import { useWorkspaceSnapshot, useWorkspaceTransactions } from "@panefold/react/adapter";
 import type { RuntimeDispatchReceipt, WorkspaceRuntime } from "@panefold/runtime";
 
 import { Glyph } from "./demo-panels";

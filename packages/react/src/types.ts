@@ -378,7 +378,13 @@ export interface WorkspaceRuntimeLike<TSnapshot, TCommand, TResult> {
   readonly redo: () => TResult;
   readonly canUndo: () => boolean;
   readonly canRedo: () => boolean;
+  /**
+   * Read the current transaction log. Entries are immutable: replace or reconstruct
+   * changed entries. Arrays and entries may be reconstructed on every read.
+   * Notify every log change through subscribeTransactions, or subscribe if omitted.
+   */
   readonly getTransactions?: () => readonly unknown[];
+  /** Optional log-specific notifications; otherwise subscribe must cover log changes. */
   readonly subscribeTransactions?: (listener: () => void) => () => void;
 }
 

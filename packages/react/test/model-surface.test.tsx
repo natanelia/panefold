@@ -11,11 +11,13 @@ import {
   useWorkspaceRuntime,
   type WorkspacePanelRegistry,
   type WorkspacePanelRenderProps,
-} from "@panefold/react";
+} from "@panefold/react/adapter";
 import {
   createModelWorkspaceBindings,
   createModelWorkspaceSession,
   ModelWorkspaceSurface,
+  useModelWorkspaceActions,
+  useModelWorkspaceRuntime,
   type ModelWorkspaceSession,
 } from "@panefold/react/model";
 import { modelBounds, modelFixture } from "./model-fixture";
@@ -32,6 +34,8 @@ describe("compiled model surface", () => {
         WorkspaceCommand,
         RuntimeDispatchReceipt
       >();
+      expect(useModelWorkspaceRuntime()).toBe(runtime);
+      expect(useModelWorkspaceActions()).toBe(session.actions);
       observed.add(runtime);
       return <div>{`Content ${panel.title}`}</div>;
     }

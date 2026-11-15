@@ -28,7 +28,7 @@ import {
   type WorkspaceResizePreviewMode,
   type WorkspaceTabContent,
   type WorkspaceTabPlacement,
-} from "@panefold/react";
+} from "@panefold/react/adapter";
 import type { DurableWorkspaceStatus, RuntimeDispatchReceipt } from "@panefold/runtime";
 
 import { demoPanelRegistry, heavyContentDemoPanelRegistry } from "./demo-panels";

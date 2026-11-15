@@ -16,7 +16,7 @@ import {
   WorkspaceSurface,
   type WorkspacePanelRegistry,
   type WorkspacePanelRenderProps,
-} from "@panefold/react";
+} from "@panefold/react/adapter";
 import {
   createWorkspaceRuntime,
   type RuntimeDispatchReceipt,

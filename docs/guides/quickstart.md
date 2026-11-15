@@ -21,10 +21,10 @@ Append `?fixture=starter` to that local workbench URL. Or open the [hosted start
 
 The starter contains an editable note, a preview and an inspector. It uses the real runtime and React surface, not a picture of a docking layout. Switch tabs, type a note, drag it to another group, resize the split, and change the tab rail. Undo reverses layout changes, not edits inside the note.
 
-The entry point is [docs-starter.tsx](../../apps/demo/src/docs-starter.tsx). It uses the official
-`createModelWorkspaceSession` and `ModelWorkspaceSurface` exports from `@panefold/react/model`.
-They connect the runtime, model projection, semantic commands and model-aware layout solver.
-The smaller starter does not import or copy the workbench's command glue.
+The entry point is [docs-starter.tsx](../../apps/demo/src/docs-starter.tsx). It uses
+`createWorkspaceLayout` to describe the arrangement, `Workspace` to own the runtime, and an
+explicit `WorkspaceSurface` to render the constrained layout. Its **Show notes** button uses `useWorkspaceActions`;
+the revision uses a typed selector. The component and hooks come from `@panefold/react`.
 
 ## 3. Make a visible change
 
@@ -36,10 +36,12 @@ Read [your first panel](panels.md), [tabs](tabs.md), and [themes](styling.md) fo
 
 Stay in the monorepo first. Its `workspace:*` dependencies resolve the unpublished packages and its build order creates the package declarations. For a separate repository, build and vendor the selected packages with all their workspace dependencies; the source tree is not a single-file npm dependency.
 
-Start with a valid initial snapshot, your panel registry and the renderer stylesheet. Create one
-model session in an effect and dispose it in that effect's cleanup. `ModelWorkspaceSurface`
-installs the session's provider, commands, projection and constraint-aware solver together.
-The [React guide](react.md) explains customization and the lower-level generic renderer.
+Start with a layout definition, your panel registry and the renderer stylesheet. The
+[complete React example](react.md#start-with-a-workspace) shows these pieces together.
+`Workspace` creates the runtime after mounting and disposes it on unmount. Place a
+`WorkspaceSurface`, toolbars and other application content anywhere beneath it. The root reads setup
+arguments once. To start a different workspace, change its React `key`. To use an externally owned
+runtime, replace the root with `WorkspaceProvider`.
 The starter keeps layout in memory; the full workbench demonstrates durable IndexedDB restoration.
 
 ## 5. Check your changes

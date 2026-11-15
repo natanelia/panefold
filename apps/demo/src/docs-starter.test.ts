@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { validateWorkspace } from "@panefold/kernel";
-import { panelId } from "@panefold/model";
-import { createModelWorkspaceSession, projectModelWorkspace } from "@panefold/react/model";
+import { projectModelWorkspace } from "@panefold/react/model";
+import { createWorkspace } from "@panefold/runtime";
 import { initialSnapshot, starterPanels } from "./docs-starter";
 
 describe("compiled documentation starter", () => {
@@ -9,22 +9,35 @@ describe("compiled documentation starter", () => {
     expect(validateWorkspace(initialSnapshot)).toEqual([]);
     const projection = projectModelWorkspace(initialSnapshot);
     expect(Object.keys(projection.groups)).toHaveLength(2);
+    expect(projection.rootNodeId).toBe("root");
+    expect(initialSnapshot.nodes.byId.root).toMatchObject({
+      children: ["primary-node", "inspector-node"],
+      weights: [650_000, 350_000],
+    });
+    expect(initialSnapshot.groups.byId.primary?.selectedPanelId).toBe("notes");
+    expect(initialSnapshot.panels.byId.notes?.constraints.hardMinInline).toBe(140);
     for (const panel of Object.values(projection.panels))
       expect(starterPanels[panel.type]).toBeDefined();
   });
-  it("uses the actual runtime and command adapter, with reversible layout changes", () => {
-    const session = createModelWorkspaceSession({ initialSnapshot });
-    const { runtime, commands } = session;
+  it("uses application actions with reversible layout changes and recoverable closes", () => {
+    const workspace = createWorkspace({ initialSnapshot });
     try {
-      expect(commands).toBeDefined();
-      const receipt = runtime.dispatch({ type: "select-panel", panelId: panelId("map-canvas") });
+      const receipt = workspace.actions.selectPanel("map-canvas");
       expect(receipt.status).toBe("committed");
-      expect(validateWorkspace(runtime.getSnapshot())).toEqual([]);
-      expect(runtime.canUndo()).toBe(true);
-      expect(runtime.undo().status).toBe("committed");
-      expect(runtime.redo().status).toBe("committed");
+      expect(validateWorkspace(workspace.getSnapshot())).toEqual([]);
+      expect(workspace.getSnapshot().groups.byId.primary?.selectedPanelId).toBe("map-canvas");
+      expect(workspace.canUndo()).toBe(true);
+      expect(workspace.actions.undo().status).toBe("committed");
+      expect(workspace.getSnapshot().groups.byId.primary?.selectedPanelId).toBe("notes");
+      expect(workspace.actions.redo().status).toBe("committed");
+      expect(workspace.getSnapshot().groups.byId.primary?.selectedPanelId).toBe("map-canvas");
+      expect(workspace.actions.closePanel("map-canvas").status).toBe("committed");
+      expect(workspace.getSnapshot().panels.byId["map-canvas"]).toBeUndefined();
+      expect(workspace.actions.reopenLastPanel().status).toBe("committed");
+      expect(workspace.getSnapshot().groups.byId.primary?.selectedPanelId).toBe("map-canvas");
+      expect(validateWorkspace(workspace.getSnapshot())).toEqual([]);
     } finally {
-      session.dispose();
+      workspace.dispose();
     }
   });
 });

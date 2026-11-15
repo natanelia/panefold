@@ -6,3 +6,5 @@ export * from "./post-commit-effects";
 export * from "./policy";
 export * from "./runtime";
 export * from "./selectors";
+export * from "./actions";
+export * from "./workspace";

@@ -104,11 +104,21 @@ test("starter uses live panels and preserves note state across tab presentation 
   await expect(note).toHaveValue("My component state stays with the panel.");
   await page.getByRole("tab", { name: "Preview", exact: true }).click();
   await expect(page.getByRole("heading", { name: "Keep the application yours." })).toBeVisible();
-  await page.getByRole("tab", { name: "Notes", exact: true }).click();
+  await page.getByRole("button", { name: "Show notes", exact: true }).click();
+  await expect(page.getByRole("tab", { name: "Notes", exact: true })).toHaveAttribute(
+    "aria-selected",
+    "true",
+  );
   await expect(note).toHaveValue("My component state stays with the panel.");
   await expect(page.getByRole("button", { name: "Undo layout" })).toBeEnabled();
   await page.getByRole("button", { name: "Undo layout" }).click();
+  await expect(page.getByRole("tab", { name: "Preview", exact: true })).toHaveAttribute(
+    "aria-selected",
+    "true",
+  );
   await expect(page.getByRole("button", { name: "Redo layout" })).toBeEnabled();
+  await page.getByRole("button", { name: "Redo layout" }).click();
+  await expect(note).toHaveValue("My component state stays with the panel.");
   expect(errors).toEqual([]);
 });
 

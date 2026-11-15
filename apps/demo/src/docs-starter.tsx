@@ -1,94 +1,56 @@
-import { useEffect, useState, useSyncExternalStore } from "react";
+import { useState } from "react";
+import { createPanel, createWorkspaceLayout } from "@panefold/model";
 import {
-  MAIN_SURFACE_CAPABILITIES,
-  createWorkspaceSnapshot,
-  groupId,
-  nodeId,
-  panelId,
-  surfaceId,
-  type PanelRecord,
-} from "@panefold/model";
-import {
+  Workspace,
+  WorkspaceSurface,
+  useWorkspaceActions,
+  useWorkspaceRuntime,
+  useWorkspaceSelector,
   type WorkspacePanelRegistry,
   type WorkspacePanelRenderProps,
   type WorkspaceTabPlacement,
 } from "@panefold/react";
-import {
-  createModelWorkspaceSession,
-  ModelWorkspaceSurface,
-  type ModelWorkspaceSession,
-} from "@panefold/react/model";
 import type { RuntimeDispatchReceipt } from "@panefold/runtime";
 import "./docs-starter.css";
 
-function panel(id: string, type: string, title: string): PanelRecord {
-  return {
-    id: panelId(id),
+function panel(id: string, type: string, title: string) {
+  return createPanel({
+    id,
     type,
-    typeVersion: 1,
     title,
-    parameters: {},
-    capabilities: {
-      closable: true,
-      floatable: true,
-      popout: false,
-      pictureInPicture: false,
-      singleton: true,
-    },
+    capabilities: { singleton: true },
     constraints: { hardMinInline: 140, hardMinBlock: 140 },
-    lifecycle: {
-      hidden: "suspend",
-      sameDocumentMove: "preserve-host",
-      crossDocumentMove: "portal-coupled",
-    },
-  };
+    lifecycle: { hidden: "suspend", crossDocumentMove: "portal-coupled" },
+  });
 }
-export const initialSnapshot = createWorkspaceSnapshot({
-  applicationLayoutVersion: 1,
+export const initialSnapshot = createWorkspaceLayout({
   panels: [
     panel("notes", "starter.notes", "Notes"),
     panel("map-canvas", "starter.preview", "Preview"),
     panel("feature-inspector", "starter.inspector", "Inspector"),
   ],
-  groups: [
-    {
-      id: groupId("primary"),
-      panelIds: [panelId("notes"), panelId("map-canvas")],
-      selectedPanelId: panelId("notes"),
-      region: "primary",
-      persistent: true,
-    },
-    {
-      id: groupId("inspector"),
-      panelIds: [panelId("feature-inspector")],
-      selectedPanelId: panelId("feature-inspector"),
-      region: "inspector",
-      persistent: true,
-    },
-  ],
-  nodes: [
-    {
-      kind: "split",
-      id: nodeId("root"),
-      axis: "inline",
-      children: [nodeId("primary-node"), nodeId("inspector-node")],
-      weights: [650_000, 350_000],
-      collapsedChildIds: [],
-    },
-    { kind: "group", id: nodeId("primary-node"), groupId: groupId("primary") },
-    { kind: "group", id: nodeId("inspector-node"), groupId: groupId("inspector") },
-  ],
-  surfaces: [
-    {
-      id: surfaceId("main"),
-      kind: "main",
-      rootNodeId: nodeId("root"),
-      capabilities: MAIN_SURFACE_CAPABILITIES,
-      maximized: false,
-    },
-  ],
-  activation: { activePanelId: panelId("notes"), activeSurfaceId: surfaceId("main") },
-  focusMemory: { panelId: panelId("notes"), groupId: groupId("primary"), fallback: "selected-tab" },
+  layout: {
+    id: "root",
+    axis: "inline",
+    weights: [65, 35],
+    children: [
+      {
+        id: "primary",
+        nodeId: "primary-node",
+        panels: ["notes", "map-canvas"],
+        region: "primary",
+        persistent: true,
+      },
+      {
+        id: "inspector",
+        nodeId: "inspector-node",
+        panels: ["feature-inspector"],
+        region: "inspector",
+        persistent: true,
+      },
+    ],
+  },
+  activePanelId: "notes",
 });
 function NotesPanel({ lifecycle }: WorkspacePanelRenderProps) {
   const [text, setText] = useState(
@@ -137,38 +99,6 @@ export const starterPanels: WorkspacePanelRegistry = {
   "starter.inspector": { render: InspectorPanel, icon: <span aria-hidden="true">☷</span> },
 };
 export default function StarterWorkspace() {
-  const [session, setSession] = useState<ModelWorkspaceSession>();
-  useEffect(() => {
-    const nextSession = createModelWorkspaceSession({ initialSnapshot, historyLimit: 50 });
-    setSession(nextSession);
-    return () => nextSession.dispose();
-  }, []);
-  return (
-    <main className="starter-app">
-      <div className="starter-container">
-        <a href={new URL("../docs/quickstart/", document.baseURI).href}>← Panefold quickstart</a>
-        <p className="starter-kicker">Source-only · Experimental · Real runtime</p>
-        <h1>Your first workspace.</h1>
-        <p className="starter-lead">
-          Three components. Two groups. One place to start. This smaller fixture does not use
-          IndexedDB or open browser windows.
-        </p>
-        {session ? <StarterSurface session={session} /> : <p role="status">Starting workspace…</p>}
-        <p className="starter-footnote">
-          Source: apps/demo/src/docs-starter.tsx. The @panefold/react/model entry point supplies the
-          runtime wiring, commands and constraint-aware layout.
-        </p>
-      </div>
-    </main>
-  );
-}
-function StarterSurface({ session }: { readonly session: ModelWorkspaceSession }) {
-  const { runtime } = session;
-  const snapshot = useSyncExternalStore(
-    runtime.subscribe,
-    runtime.getSnapshot,
-    runtime.getSnapshot,
-  );
   const [placement, setPlacement] = useState<WorkspaceTabPlacement>("block-start");
   const [iconsOnly, setIconsOnly] = useState(false);
   const [status, setStatus] = useState(
@@ -183,47 +113,98 @@ function StarterSurface({ session }: { readonly session: ModelWorkspaceSession }
           : `Committed revision ${receipt.result.state.snapshot.revision.toString()}.`,
     );
   return (
-    <>
-      <div className="starter-toolbar">
-        <label htmlFor="starter-tab-rail">Tab rail</label>
-        <select
-          id="starter-tab-rail"
-          value={placement}
-          onChange={(event) => setPlacement(event.target.value as WorkspaceTabPlacement)}
+    <main className="starter-app">
+      <div className="starter-container">
+        <a href={new URL("../docs/quickstart/", document.baseURI).href}>← Panefold quickstart</a>
+        <p className="starter-kicker">Source-only · Experimental · Real runtime</p>
+        <h1>Your first workspace.</h1>
+        <p className="starter-lead">
+          Three components. Two groups. One place to start. This smaller fixture does not use
+          IndexedDB or open browser windows.
+        </p>
+        <Workspace
+          initial={{ initialSnapshot, historyLimit: 50 }}
+          fallback={<p role="status">Starting workspace…</p>}
         >
-          <option value="block-start">Top</option>
-          <option value="block-end">Bottom</option>
-          <option value="inline-start">Start</option>
-          <option value="inline-end">End</option>
-        </select>
-        <label>
-          <input
-            type="checkbox"
-            checked={iconsOnly}
-            onChange={(event) => setIconsOnly(event.target.checked)}
-          />{" "}
-          Icons only
-        </label>
-        <button type="button" disabled={!runtime.canUndo()} onClick={() => report(runtime.undo())}>
-          Undo layout
-        </button>
-        <button type="button" disabled={!runtime.canRedo()} onClick={() => report(runtime.redo())}>
-          Redo layout
-        </button>
-        <span>Revision {snapshot.revision.toString()}</span>
+          <StarterToolbar
+            placement={placement}
+            onPlacementChange={setPlacement}
+            iconsOnly={iconsOnly}
+            onIconsOnlyChange={setIconsOnly}
+            onResult={report}
+          />
+          <WorkspaceSurface
+            panels={starterPanels}
+            tabPresentation={{ placement, content: iconsOnly ? "icon-only" : "icon-and-label" }}
+            motion="off"
+            workspaceLabel="Starter workspace"
+            className="starter-surface"
+            onCommandResult={report}
+          />
+          <p className="starter-status" role="status">
+            {status}
+          </p>
+        </Workspace>
+        <p className="starter-footnote">
+          Source: apps/demo/src/docs-starter.tsx. Workspace owns the runtime; WorkspaceSurface
+          renders the layout. The toolbar and status are ordinary children alongside it.
+        </p>
       </div>
-      <ModelWorkspaceSurface
-        bindings={session}
-        panels={starterPanels}
-        tabPresentation={{ placement, content: iconsOnly ? "icon-only" : "icon-and-label" }}
-        motion="off"
-        workspaceLabel="Starter workspace"
-        className="starter-surface"
-        onCommandResult={report}
-      />
-      <p className="starter-status" role="status">
-        {status}
-      </p>
-    </>
+    </main>
+  );
+}
+function StarterToolbar({
+  placement,
+  onPlacementChange,
+  iconsOnly,
+  onIconsOnlyChange,
+  onResult,
+}: {
+  readonly placement: WorkspaceTabPlacement;
+  readonly onPlacementChange: (placement: WorkspaceTabPlacement) => void;
+  readonly iconsOnly: boolean;
+  readonly onIconsOnlyChange: (iconsOnly: boolean) => void;
+  readonly onResult: (receipt: RuntimeDispatchReceipt) => void;
+}) {
+  const runtime = useWorkspaceRuntime();
+  const actions = useWorkspaceActions();
+  const revision = useWorkspaceSelector((snapshot) => snapshot.revision);
+  const hasNotes = useWorkspaceSelector((snapshot) => snapshot.panels.byId.notes !== undefined);
+  return (
+    <div className="starter-toolbar">
+      <label htmlFor="starter-tab-rail">Tab rail</label>
+      <select
+        id="starter-tab-rail"
+        value={placement}
+        onChange={(event) => onPlacementChange(event.target.value as WorkspaceTabPlacement)}
+      >
+        <option value="block-start">Top</option>
+        <option value="block-end">Bottom</option>
+        <option value="inline-start">Start</option>
+        <option value="inline-end">End</option>
+      </select>
+      <label>
+        <input
+          type="checkbox"
+          checked={iconsOnly}
+          onChange={(event) => onIconsOnlyChange(event.target.checked)}
+        />{" "}
+        Icons only
+      </label>
+      <button
+        type="button"
+        disabled={!hasNotes}
+        onClick={() => onResult(actions.selectPanel("notes"))}
+      >
+        Show notes
+      </button>
+      <button type="button" disabled={!runtime.canUndo()} onClick={() => onResult(actions.undo())}>
+        Undo layout
+      </button>
+      <button type="button" disabled={!runtime.canRedo()} onClick={() => onResult(actions.redo())}>
+        Redo layout
+      </button>
+      <span>Revision {revision.toString()}</span>
+    </div>
   );
 }

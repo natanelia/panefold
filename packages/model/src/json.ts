@@ -40,9 +40,7 @@ export function isJsonValue(value: unknown): value is JsonValue {
     if (Array.isArray(current)) {
       for (let index = current.length - 1; index >= 0; index -= 1) {
         if (!Object.hasOwn(current, index)) return false;
-        stack.push({ value: current[index] });
       }
-      continue;
     }
 
     const descriptors = Object.getOwnPropertyDescriptors(current);

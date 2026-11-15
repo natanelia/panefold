@@ -30,7 +30,30 @@ Use a meaningful panel title even with icon-only tabs. The icon supplements the 
 
 ## Create an instance
 
-A model `PanelRecord` supplies an ID, `type`, `typeVersion`, title, JSON parameters, capabilities, constraints and lifecycle policy. The starter shows a complete record and the group/node/surface records that make it visible.
+A panel needs an ID and a registered type. `createPanel` fills the remaining model defaults;
+`createWorkspaceLayout` accepts the same input directly in its `panels` array:
+
+```ts
+import { createPanel } from "@panefold/model";
+
+const note = createPanel({
+  id: "notes",
+  type: "example.note",
+  title: "Notes",
+  parameters: { documentId: "welcome" },
+  constraints: { hardMinInline: 240 },
+  lifecycle: { hidden: "suspend" },
+});
+```
+
+The result is an immutable `PanelRecord`. Defaults are version `1`, empty JSON parameters and
+constraints, closable and floatable panels, no browser popout or Picture-in-Picture, no singleton
+restriction, a kept-alive hidden host, preserved same-document hosts and unsupported cross-document
+moves. Partial capabilities and lifecycle policies override only the fields supplied.
+
+To add an instance after setup, call `actions.openPanel(note, "primary")`, where `primary` is a live
+group ID. The action also accepts the compact input directly. It returns a dispatch receipt;
+inspect rejections such as a duplicate ID or an unavailable destination.
 
 The registry key must match `PanelRecord.type` exactly. Adding a renderer alone does not insert a panel into a group; adding a record alone does not create its React component.
 

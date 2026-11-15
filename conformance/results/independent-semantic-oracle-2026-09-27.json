@@ -2,20 +2,20 @@
   "schemaVersion": 1,
   "kind": "differential-model-result",
   "profile": "compact-react-chromium-desktop",
-  "producedAt": "2026-11-08T13:02:50.554567+00:00",
+  "producedAt": "2026-11-15T00:08:38.807Z",
   "status": "passed-with-thresholds-unmet",
   "runner": "panefold-differential-campaign",
   "commands": {
     "prerequisite": "pnpm install --frozen-lockfile && pnpm build:packages",
-    "build": "pnpm exec tsup scripts/run-independent-semantic-campaign.ts --format esm --platform node --target node22 --out-dir artifacts/independent-audit --clean",
-    "campaign": "node artifacts/independent-audit/run-independent-semantic-campaign.js --seed 20260812 --steps 10000",
-    "suite": "pnpm exec vitest run packages/kernel-optimized/test/benchmark.test.ts packages/kernel-optimized/test/differential.test.ts packages/kernel-optimized/test/independent-reducer.test.ts packages/kernel-optimized/test/persistent-bucket-map.test.ts packages/kernel-optimized/test/projection.test.ts --reporter=json --outputFile=artifacts/independent-suite.json"
+    "build": "pnpm exec tsup scripts/run-independent-semantic-campaign.ts --format esm --platform node --target node22 --out-dir artifacts/independent-review-audit --clean",
+    "campaign": "node artifacts/independent-review-audit/run-independent-semantic-campaign.js --seed 20260812 --steps 10000 > artifacts/independent-review-campaign.json",
+    "suite": "VITEST_MAX_WORKERS=1 pnpm exec vitest run packages/kernel-optimized/test/benchmark.test.ts packages/kernel-optimized/test/differential.test.ts packages/kernel-optimized/test/independent-reducer.test.ts packages/kernel-optimized/test/persistent-bucket-map.test.ts packages/kernel-optimized/test/projection.test.ts --reporter=json --outputFile=artifacts/independent-review-suite.json"
   },
   "environment": {
     "operatingSystem": "Linux-6.18.57-x86_64-with-glibc2.41",
     "node": "v24.22.1",
-    "pnpm": "11.16.0",
-    "dependencies": "Installed with pnpm install --frozen-lockfile for this isolated worktree.",
+    "pnpm": "11.25.0",
+    "dependencies": "Reused the existing dependency installation matching unchanged pnpm-lock.yaml; workspace packages were rebuilt for this isolated checkout.",
     "vitestMaxWorkers": 1
   },
   "campaign": {
@@ -31,14 +31,14 @@
     "divergenceCount": 0,
     "finalHash": "fnv1a64-v1:a1f58a1b0c635ad1",
     "generatedCommandTypeCount": 36,
-    "elapsedMs": 27349
+    "elapsedMs": 46002
   },
   "suite": {
     "testFiles": 5,
     "tests": 25,
     "passed": 25,
     "failed": 0,
-    "durationMs": 9255.566650390625
+    "durationMs": 16451.82666015625
   },
   "checks": {
     "curatedCommandDiscriminants": 36,
@@ -101,8 +101,9 @@
     "packages/model/src/effects.ts": "1bed7b3eab6289f407357379f2bfa0cc1611dd3f2ef4aec1eb5835bdf811ff8c",
     "packages/model/src/factories.ts": "efb2d00d14f7f93fc249daae477a22e1b3dea8541d9cffc1cb2e1e04651c6b98",
     "packages/model/src/ids.ts": "cbf1947c1c8ed51447a6e3b5d77b04734e0b6b59e588099f442b99c3bde953c1",
-    "packages/model/src/index.ts": "be7cef88f8bf665374cfdca6a72b146f20d6861da1649a41f535df5c424861b7",
-    "packages/model/src/json.ts": "71b1008440a2511a701e7ff4484e0373fd0f0dfac78a39eb099da31f0ee389f5",
+    "packages/model/src/index.ts": "ff5e289957809f04fa04ae73ebc7070857f0d3bb261471ff36c96d1d0e2686f8",
+    "packages/model/src/json.ts": "bfedbf987b02147cafce6759890cb19c248bb84b708af9335b622bc0620e4037",
+    "packages/model/src/layout.ts": "482a151700baf247a17b210ec30c07ddee4a4b0142509f4b1a875c928d898d24",
     "packages/model/src/panel-registry.ts": "0a84a2ea260b55bf2c8efaa8462aae4e698045865f533d6e937a93ab8af9af5c",
     "packages/model/src/results.ts": "f66a7e790365153a33f72df22e7961890d74f0e1723cf9ed2f13fcdd58c50fec",
     "packages/kernel-optimized/test/benchmark.test.ts": "1ed3acf97650eb802217931c29ec14021f14ffb7134873345975cf370ba6587c",
@@ -116,18 +117,19 @@
     "The correctness-first candidate rebuilds Map and entity-table state for each command; it is an independent semantic oracle, not a retained performance-optimized production kernel.",
     "Ten thousand generated attempts are far below the ten-million stable threshold.",
     "The reproducible evidence runner bundles internal source imports because the independent candidate is intentionally not part of the public package API.",
-    "A clean clone must install dependencies and build workspace packages before bundling the campaign runner because it imports generated package declarations and runtime entry points."
+    "A clean clone must install dependencies and build workspace packages before bundling the campaign runner because it imports generated package declarations and runtime entry points.",
+    "This is correctness evidence from a shared development container; its elapsed times are not controlled performance measurements."
   ],
   "rawReports": [
     {
-      "path": "artifacts/independent-campaign.json",
-      "sha256": "38a9adf55870fc52e8b1b22fc5e9891510bd8eddb49b4df04893c6a646643de6",
-      "execution": "Local isolated worktree; freshly executed reports retained with this review."
+      "path": "artifacts/independent-review-campaign.json",
+      "sha256": "c5edc8af6c13b1a738d92e6f5efc9086eda7fe50ec83490c667230ebfcceb2a3",
+      "execution": "Fresh local execution in this isolated checkout; raw output retained with the review."
     },
     {
-      "path": "artifacts/independent-suite.json",
-      "sha256": "945ff2405fba87803c4be38d1b4d9c29982f7a87dcc46670d12693b454ffe234",
-      "execution": "Local isolated worktree; freshly executed reports retained with this review."
+      "path": "artifacts/independent-review-suite.json",
+      "sha256": "564e15a8d902df3f4cbc9a36c457359d6b2f693ab1a62809bb5168be7b467f6e",
+      "execution": "Fresh local execution with VITEST_MAX_WORKERS=1; raw output retained with the review."
     }
   ]
 }

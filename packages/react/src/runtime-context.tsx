@@ -1,8 +1,7 @@
 import {
   createContext,
   useContext,
-  useEffect,
-  useState,
+  useMemo,
   useSyncExternalStore,
   type PropsWithChildren,
 } from "react";
@@ -66,16 +65,69 @@ export function useWorkspaceProjection<TSnapshot, TCommand, TResult, TSelection>
 
 export function useWorkspaceTransactions<TSnapshot, TCommand, TResult>() {
   const runtime = useWorkspaceRuntime<TSnapshot, TCommand, TResult>();
-  const [transactions, setTransactions] = useState<readonly unknown[]>(
-    () => runtime.getTransactions?.() ?? [],
-  );
+  return useRuntimeTransactions(runtime);
+}
 
-  useEffect(() => {
-    const subscribe = runtime.subscribeTransactions ?? runtime.subscribe;
-    return subscribe(() => {
-      setTransactions(runtime.getTransactions?.() ?? []);
-    });
+interface TransactionSource<Transaction> {
+  readonly getTransactions?: () => readonly Transaction[];
+  readonly subscribeTransactions?: (listener: () => void) => () => void;
+  readonly subscribe: (listener: () => void) => () => void;
+}
+
+/** Shared implementation for generic adapters and the typed model binding. */
+export function useRuntimeTransactions<Transaction>(
+  runtime: TransactionSource<Transaction>,
+): readonly Transaction[] {
+  const source = useMemo(() => {
+    let previous: readonly Transaction[] = [];
+    let dirty = true;
+    const getSnapshot = () => {
+      if (!dirty) return previous;
+      const next = runtime.getTransactions?.() ?? [];
+      // Read only after a notification or subscription change. Custom adapters
+      // may reconstruct both the array and its entries on every call.
+      if (
+        next.length !== previous.length ||
+        next.some((entry, index) => entry !== previous[index])
+      ) {
+        previous = [...next];
+      }
+      dirty = false;
+      return previous;
+    };
+    return {
+      getSnapshot,
+      subscribe: (listener: () => void) => {
+        let active = true;
+        const onChange = () => {
+          if (!active) return;
+          dirty = true;
+          listener();
+        };
+        const unsubscribe =
+          runtime.subscribeTransactions === undefined
+            ? runtime.subscribe(onChange)
+            : runtime.subscribeTransactions(onChange);
+        // Attach before reading again to cover changes between render and
+        // subscription, including reattachment after an Activity was hidden.
+        dirty = true;
+        try {
+          getSnapshot();
+          // Activity can reconnect effects without rerendering the consumer.
+          // Notify React after refreshing so a hidden-period change is visible.
+          listener();
+        } catch (error) {
+          active = false;
+          unsubscribe();
+          throw error;
+        }
+        return () => {
+          active = false;
+          dirty = true;
+          unsubscribe();
+        };
+      },
+    };
   }, [runtime]);
-
-  return transactions;
+  return useSyncExternalStore(source.subscribe, source.getSnapshot, source.getSnapshot);
 }
